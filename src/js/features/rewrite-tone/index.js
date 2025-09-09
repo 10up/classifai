@@ -25,7 +25,6 @@ import { addFilter } from '@wordpress/hooks';
 
 import { useSelectedBlocks } from '../../hooks';
 import { InjectIframeStyles } from '../../components';
-import { tones } from './tones';
 import {
 	filterAndFlattenAllowedBlocks,
 	getClientIdToBlockContentMapping,
@@ -42,25 +41,6 @@ const allowedTextBlocks = [
 ];
 
 const chatTabSlug = 'classifai-rewrite-tone';
-
-function defaultToneAttribute( toneAttribute = '', value = null ) {
-	if ( ! toneAttribute ) {
-		return '';
-	}
-
-	if ( ! value ) {
-		return (
-			window.localStorage.getItem(
-				`classifai-tone-attribute-${ toneAttribute }`
-			) || ''
-		);
-	}
-
-	window.localStorage.setItem(
-		`classifai-tone-attribute-${ toneAttribute }`,
-		value
-	);
-}
 
 const RewriteTonePlugin = () => {
 	// Holds a reference to the original, unmodified editor blocks.
@@ -90,6 +70,7 @@ const RewriteTonePlugin = () => {
 	/**
 	 * Performs rewrite when triggered by the user on Button click.
 	 *
+	 * @param {string} tone The selected tone.
 	 * @return {void}
 	 */
 	async function rewriteTone( tone ) {
@@ -157,21 +138,24 @@ const RewriteTonePlugin = () => {
 		}
 
 		if ( allSelectedBlocks.length ) {
-			classifaiRewriteToneTones = classifaiRewriteToneTones.map( tone => {
-				return {
-					...tone,
-					disabled: false,
+			classifaiRewriteToneTones = classifaiRewriteToneTones.map(
+				( tone ) => {
+					return {
+						...tone,
+						disabled: false,
+					};
 				}
-			} );
+			);
 		} else {
-			classifaiRewriteToneTones = classifaiRewriteToneTones.map( tone => {
-				return {
-					...tone,
-					disabled: true,
+			classifaiRewriteToneTones = classifaiRewriteToneTones.map(
+				( tone ) => {
+					return {
+						...tone,
+						disabled: true,
+					};
 				}
-			} );
+			);
 		}
-
 	}, [ allSelectedBlocks.length, isRewriteInProgress ] );
 
 	useEffect(
@@ -239,19 +223,22 @@ const RewriteTonePlugin = () => {
 		[ response ]
 	);
 
-	classifaiRewriteToneTones = classifaiRewriteToneTones.map( tone => {
+	classifaiRewriteToneTones = classifaiRewriteToneTones.map( ( tone ) => {
 		return {
 			...tone,
-			disabled: isRewriteInProgress
-		}
+			disabled: isRewriteInProgress,
+		};
 	} );
 
 	return (
 		<>
 			<Fill name={ chatTabSlug }>
 				{ ! allSelectedBlocks.length && (
-					<Notice status='warning' isDismissible={ false }>
-						{ __( 'No blocks selected. Select one or more blocks to enable the options.', 'classifai' ) }
+					<Notice status="warning" isDismissible={ false }>
+						{ __(
+							'No blocks selected. Select one or more blocks to enable the options.',
+							'classifai'
+						) }
 					</Notice>
 				) }
 				<MenuGroup>
@@ -260,7 +247,11 @@ const RewriteTonePlugin = () => {
 						onSelect={ ( value ) => rewriteTone( value ) }
 					/>
 				</MenuGroup>
-				<Flex justify='center' align='center' style={ { minHeight: '50px' } }>
+				<Flex
+					justify="center"
+					align="center"
+					style={ { minHeight: '50px' } }
+				>
 					<FlexItem>
 						{ isRewriteInProgress && <ProgressBar /> }
 					</FlexItem>
@@ -272,7 +263,9 @@ const RewriteTonePlugin = () => {
 					isFullScreen={ true }
 					onRequestClose={ () => setIsPreviewVisible( false ) }
 				>
-					<InjectIframeStyles title={ __( 'Rewrite tone previewer', 'classifai' ) }>
+					<InjectIframeStyles
+						title={ __( 'Rewrite tone previewer', 'classifai' ) }
+					>
 						<BlockEditorProvider
 							value={ blocksForPreview }
 							settings={ {
@@ -319,14 +312,10 @@ registerPlugin( 'classifai-rewrite-tone-plugin', {
 	render: RewriteTonePlugin,
 } );
 
-addFilter(
-	'classifai.chatUI',
-	'classifai',
-	( args ) => {
-		args.push( {
-			name: chatTabSlug,
-			title: __( 'Rewrite Tone', 'classifai' ),
-		} );
-		return args;
-	}
-);
+addFilter( 'classifai.chatUI', 'classifai', ( args ) => {
+	args.push( {
+		name: chatTabSlug,
+		title: __( 'Rewrite Tone', 'classifai' ),
+	} );
+	return args;
+} );

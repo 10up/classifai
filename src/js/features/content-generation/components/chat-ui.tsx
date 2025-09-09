@@ -1,10 +1,4 @@
-import React, {
-	useEffect,
-	useState,
-	useRef,
-	useLayoutEffect,
-	CSSProperties,
-} from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { select, dispatch } from '@wordpress/data';
 import { pasteHandler, parse } from '@wordpress/blocks';
@@ -20,12 +14,6 @@ import { ChatHistory } from './chat-history';
 import { ErrorMessage } from './error-message';
 import { ChatInput } from './chat-input';
 import { ConversationEntry } from './types';
-
-const chatTitleStyles: CSSProperties = {
-	marginBottom: '12px',
-	fontWeight: 'bold',
-	fontSize: '16px',
-};
 
 const chatTabSlug = 'classifai-content-generation';
 
@@ -346,9 +334,7 @@ export const ChatUI: React.FC = () => {
 				<ChatInput
 					textareaRef={ textareaRef }
 					value={ inputValue }
-					onChange={ ( value ) =>
-						setInputValue( value )
-					}
+					onChange={ ( value ) => setInputValue( value ) }
 					onKeyDown={ handleKeyDown }
 					isLoading={ isLoading }
 					placeholderText={ getPlaceholderText() }
@@ -358,14 +344,10 @@ export const ChatUI: React.FC = () => {
 	);
 };
 
-addFilter(
-	'classifai.chatUI',
-	'classifai',
-	( args ) => {
-		args.push( {
-			name: chatTabSlug,
-			title: __( 'Generate Content', 'classifai' ),
-		} );
-		return args;
-	}
-);
+addFilter( 'classifai.chatUI', 'classifai', ( args ) => {
+	args.push( {
+		name: chatTabSlug,
+		title: __( 'Generate Content', 'classifai' ),
+	} );
+	return args;
+} );

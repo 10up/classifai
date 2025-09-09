@@ -24,7 +24,11 @@ export const RenderChatUI = () => {
 		const rootElement = document.createElement( 'div' );
 		editorIframe.parentNode.appendChild( rootElement );
 
-		if ( editorIframe?.parentElement?.querySelector( '.classifai-chat-container' ) ) {
+		if (
+			editorIframe?.parentElement?.querySelector(
+				'.classifai-chat-container'
+			)
+		) {
 			return;
 		}
 

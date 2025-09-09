@@ -61,7 +61,10 @@ const chatButtonStyles: CSSProperties = {
 		'var(--wp-components-color-accent-darker-10,var(--wp-admin-theme-color-darker-10,#2145e6))',
 };
 
-const featureTabs = applyFilters( 'classifai.chatUI', [] ) as { name: string; title: string }[];
+const featureTabs = applyFilters( 'classifai.chatUI', [] ) as {
+	name: string;
+	title: string;
+}[];
 
 /**
  * ChatUI component
@@ -166,7 +169,10 @@ export const ChatUI: React.FC = () => {
 						>
 							<SlotFillProvider>
 								<PluginArea />
-								<TabPanel tabs={ featureTabs } className='classifai-chat-tabs'>
+								<TabPanel
+									tabs={ featureTabs }
+									className="classifai-chat-tabs"
+								>
 									{ ( tab ) => (
 										<div style={ { padding: '1rem 14px' } }>
 											<Slot name={ tab.name } />

@@ -26,7 +26,8 @@
 		"classifAISettings": "readonly",
 		"DOMParser": "readonly",
 		"MutationObserver": "readonly",
-		"classifaiRecommendedContentSettings": "readonly"
+		"classifaiRecommendedContentSettings": "readonly",
+		"classifaiRewriteToneTones": "readonly"
 	},
 	"rules": {
 		"react/jsx-no-undef": "off"

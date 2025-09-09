@@ -9,7 +9,10 @@ export const filterAndFlattenAllowedBlocks = (
 			...acc,
 			...( allowedBlocks.includes( block.name ) ? [ block ] : [] ),
 			...( block.innerBlocks
-				? filterAndFlattenAllowedBlocks( block.innerBlocks, allowedBlocks )
+				? filterAndFlattenAllowedBlocks(
+						block.innerBlocks,
+						allowedBlocks
+				  )
 				: [] ),
 		],
 		[]
