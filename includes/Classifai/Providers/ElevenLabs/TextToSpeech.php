@@ -188,7 +188,7 @@ class TextToSpeech extends Provider {
 		 * @since x.x.x
 		 *
 		 * @param array  $body         Request body that will be sent to ElevenLabs.
-		 * @param string $post_id      Post ID.
+		 * @param int    $post_id      Post ID.
 		 * @param string $post_content Post content.
 		 *
 		 * @return array Request body.
