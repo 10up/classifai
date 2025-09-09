@@ -39,7 +39,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 
 | Tagging | Recommended Content | Excerpt Generation | Comment Moderation |
 | :-: | :-: | :-: | :-: |
-| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure AI Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI comment moderation](assets/img/screenshot-13.png "Example of automatic comment moderation with OpenAI.") |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI comment moderation](assets/img/screenshot-13.png "Example of automatic comment moderation with OpenAI.") |
 
 | Audio Transcripts | Title Generation | Expand or Condense Text | Text to Speech |
 | :-: | :-: | :-: | :-: |

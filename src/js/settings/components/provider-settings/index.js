@@ -23,7 +23,6 @@ import { OpenAIModerationSettings } from './openai-moderation';
 import { OpenAIEmbeddingsSettings } from './openai-embeddings';
 import { OpenAISpeechToTextSettings } from './openai-speech-to-text';
 import { AzureAIVisionSettings } from './azure-ai-vision';
-import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIImagesSettings } from './openai-images';
 import { StableDiffusionSettings } from './stable-diffusion';
 import { AmazonPollySettings } from './amazon-polly';
@@ -100,9 +99,6 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 
 		case 'ms_computer_vision':
 			return <AzureAIVisionSettings isConfigured={ isConfigured } />;
-
-		case 'ms_azure_personalizer':
-			return <AzurePersonalizerSettings isConfigured={ isConfigured } />;
 
 		case 'aws_polly':
 			return <AmazonPollySettings isConfigured={ isConfigured } />;
