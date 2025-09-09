@@ -171,7 +171,8 @@ const RewriteTonePlugin = () => {
 				}
 			} );
 		}
-	}, [ allSelectedBlocks.length ] );
+
+	}, [ allSelectedBlocks.length, isRewriteInProgress ] );
 
 	useEffect(
 		function reactToResponse() {
@@ -237,6 +238,13 @@ const RewriteTonePlugin = () => {
 		},
 		[ response ]
 	);
+
+	classifaiRewriteToneTones = classifaiRewriteToneTones.map( tone => {
+		return {
+			...tone,
+			disabled: isRewriteInProgress
+		}
+	} );
 
 	return (
 		<>
