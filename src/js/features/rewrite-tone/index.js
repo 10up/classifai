@@ -190,7 +190,7 @@ const RewriteTonePlugin = () => {
 						// Gutenberg does not recognise <li> without <ul>, and hence rawHandler() returns a
 						// generic `core/html` block instead of a `core/list-item` block.
 						//
-						// We handle this separately by using `createBlock()` isntead.
+						// We handle this separately by using `createBlock()` instead.
 						newBlock = createBlock( currentBlock.name, {
 							// The response contains `<li></li>` tags, which we remove here as they are added
 							// by `createBlock()`. If we don't do this, then nested List item blocks will be
