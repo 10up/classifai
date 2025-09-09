@@ -101,6 +101,8 @@ abstract class Feature {
 
 	/**
 	 * Register the ability for the Feature.
+	 *
+	 * Override this method in the Feature to register an ability.
 	 */
 	public function register_ability() {
 	}

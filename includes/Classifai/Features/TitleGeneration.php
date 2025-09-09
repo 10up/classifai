@@ -96,6 +96,55 @@ class TitleGeneration extends Feature {
 	}
 
 	/**
+	 * Register the ability for the Feature.
+	 */
+	public function register_ability() {
+		wp_register_ability(
+			'classifai/generate-title',
+			[
+				'label'               => esc_html__( 'Generate title suggestions', 'classifai' ),
+				'description'         => esc_html__( 'Use AI to generate title suggestions based on content. This can be content that is passed in or content that is pulled from a post via the post ID. Will return an array of title suggestions.', 'classifai' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => [
+						'content' => [
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'description'       => esc_html__( 'Content to generate a title for.', 'classifai' ),
+						],
+						'id'      => [
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'description'       => esc_html__( 'Post ID to generate a title for.', 'classifai' ),
+						],
+						'n'       => [
+							'type'              => 'integer',
+							'minimum'           => 1,
+							'maximum'           => 10,
+							'sanitize_callback' => 'absint',
+							'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
+						],
+					],
+				],
+				'output_schema'       => [
+					'type'  => 'array',
+					'items' => [
+						'type'        => 'string',
+						'description' => esc_html__( 'Title suggestion.', 'classifai' ),
+					],
+				],
+				'execute_callback'    => function ( $input ) {
+					return [ 'test', 'test2' ]; // TODO: Implement the actual title generation.
+				},
+				'permission_callback' => '__return_true', // TODO: Add a proper permission callback.
+				'meta'                => [
+					'type' => 'tool',
+				],
+			]
+		);
+	}
+
+	/**
 	 * Register any needed endpoints.
 	 */
 	public function register_endpoints() {
