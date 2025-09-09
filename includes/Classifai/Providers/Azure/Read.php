@@ -10,6 +10,8 @@ namespace Classifai\Providers\Azure;
 
 use WP_Error;
 use function Classifai\computer_vision_max_filesize;
+use function Classifai\safe_wp_remote_post;
+use function Classifai\safe_wp_remote_get;
 
 /**
  * Read class
@@ -95,10 +97,10 @@ class Read {
 		 * @since 1.7.0
 		 * @hook classifai_azure_read_should_process
 		 *
-		 * @param {bool} $process       Whether to run OCR processing or not.
-		 * @param {int}  $attachment_id The attachment ID.
+		 * @param bool $process       Whether to run OCR processing or not.
+		 * @param int  $attachment_id The attachment ID.
 		 *
-		 * @return {bool} Whether this attachment should have OCR processing.
+		 * @return bool Whether this attachment should have OCR processing.
 		 */
 		return apply_filters( 'classifai_azure_read_should_process', $process, $this->attachment_id );
 	}
@@ -143,10 +145,10 @@ class Read {
 		 * @since 1.7.0
 		 * @hook classifai_azure_read_request_args
 		 *
-		 * @param {array} $args       Whether to run OCR processing or not.
-		 * @param {int}   $attachment_id The attachment ID.
+		 * @param array $args          Whether to run OCR processing or not.
+		 * @param int   $attachment_id The attachment ID.
 		 *
-		 * @return {array} Filtered request arguments.
+		 * @return array Filtered request arguments.
 		 */
 		$request_args = apply_filters( 'classifai_azure_read_request_args', [], $this->attachment_id );
 
@@ -161,7 +163,7 @@ class Read {
 			return $this->log_error( new WP_Error( 'invalid_attachment', esc_html__( 'Document does not exist.', 'classifai' ) ) );
 		}
 
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$url,
 			[
 				'body'    => wp_json_encode(
@@ -182,10 +184,10 @@ class Read {
 		 * @since 1.5.0
 		 * @hook classifai_azure_read_after_request
 		 *
-		 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
-		 * @param {string} The request URL with query args added.
-		 * @param {int} The document ID.
-		 * @param {string} The document URL.
+		 * @param array|\WP_Error  $response      Response data or a WP_Error if the request failed.
+		 * @param string           $url           The request URL with query args added.
+		 * @param int              $attachment_id The document ID.
+		 * @param string           $document_url  The document URL.
 		 */
 		do_action( 'classifai_azure_read_after_request', $response, $url, $this->attachment_id, $document_url );
 
@@ -219,19 +221,14 @@ class Read {
 	 * @return WP_Error|null|array
 	 */
 	public function check_read_result( string $operation_url ) {
-		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
-			$response = vip_safe_wp_remote_get( $operation_url );
-		} else {
-			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get -- use of `vip_safe_wp_remote_get` is done when available.
-			$response = wp_remote_get(
-				$operation_url,
-				[
-					'headers' => [
-						'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
-					],
-				]
-			);
-		}
+		$response = safe_wp_remote_get(
+			$operation_url,
+			[
+				'headers' => [
+					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
+				],
+			]
+		);
 
 		set_transient( 'classifai_azure_computer_vision_pdf_text_extraction_check_result_latest_response', $response, DAY_IN_SECONDS * 30 );
 
@@ -256,9 +253,9 @@ class Read {
 					 * @since 1.7.0
 					 * @hook classifai_azure_read_retry_interval
 					 *
-					 * @param {int} $seconds How many seconds should the interval be? Default 60.
+					 * @param int $seconds How many seconds should the interval be? Default 60.
 					 *
-					 * @return {int} Filtered interval.
+					 * @return int Filtered interval.
 					 */
 					$retry_interval = apply_filters( 'classifai_azure_read_retry_interval', MINUTE_IN_SECONDS );
 					wp_schedule_single_event( time() + $retry_interval, 'classifai_retry_get_read_result', [ $operation_url, $this->attachment_id ] );
@@ -290,9 +287,9 @@ class Read {
 		 * @since 1.7.0
 		 * @hook classifai_azure_read_result_max_page
 		 *
-		 * @param {int} $max_page The maximum pages that are read.
+		 * @param int $max_page The maximum pages that are read.
 		 *
-		 * @return {int} Filtered max pages.
+		 * @return int Filtered max pages.
 		 */
 		$max_page = min( apply_filters( 'classifai_azure_read_result_max_page', 2 ), count( $data['analyzeResult']['readResults'] ) );
 
@@ -310,11 +307,11 @@ class Read {
 		 * @since 1.7.0
 		 * @hook classifai_azure_read_text_result
 		 *
-		 * @param {array} $lines_of_text Array of text extracted from the response.
-		 * @param {int}   $attachment_id The attachment ID.
-		 * @param {array} $data          Read result.
+		 * @param array $lines_of_text Array of text extracted from the response.
+		 * @param int   $attachment_id The attachment ID.
+		 * @param array $data          Read result.
 		 *
-		 * @return {array} Filtered array of text.
+		 * @return array Filtered array of text.
 		 */
 		$lines_of_text = apply_filters( 'classifai_azure_read_text_result', $lines_of_text, $this->attachment_id, $data );
 

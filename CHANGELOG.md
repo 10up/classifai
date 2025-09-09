@@ -4,6 +4,75 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.6.0] - 2025-08-21
+
+### Added
+
+- Support for Together AI as a Provider for Image Generation, allowing the generation of images using open source models hosted by Together AI (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#976](https://github.com/10up/classifai/pull/976)).
+- Support for Stable Diffusion as a Provider for Image Generation, allowing the generation of images locally (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#974](https://github.com/10up/classifai/pull/974)).
+- Auto-detection and reuse of existing Provider credentials when enabling Features (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#947](https://github.com/10up/classifai/pull/947)).
+- "Number of suggestions" setting added to the Title Generation and Content Resizing Features when using Ollama (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#977](https://github.com/10up/classifai/pull/977)).
+- Model selection dropdown in Gemini API and Grok(xAI) Providers (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#981](https://github.com/10up/classifai/pull/981)).
+
+### Changed
+
+- Increase precision of our threshold settings to allow 2 decimal places, giving more fine-grained control over the threshold (props [@MiguelAxcar](https://github.com/MiguelAxcar), [@dkotter](https://github.com/dkotter) via [#967](https://github.com/10up/classifai/pull/967)).
+- Centralize remote HTTP via `safe_wp_remote_request()` and route all providers through safe wrappers, while keeping existing timeouts and headers (props [@MiguelAxcar](https://github.com/MiguelAxcar), [@psorensen](https://github.com/psorensen), [@sksaju](https://github.com/sksaju), [@dkotter](https://github.com/dkotter) via [#972](https://github.com/10up/classifai/pull/972)).
+- Request JSON structured output when using Ollama with the Title Generation and Content Resizing Features (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#977](https://github.com/10up/classifai/pull/977)).
+
+### Fixed
+
+- Ensure our Chrome AI Provider still works on the latest version of Chrome Canary (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#955](https://github.com/10up/classifai/pull/955)).
+- Ensure a Feature supports a Provider before we save that Provider with the Feature settings (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#959](https://github.com/10up/classifai/pull/959)).
+- Replace remote `file_get_contents()` (Ollama, CLI remote input) with HTTP API (props [@MiguelAxcar](https://github.com/MiguelAxcar), [@dkotter](https://github.com/dkotter) via [#972](https://github.com/10up/classifai/pull/972)).
+- Restored "Classify Post" suggestion in Pre-Publish panel after regression (props [@faisal-alvi](https://github.com/faisal-alvi), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#962](https://github.com/10up/classifai/pull/962)).
+- Ensure the Key Takeaways block renders properly on the front-end for non-logged in users (props [@JeremyEnglert](https://github.com/JeremyEnglert), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#984](https://github.com/10up/classifai/pull/984)).
+
+### Security
+
+- Bump `on-headers` from 1.0.2 to 1.1.0 and `compression` from 1.7.4 to 1.8.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#961](https://github.com/10up/classifai/pull/961)).
+- Bump `form-data` from 4.0.0 to 4.0.4 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#963](https://github.com/10up/classifai/pull/963)).
+- Bump `tmp` from 0.2.3 to 0.2.5 and `@inquirer/editor` from 4.2.6 to 4.2.16 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#970](https://github.com/10up/classifai/pull/970)).
+
+### Developer
+
+- Changed how our hook documentation is built to use the new WP Hooks Documentor package (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#966](https://github.com/10up/classifai/pull/966)).
+- Ensure error messages are properly logged when running the image WP-CLI command (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#958](https://github.com/10up/classifai/pull/958)).
+- Update outdated node dependencies (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#960](https://github.com/10up/classifai/pull/960)).
+- Add dedicated VIPCS workflow and README badge (props [@MiguelAxcar](https://github.com/MiguelAxcar), [@dkotter](https://github.com/dkotter) via [#972](https://github.com/10up/classifai/pull/972)).
+
+## [3.5.0] - 2025-07-14
+
+### Added
+
+- Google AI Imagen as a new Provider for Image Generation (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#943](https://github.com/10up/classifai/pull/943)).
+- New option to our WP-CLI command adding the ability to transcribe audio through remote URLs or File system paths (props [@Sidsector9](https://github.com/Sidsector9), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#937](https://github.com/10up/classifai/pull/937)).
+- New filters, `classifai_chatgpt_key_takeaways_auto_run`, `classifai_ollama_key_takeaways_auto_run`, `classifai_azure_openai_key_takeaways_auto_run`, that allow turning off automatic processing of Key Takeaways (props [@gsarig](https://github.com/gsarig), [@dkotter](https://github.com/dkotter) via [#941](https://github.com/10up/classifai/pull/941)).
+- Prompt users to register on the Installed Plugins screen (props [@BhargavBhandari90](https://github.com/BhargavBhandari90), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#952](https://github.com/10up/classifai/pull/952)).
+
+### Changed
+
+- Switch to using `gpt-4.1-mini` instead of `gpt-4o-mini` for any image processing Features with OpenAI (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#940](https://github.com/10up/classifai/pull/940)).
+- Enhance title generation prompts to default to sentence case formatting (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#942](https://github.com/10up/classifai/pull/942)).
+- Enhance Excerpt Generation by including Author Context (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#944](https://github.com/10up/classifai/pull/944)).
+- New error state in the Key Takeaways block, making it more clear when an error occurs (props [@dkotter](https://github.com/dkotter), [@gsarig](https://github.com/gsarig) via [#941](https://github.com/10up/classifai/pull/941)).
+
+### Fixed
+
+- Don't render the Key Takeaways block if we have no Key Takeaways to show (props [@dkotter](https://github.com/dkotter), [@gsarig](https://github.com/gsarig) via [#941](https://github.com/10up/classifai/pull/941)).
+- Update wrong hook name from `classifai_openai_dalle_embeddings_model` to `classifai_openai_dalle_model` (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#943](https://github.com/10up/classifai/pull/943)).
+- Ensure per-image options are sent correctly when the Generate Image prompt is submitted via the Enter key (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#943](https://github.com/10up/classifai/pull/943)).
+- Ensure API error messages aren't fully HTML escaped so they are easier to read and understand (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#946](https://github.com/10up/classifai/pull/946)).
+- Remove HTML from post statuses before rendering those in our settings (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi), [@iamdharmesh](https://github.com/iamdharmesh) via [#948](https://github.com/10up/classifai/pull/948)).
+- Ensure if an API error occurs when generating embeddings, we don't try to keep processing that item and end up in an infinite loop (props [@dkotter](https://github.com/dkotter), [@MiguelAxcar](https://github.com/MiguelAxcar) via [#949](https://github.com/10up/classifai/pull/949)).
+- Key Takeaways block editor class name (props [@mattradford-sage](https://github.com/mattradford-sage), [@dkotter](https://github.com/dkotter) via [#951](https://github.com/10up/classifai/pull/951)).
+- Only allow jpg, png, gif and webp images to be processed when using OpenAI, matching what they support (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#940](https://github.com/10up/classifai/pull/940)).
+
+### Developer
+
+- Add a main Diagrams doc page and nest all diagrams under that (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#939](https://github.com/10up/classifai/pull/939)).
+- New developer doc on how to trigger ClassifAI Features within your own UI (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#945](https://github.com/10up/classifai/pull/945)).
+
 ## [3.4.0] - 2025-06-12
 
 **Note that this release bumps the WordPress minimum from 6.6 to 6.7.**
@@ -755,6 +824,8 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.6.0]: https://github.com/10up/classifai/compare/3.5.0...3.6.0
+[3.5.0]: https://github.com/10up/classifai/compare/3.4.0...3.5.0
 [3.4.0]: https://github.com/10up/classifai/compare/3.3.1...3.4.0
 [3.3.1]: https://github.com/10up/classifai/compare/3.3.0...3.3.1
 [3.3.0]: https://github.com/10up/classifai/compare/3.2.0...3.3.0

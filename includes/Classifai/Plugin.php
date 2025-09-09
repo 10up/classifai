@@ -98,16 +98,16 @@ class Plugin {
 		 * @since 1.3.0
 		 * @hook classifai_services
 		 *
-		 * @param {array} 'services' Associative array of service slugs and PHP class namespace.
+		 * @param array 'services' Associative array of service slugs and PHP class namespace.
 		 *
-		 * @return {array} The filtered list of services.
+		 * @return array The filtered list of services.
 		 */
 		$classifai_services = apply_filters(
 			'classifai_services',
 			[
-				'language_processing' => 'Classifai\Services\LanguageProcessing',
-				'image_processing'    => 'Classifai\Services\ImageProcessing',
-				'personalizer'        => 'Classifai\Services\Personalizer',
+				'language_processing'    => 'Classifai\Services\LanguageProcessing',
+				'image_processing'       => 'Classifai\Services\ImageProcessing',
+				'content_recommendation' => 'Classifai\Services\ContentRecommendation',
 			]
 		);
 
@@ -303,14 +303,13 @@ class Plugin {
 		$features = array();
 
 		// Get the existing settings.
-		$nlu_settings          = get_option( 'classifai_watson_nlu', [] );
-		$embeddings_settings   = get_option( 'classifai_openai_embeddings', [] );
-		$whisper_settings      = get_option( 'classifai_openai_whisper', [] );
-		$chatgpt_settings      = get_option( 'classifai_openai_chatgpt', [] );
-		$tts_settings          = get_option( 'classifai_azure_text_to_speech', [] );
-		$vision_settings       = get_option( 'classifai_computer_vision', [] );
-		$dalle_settings        = get_option( 'classifai_openai_dalle', [] );
-		$personalizer_settings = get_option( 'classifai_personalizer', [] );
+		$nlu_settings        = get_option( 'classifai_watson_nlu', [] );
+		$embeddings_settings = get_option( 'classifai_openai_embeddings', [] );
+		$whisper_settings    = get_option( 'classifai_openai_whisper', [] );
+		$chatgpt_settings    = get_option( 'classifai_openai_chatgpt', [] );
+		$tts_settings        = get_option( 'classifai_azure_text_to_speech', [] );
+		$vision_settings     = get_option( 'classifai_computer_vision', [] );
+		$dalle_settings      = get_option( 'classifai_openai_dalle', [] );
 
 		// If settings are there, migrate them.
 		if ( ! empty( $nlu_settings ) || ! empty( $embeddings_settings ) ) {
@@ -342,11 +341,6 @@ class Plugin {
 		if ( ! empty( $dalle_settings ) ) {
 			$features[] = \Classifai\Features\ImageGeneration::class;
 		}
-
-		if ( ! empty( $personalizer_settings ) ) {
-			$features[] = \Classifai\Features\RecommendedContent::class;
-		}
-
 		// Migrate settings.
 		$migration_needed = ! empty( $features );
 		foreach ( $features as $feature ) {

@@ -15,6 +15,7 @@ use function Classifai\get_largest_size_and_dimensions_image_url;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_default_prompt;
+use function Classifai\safe_file_get_contents;
 
 /**
  * Ollama Multimodal class
@@ -138,7 +139,7 @@ class OllamaMultimodal extends Ollama {
 		}
 
 		// Download the image so we can encode it.
-		$image_data = file_get_contents( $image_url ); // phpcs:ignore
+		$image_data = safe_file_get_contents( $image_url );
 
 		if ( false === $image_data || ! is_string( $image_data ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Image cannot be downloaded.', 'classifai' ) );
@@ -150,10 +151,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_descriptive_text_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param string $prompt Prompt we are sending to Ollama.
+		 * @param int $attachment_id ID of attachment.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $attachment_id );
 
@@ -163,10 +164,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_descriptive_text_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param array $body          Request body that will be sent to Ollama.
+		 * @param int   $attachment_id ID of attachment.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_descriptive_text_request_body',
@@ -206,7 +207,7 @@ class OllamaMultimodal extends Ollama {
 		}
 
 		// Download the image so we can encode it.
-		$image_data = file_get_contents( $image_url ); // phpcs:ignore
+		$image_data = safe_file_get_contents( $image_url );
 
 		if ( false === $image_data || ! is_string( $image_data ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Image cannot be downloaded.', 'classifai' ) );
@@ -218,10 +219,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_ocr_processing_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param string $prompt        Prompt we are sending to Ollama.
+		 * @param int    $attachment_id ID of attachment.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_ocr_processing_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $attachment_id );
 
@@ -231,10 +232,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_ocr_processing_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param array $body          Request body that will be sent to Ollama.
+		 * @param int   $attachment_id ID of attachment.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_ocr_processing_request_body',
@@ -279,7 +280,7 @@ class OllamaMultimodal extends Ollama {
 		}
 
 		// Download the image so we can encode it.
-		$image_data = file_get_contents( $image_url ); // phpcs:ignore
+		$image_data = safe_file_get_contents( $image_url );
 
 		if ( false === $image_data || ! is_string( $image_data ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Image cannot be downloaded.', 'classifai' ) );
@@ -291,10 +292,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_image_tag_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param string $prompt        Prompt we are sending to Ollama.
+		 * @param int    $attachment_id ID of attachment.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_image_tag_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $attachment_id );
 
@@ -304,10 +305,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_image_tag_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param array $body Request body that will be sent to Ollama.
+		 * @param int $attachment_id ID of attachment.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_image_tag_request_body',

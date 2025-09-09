@@ -16,6 +16,7 @@ use Classifai\Normalizer;
 use WP_Error;
 
 use function Classifai\get_default_prompt;
+use function Classifai\sanitize_number_of_responses_field;
 
 /**
  * Ollama class
@@ -48,6 +49,16 @@ class Ollama extends Provider {
 			'model'         => '',
 			'models'        => [],
 		];
+
+		/**
+		 * Default values for feature specific settings.
+		 */
+		switch ( $this->feature_instance::ID ) {
+			case ContentResizing::ID:
+			case TitleGeneration::ID:
+				$common_settings['number_of_suggestions'] = 1;
+				break;
+		}
 
 		return $common_settings;
 	}
@@ -101,6 +112,13 @@ class Ollama extends Provider {
 		}
 
 		$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] ?? $settings[ static::ID ]['model'] );
+
+		switch ( $this->feature_instance::ID ) {
+			case ContentResizing::ID:
+			case TitleGeneration::ID:
+				$new_settings[ static::ID ]['number_of_suggestions'] = sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings[ static::ID ], $settings[ static::ID ] );
+				break;
+		}
 
 		return $new_settings;
 	}
@@ -210,11 +228,11 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_excerpt_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
-		 * @param {int} $post_id ID of post.
-		 * @param {int} $excerpt_length Length of final excerpt.
+		 * @param string $prompt         Prompt we are sending to Ollama. Gets added before post content.
+		 * @param int    $post_id        ID of post.
+		 * @param int    $excerpt_length Length of final excerpt.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
@@ -232,10 +250,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_excerpt_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $post_id ID of post.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_excerpt_request_body',
@@ -286,6 +304,7 @@ class Ollama extends Provider {
 		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
+				'num'     => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
 				'content' => '',
 			]
 		);
@@ -310,11 +329,11 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_title_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Prompt we are sending to Ollama. Gets added before post content.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_title_prompt', $prompt, $post_id, $args );
 
@@ -332,10 +351,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_title_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $post_id ID of post.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_title_request_body',
@@ -343,30 +362,51 @@ class Ollama extends Provider {
 				'model'    => $settings[ static::ID ]['model'] ?? '',
 				'messages' => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'stream'   => false,
+				'format'   => [
+					'type'       => 'object',
+					'properties' => [
+						'title' => [
+							'type' => 'string',
+						],
+					],
+					'required'   => [ 'title' ],
+				],
 			],
 			$post_id
 		);
 
-		// Make our API request.
-		$request  = new APIRequest( 'test' );
-		$response = $request->post(
-			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-			[
-				'body' => wp_json_encode( $body ),
-			]
-		);
+		// Make our API requests.
+		$request = new APIRequest( 'test', $feature->get_option_name() );
 
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		$responses = [];
+		for ( $i = 0; $i < $args['num']; $i++ ) {
+			$responses[] = $request->post(
+				$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
+				[
+					'body' => wp_json_encode( $body ),
+				]
+			);
 		}
 
-		// If we have a message, return it.
-		$return = [];
-		if ( isset( $response['message'], $response['message']['content'] ) ) {
-			$return[] = sanitize_text_field( trim( $response['message']['content'], ' "\'' ) );
+		$cleaned_responses = [];
+
+		foreach ( $responses as $response ) {
+			// Extract out the response, if it exists.
+			if ( ! is_wp_error( $response ) && isset( $response['message'], $response['message']['content'] ) ) {
+				// We expect the response to be valid json since we requested that schema.
+				$title = json_decode( $response['message']['content'], true );
+
+				if ( isset( $title['title'] ) ) {
+					$cleaned_responses[] = sanitize_text_field( trim( $title['title'], ' "\'' ) );
+				} else {
+					return new WP_Error( 'refusal', esc_html__( 'Request failed', 'classifai' ) );
+				}
+			} elseif ( is_wp_error( $response ) ) {
+				return $response;
+			}
 		}
 
-		return $return;
+		return $cleaned_responses;
 	}
 
 	/**
@@ -387,6 +427,7 @@ class Ollama extends Provider {
 		$args = wp_parse_args(
 			array_filter( $args ),
 			[
+				'num'     => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
 				'content' => '',
 			]
 		);
@@ -403,11 +444,11 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_' . $args['resize_type'] . '_content_prompt
 		 *
-		 * @param {string} $prompt Resize prompt we are sending to Ollama. Gets added as a system prompt.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Resize prompt we are sending to Ollama. Gets added as a system prompt.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
 
@@ -417,10 +458,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_resize_content_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int}   $post_id ID of post.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_resize_content_request_body',
@@ -437,30 +478,51 @@ class Ollama extends Provider {
 					],
 				],
 				'stream'   => false,
+				'format'   => [
+					'type'       => 'object',
+					'properties' => [
+						'content' => [
+							'type' => 'string',
+						],
+					],
+					'required'   => [ 'content' ],
+				],
 			],
 			$post_id
 		);
 
-		// Make our API request.
-		$request  = new APIRequest( 'test' );
-		$response = $request->post(
-			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-			[
-				'body' => wp_json_encode( $body ),
-			]
-		);
+		// Make our API requests.
+		$request = new APIRequest( 'test', $feature->get_option_name() );
 
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		$responses = [];
+		for ( $i = 0; $i < $args['num']; $i++ ) {
+			$responses[] = $request->post(
+				$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
+				[
+					'body' => wp_json_encode( $body ),
+				]
+			);
 		}
 
-		// If we have a message, return it.
-		$return = [];
-		if ( isset( $response['message'], $response['message']['content'] ) ) {
-			$return[] = sanitize_text_field( trim( $response['message']['content'], ' "\'' ) );
+		$cleaned_responses = [];
+
+		foreach ( $responses as $response ) {
+			// Extract out the response, if it exists.
+			if ( ! is_wp_error( $response ) && isset( $response['message'], $response['message']['content'] ) ) {
+				// We expect the response to be valid json since we requested that schema.
+				$content = json_decode( $response['message']['content'], true );
+
+				if ( isset( $content['content'] ) ) {
+					$cleaned_responses[] = sanitize_text_field( trim( $content['content'], ' "\'' ) );
+				} else {
+					return new WP_Error( 'refusal', esc_html__( 'Request failed', 'classifai' ) );
+				}
+			} elseif ( is_wp_error( $response ) ) {
+				return $response;
+			}
 		}
 
-		return $return;
+		return $cleaned_responses;
 	}
 
 	/**
@@ -500,13 +562,13 @@ class Ollama extends Provider {
 		 * only want to run when triggered manually, you can
 		 * filter the return value to false.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_ollama_key_takeaways_auto_run
 		 *
-		 * @param {bool} $run Whether to run the key takeaways generation.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param bool $run     Whether to run the key takeaways generation.
+		 * @param int  $post_id ID of post we are summarizing.
 		 *
-		 * @return {bool} Whether to run the key takeaways generation.
+		 * @return bool Whether to run the key takeaways generation.
 		 */
 		$run = apply_filters( 'classifai_ollama_key_takeaways_auto_run', true, $post_id );
 
@@ -533,10 +595,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_key_takeaways_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param string $prompt  Prompt we are sending to Ollama. Gets added before post content.
+		 * @param int    $post_id ID of post we are summarizing.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_key_takeaways_prompt', $prompt, $post_id );
 
@@ -546,10 +608,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_key_takeaways_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_key_takeaways_request_body',
@@ -640,11 +702,11 @@ class Ollama extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_ollama_content_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before summary.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Prompt we are sending to Ollama. Gets added before summary.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_content_prompt', esc_textarea( get_default_prompt( $settings['prompt'] ) ?? $feature->prompt ), $post_id, $args );
 
@@ -699,10 +761,10 @@ class Ollama extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_ollama_content_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $post_id ID of post.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_content_request_body',
@@ -804,10 +866,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_content
 		 *
-		 * @param {string} $content Content that will be sent to Ollama.
-		 * @param {int} $post_id ID of post.
+		 * @param string $content Content that will be sent to Ollama.
+		 * @param int    $post_id ID of post.
 		 *
-		 * @return {string} Content.
+		 * @return string Content.
 		 */
 		return apply_filters( 'classifai_ollama_content', $content, $post_id );
 	}

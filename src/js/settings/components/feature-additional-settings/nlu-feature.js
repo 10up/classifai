@@ -126,6 +126,9 @@ export const NLUFeatureSettings = () => {
 									[ `${ feature }_threshold` ]: value,
 								} );
 							} }
+							min="0"
+							max="100"
+							step="0.01"
 						/>
 						{ 'ibm_watson_nlu' === featureSettings.provider && (
 							<SelectControl

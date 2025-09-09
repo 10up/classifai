@@ -10,6 +10,8 @@ use Classifai\Features\TextToSpeech;
 use stdClass;
 use WP_Http;
 use WP_Error;
+use function Classifai\safe_wp_remote_post;
+use function Classifai\safe_wp_remote_get;
 
 class Speech extends Provider {
 
@@ -213,23 +215,11 @@ class Speech extends Provider {
 			$default['endpoint_url']
 		);
 
-		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
-			$response = vip_safe_wp_remote_get(
-				$request_url,
-				'',
-				3,
-				1,
-				20,
-				$request_params
-			);
-		} else {
-			$request_params['timeout'] = 20; // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get -- use of `vip_safe_wp_remote_get` is done when available.
-			$response = wp_remote_get(
-				$request_url,
-				$request_params
-			);
-		}
+		$request_params['timeout'] = $request_params['timeout'] ?? 20;
+		$response                  = safe_wp_remote_get(
+			$request_url,
+			$request_params
+		);
 
 		if ( is_wp_error( $response ) ) {
 			add_settings_error(
@@ -386,12 +376,12 @@ class Speech extends Provider {
 		);
 
 		$remote_url = sprintf( '%s%s', $settings[ static::ID ]['endpoint_url'], self::API_PATH );
-		$response   = wp_remote_post( $remote_url, $request_params );
+		$response   = safe_wp_remote_post( $remote_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
 				'azure_text_to_speech_http_error',
-				esc_html( $response->get_error_message() )
+				wp_kses_post( $response->get_error_message() )
 			);
 		}
 
