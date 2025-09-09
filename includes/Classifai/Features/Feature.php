@@ -74,6 +74,10 @@ abstract class Feature {
 		if ( $this->is_feature_enabled() ) {
 			$this->feature_setup();
 		}
+
+		if ( $this->is_enabled() ) {
+			add_action( 'abilities_api_init', [ $this, 'abilities_api_init' ] );
+		}
 	}
 
 	/**
@@ -82,6 +86,23 @@ abstract class Feature {
 	 * Only fires if the feature is enabled, configured and user has access.
 	 */
 	public function feature_setup() {
+	}
+
+	/**
+	 * Register an ability after the abilities API is initialized.
+	 *
+	 * Only fires if the Feature is enabled.
+	 */
+	public function abilities_api_init() {
+		if ( function_exists( 'wp_register_ability' ) ) {
+			$this->register_ability();
+		}
+	}
+
+	/**
+	 * Register the ability for the Feature.
+	 */
+	public function register_ability() {
 	}
 
 	/**
