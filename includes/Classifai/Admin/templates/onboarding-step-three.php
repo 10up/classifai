@@ -65,7 +65,7 @@ require_once 'onboarding-header.php';
 		 * @since 3.2.0
 		 * @hook classifai_before_onboarding_feature_settings_form
 		 *
-		 * @param {string} $current_feature Current feature.
+		 * @param string $current_feature Current feature.
 		 */
 		do_action( 'classifai_before_onboarding_feature_settings_form', $current_feature );
 		?>
@@ -92,7 +92,7 @@ require_once 'onboarding-header.php';
 		 * @since 3.2.0
 		 * @hook classifai_after_onboarding_feature_settings_form
 		 *
-		 * @param {string} $current_feature Current active feature.
+		 * @param string $current_feature Current active feature.
 		 */
 		do_action( 'classifai_after_onboarding_feature_settings_form', $current_feature );
 		?>

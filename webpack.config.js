@@ -12,12 +12,6 @@ module.exports = {
 		'key-takeaways-block': [
 			'./includes/Classifai/Blocks/key-takeaways/index.js',
 		],
-		'recommended-content-block': [
-			'./includes/Classifai/Blocks/recommended-content-block/index.js',
-		],
-		'recommended-content-block-frontend': [
-			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
-		],
 		'recommended-content-block-variation': [
 			'./src/js/features/recommended-content/variation.js',
 		],
@@ -28,6 +22,7 @@ module.exports = {
 		'classifai-plugin-classification': './src/js/features/classification/index.js',
 		'classifai-plugin-classification-previewer': './src/js/features/classification/previewer.js',
 		'classifai-plugin-classification-ibm-watson': './src/js/features/classification/ibm-watson.js',
+		'classifai-plugin-classification-pre-publish': './src/js/features/classification/pre-publish-panel.js',
 		'classifai-plugin-fill': './src/js/features/slot-fill/index.js',
 		'classifai-plugin-text-to-speech': './src/js/features/text-to-speech/index.js',
 		'classifai-plugin-text-to-speech-frontend': './src/js/features/text-to-speech/frontend/index.js',
