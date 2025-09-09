@@ -170,8 +170,8 @@ class ImageCropping extends Feature {
 	 * @param array $response Array of prepared attachment data.
 	 * @return array
 	 */
-	public function set_media_library_attachment_size( array $response ): array {
-		if ( 'image' !== $response['type'] ) {
+	public function set_media_library_attachment_size( $response ) {
+		if ( ! isset( $response['type'] ) || 'image' !== $response['type'] ) {
 			return $response;
 		}
 
