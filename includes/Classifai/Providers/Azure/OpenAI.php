@@ -46,14 +46,14 @@ class OpenAI extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $chat_completion_api_version = '2023-05-15';
+	protected $chat_completion_api_version = '2024-10-21';
 
 	/**
 	 * Completion API version.
 	 *
 	 * @var string
 	 */
-	protected $completion_api_version = '2023-05-15';
+	protected $completion_api_version = '2024-10-21';
 
 	/**
 	 * GeminiAPI constructor.
@@ -62,6 +62,25 @@ class OpenAI extends Provider {
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
+	}
+
+	/**
+	 * Get the API version.
+	 *
+	 * @return string
+	 */
+	public function get_api_version(): string {
+		/**
+		 * Filter the API version.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_azure_openai_api_version
+		 *
+		 * @param string $version The default API version.
+		 *
+		 * @return string The API version.
+		 */
+		return apply_filters( 'classifai_azure_openai_api_version', $this->chat_completion_api_version );
 	}
 
 	/**
@@ -254,11 +273,12 @@ class OpenAI extends Provider {
 			( $feature instanceof ContentResizing ||
 			$feature instanceof ExcerptGeneration ||
 			$feature instanceof TitleGeneration ||
-			$feature instanceof KeyTakeaways ) &&
+			$feature instanceof KeyTakeaways ||
+			$feature instanceof ContentGeneration ) &&
 			$deployment
 		) {
 			$endpoint = trailingslashit( $endpoint ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
-			$endpoint = add_query_arg( 'api-version', $this->chat_completion_api_version, $endpoint );
+			$endpoint = add_query_arg( 'api-version', $this->get_api_version(), $endpoint );
 		}
 
 		return $endpoint;
