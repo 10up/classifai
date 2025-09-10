@@ -100,10 +100,10 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 			spinnerEl.show();
 			isProcessing = true;
 
-			const path = scriptData.title?.path + postId;
-
 			apiFetch( {
-				path,
+				path: scriptData.title?.path,
+				method: 'POST',
+				data: { input: { id: postId } },
 			} )
 				.then( ( result ) => {
 					generateTextEl.css( 'opacity', '1' );

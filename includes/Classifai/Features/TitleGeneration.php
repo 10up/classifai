@@ -257,6 +257,10 @@ class TitleGeneration extends Feature {
 	/**
 	 * Check if a given request has access to generate a title.
 	 *
+	 * TODO: If we want to keep our custom REST endpoint,
+	 * we can look to merge these permission callbacks together
+	 * to avoid duplicating code.
+	 *
 	 * @param array $input The input array.
 	 * @return bool|WP_Error
 	 */
