@@ -34,6 +34,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Scan PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
+* Modification of your `robots.txt` file to block the most common AI data scraping bots from indexing your site
 
 ### Language Processing
 
@@ -158,7 +159,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Check for an email from `ClassifAI Team` which contains the registration key.
 - Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
-### 2. Configure ClassifAI Registration Key under Tools > ClassifAI > ClassifAI Registration
+### 2. Configure ClassifAI Registration Key under Tools > ClassifAI > Settings
 
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
