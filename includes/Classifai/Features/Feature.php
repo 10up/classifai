@@ -91,7 +91,7 @@ abstract class Feature {
 	/**
 	 * Register an ability after the abilities API is initialized.
 	 *
-	 * Only fires if the Feature is enabled.
+	 * Only fires if the Feature is enabled and configured.
 	 */
 	public function abilities_api_init() {
 		if ( function_exists( 'wp_register_ability' ) ) {

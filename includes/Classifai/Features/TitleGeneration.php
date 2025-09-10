@@ -127,15 +127,18 @@ class TitleGeneration extends Feature {
 					],
 				],
 				'output_schema'       => [
-					'type'  => 'array',
-					'items' => [
-						'type'        => 'string',
-						'description' => esc_html__( 'Title suggestion.', 'classifai' ),
+					'type'       => 'object',
+					'properties' => [
+						'titles' => [
+							'type'  => 'array',
+							'items' => [
+								'type'        => 'string',
+								'description' => esc_html__( 'Title suggestion', 'classifai' ),
+							],
+						],
 					],
 				],
-				'execute_callback'    => function ( $input ) {
-					return [ 'test', 'test2' ]; // TODO: Implement the actual title generation.
-				},
+				'execute_callback'    => [ $this, 'abilities_api_callback' ],
 				'permission_callback' => '__return_true', // TODO: Add a proper permission callback.
 				'meta'                => [
 					'type' => 'tool',
@@ -249,6 +252,32 @@ class TitleGeneration extends Feature {
 		}
 
 		return parent::rest_endpoint_callback( $request );
+	}
+
+	/**
+	 * Request handler for the abilities API.
+	 *
+	 * @param array $input The input array.
+	 * @return \WP_REST_Response
+	 */
+	public function abilities_api_callback( array $input ) {
+		$args = wp_parse_args(
+			$input,
+			[
+				'content' => null,
+				'id'      => null,
+				'n'       => 1,
+			]
+		);
+
+		return $this->run(
+			$args['id'],
+			'title',
+			[
+				'num'     => $args['n'],
+				'content' => $args['content'],
+			]
+		);
 	}
 
 	/**
