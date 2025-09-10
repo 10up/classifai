@@ -139,7 +139,7 @@ class TitleGeneration extends Feature {
 					],
 				],
 				'execute_callback'    => [ $this, 'abilities_api_callback' ],
-				'permission_callback' => '__return_true', // TODO: Add a proper permission callback.
+				'permission_callback' => [ $this, 'abilities_api_permissions_check' ],
 				'meta'                => [
 					'type' => 'tool',
 				],
@@ -255,6 +255,36 @@ class TitleGeneration extends Feature {
 	}
 
 	/**
+	 * Check if a given request has access to generate a title.
+	 *
+	 * @param array $input The input array.
+	 * @return bool|WP_Error
+	 */
+	public function abilities_api_permissions_check( array $input ) {
+		$post_id = $input['id'] ?? null;
+
+		// Ensure we have a logged in user that can edit the item.
+		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$post_type     = get_post_type( $post_id );
+		$post_type_obj = get_post_type_object( $post_type );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $this->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Title generation not currently enabled.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Request handler for the abilities API.
 	 *
 	 * @param array $input The input array.
@@ -266,7 +296,7 @@ class TitleGeneration extends Feature {
 			[
 				'content' => null,
 				'id'      => null,
-				'n'       => 1,
+				'n'       => null,
 			]
 		);
 
@@ -377,7 +407,7 @@ class TitleGeneration extends Feature {
 			'enabledFeatures' => [
 				0 => [
 					'feature'       => 'title',
-					'path'          => '/classifai/v1/generate-title/',
+					'path'          => '/wp/v2/abilities/classifai/generate-title/run/',
 					'buttonText'    => __( 'Generate titles', 'classifai' ),
 					'modalTitle'    => __( 'Select a title', 'classifai' ),
 					'selectBtnText' => __( 'Select', 'classifai' ),

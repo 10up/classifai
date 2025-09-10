@@ -66,7 +66,7 @@ const TitleGenerationPlugin = () => {
 		apiFetch( {
 			path,
 			method: 'POST',
-			data: { id: postId, content: postContent },
+			data: { input: { id: postId, content: postContent } },
 		} ).then(
 			async ( res ) => {
 				// Support calling a function from the response for browser AI.
