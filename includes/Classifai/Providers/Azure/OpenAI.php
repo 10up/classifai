@@ -17,6 +17,7 @@ use WP_Error;
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
 use function Classifai\safe_wp_remote_post;
+use function Classifai\get_temperature;
 
 class OpenAI extends Provider {
 
@@ -553,7 +554,7 @@ class OpenAI extends Provider {
 			'classifai_azure_openai_title_request_body',
 			[
 				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id
@@ -660,7 +661,7 @@ class OpenAI extends Provider {
 						'content' => '"""' . esc_html( $args['content'] ) . '"""',
 					],
 				],
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id
