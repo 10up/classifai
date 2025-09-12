@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.7.0] - 2025-09-15
+
+### Added
+
+- New setting that when turned on, will modify your site's `robots.txt` file to block the most common AI data scraping bots (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#990](https://github.com/10up/classifai/pull/990)).
+- ElevenLabs as a new Provider for the Audio Transcripts Generation Feature (Speech to Text) (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#991](https://github.com/10up/classifai/pull/991)).
+- ElevenLabs as a new Provider for the Text to Speech Feature (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#1002](https://github.com/10up/classifai/pull/1002)).
+- Ollama as a Provider for the Smart 404 and Term Cleanup Features (props [@av3nger](https://github.com/av3nger), [@dkotter](https://github.com/dkotter) via [#980](https://github.com/10up/classifai/pull/980)).
+- Increase the temperature value when requesting more results, hopefully leading to more unique results (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#1005](https://github.com/10up/classifai/pull/1005)).
+
+### Changed
+
+- Update the Azure OpenAI API version from `2023-05-15` to `2024-10-21` (props [@gsarig](https://github.com/gsarig), [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#1001](https://github.com/10up/classifai/pull/1001)).
+- Moved some methods from the OpenAI Speech to Text Provider class to the Audio Transcripts Generation Feature class, to avoid code duplication. If relying on those methods, please update your code (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#991](https://github.com/10up/classifai/pull/991)).
+- Limit our number of suggestions input from 1 to 10 (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#1005](https://github.com/10up/classifai/pull/1005)).
+
+### Removed
+
+- Microsoft Azure AI Personalizer as a Provider from the Recommendation Service (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@vikrampm1](https://github.com/vikrampm1), [@fabiankaegy](https://github.com/fabiankaegy), [@dkotter](https://github.com/dkotter) via [#999](https://github.com/10up/classifai/pull/999)).
+- The RSS Importer WP-CLI command (props [@av3nger](https://github.com/av3nger), [@dkotter](https://github.com/dkotter) via [#987](https://github.com/10up/classifai/pull/987)).
+
+### Fixed
+
+- Remove the Generate Titles button from attachments (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#1004](https://github.com/10up/classifai/pull/1004)).
+- Smart crop thumbnails not showing in WordPress UI (props [@mendezcode](https://github.com/mendezcode), [@kmgalanakis](https://github.com/kmgalanakis), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#971](https://github.com/10up/classifai/pull/971)).
+- Ensure the Content Generation Feature works when using Azure OpenAI as the Provider (props [@gsarig](https://github.com/gsarig), [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#1001](https://github.com/10up/classifai/pull/1001)).
+- Ensure error message shows properly if registration settings are initially saved with empty values (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#990](https://github.com/10up/classifai/pull/990)).
+
+### Developer
+
+- New filter, `classifai_azure_openai_api_version`, that makes it easier to change the API version Azure OpenAI uses (props [@gsarig](https://github.com/gsarig), [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#1001](https://github.com/10up/classifai/pull/1001)).
+- Update outdated node dependencies (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#1007](https://github.com/10up/classifai/pull/1007)).
+
 ## [3.6.0] - 2025-08-21
 
 ### Added
@@ -824,6 +857,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.7.0]: https://github.com/10up/classifai/compare/3.6.0...3.7.0
 [3.6.0]: https://github.com/10up/classifai/compare/3.5.0...3.6.0
 [3.5.0]: https://github.com/10up/classifai/compare/3.4.0...3.5.0
 [3.4.0]: https://github.com/10up/classifai/compare/3.3.1...3.4.0
