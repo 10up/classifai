@@ -186,10 +186,18 @@ trait ElevenLabs {
 			if ( $this->feature_instance instanceof TextToSpeech ) {
 				// Get the available voices.
 				$voices = $this->get_voices( $new_settings[ static::ID ]['api_key'] ?? '' );
-				if ( ! is_wp_error( $voices ) && ! empty( $voices ) ) {
-					$new_settings[ static::ID ]['voices'] = $voices;
+
+				if ( is_wp_error( $voices ) ) {
+					$new_settings[ static::ID ]['authenticated'] = false;
+					$new_settings[ static::ID ]['voices']        = [];
+					add_settings_error(
+						'api_key',
+						'classifai-elevenlabs-voices-error',
+						$voices->get_error_message(),
+						'error'
+					);
 				} else {
-					$new_settings[ static::ID ]['voices'] = [];
+					$new_settings[ static::ID ]['voices'] = $voices;
 				}
 			}
 		}

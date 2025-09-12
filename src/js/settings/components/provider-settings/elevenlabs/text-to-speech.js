@@ -29,6 +29,14 @@ export const ElevenLabsTextToSpeechSettings = ( { isConfigured = false } ) => {
 	);
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
+	const voices = providerSettings.voices.length
+		? providerSettings.voices
+		: [
+				{
+					name: __( '-- Choose Voice --', 'classifai' ),
+					id: '',
+				},
+		  ];
 
 	return (
 		<>
@@ -44,40 +52,37 @@ export const ElevenLabsTextToSpeechSettings = ( { isConfigured = false } ) => {
 				onChange={ ( value ) => onChange( { model: value } ) }
 				modelsDocUrl="https://elevenlabs.io/docs/models"
 			/>
-			{ !! providerSettings.voices?.length && (
-				<SettingsRow
-					label={ __( 'Voice', 'classifai' ) }
-					description={
-						<>
-							{ __(
-								'Select the voice for the generated audio. You can find more details on voices',
-								'classifai'
-							) }{ ' ' }
-							<a
-								href="https://elevenlabs.io/app/voice-library"
-								target="_blank"
-								rel="noreferrer"
-							>
-								{ __( 'here', 'classifai' ) }
-							</a>
-							.
-						</>
-					}
-				>
-					<SelectControl
-						id={ `${ providerName }_voice` }
-						onChange={ ( value ) => onChange( { voice: value } ) }
-						value={ providerSettings.voice || 'alloy' }
-						options={ ( providerSettings.voices || [] ).map(
-							( ele ) => ( {
-								label: ele.name,
-								value: ele.id,
-							} )
-						) }
-						__nextHasNoMarginBottom
-					/>
-				</SettingsRow>
-			) }
+			<SettingsRow
+				label={ __( 'Voice', 'classifai' ) }
+				description={
+					<>
+						{ __(
+							'Select the voice for the generated audio. You can find more details on voices',
+							'classifai'
+						) }{ ' ' }
+						<a
+							href="https://elevenlabs.io/app/voice-library"
+							target="_blank"
+							rel="noreferrer"
+						>
+							{ __( 'here', 'classifai' ) }
+						</a>
+						.
+					</>
+				}
+			>
+				<SelectControl
+					id={ `${ providerName }_voice` }
+					onChange={ ( value ) => onChange( { voice: value } ) }
+					value={ providerSettings.voice || '' }
+					options={ voices.map( ( ele ) => ( {
+						label: ele.name,
+						value: ele.id,
+					} ) ) }
+					disabled={ ! providerSettings.voices?.length }
+					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
 		</>
 	);
 };

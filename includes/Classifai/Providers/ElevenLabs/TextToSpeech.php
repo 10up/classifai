@@ -95,12 +95,12 @@ class TextToSpeech extends Provider {
 		$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] ?? $settings[ static::ID ]['voice'] );
 
 		// Ensure the model being saved is valid. If not valid or we don't have one, use the first model.
-		if ( ! in_array( $new_settings[ static::ID ]['model'], array_column( $new_settings[ static::ID ]['models'], 'id' ), true ) ) {
+		if ( ! empty( $new_settings[ static::ID ]['models'] ) && ! in_array( $new_settings[ static::ID ]['model'], array_column( $new_settings[ static::ID ]['models'], 'id' ), true ) ) {
 			$new_settings[ static::ID ]['model'] = array_column( $new_settings[ static::ID ]['models'], 'id' )[0];
 		}
 
 		// Ensure the voice being saved is valid. If not valid or we don't have one, use the first voice.
-		if ( ! in_array( $new_settings[ static::ID ]['voice'], array_column( $new_settings[ static::ID ]['voices'], 'id' ), true ) ) {
+		if ( ! empty( $new_settings[ static::ID ]['voices'] ) && ! in_array( $new_settings[ static::ID ]['voice'], array_column( $new_settings[ static::ID ]['voices'], 'id' ), true ) ) {
 			$new_settings[ static::ID ]['voice'] = array_column( $new_settings[ static::ID ]['voices'], 'id' )[0];
 		}
 
