@@ -74,7 +74,7 @@ class OpenAI extends Provider {
 		/**
 		 * Filter the API version.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 * @hook classifai_azure_openai_api_version
 		 *
 		 * @param string $version The default API version.

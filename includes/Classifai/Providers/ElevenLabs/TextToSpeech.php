@@ -49,7 +49,7 @@ class TextToSpeech extends Provider {
 		 *
 		 * Useful if you want to change the model for certain use cases.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 * @hook classifai_elevenlabs_text_to_speech_model
 		 *
 		 * @param string $model The current model to use.
@@ -185,7 +185,7 @@ class TextToSpeech extends Provider {
 		/**
 		 * Filter the request body before sending to ElevenLabs.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 *
 		 * @param array  $body         Request body that will be sent to ElevenLabs.
 		 * @param int    $post_id      Post ID.

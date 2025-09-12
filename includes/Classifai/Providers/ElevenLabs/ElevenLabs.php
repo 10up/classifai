@@ -37,7 +37,7 @@ trait ElevenLabs {
 		/**
 		 * Filter the ElevenLabs API URL.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 * @hook classifai_elevenlabs_api_url
 		 *
 		 * @param string $url The default API URL.
@@ -66,7 +66,7 @@ trait ElevenLabs {
 		/**
 		 * Filter the URL for the request.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 * @hook classifai_elevenlabs_api_request_url
 		 *
 		 * @param string $url The URL for the request.
@@ -87,7 +87,7 @@ trait ElevenLabs {
 		/**
 		 * Filter the options for the request.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 * @hook classifai_elevenlabs_api_request_options
 		 *
 		 * @param array  $options The options for the request.

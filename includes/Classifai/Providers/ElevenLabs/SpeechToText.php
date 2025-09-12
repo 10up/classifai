@@ -159,7 +159,7 @@ class SpeechToText extends Provider {
 		/**
 		 * Filter the request body before sending to ElevenLabs.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 * @hook classifai_elevenlabs_transcribe_request_body
 		 *
 		 * @param array  $body      Request body that will be sent to ElevenLabs.
