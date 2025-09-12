@@ -121,7 +121,7 @@ export const chromeAITextGeneration = async ( prompt = '', content = '' ) => {
 			// eslint-disable-next-line no-alert
 			window.alert(
 				sprintf(
-					/* translators: %s: error message */
+					/* translators: %1$s: error message */
 					__(
 						'Error occurred during AI text generation: %1$s. Please ensure you have followed the setup instructions at https://10up.github.io/classifai/tutorial-chrome-built-in-ai.html',
 						'classifai'
