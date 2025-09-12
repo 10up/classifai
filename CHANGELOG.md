@@ -205,7 +205,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [3.2.0] - 2024-12-18
 
-**Prior to updating, please read: this release of ClassifAI rearchitects how the settings pages are built, from a standard PHP approach to using React components. If you've created custom Features or Providers or added your own custom settings, you'll need to update your code to work in this new structure. See our [documentation](https://10up.github.io/classifai/tutorial-useful-snippets.html) for examples.**
+**Prior to updating, please read: this release of ClassifAI rearchitects how the settings pages are built, from a standard PHP approach to using React components. If you've created custom Features or Providers or added your own custom settings, you'll need to update your code to work in this new structure. See our [documentation](https://10up.github.io/classifai/advanced-docs/useful-snippets) for examples.**
 
 **Also note that this release bumps the WordPress minimum from 6.1 to 6.5.**
 
@@ -318,7 +318,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Ensure we properly account for `null` values when merging our saved settings with our default settings (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#741](https://github.com/10up/classifai/pull/741)).
 
 ## [3.0.0] - 2024-02-29
-**Note that this is a major release of ClassifAI that restructures most of the codebase and will have some breaking changes. If you're extending ClassifAI in any way, please ensure you fully test those integrations prior to running this update on production. For more details on what is changing, see the [migration guide](https://10up.github.io/classifai/tutorial-migration-guide-v2-to-v3.html).**
+**Note that this is a major release of ClassifAI that restructures most of the codebase and will have some breaking changes. If you're extending ClassifAI in any way, please ensure you fully test those integrations prior to running this update on production. For more details on what is changing, see the [migration guide](https://10up.github.io/classifai/advanced-docs/migration-guide-v2-to-v3).**
 
 ### Added
 - New Moderation Feature that utilizes the OpenAI Moderation API to moderate comments (props [@kirtangajjar](https://github.com/kirtangajjar), [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#531](https://github.com/10up/classifai/pull/531)).
