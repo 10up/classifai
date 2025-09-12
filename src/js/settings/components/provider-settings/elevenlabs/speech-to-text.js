@@ -1,14 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { SelectControl } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../../settings-row';
+import { ModelSelector } from '../../model-selector';
 import { STORE_NAME } from '../../../data/store';
 import { ElevenLabsSettings } from './base';
 
@@ -29,22 +27,6 @@ export const ElevenLabsSpeechToTextSettings = ( { isConfigured = false } ) => {
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
 
-	const models = [
-		{ label: __( '-- Choose Model --', 'classifai' ), value: '' },
-	];
-
-	// Convert providerSettings.models to an array from an object.
-	if ( providerSettings?.models ) {
-		models.push(
-			...Object.entries( providerSettings.models ).map(
-				( [ key, model ] ) => ( {
-					label: model.display_name || key,
-					value: model.id || key,
-				} )
-			)
-		);
-	}
-
 	return (
 		<>
 			{ ! isConfigured && (
@@ -53,23 +35,12 @@ export const ElevenLabsSpeechToTextSettings = ( { isConfigured = false } ) => {
 					onChange={ onChange }
 				/>
 			) }
-			<SettingsRow
-				label={ __( 'Model', 'classifai' ) }
-				description={ __(
-					'Choose the model you want to use.',
-					'classifai'
-				) }
-			>
-				<SelectControl
-					id={ `${ providerName }_model` }
-					onChange={ ( value ) => onChange( { model: value } ) }
-					value={ providerSettings?.model || '' }
-					options={ models }
-					disabled={ models.length <= 1 }
-					__nextHasNoMarginBottom
-					__next40pxDefaultSize
-				/>
-			</SettingsRow>
+			<ModelSelector
+				providerName={ providerName }
+				providerSettings={ providerSettings }
+				onChange={ ( value ) => onChange( { model: value } ) }
+				modelsDocUrl="https://elevenlabs.io/docs/models"
+			/>
 		</>
 	);
 };

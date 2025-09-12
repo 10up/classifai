@@ -1,0 +1,59 @@
+{
+  "voices": [
+      {
+          "voice_id": "21m00Tcm4TlvDq8ikWAM",
+          "name": "Rachel",
+          "samples": null,
+          "category": "premade",
+          "fine_tuning": {
+              "is_allowed_to_fine_tune": false,
+              "state": {},
+              "verification_failures": [],
+              "verification_attempts_count": 0,
+              "manual_verification_requested": false,
+              "language": null,
+              "progress": {},
+              "message": {},
+              "dataset_duration_seconds": null,
+              "verification_attempts": null,
+              "slice_ids": null,
+              "manual_verification": null,
+              "max_verification_attempts": null,
+              "next_max_verification_attempts_reset_unix_ms": null
+          },
+          "labels": {
+              "accent": "american",
+              "descriptive": "casual",
+              "age": "young",
+              "gender": "female",
+              "language": "en",
+              "use_case": "conversational"
+          },
+          "description": "Matter-of-fact, personable woman. Great for conversational use cases.",
+          "preview_url": "https://storage.googleapis.com/eleven-public-prod/premade/voices/21m00Tcm4TlvDq8ikWAM/b4928a68-c03b-411f-8533-3d5c299fd451.mp3",
+          "available_for_tiers": [],
+          "settings": null,
+          "sharing": null,
+          "high_quality_base_model_ids": [],
+          "verified_languages": [],
+          "safety_control": null,
+          "voice_verification": {
+              "requires_verification": false,
+              "is_verified": false,
+              "verification_failures": [],
+              "verification_attempts_count": 0,
+              "language": null,
+              "verification_attempts": null
+          },
+          "permission_on_resource": null,
+          "is_owner": false,
+          "is_legacy": false,
+          "is_mixed": false,
+          "favorited_at_unix": null,
+          "created_at_unix": null
+      }
+  ],
+  "has_more": true,
+  "total_count": 52,
+  "next_page_token": "Mjl2RDMzTjFDdHhDbXFRUlBPSEp8"
+}
