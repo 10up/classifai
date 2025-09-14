@@ -97,6 +97,8 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 					<InputControl
 						id={ `${ providerName }_number_of_suggestions` }
 						type="number"
+						min={ 1 }
+						max={ 10 }
 						value={ providerSettings.number_of_suggestions || 1 }
 						onChange={ ( value ) =>
 							onChange( { number_of_suggestions: value } )

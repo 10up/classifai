@@ -221,7 +221,7 @@ export default function Home() {
 			title: 'Recommended Content',
 			tagline: 'Recommended Content Block',
 			description:
-				'Content suggestions with reinforcement learning based on semantic traffic data using Microsoft Azure Personalizer.',
+				'Render recommended content based on embeddings by utilizing vector similarity search to identify semantically relevant items.',
 			configureLink: '/feature-configuration/recommended-content',
 		},
 		{

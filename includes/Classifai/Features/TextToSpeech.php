@@ -6,6 +6,7 @@ use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Azure\Speech;
 use Classifai\Providers\AWS\AmazonPolly;
 use Classifai\Providers\OpenAI\TextToSpeech as OpenAITTS;
+use Classifai\Providers\ElevenLabs\TextToSpeech as ElevenLabsTTS;
 use Classifai\Normalizer;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -72,9 +73,10 @@ class TextToSpeech extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			AmazonPolly::ID => __( 'Amazon Polly', 'classifai' ),
-			Speech::ID      => __( 'Microsoft Azure AI Speech', 'classifai' ),
-			OpenAITTS::ID   => __( 'OpenAI Text to Speech', 'classifai' ),
+			AmazonPolly::ID   => __( 'Amazon Polly', 'classifai' ),
+			Speech::ID        => __( 'Microsoft Azure AI Speech', 'classifai' ),
+			OpenAITTS::ID     => __( 'OpenAI Text to Speech', 'classifai' ),
+			ElevenLabsTTS::ID => __( 'ElevenLabs', 'classifai' ),
 		];
 
 		// Get readme content.

@@ -80,6 +80,7 @@ class ImageCropping extends Feature {
 		add_action( 'edit_attachment', [ $this, 'maybe_crop_image' ] );
 
 		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
+		add_filter( 'wp_prepare_attachment_for_js', [ $this, 'set_media_library_attachment_size' ], 10, 1 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_smart_crops' ], 7, 2 );
 	}
 
@@ -178,6 +179,28 @@ class ImageCropping extends Feature {
 		}
 
 		return $metadata;
+	}
+
+	/**
+	 * Adjust the media library attachment size to account for cropped thumbnails.
+	 *
+	 * @param array $response Array of prepared attachment data.
+	 * @return array
+	 */
+	public function set_media_library_attachment_size( $response ) {
+		if ( ! isset( $response['type'] ) || 'image' !== $response['type'] ) {
+			return $response;
+		}
+
+		/*
+		 * Replace the `medium` thumbnail with the original `thumbnail` size, which has been
+		 * smart cropped to show the actual cropped image on the media library thumbnail.
+		 */
+		if ( isset( $response['sizes']['thumbnail'] ) && isset( $response['sizes']['medium'] ) ) {
+			$response['sizes']['medium'] = $response['sizes']['thumbnail'];
+		}
+
+		return $response;
 	}
 
 	/**

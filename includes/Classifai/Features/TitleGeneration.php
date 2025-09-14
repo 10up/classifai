@@ -258,40 +258,50 @@ class TitleGeneration extends Feature {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_assets( string $hook_suffix ) {
-		// Load asset in new post and edit post screens.
-		if ( 'post.php' === $hook_suffix || 'post-new.php' === $hook_suffix ) {
-			$screen = get_current_screen();
-
-			// Load the assets for the classic editor.
-			if ( $screen && ! $screen->is_block_editor() ) {
-				if ( post_type_supports( $screen->post_type, 'title' ) ) {
-					wp_enqueue_style(
-						'classifai-plugin-classic-title-generation-css',
-						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.css',
-						[],
-						get_asset_info( 'classifai-plugin-classic-title-generation', 'version' ),
-						'all'
-					);
-
-					wp_enqueue_script(
-						'classifai-plugin-classic-title-generation-js',
-						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.js',
-						array_merge( get_asset_info( 'classifai-plugin-classic-title-generation', 'dependencies' ), array( 'wp-api' ) ),
-						get_asset_info( 'generate-title-classic', 'version' ),
-						true
-					);
-
-					wp_add_inline_script(
-						'classifai-plugin-classic-title-generation-js',
-						sprintf(
-							'var classifaiChatGPTData = %s;',
-							wp_json_encode( $this->get_localised_vars() )
-						),
-						'before'
-					);
-				}
-			}
+		// Load asset in new post and edit post screens only.
+		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
+			return;
 		}
+
+		$screen = get_current_screen();
+
+		// Load the assets for the classic editor only.
+		if ( ! $screen || $screen->is_block_editor() ) {
+			return;
+		}
+
+		// Load the assets only if the post type supports titles and is not an attachment.
+		if (
+			! post_type_supports( $screen->post_type, 'title' ) ||
+			in_array( $screen->post_type, [ 'attachment' ], true )
+		) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'classifai-plugin-classic-title-generation-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.css',
+			[],
+			get_asset_info( 'classifai-plugin-classic-title-generation', 'version' ),
+			'all'
+		);
+
+		wp_enqueue_script(
+			'classifai-plugin-classic-title-generation-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.js',
+			array_merge( get_asset_info( 'classifai-plugin-classic-title-generation', 'dependencies' ), array( 'wp-api' ) ),
+			get_asset_info( 'generate-title-classic', 'version' ),
+			true
+		);
+
+		wp_add_inline_script(
+			'classifai-plugin-classic-title-generation-js',
+			sprintf(
+				'var classifaiChatGPTData = %s;',
+				wp_json_encode( $this->get_localised_vars() )
+			),
+			'before'
+		);
 	}
 
 	/**

@@ -39,7 +39,8 @@ class Plugin {
 		add_action( 'admin_init', [ $this, 'add_privacy_policy_content' ] );
 		add_action( 'admin_init', [ $this, 'maybe_migrate_to_v3' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
+		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, [ $this, 'filter_plugin_action_links' ] );
+		add_filter( 'robots_txt', [ $this, 'maybe_block_ai_crawlers' ] );
 		add_action( 'after_classifai_init', [ $this, 'load_action_scheduler' ] );
 	}
 
@@ -105,9 +106,9 @@ class Plugin {
 		$classifai_services = apply_filters(
 			'classifai_services',
 			[
-				'language_processing' => 'Classifai\Services\LanguageProcessing',
-				'image_processing'    => 'Classifai\Services\ImageProcessing',
-				'personalizer'        => 'Classifai\Services\Personalizer',
+				'language_processing'    => 'Classifai\Services\LanguageProcessing',
+				'image_processing'       => 'Classifai\Services\ImageProcessing',
+				'content_recommendation' => 'Classifai\Services\ContentRecommendation',
 			]
 		);
 
@@ -249,6 +250,59 @@ class Plugin {
 	}
 
 	/**
+	 * Maybe block AI crawlers from indexing the site.
+	 *
+	 * @param string $robots_txt The robots.txt content.
+	 * @return string The robots.txt content.
+	 */
+	public function maybe_block_ai_crawlers( $robots_txt ) {
+		$service_manager = new Services\ServicesManager();
+		$settings        = $service_manager->get_settings();
+
+		// Only block AI bots if the setting is enabled.
+		if ( ! isset( $settings['block_ai_bots'] ) || '1' !== $settings['block_ai_bots'] ) {
+			return $robots_txt;
+		}
+
+		// Ensure the content is a string, in case some other plugin has messed up.
+		if ( ! is_string( $robots_txt ) ) {
+			$robots_txt = (string) $robots_txt;
+		}
+
+		$robots_txt .= '
+## Apple crawler (https://support.apple.com/en-us/119829)
+User-agent: Applebot-Extended
+Disallow: /
+
+## Common Crawl crawler (https://commoncrawl.org/ccbot)
+User-agent: CCBot
+Disallow: /
+
+## Anthropic crawler (https://support.anthropic.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler)
+User-agent: ClaudeBot
+Disallow: /
+
+## Facebook crawler (https://developers.facebook.com/docs/sharing/webmasters/web-crawlers/)
+User-agent: FacebookBot
+Disallow: /
+
+## Google crawler (https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers)
+User-agent: Google-Extended
+Disallow: /
+
+## OpenAI GPTBot crawler (https://platform.openai.com/docs/bots)
+User-agent: GPTbot
+Disallow: /
+
+## Meta crawler (https://developers.facebook.com/docs/sharing/webmasters/web-crawlers/)
+User-agent: Meta-ExternalAgent
+Disallow: /
+';
+
+		return $robots_txt;
+	}
+
+	/**
 	 * Load the Action Scheduler library.
 	 */
 	public function load_action_scheduler() {
@@ -303,14 +357,13 @@ class Plugin {
 		$features = array();
 
 		// Get the existing settings.
-		$nlu_settings          = get_option( 'classifai_watson_nlu', [] );
-		$embeddings_settings   = get_option( 'classifai_openai_embeddings', [] );
-		$whisper_settings      = get_option( 'classifai_openai_whisper', [] );
-		$chatgpt_settings      = get_option( 'classifai_openai_chatgpt', [] );
-		$tts_settings          = get_option( 'classifai_azure_text_to_speech', [] );
-		$vision_settings       = get_option( 'classifai_computer_vision', [] );
-		$dalle_settings        = get_option( 'classifai_openai_dalle', [] );
-		$personalizer_settings = get_option( 'classifai_personalizer', [] );
+		$nlu_settings        = get_option( 'classifai_watson_nlu', [] );
+		$embeddings_settings = get_option( 'classifai_openai_embeddings', [] );
+		$whisper_settings    = get_option( 'classifai_openai_whisper', [] );
+		$chatgpt_settings    = get_option( 'classifai_openai_chatgpt', [] );
+		$tts_settings        = get_option( 'classifai_azure_text_to_speech', [] );
+		$vision_settings     = get_option( 'classifai_computer_vision', [] );
+		$dalle_settings      = get_option( 'classifai_openai_dalle', [] );
 
 		// If settings are there, migrate them.
 		if ( ! empty( $nlu_settings ) || ! empty( $embeddings_settings ) ) {
@@ -342,11 +395,6 @@ class Plugin {
 		if ( ! empty( $dalle_settings ) ) {
 			$features[] = \Classifai\Features\ImageGeneration::class;
 		}
-
-		if ( ! empty( $personalizer_settings ) ) {
-			$features[] = \Classifai\Features\RecommendedContent::class;
-		}
-
 		// Migrate settings.
 		$migration_needed = ! empty( $features );
 		foreach ( $features as $feature ) {
