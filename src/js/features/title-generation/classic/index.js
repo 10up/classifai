@@ -89,6 +89,10 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 			}
 
 			$( '#classifai-title-generation__results-content' ).html( '' );
+
+			// Clear any existing disable feature links to prevent duplicates.
+			$( '.classifai-title-generation__result-disable-link' ).remove();
+
 			const generateTextEl = $(
 				'.classifai-title-generation__title-generate-btn--text'
 			);
