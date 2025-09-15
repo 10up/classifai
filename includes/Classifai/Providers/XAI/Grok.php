@@ -18,6 +18,7 @@ use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\get_largest_size_and_dimensions_image_url;
+use function Classifai\get_temperature;
 
 class Grok extends Provider {
 	/**
@@ -628,7 +629,7 @@ class Grok extends Provider {
 			[
 				'model'       => $this->get_model(),
 				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'stream'      => false,
 				'n'           => absint( $args['num'] ),
 			],
@@ -733,7 +734,7 @@ class Grok extends Provider {
 						'content' => '"""' . esc_html( $args['content'] ) . '"""',
 					],
 				],
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'stream'      => false,
 				'n'           => absint( $args['num'] ),
 			],

@@ -21,6 +21,7 @@ use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\get_largest_size_and_dimensions_image_url;
+use function Classifai\get_temperature;
 
 class ChatGPT extends Provider {
 
@@ -762,7 +763,7 @@ class ChatGPT extends Provider {
 			[
 				'model'       => $this->chatgpt_model,
 				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id
@@ -867,7 +868,7 @@ class ChatGPT extends Provider {
 						'content' => '"""' . esc_html( $args['content'] ) . '"""',
 					],
 				],
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id

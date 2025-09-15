@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\ElevenLabs;
 
+use Classifai\Features\TextToSpeech;
 use WP_Error;
 
 use function Classifai\safe_wp_remote_get;
@@ -36,7 +37,7 @@ trait ElevenLabs {
 		/**
 		 * Filter the ElevenLabs API URL.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 * @hook classifai_elevenlabs_api_url
 		 *
 		 * @param string $url The default API URL.
@@ -65,7 +66,7 @@ trait ElevenLabs {
 		/**
 		 * Filter the URL for the request.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 * @hook classifai_elevenlabs_api_request_url
 		 *
 		 * @param string $url The URL for the request.
@@ -86,7 +87,7 @@ trait ElevenLabs {
 		/**
 		 * Filter the options for the request.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.0
 		 * @hook classifai_elevenlabs_api_request_options
 		 *
 		 * @param array  $options The options for the request.
@@ -121,8 +122,15 @@ trait ElevenLabs {
 			return $response;
 		}
 
+		$code         = wp_remote_retrieve_response_code( $response );
+		$content_type = wp_remote_retrieve_header( $response, 'content-type' );
+
+		// Return the body if the request was successful and the content type is audio.
+		if ( 200 === $code && false !== strpos( $content_type, 'audio' ) ) {
+			return $response;
+		}
+
 		$body = wp_remote_retrieve_body( $response );
-		$code = wp_remote_retrieve_response_code( $response );
 		$json = json_decode( $body, true );
 
 		if ( 200 !== $code ) {
@@ -174,6 +182,24 @@ trait ElevenLabs {
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
 			$new_settings[ static::ID ]['models']        = $models;
+
+			if ( $this->feature_instance instanceof TextToSpeech ) {
+				// Get the available voices.
+				$voices = $this->get_voices( $new_settings[ static::ID ]['api_key'] ?? '' );
+
+				if ( is_wp_error( $voices ) ) {
+					$new_settings[ static::ID ]['authenticated'] = false;
+					$new_settings[ static::ID ]['voices']        = [];
+					add_settings_error(
+						'api_key',
+						'classifai-elevenlabs-voices-error',
+						$voices->get_error_message(),
+						'error'
+					);
+				} else {
+					$new_settings[ static::ID ]['voices'] = $voices;
+				}
+			}
 		}
 
 		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
@@ -199,15 +225,67 @@ trait ElevenLabs {
 			return $response;
 		}
 
+		// Filter the models based on the current feature.
+		if ( $this->feature_instance instanceof TextToSpeech ) {
+			$response = array_filter(
+				$response,
+				function ( $model ) {
+					return true === $model['can_do_text_to_speech'];
+				}
+			);
+		}
+
 		// Get the model data we need.
 		$models = array_map(
 			fn( $model ) => [
-				'id'           => $model['model_id'] ?? '',
-				'display_name' => $model['name'] ?? '',
+				'id'              => $model['model_id'] ?? '',
+				'display_name'    => $model['name'] ?? '',
+				'max_text_length' => $model['maximum_text_length_per_request'] ?? '',
 			],
 			$response
 		);
 
 		return $models;
+	}
+
+	/**
+	 * Get the available voices.
+	 *
+	 * @param string $api_key The API key.
+	 * @return array|WP_Error
+	 */
+	protected function get_voices( string $api_key = '' ) {
+		// Check that we have credentials before hitting the API.
+		if ( empty( $api_key ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please enter your ElevenLabs API key.', 'classifai' ) );
+		}
+
+		$response = $this->request( $this->get_api_url( 'voices?per_page=100' ), $api_key, 'get' );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		// Get the voice data we need.
+		$voices = array_map(
+			function ( $voice ) {
+				$labels     = $voice['labels'] ?? array();
+				$name       = $voice['name'] ?? '';
+				$gender     = $labels['gender'] ?? '';
+				$language   = $labels['language'] ?? '';
+				$accent     = $labels['accent'] ?? '';
+				$voice_name = sprintf( '%s (%s) - %s', $name, ucfirst( $gender ), strtoupper( $language ) );
+				if ( ! empty( $accent ) ) {
+					$voice_name = sprintf( '%s (%s)', $voice_name, ucfirst( $accent ) );
+				}
+				return [
+					'id'   => $voice['voice_id'] ?? '',
+					'name' => $voice_name,
+				];
+			},
+			$response['voices'] ?? []
+		);
+
+		return $voices;
 	}
 }
