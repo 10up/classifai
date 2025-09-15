@@ -57,7 +57,7 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 		<>
 			{ __( 'Add a custom prompt, if desired. See our', 'classifai' ) }{ ' ' }
 			<a
-				href="https://10up.github.io/classifai/tutorial-prompt-examples.html"
+				href="https://10up.github.io/classifai/advanced-docs/prompt-examples"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
@@ -153,6 +153,8 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 					<InputControl
 						id={ `${ providerName }_number_of_suggestions` }
 						type="number"
+						min={ 1 }
+						max={ 10 }
 						value={ providerSettings.number_of_suggestions || 1 }
 						onChange={ ( value ) =>
 							onChange( { number_of_suggestions: value } )

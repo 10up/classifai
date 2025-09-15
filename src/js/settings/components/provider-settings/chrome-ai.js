@@ -57,7 +57,7 @@ export const ChromeAISettings = () => {
 					'classifai'
 				) }{ ' ' }
 				<a
-					href="https://10up.github.io/classifai/tutorial-chrome-built-in-ai.html"
+					href="https://10up.github.io/classifai/advanced-docs/chrome-built-in-ai"
 					target="_blank"
 					rel="noopener noreferrer"
 				>

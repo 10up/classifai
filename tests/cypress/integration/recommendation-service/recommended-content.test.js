@@ -10,7 +10,9 @@ describe( '[Recommendation Service] Recommended Content Tests', () => {
 	} );
 
 	it( 'Can save OpenAI Embedding settings', () => {
-		cy.visitFeatureSettings( 'personalizer/feature_recommended_content' );
+		cy.visitFeatureSettings(
+			'content_recommendation/feature_recommended_content'
+		);
 		cy.enableFeature();
 		cy.selectProvider( 'openai_embeddings' );
 		cy.get( '#openai_api_key' ).clear().type( 'password' );

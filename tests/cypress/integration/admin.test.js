@@ -47,4 +47,69 @@ describe( 'Admin can login and make sure plugin is activated', () => {
 			.first()
 			.contains( 'Image Processing' );
 	} );
+
+	it( 'Can visit the general settings page and see all settings.', () => {
+		// Check Selected Navigation menu
+		cy.visitFeatureSettings( 'settings' );
+		cy.get( '.classifai-tabs' ).should( 'exist' );
+		cy.get( '.classifai-tabs a.active-tab' )
+			.first()
+			.contains( 'Settings' );
+
+		// Check that all settings are present.
+		cy.get( '.components-input-control input[type="email"]' ).should(
+			'exist'
+		);
+		cy.get( '.components-input-control input[type="password"]' ).should(
+			'exist'
+		);
+		cy.get( '.classifai-enable-bot-block input' ).should( 'exist' );
+		cy.get( '.classifai-enable-bot-block input' ).should(
+			'not.be.checked'
+		);
+	} );
+
+	it( 'Can turn on "Block AI Bots" setting and it works.', () => {
+		cy.visitFeatureSettings( 'settings' );
+
+		cy.get( '.classifai-enable-bot-block input' ).check();
+
+		cy.saveGeneralSettings();
+
+		// Check that the robots.txt file has bots blocked.
+		cy.request( '/robots.txt' ).then( ( response ) => {
+			expect( response.body ).to.contain(
+				'User-agent: Applebot-Extended'
+			);
+			expect( response.body ).to.contain( 'User-agent: CCBot' );
+			expect( response.body ).to.contain( 'User-agent: ClaudeBot' );
+			expect( response.body ).to.contain( 'User-agent: FacebookBot' );
+			expect( response.body ).to.contain( 'User-agent: Google-Extended' );
+			expect( response.body ).to.contain( 'User-agent: GPTbot' );
+			expect( response.body ).to.contain(
+				'User-agent: Meta-ExternalAgent'
+			);
+		} );
+
+		cy.get( '.classifai-enable-bot-block input' ).uncheck();
+
+		cy.saveGeneralSettings();
+
+		// Check that the robots.txt file has bots unblocked.
+		cy.request( '/robots.txt' ).then( ( response ) => {
+			expect( response.body ).to.not.contain(
+				'User-agent: Applebot-Extended'
+			);
+			expect( response.body ).to.not.contain( 'User-agent: CCBot' );
+			expect( response.body ).to.not.contain( 'User-agent: ClaudeBot' );
+			expect( response.body ).to.not.contain( 'User-agent: FacebookBot' );
+			expect( response.body ).to.not.contain(
+				'User-agent: Google-Extended'
+			);
+			expect( response.body ).to.not.contain( 'User-agent: GPTbot' );
+			expect( response.body ).to.not.contain(
+				'User-agent: Meta-ExternalAgent'
+			);
+		} );
+	} );
 } );
