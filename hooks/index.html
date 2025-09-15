@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.8.1">
 <title data-rh="true">ClassifAI Developer Documentation</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://classifaiplugin.com/classifai/hooks/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="ClassifAI Developer Documentation"><meta data-rh="true" name="description" content="Documentation for actions, filters, and WP-CLI commands found in the ClassifAI plugin"><meta data-rh="true" property="og:description" content="Documentation for actions, filters, and WP-CLI commands found in the ClassifAI plugin"><link data-rh="true" rel="icon" href="/classifai/img/favicon.png"><link data-rh="true" rel="canonical" href="https://classifaiplugin.com/classifai/hooks/"><link data-rh="true" rel="alternate" href="https://classifaiplugin.com/classifai/hooks/" hreflang="en"><link data-rh="true" rel="alternate" href="https://classifaiplugin.com/classifai/hooks/" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Hooks","item":"https://classifaiplugin.com/classifai/hooks/"}]}</script><link rel="stylesheet" href="/classifai/assets/css/styles.ada9a8a7.css">
-<script src="/classifai/assets/js/runtime~main.20e95fd4.js" defer="defer"></script>
-<script src="/classifai/assets/js/main.7fdaa224.js" defer="defer"></script>
+<script src="/classifai/assets/js/runtime~main.cf25e5f1.js" defer="defer"></script>
+<script src="/classifai/assets/js/main.ea048885.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;"><defs>
@@ -71,8 +71,8 @@
 <li><a href="/classifai/hooks/Filters/classifai_.staticID._providers">classifai_ . static::ID . _providers</a> - Filter the feature providers.</li>
 <li><a href="/classifai/hooks/Filters/classifai_.staticID._read_status">classifai_ . static::ID . _read_status</a> - Filter the status of the PDF read operation.</li>
 <li><a href="/classifai/hooks/Filters/classifai_.staticID._rest_route_route_args">classifai_ . static::ID . <em>rest_route</em>{$route}_args</a> - Filter the arguments for the REST route.</li>
-<li><a href="/classifai/hooks/Filters/classifai_.staticID._roles">classifai_ . static::ID . _roles</a> - Filter the allowed WordPress roles for a feature.</li>
 <li><a href="/classifai/hooks/Filters/classifai_.staticID._roles">classifai_ . static::ID . _roles</a> - Filter the allowed WordPress roles for image generation.</li>
+<li><a href="/classifai/hooks/Filters/classifai_.staticID._roles">classifai_ . static::ID . _roles</a> - Filter the allowed WordPress roles for a feature.</li>
 <li><a href="/classifai/hooks/Filters/classifai_.staticID._run">classifai_ . static::ID . _run</a> - Filter the results of running the feature.</li>
 <li><a href="/classifai/hooks/Filters/classifai_.staticID._sanitize_settings">classifai_ . static::ID . _sanitize_settings</a> - Filter to change settings before they&#x27;re saved.</li>
 <li><a href="/classifai/hooks/Filters/classifai_.staticID._setting_taxonomies">classifai_ . static::ID . _setting_taxonomies</a> - Filter taxonomies shown in settings.</li>
@@ -81,6 +81,7 @@
 <li><a href="/classifai/hooks/Filters/classifai_audio_generation_initial_state">classifai_audio_generation_initial_state</a> - Initial state of the audio generation toggle when no audio already exists for the post.</li>
 <li><a href="/classifai/hooks/Filters/classifai_audio_generation_subsequent_state">classifai_audio_generation_subsequent_state</a> - Subsequent state of the audio generation toggle when audio exists for the post.</li>
 <li><a href="/classifai/hooks/Filters/classifai_azure_openai_argsresize_type_content_prompt">classifai_azure_openai_{$args[resize_type]}_content_prompt</a> - Filter the resize prompt we will send to Azure OpenAI.</li>
+<li><a href="/classifai/hooks/Filters/classifai_azure_openai_api_version">classifai_azure_openai_api_version</a> - Filter the API version.</li>
 <li><a href="/classifai/hooks/Filters/classifai_azure_openai_content">classifai_azure_openai_content</a> - Filter content that will get sent to Azure OpenAI.</li>
 <li><a href="/classifai/hooks/Filters/classifai_azure_openai_content_prompt">classifai_azure_openai_content_prompt</a> - Filter the prompt we will send to Azure OpenAI.</li>
 <li><a href="/classifai/hooks/Filters/classifai_azure_openai_content_request_body">classifai_azure_openai_content_request_body</a> - Filter the request body before sending to Azure OpenAI.</li>
@@ -140,6 +141,12 @@
 <li><a href="/classifai/hooks/Filters/classifai_dalle_request_body">classifai_dalle_request_body</a> - Filter the request body before sending to OpenAI.</li>
 <li><a href="/classifai/hooks/Filters/classifai_debug_information">classifai_debug_information</a> - Filters debug information displayed on the Site Health screen for the ClassifAI plugin.</li>
 <li><a href="/classifai/hooks/Filters/classifai_disable_post_to_audio_block">classifai_disable_post_to_audio_block</a> - Filter to disable the rendering of the Text to Speech block.</li>
+<li><a href="/classifai/hooks/Filters/classifai_elevenlabs_api_request_options">classifai_elevenlabs_api_request_options</a> - Filter the options for the request.</li>
+<li><a href="/classifai/hooks/Filters/classifai_elevenlabs_api_request_url">classifai_elevenlabs_api_request_url</a> - Filter the URL for the request.</li>
+<li><a href="/classifai/hooks/Filters/classifai_elevenlabs_api_url">classifai_elevenlabs_api_url</a> - Filter the ElevenLabs API URL.</li>
+<li><a href="/classifai/hooks/Filters/classifai_elevenlabs_text_to_speech_model">classifai_elevenlabs_text_to_speech_model</a> - Filter the model name.</li>
+<li><a href="/classifai/hooks/Filters/classifai_elevenlabs_text_to_speech_request_body">classifai_elevenlabs_text_to_speech_request_body</a> - Filter the request body before sending to ElevenLabs.</li>
+<li><a href="/classifai/hooks/Filters/classifai_elevenlabs_transcribe_request_body">classifai_elevenlabs_transcribe_request_body</a> - Filter the request body before sending to ElevenLabs.</li>
 <li><a href="/classifai/hooks/Filters/classifai_excerpt_generation_author_name">classifai_excerpt_generation_author_name</a> - Filter the author name used in excerpt generation.</li>
 <li><a href="/classifai/hooks/Filters/classifai_feature_classification_taxonomy_for_feature">classifai_feature_classification_taxonomy_for_feature</a> - Filter the Taxonomy for the specified NLU feature.</li>
 <li><a href="/classifai/hooks/Filters/classifai_feature_threshold">classifai_feature_threshold</a> - Filter the threshold for a specific feature. Any results below the threshold will be ignored.</li>
@@ -242,9 +249,6 @@
 <li><a href="/classifai/hooks/Filters/classifai_pre_normalize">classifai_pre_normalize</a> - Hook to filter post content before stripping HTML tags.</li>
 <li><a href="/classifai/hooks/Filters/classifai_pre_render_post_audio_controls">classifai_pre_render_post_audio_controls</a> - Filters the audio player markup before display.</li>
 <li><a href="/classifai/hooks/Filters/classifai_recommendation_service_providers">classifai_recommendation_service_providers</a> - Filter the service providers for Recommendation service.</li>
-<li><a href="/classifai/hooks/Filters/classifai_recommended_block_attributes">classifai_recommended_block_attributes</a> - Filter the recommended content block attributes</li>
-<li><a href="/classifai/hooks/Filters/classifai_recommended_block_markup">classifai_recommended_block_markup</a> - Filter the recommended content block markup</li>
-<li><a href="/classifai/hooks/Filters/classifai_recommended_content_post_args">classifai_recommended_content_post_args</a> - Filters Recommended content post arguments.</li>
 <li><a href="/classifai/hooks/Filters/classifai_reusable_credentials">classifai_reusable_credentials</a> - Filter the reusable credentials for a feature.</li>
 <li><a href="/classifai/hooks/Filters/classifai_services">classifai_services</a> - Filter available Services.</li>
 <li><a href="/classifai/hooks/Filters/classifai_settings_ibm_watson_nlu_taxonomies">classifai_settings_ibm_watson_nlu_taxonomies</a> - Filter IBM Watson NLU taxonomies shown in settings.</li>
