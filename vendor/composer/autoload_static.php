@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
+class ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -15,15 +15,10 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         '8a9dc1de0ca7e01f3e08231539562f61' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/functions.php',
         '9b77ddcfb14408a32f5aaf74e0a11694' => __DIR__ . '/..' . '/yahnis-elsts/plugin-update-checker/load-v5p1.php',
         'd5afeacfe11f422b161ec2bf0bc6940f' => __DIR__ . '/../..' . '/includes/Classifai/Helpers.php',
-        'dd5471419f4d492e4967fd310ef99d1b' => __DIR__ . '/../..' . '/includes/Classifai/Blocks.php',
         '7392f1c1286a9c92e3b46a9aafcd08cb' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Watson/Helpers.php',
     );
 
     public static $prefixLengthsPsr4 = array (
-        'U' => 
-        array (
-            'UAParser\\' => 9,
-        ),
         'S' => 
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
@@ -45,7 +40,6 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         ),
         'C' => 
         array (
-            'Composer\\CaBundle\\' => 18,
             'Classifai\\' => 10,
         ),
         'A' => 
@@ -55,10 +49,6 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
     );
 
     public static $prefixDirsPsr4 = array (
-        'UAParser\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/ua-parser/uap-php/src',
-        ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
@@ -87,10 +77,6 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'GuzzleHttp\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
-        ),
-        'Composer\\CaBundle\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
         ),
         'Classifai\\' => 
         array (
@@ -438,7 +424,6 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'Classifai\\Admin\\Update' => __DIR__ . '/../..' . '/includes/Classifai/Admin/Update.php',
         'Classifai\\Admin\\UserProfile' => __DIR__ . '/../..' . '/includes/Classifai/Admin/UserProfile.php',
         'Classifai\\Command\\ClassifaiCommand' => __DIR__ . '/../..' . '/includes/Classifai/Command/ClassifaiCommand.php',
-        'Classifai\\Command\\RSSImporterCommand' => __DIR__ . '/../..' . '/includes/Classifai/Command/RSSImporterCommand.php',
         'Classifai\\EmbeddingsScheduler' => __DIR__ . '/../..' . '/includes/Classifai/EmbeddingsScheduler.php',
         'Classifai\\Features\\AudioTranscriptsGeneration' => __DIR__ . '/../..' . '/includes/Classifai/Features/AudioTranscriptsGeneration.php',
         'Classifai\\Features\\Classification' => __DIR__ . '/../..' . '/includes/Classifai/Features/Classification.php',
@@ -468,11 +453,13 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'Classifai\\Providers\\Azure\\ComputerVision' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Azure/ComputerVision.php',
         'Classifai\\Providers\\Azure\\Embeddings' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Azure/Embeddings.php',
         'Classifai\\Providers\\Azure\\OpenAI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Azure/OpenAI.php',
-        'Classifai\\Providers\\Azure\\Personalizer' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Azure/Personalizer.php',
         'Classifai\\Providers\\Azure\\Read' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Azure/Read.php',
         'Classifai\\Providers\\Azure\\SmartCropping' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Azure/SmartCropping.php',
         'Classifai\\Providers\\Azure\\Speech' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Azure/Speech.php',
         'Classifai\\Providers\\Browser\\ChromeAI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Browser/ChromeAI.php',
+        'Classifai\\Providers\\ElevenLabs\\ElevenLabs' => __DIR__ . '/../..' . '/includes/Classifai/Providers/ElevenLabs/ElevenLabs.php',
+        'Classifai\\Providers\\ElevenLabs\\SpeechToText' => __DIR__ . '/../..' . '/includes/Classifai/Providers/ElevenLabs/SpeechToText.php',
+        'Classifai\\Providers\\ElevenLabs\\TextToSpeech' => __DIR__ . '/../..' . '/includes/Classifai/Providers/ElevenLabs/TextToSpeech.php',
         'Classifai\\Providers\\GoogleAI\\APIRequest' => __DIR__ . '/../..' . '/includes/Classifai/Providers/GoogleAI/APIRequest.php',
         'Classifai\\Providers\\GoogleAI\\GeminiAPI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/GoogleAI/GeminiAPI.php',
         'Classifai\\Providers\\GoogleAI\\GoogleAI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/GoogleAI/GoogleAI.php',
@@ -501,9 +488,9 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'Classifai\\Providers\\Watson\\PostClassifier' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Watson/PostClassifier.php',
         'Classifai\\Providers\\XAI\\APIRequest' => __DIR__ . '/../..' . '/includes/Classifai/Providers/XAI/APIRequest.php',
         'Classifai\\Providers\\XAI\\Grok' => __DIR__ . '/../..' . '/includes/Classifai/Providers/XAI/Grok.php',
+        'Classifai\\Services\\ContentRecommendation' => __DIR__ . '/../..' . '/includes/Classifai/Services/ContentRecommendation.php',
         'Classifai\\Services\\ImageProcessing' => __DIR__ . '/../..' . '/includes/Classifai/Services/ImageProcessing.php',
         'Classifai\\Services\\LanguageProcessing' => __DIR__ . '/../..' . '/includes/Classifai/Services/LanguageProcessing.php',
-        'Classifai\\Services\\Personalizer' => __DIR__ . '/../..' . '/includes/Classifai/Services/Personalizer.php',
         'Classifai\\Services\\Service' => __DIR__ . '/../..' . '/includes/Classifai/Services/Service.php',
         'Classifai\\Services\\ServicesManager' => __DIR__ . '/../..' . '/includes/Classifai/Services/ServicesManager.php',
         'Classifai\\Taxonomy\\AbstractTaxonomy' => __DIR__ . '/../..' . '/includes/Classifai/Taxonomy/AbstractTaxonomy.php',
@@ -514,7 +501,6 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'Classifai\\Taxonomy\\KeywordTaxonomy' => __DIR__ . '/../..' . '/includes/Classifai/Taxonomy/KeywordTaxonomy.php',
         'Classifai\\Taxonomy\\TaxonomyFactory' => __DIR__ . '/../..' . '/includes/Classifai/Taxonomy/TaxonomyFactory.php',
         'Classifai\\TermCleanupScheduler' => __DIR__ . '/../..' . '/includes/Classifai/TermCleanupScheduler.php',
-        'Composer\\CaBundle\\CaBundle' => __DIR__ . '/..' . '/composer/ca-bundle/src/CaBundle.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'GuzzleHttp\\BodySummarizer' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/BodySummarizer.php',
         'GuzzleHttp\\BodySummarizerInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/BodySummarizerInterface.php',
@@ -631,43 +617,14 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'Psr\\Http\\Message\\UriFactoryInterface' => __DIR__ . '/..' . '/psr/http-factory/src/UriFactoryInterface.php',
         'Psr\\Http\\Message\\UriInterface' => __DIR__ . '/..' . '/psr/http-message/src/UriInterface.php',
         'Symfony\\Polyfill\\Mbstring\\Mbstring' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/Mbstring.php',
-        'UAParser\\AbstractParser' => __DIR__ . '/..' . '/ua-parser/uap-php/src/AbstractParser.php',
-        'UAParser\\Command\\ConvertCommand' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Command/ConvertCommand.php',
-        'UAParser\\Command\\FetchCommand' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Command/FetchCommand.php',
-        'UAParser\\Command\\LogfileCommand' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Command/LogfileCommand.php',
-        'UAParser\\Command\\ParserCommand' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Command/ParserCommand.php',
-        'UAParser\\Command\\UpdateCommand' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Command/UpdateCommand.php',
-        'UAParser\\DeviceParser' => __DIR__ . '/..' . '/ua-parser/uap-php/src/DeviceParser.php',
-        'UAParser\\Exception\\DomainException' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Exception/DomainException.php',
-        'UAParser\\Exception\\FetcherException' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Exception/FetcherException.php',
-        'UAParser\\Exception\\FileNotFoundException' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Exception/FileNotFoundException.php',
-        'UAParser\\Exception\\InvalidArgumentException' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Exception/InvalidArgumentException.php',
-        'UAParser\\Exception\\ReaderException' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Exception/ReaderException.php',
-        'UAParser\\OperatingSystemParser' => __DIR__ . '/..' . '/ua-parser/uap-php/src/OperatingSystemParser.php',
-        'UAParser\\Parser' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Parser.php',
-        'UAParser\\ParserFactoryMethods' => __DIR__ . '/..' . '/ua-parser/uap-php/src/ParserFactoryMethods.php',
-        'UAParser\\Result\\AbstractClient' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Result/AbstractClient.php',
-        'UAParser\\Result\\AbstractSoftware' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Result/AbstractSoftware.php',
-        'UAParser\\Result\\AbstractVersionedSoftware' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Result/AbstractVersionedSoftware.php',
-        'UAParser\\Result\\Client' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Result/Client.php',
-        'UAParser\\Result\\Device' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Result/Device.php',
-        'UAParser\\Result\\OperatingSystem' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Result/OperatingSystem.php',
-        'UAParser\\Result\\UserAgent' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Result/UserAgent.php',
-        'UAParser\\UserAgentParser' => __DIR__ . '/..' . '/ua-parser/uap-php/src/UserAgentParser.php',
-        'UAParser\\Util\\CodeGenerator' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Util/CodeGenerator.php',
-        'UAParser\\Util\\Converter' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Util/Converter.php',
-        'UAParser\\Util\\Fetcher' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Util/Fetcher.php',
-        'UAParser\\Util\\Logfile\\AbstractReader' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Util/Logfile/AbstractReader.php',
-        'UAParser\\Util\\Logfile\\ApacheCommonLogFormatReader' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Util/Logfile/ApacheCommonLogFormatReader.php',
-        'UAParser\\Util\\Logfile\\ReaderInterface' => __DIR__ . '/..' . '/ua-parser/uap-php/src/Util/Logfile/ReaderInterface.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae::$classMap;
 
         }, null, ClassLoader::class);
     }

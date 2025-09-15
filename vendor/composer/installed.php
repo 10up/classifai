@@ -3,7 +3,7 @@
         'name' => '10up/classifai',
         'pretty_version' => 'dev-trunk',
         'version' => 'dev-trunk',
-        'reference' => '92b52cb0fb7f73c42aad5435f3cf72eb334286c2',
+        'reference' => '8a4d9a753d574ec51c04d5d5dee5d56dd2837562',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '10up/classifai' => array(
             'pretty_version' => 'dev-trunk',
             'version' => 'dev-trunk',
-            'reference' => '92b52cb0fb7f73c42aad5435f3cf72eb334286c2',
+            'reference' => '8a4d9a753d574ec51c04d5d5dee5d56dd2837562',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -35,17 +35,6 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../aws/aws-sdk-php',
             'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'composer/ca-bundle' => array(
-            'pretty_version' => 'dev-main',
-            'version' => 'dev-main',
-            'reference' => 'bc0593537a463e55cadf45fd938d23b75095b7e1',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/./ca-bundle',
-            'aliases' => array(
-                0 => '1.x-dev',
-            ),
             'dev_requirement' => false,
         ),
         'guzzlehttp/guzzle' => array(
@@ -160,17 +149,6 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/polyfill-mbstring',
             'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'ua-parser/uap-php' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => 'b796c5ea5df588e65aeb4e2c6cce3811dec4fed6',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../ua-parser/uap-php',
-            'aliases' => array(
-                0 => '9999999-dev',
-            ),
             'dev_requirement' => false,
         ),
         'woocommerce/action-scheduler' => array(

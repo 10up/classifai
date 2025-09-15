@@ -956,3 +956,23 @@ function safe_wp_remote_post( string $url, array $args = [] ) {
 	return safe_wp_remote_request( 'POST', $url, $args );
 }
 
+/**
+ * Get the temperature for the request.
+ *
+ * We increase the base temperature proportionally
+ * to the number of results, ensuring it never exceeds 2.
+ *
+ * The goal here is to get more diverse results when
+ * we are requesting more results.
+ *
+ * @param float $temperature The temperature.
+ * @param int   $results The number of results.
+ * @return float The temperature.
+ */
+function get_temperature( float $temperature, int $results = 1 ): float {
+	if ( 1 === $results ) {
+		return $temperature;
+	}
+
+	return (float) min( 2.0, $temperature + ( $results / 10 ) );
+}
