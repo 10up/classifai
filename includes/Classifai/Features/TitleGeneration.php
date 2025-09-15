@@ -125,6 +125,9 @@ class TitleGeneration extends Feature {
 							'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
 						],
 					],
+					'required'   => [
+						'id',
+					],
 				],
 				'output_schema'       => [
 					'type'       => 'object',
