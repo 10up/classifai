@@ -4,7 +4,7 @@ Tags:              AI, Artificial Intelligence, ML, Machine Learning, Microsoft 
 Requires at least: 6.7
 Tested up to:      6.8
 Requires PHP:      7.4
-Stable tag:        3.6.0
+Stable tag:        3.7.0
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,12 +58,12 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 **Note that this release bumps the WordPress minimum from 6.5 to 6.6.**
 
 = 3.2.0 =
-**Note that this release of ClassifAI rearchitects how the settings pages are built, from a standard PHP approach to using React components. If you've created custom Features or Providers or added your own custom settings, you'll need to update your code to work in this new structure. See our [documentation](https://10up.github.io/classifai/tutorial-useful-snippets.html) for examples.**
+**Note that this release of ClassifAI rearchitects how the settings pages are built, from a standard PHP approach to using React components. If you've created custom Features or Providers or added your own custom settings, you'll need to update your code to work in this new structure. See our [documentation](https://10up.github.io/classifai/advanced-docs/useful-snippets) for examples.**
 
 **Also note that this release bumps the WordPress minimum from 6.1 to 6.5.**
 
 = 3.0.0 =
-**Note that this is a major release of ClassifAI that restructures most of the codebase and will have some breaking changes. If you're extending ClassifAI in any way, please ensure you fully test those integrations prior to running this update on production. For more details on what is changing, see the [migration guide](https://10up.github.io/classifai/tutorial-migration-guide-v2-to-v3.html).**
+**Note that this is a major release of ClassifAI that restructures most of the codebase and will have some breaking changes. If you're extending ClassifAI in any way, please ensure you fully test those integrations prior to running this update on production. For more details on what is changing, see the [migration guide](https://10up.github.io/classifai/advanced-docs/migration-guide-v2-to-v3).**
 
 = 2.5.0 =
 **Note that this release bumps the WordPress minimum from 5.8 to 6.1.**
