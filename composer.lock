@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6dc808963eeb7d944100df18d3fb0dee",
+    "content-hash": "cc702ece2eaff55dc454cacb97aaa990",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1023,6 +1023,100 @@
                 "source": "https://github.com/WordPress/abilities-api"
             },
             "time": "2025-09-05T07:28:21+00:00"
+        },
+        {
+            "name": "wordpress/mcp-adapter",
+            "version": "dev-trunk",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/mcp-adapter.git",
+                "reference": "7a2d22cff92328bc94f5b1648a66ae4273e949c5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/7a2d22cff92328bc94f5b1648a66ae4273e949c5",
+                "reference": "7a2d22cff92328bc94f5b1648a66ae4273e949c5",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "automattic/vipwpcs": "^3.0",
+                "phpcompatibility/php-compatibility": "10.x-dev as 9.99.99",
+                "phpcompatibility/phpcompatibility-wp": "^2.1",
+                "phpstan/extension-installer": "^1.3",
+                "phpstan/php-8-stubs": "^0.4.24",
+                "phpstan/phpstan": "^2.1.22",
+                "phpstan/phpstan-deprecation-rules": "^2.0.3",
+                "phpunit/phpunit": "^9.6",
+                "slevomat/coding-standard": "^8.0",
+                "szepeviktor/phpstan-wordpress": "^2.0",
+                "wp-phpunit/wp-phpunit": "^6.5",
+                "wpackagist-plugin/plugin-check": "^1.6",
+                "yoast/phpunit-polyfills": "^4.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "installer-paths": {
+                    "vendor/{$vendor}/{$name}/": [
+                        "wpackagist-plugin/plugin-check"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "WP\\MCP\\": "includes/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "WP\\MCP\\Tests\\": [
+                        "tests/"
+                    ]
+                }
+            },
+            "scripts": {
+                "lint:php": [
+                    "phpcs"
+                ],
+                "lint:php:fix": [
+                    "phpcbf"
+                ],
+                "lint:php:stan": [
+                    "vendor/bin/phpstan analyse --memory-limit=1G"
+                ],
+                "test": [
+                    "phpunit --strict-coverage"
+                ]
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "WordPress AI Team",
+                    "homepage": "https://make.wordpress.org/ai/"
+                }
+            ],
+            "description": "Adapter for Abilities API, letting WordPress abilities to be used as MCP tools, resources or prompts",
+            "homepage": "https://github.com/wordpress/mcp-adapter",
+            "keywords": [
+                "abilities-api",
+                "adapter",
+                "ai",
+                "api",
+                "integration",
+                "mcp",
+                "model-context-protocol",
+                "wordpress"
+            ],
+            "support": {
+                "issues": "https://github.com/wordpress/mcp-adapter/issues",
+                "source": "https://github.com/wordpress/mcp-adapter"
+            },
+            "time": "2025-09-12T10:52:00+00:00"
         },
         {
             "name": "yahnis-elsts/plugin-update-checker",
@@ -4117,7 +4211,8 @@
     "stability-flags": {
         "php-stubs/wp-cli-stubs": 20,
         "phpcompatibility/php-compatibility": 20,
-        "phpstan/extension-installer": 20
+        "phpstan/extension-installer": 20,
+        "wordpress/mcp-adapter": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

@@ -9,12 +9,19 @@
   ],
   "type": "wordpress-plugin",
   "license": "GPLv2",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/WordPress/mcp-adapter"
+    }
+  ],
   "require": {
     "php": ">=7.4",
     "yahnis-elsts/plugin-update-checker": "5.1",
     "aws/aws-sdk-php": "^3.300",
     "woocommerce/action-scheduler": "3.8.1",
-    "wordpress/abilities-api": "^0.1"
+    "wordpress/abilities-api": "^0.1",
+    "wordpress/mcp-adapter": "dev-trunk"
   },
   "autoload": {
     "psr-4": {
