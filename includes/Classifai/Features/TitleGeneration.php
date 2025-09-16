@@ -133,11 +133,11 @@ class TitleGeneration extends Feature {
 					'type'       => 'object',
 					'properties' => [
 						'titles' => [
-							'type'  => 'array',
-							'items' => [
-								'type'        => 'string',
-								'description' => esc_html__( 'Title suggestion', 'classifai' ),
+							'type'        => 'array',
+							'items'       => [
+								'type' => 'string',
 							],
+							'description' => esc_html__( 'Title suggestions', 'classifai' ),
 						],
 					],
 				],
@@ -307,7 +307,7 @@ class TitleGeneration extends Feature {
 			]
 		);
 
-		return $this->run(
+		$output = $this->run(
 			$args['id'],
 			'title',
 			[
@@ -315,6 +315,12 @@ class TitleGeneration extends Feature {
 				'content' => $args['content'],
 			]
 		);
+
+		if ( is_wp_error( $output ) ) {
+			return $output;
+		}
+
+		return [ 'titles' => $output ];
 	}
 
 	/**

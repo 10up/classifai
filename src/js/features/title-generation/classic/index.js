@@ -114,6 +114,15 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 					spinnerEl.hide();
 					isProcessing = false;
 
+					if (
+						typeof result === 'object' &&
+						result.hasOwnProperty( 'titles' )
+					) {
+						result = result.titles;
+					} else {
+						result = [];
+					}
+
 					result.forEach( ( title ) => {
 						$( '<textarea>', {
 							text: title,
