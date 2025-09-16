@@ -24,11 +24,6 @@ class Plugin {
 	public $admin_helpers = [];
 
 	/**
-	 * @var McpAdapter $mcp_adapter The MCP adapter.
-	 */
-	public $mcp_adapter = null;
-
-	/**
 	 * Lazy initialize the plugin
 	 */
 	public static function get_instance() {
@@ -54,7 +49,7 @@ class Plugin {
 		add_action( 'after_classifai_init', [ $this, 'load_action_scheduler' ] );
 
 		// Initialize the MCP adapter so the hooks are loaded.
-		$this->mcp_adapter = McpAdapter::instance();
+		McpAdapter::instance();
 		add_action( 'mcp_adapter_init', [ $this, 'mcp_adapter_init' ] );
 	}
 
