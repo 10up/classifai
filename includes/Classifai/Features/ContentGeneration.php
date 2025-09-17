@@ -259,17 +259,18 @@ EOD;
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'prompt'     => [
+			'prompt'             => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->prompt,
 					'original' => 1,
 				],
 			],
-			'post_types' => [
+			'post_types'         => [
 				'post' => 'post',
 			],
-			'provider'   => ChatGPT::ID,
+			'provider'           => ChatGPT::ID,
+			'enable_quick_draft' => true,
 		];
 	}
 
@@ -313,6 +314,9 @@ EOD;
 				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			}
 		}
+
+		// Sanitize Quick Draft setting
+		$new_settings['enable_quick_draft'] = isset( $new_settings['enable_quick_draft'] ) ? (bool) $new_settings['enable_quick_draft'] : false;
 
 		return $new_settings;
 	}
