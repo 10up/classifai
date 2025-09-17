@@ -74,6 +74,30 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
+	 * Get the instructions for voice control.
+	 *
+	 * @return string
+	 */
+	public function get_instructions(): string {
+		$settings     = $this->feature_instance->get_settings();
+		$instructions = $settings[ static::ID ]['instructions'] ?? '';
+
+		/**
+		 * Filter the instructions for voice control.
+		 *
+		 * Useful if you want to modify the instructions for certain use cases.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_text_to_speech_instructions
+		 *
+		 * @param string $instructions The current instructions to use.
+		 *
+		 * @return string The instructions to use.
+		 */
+		return apply_filters( 'classifai_openai_text_to_speech_instructions', $instructions );
+	}
+
+	/**
 	 * Register settings for the provider.
 	 */
 	public function render_provider_fields(): void {
@@ -216,6 +240,51 @@ class TextToSpeech extends Provider {
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
+
+		add_settings_field(
+			static::ID . '_instructions',
+			esc_html__( 'Voice instructions', 'classifai' ),
+			[ $this, 'render_textarea' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'instructions',
+				'default_value' => $settings['instructions'],
+				'description'   => __( 'Optional instructions to control the voice characteristics of the generated audio. For example: "Speak in a calm, professional tone" or "Use a more energetic delivery".', 'classifai' ),
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
+				'rows'          => 3,
+			]
+		);
+	}
+
+	/**
+	 * Render a textarea field.
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_textarea( array $args ) {
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$setting_index = $this->feature_instance->get_settings( $option_index );
+		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+
+		// Check for a default value.
+		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
+		$rows  = isset( $args['rows'] ) ? $args['rows'] : 3;
+		?>
+
+		<textarea
+			id="<?php echo esc_attr( $args['label_for'] ); ?>"
+			name="<?php echo esc_attr( $this->feature_instance->get_option_name() ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+			rows="<?php echo esc_attr( $rows ); ?>"
+			class="large-text"
+			placeholder="<?php esc_attr_e( 'Enter instructions to control voice characteristics...', 'classifai' ); ?>"
+		><?php echo esc_textarea( $value ); ?></textarea>
+
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+		}
 	}
 
 	/**
@@ -234,10 +303,11 @@ class TextToSpeech extends Provider {
 				return array_merge(
 					$common_settings,
 					[
-						'tts_model' => 'gpt-4o-mini-tts',
-						'voice'     => 'alloy',
-						'format'    => 'mp3',
-						'speed'     => 1,
+						'tts_model'    => 'gpt-4o-mini-tts',
+						'voice'        => 'alloy',
+						'format'       => 'mp3',
+						'speed'        => 1,
+						'instructions' => '',
 					]
 				);
 		}
@@ -275,6 +345,9 @@ class TextToSpeech extends Provider {
 			if ( 0.25 <= $speed || 4.00 >= $speed ) {
 				$new_settings[ static::ID ]['speed'] = sanitize_text_field( $new_settings[ static::ID ]['speed'] );
 			}
+
+			// Sanitize instructions field.
+			$new_settings[ static::ID ]['instructions'] = sanitize_textarea_field( $new_settings[ static::ID ]['instructions'] ?? '' );
 		}
 
 		return $new_settings;
@@ -362,6 +435,31 @@ class TextToSpeech extends Provider {
 			'input'           => $post_content,
 		);
 
+		// Add instructions if provided.
+		$instructions = $this->get_instructions();
+		if ( ! empty( $instructions ) ) {
+			$request_body['instructions'] = $instructions;
+		}
+
+		/**
+		 * Filter the request body before sending to OpenAI.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_text_to_speech_request_body
+		 *
+		 * @param array  $request_body The request body that will be sent to OpenAI.
+		 * @param int    $post_id      Post ID.
+		 * @param string $post_content Post content.
+		 *
+		 * @return array The filtered request body.
+		 */
+		$request_body = apply_filters(
+			'classifai_openai_text_to_speech_request_body',
+			$request_body,
+			$post_id,
+			$post_content
+		);
+
 		$response = $request->post(
 			$this->get_api_url(),
 			[
@@ -397,6 +495,7 @@ class TextToSpeech extends Provider {
 			$debug_info[ __( 'Model', 'classifai' ) ]        = $provider_settings['tts_model'] ?? '';
 			$debug_info[ __( 'Voice', 'classifai' ) ]        = $provider_settings['voice'] ?? '';
 			$debug_info[ __( 'Audio format', 'classifai' ) ] = $provider_settings['format'] ?? '';
+			$debug_info[ __( 'Instructions', 'classifai' ) ] = $provider_settings['instructions'] ?? '';
 
 			// We don't save the response transient because WP does not support serialized binary data to be inserted to the options.
 		}
