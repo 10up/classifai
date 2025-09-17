@@ -3,8 +3,8 @@
  * Quick Draft Integration Feature
  *
  * Integrates ClassifAI Content Generation with WordPress Quick Draft widget.
- *
  */
+
 namespace Classifai\Features;
 
 use Classifai\Features\ContentGeneration;
@@ -80,9 +80,9 @@ class QuickDraftIntegration {
 
 		wp_enqueue_script(
 			'classifai-quick-draft-js',
-			CLASSIFAI_PLUGIN_URL . 'dist/classifai-quick-draft.js',
+			plugin_dir_url( dirname( __DIR__, 2 ) ) . 'dist/classifai-quick-draft.js',
 			[ 'jquery', 'wp-api-fetch' ],
-			CLASSIFAI_PLUGIN_VERSION,
+			'3.7.0',
 			true
 		);
 
@@ -101,9 +101,9 @@ class QuickDraftIntegration {
 
 		wp_enqueue_style(
 			'classifai-quick-draft-css',
-			CLASSIFAI_PLUGIN_URL . 'dist/classifai-quick-draft.css',
+			plugin_dir_url( dirname( __DIR__, 2 ) ) . 'dist/classifai-quick-draft.css',
 			[],
-			CLASSIFAI_PLUGIN_VERSION
+			'3.7.0'
 		);
 	}
 
@@ -175,6 +175,7 @@ class QuickDraftIntegration {
 				],
 			]
 		);
+
 	}
 
 	/**
@@ -259,4 +260,5 @@ class QuickDraftIntegration {
 			'success'      => true,
 		] );
 	}
+
 }
