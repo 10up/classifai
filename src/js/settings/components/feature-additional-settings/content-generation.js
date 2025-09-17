@@ -3,7 +3,7 @@
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { CheckboxControl } from '@wordpress/components';
+import { CheckboxControl, ToggleControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -69,6 +69,23 @@ export const ContentGenerationSettings = () => {
 						/>
 					);
 				} ) }
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Quick Draft Integration', 'classifai' ) }
+				description={ __(
+					'Add a "Create Draft from Prompt Content" button to the Quick Draft widget on the admin dashboard.',
+					'classifai'
+				) }
+			>
+				<ToggleControl
+					checked={ featureSettings.enable_quick_draft !== false }
+					onChange={ ( value ) => {
+						setFeatureSettings( {
+							enable_quick_draft: value,
+						} );
+					} }
+					__nextHasNoMarginBottom
+				/>
 			</SettingsRow>
 		</>
 	);
