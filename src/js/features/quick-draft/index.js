@@ -69,8 +69,11 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				// Show success message
 				showSuccessMessage( response );
 
-				// Refresh the recent drafts section
-				refreshRecentDrafts();
+				// Reload the page to show the new draft
+				// This is more reliable than trying to refresh just the widget
+				setTimeout( function() {
+					location.reload();
+				}, 1000 );
 			} else {
 				throw new Error( response.message || classifaiQuickDraft.error );
 			}
@@ -119,35 +122,5 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				message.remove();
 			}
 		}, 5000 );
-	}
-
-	/**
-	 * Refresh the recent drafts section.
-	 */
-	function refreshRecentDrafts() {
-		// Trigger the same refresh mechanism as the standard Save Draft
-		if ( window.quickPressLoad ) {
-			// Make a request to refresh the widget content
-			apiFetch( {
-				path: 'wp/v2/posts',
-				method: 'GET',
-				data: {
-					status: 'draft',
-					author: window.classifaiQuickDraft?.currentUserId || '',
-					per_page: 4,
-					orderby: 'modified',
-					order: 'desc',
-				},
-			} ).then( function() {
-				// Reload the quick press widget content
-				const widgetContainer = document.querySelector( '#dashboard_quick_press .inside' );
-				if ( widgetContainer ) {
-					// This will reload the entire widget content including recent drafts
-					location.reload();
-				}
-			} ).catch( function() {
-				// Silently fail - not critical
-			} );
-		}
 	}
 } );
