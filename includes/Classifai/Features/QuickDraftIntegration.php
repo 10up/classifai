@@ -1,6 +1,6 @@
 <?php
 /**
- * Quick Draft Integration Feature
+ * Quick Draft Integration Feature.
  *
  * Integrates ClassifAI Content Generation with WordPress Quick Draft widget.
  */
@@ -13,8 +13,8 @@ use WP_REST_Request;
 use WP_Error;
 
 /**
- * Quick Draft Integration Feature
- * 
+ * Quick Draft Integration Feature.
+ *
  * Integrates ClassifAI Content Generation with WordPress Quick Draft widget.
  */
 class QuickDraftIntegration {
@@ -37,12 +37,12 @@ class QuickDraftIntegration {
 	 * Initialize the Quick Draft integration.
 	 */
 	public function init() {
-		// Only initialize if Content Generation is enabled
+		// Only initialize if Content Generation is enabled.
 		if ( ! $this->content_generation->is_feature_enabled() ) {
 			return;
 		}
 
-		// Check if Quick Draft integration is enabled
+		// Check if Quick Draft integration is enabled.
 		if ( ! $this->is_quick_draft_enabled() ) {
 			return;
 		}
@@ -67,13 +67,13 @@ class QuickDraftIntegration {
 	 */
 	public function enqueue_assets() {
 		$screen = get_current_screen();
-		
-		// Only load on dashboard
+
+		// Only load on dashboard.
 		if ( ! $screen || 'dashboard' !== $screen->id ) {
 			return;
 		}
 
-		// Only load if user can create posts
+		// Only load if user can create posts.
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			return;
 		}
@@ -125,12 +125,11 @@ class QuickDraftIntegration {
 	 */
 	public function add_quick_draft_button_script() {
 		$screen = get_current_screen();
-		
+
 		// Only add on dashboard
 		if ( ! $screen || 'dashboard' !== $screen->id ) {
 			return;
 		}
-
 		?>
 		<script type="text/javascript">
 		jQuery(document).ready(function($) {
@@ -161,9 +160,9 @@ class QuickDraftIntegration {
 				'args'                => [
 					'title'   => [
 						'type'              => 'string',
-						'sanitize_callback'  => 'sanitize_text_field',
-						'validate_callback'  => 'rest_validate_request_arg',
-						'description'        => esc_html__( 'The title of the article.', 'classifai' ),
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'The title of the article.', 'classifai' ),
 					],
 					'content' => [
 						'required'          => true,
@@ -175,16 +174,14 @@ class QuickDraftIntegration {
 				],
 			]
 		);
-
 	}
 
 	/**
 	 * Check permissions for Quick Draft generation.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|bool
 	 */
-	public function permissions_check( WP_REST_Request $request ) {
+	public function permissions_check() {
 		// Ensure user can create posts
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			return false;
@@ -252,13 +249,14 @@ class QuickDraftIntegration {
 			return new WP_Error( 'post_update_failed', esc_html__( 'Failed to update post with generated content.', 'classifai' ) );
 		}
 
-		return rest_ensure_response( [
-			'post_id'      => $post_id,
-			'edit_url'     => admin_url( "post.php?post={$post_id}&action=edit" ),
-			'content'      => $result,
-			'title'        => $title,
-			'success'      => true,
-		] );
+		return rest_ensure_response(
+			[
+				'post_id'  => $post_id,
+				'edit_url' => admin_url( "post.php?post={$post_id}&action=edit" ),
+				'content'  => $result,
+				'title'    => $title,
+				'success'  => true,
+			]
+		);
 	}
-
 }
