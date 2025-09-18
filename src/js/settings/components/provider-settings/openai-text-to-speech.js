@@ -206,11 +206,13 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 			>
 				<TextareaControl
 					id={ `${ providerName }_instructions` }
-					onChange={ ( value ) => onChange( { instructions: value } ) }
+					onChange={ ( value ) =>
+						onChange( { instructions: value } )
+					}
 					value={ providerSettings.instructions || '' }
 					rows={ 3 }
 					placeholder={ __(
-						'Enter instructions to control voice characteristics...',
+						'Enter instructions to control voice characteristics…',
 						'classifai'
 					) }
 				/>
