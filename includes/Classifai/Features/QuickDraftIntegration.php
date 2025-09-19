@@ -82,7 +82,7 @@ class QuickDraftIntegration {
 			'classifai-quick-draft-js',
 			plugin_dir_url( dirname( __DIR__, 2 ) ) . 'dist/classifai-quick-draft.js',
 			[ 'jquery', 'wp-api-fetch' ],
-			'3.7.0',
+			'3.8.0',
 			true
 		);
 
@@ -103,7 +103,7 @@ class QuickDraftIntegration {
 			'classifai-quick-draft-css',
 			plugin_dir_url( dirname( __DIR__, 2 ) ) . 'dist/classifai-quick-draft.css',
 			[],
-			'3.7.0'
+			'3.8.0'
 		);
 	}
 
