@@ -85,6 +85,7 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -146,47 +147,7 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
-				/>
-			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Audio format', 'classifai' ) }
-				description={ __(
-					'Select the desired audio format.',
-					'classifai'
-				) }
-			>
-				<SelectControl
-					id={ `${ providerName }_format` }
-					onChange={ ( value ) => onChange( { format: value } ) }
-					value={ providerSettings.format || '.mp3' }
-					options={ [
-						{
-							label: __( '.mp3', 'classifai' ),
-							value: 'mp3',
-						},
-						{
-							label: __( '.wav', 'classifai' ),
-							value: 'wav',
-						},
-					] }
-					__nextHasNoMarginBottom
-				/>
-			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Audio speed', 'classifai' ) }
-				description={ __(
-					'Select the desired speed of the generated audio.',
-					'classifai'
-				) }
-			>
-				<InputControl
-					id={ `${ providerName }_speed` }
-					onChange={ ( value ) => onChange( { speed: value } ) }
-					value={ providerSettings.speed || 1 }
-					type="number"
-					step="0.25"
-					min="0.25"
-					max="4"
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -215,6 +176,50 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 						'Enter instructions to control voice characteristics…',
 						'classifai'
 					) }
+					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Audio format', 'classifai' ) }
+				description={ __(
+					'Select the desired audio format.',
+					'classifai'
+				) }
+			>
+				<SelectControl
+					id={ `${ providerName }_format` }
+					onChange={ ( value ) => onChange( { format: value } ) }
+					value={ providerSettings.format || '.mp3' }
+					options={ [
+						{
+							label: __( '.mp3', 'classifai' ),
+							value: 'mp3',
+						},
+						{
+							label: __( '.wav', 'classifai' ),
+							value: 'wav',
+						},
+					] }
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+				/>
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Audio speed', 'classifai' ) }
+				description={ __(
+					'Select the desired speed of the generated audio.',
+					'classifai'
+				) }
+			>
+				<InputControl
+					id={ `${ providerName }_speed` }
+					onChange={ ( value ) => onChange( { speed: value } ) }
+					value={ providerSettings.speed || 1 }
+					type="number"
+					step="0.25"
+					min="0.25"
+					max="4"
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>
