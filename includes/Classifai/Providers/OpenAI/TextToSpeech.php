@@ -243,51 +243,6 @@ class TextToSpeech extends Provider {
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
-
-		add_settings_field(
-			static::ID . '_instructions',
-			esc_html__( 'Voice instructions', 'classifai' ),
-			[ $this, 'render_textarea' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'instructions',
-				'default_value' => $settings['instructions'],
-				'description'   => __( 'Optional instructions to control the voice characteristics of the generated audio. For example: "Speak in a calm, professional tone" or "Use a more energetic delivery".', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-				'rows'          => 3,
-			]
-		);
-	}
-
-	/**
-	 * Render a textarea field.
-	 *
-	 * @param array $args The args passed to add_settings_field.
-	 */
-	public function render_textarea( array $args ) {
-		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
-		$setting_index = $this->feature_instance->get_settings( $option_index );
-		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
-
-		// Check for a default value.
-		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
-		$rows  = isset( $args['rows'] ) ? $args['rows'] : 3;
-		?>
-
-		<textarea
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
-			name="<?php echo esc_attr( $this->feature_instance->get_option_name() ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
-			rows="<?php echo esc_attr( $rows ); ?>"
-			class="large-text"
-			placeholder="<?php esc_attr_e( 'Enter instructions to control voice characteristics...', 'classifai' ); ?>"
-		><?php echo esc_textarea( $value ); ?></textarea>
-
-		<?php
-		if ( ! empty( $args['description'] ) ) {
-			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
-		}
 	}
 
 	/**
