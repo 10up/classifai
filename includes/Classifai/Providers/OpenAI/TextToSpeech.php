@@ -76,11 +76,14 @@ class TextToSpeech extends Provider {
 	/**
 	 * Get the instructions for voice control.
 	 *
+	 * @param string $instructions The instructions to use. If empty, the instructions from the settings will be used.
 	 * @return string
 	 */
-	public function get_instructions(): string {
-		$settings     = $this->feature_instance->get_settings();
-		$instructions = $settings[ static::ID ]['instructions'] ?? '';
+	public function get_instructions( string $instructions = '' ): string {
+		if ( empty( $instructions ) ) {
+			$settings     = $this->feature_instance->get_settings();
+			$instructions = $settings[ static::ID ]['instructions'] ?? '';
+		}
 
 		/**
 		 * Filter the instructions for voice control.
@@ -436,7 +439,7 @@ class TextToSpeech extends Provider {
 		);
 
 		// Add instructions if provided.
-		$instructions = $this->get_instructions();
+		$instructions = $this->get_instructions( $settings[ static::ID ]['instructions'] ?? '' );
 		if ( ! empty( $instructions ) ) {
 			$request_body['instructions'] = $instructions;
 		}
