@@ -102,9 +102,7 @@ class ImageGeneration extends Feature {
 				'description'         => esc_html__( 'Use AI to generate one or more images based on a prompt. Will return either a URL or a base64 encoded image.', 'classifai' ),
 				'input_schema'        => [
 					'type'       => 'object',
-					'properties' => [
-						$input_schema['args'],
-					],
+					'properties' => $input_schema['args'],
 					'required'   => [
 						'prompt',
 					],
