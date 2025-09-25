@@ -66,6 +66,35 @@ class ImageGeneration extends Feature {
 	 * Register the ability for the Feature.
 	 */
 	public function register_ability() {
+		/**
+		 * Filter the input schema for the ability.
+		 *
+		 * This allows for adding or modifying the arguments for the ability.
+		 * TODO: If we get rid of our custom REST endpoint, we can change
+		 * how this filter works. Right now we're trying to match what the
+		 * REST endpoint uses but that means we have some unnecessary code here,
+		 * particularly the args part.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_{feature}_ability_input_schema
+		 *
+		 * @param array $schema Array of arguments for the input schema.
+		 *
+		 * @return array Modified array of arguments.
+		 */
+		$input_schema = apply_filters(
+			'classifai_' . static::ID . '_ability_input_schema',
+			[
+				'args' => [
+					'prompt' => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'description'       => esc_html__( 'Prompt to use to generate one or more images.', 'classifai' ),
+					],
+				],
+			]
+		);
+
 		wp_register_ability(
 			'classifai/generate-image',
 			[
@@ -74,11 +103,7 @@ class ImageGeneration extends Feature {
 				'input_schema'        => [
 					'type'       => 'object',
 					'properties' => [
-						'prompt' => [
-							'type'              => 'string',
-							'sanitize_callback' => 'sanitize_text_field',
-							'description'       => esc_html__( 'Prompt to use to generate one or more images.', 'classifai' ),
-						],
+						$input_schema['args'],
 					],
 					'required'   => [
 						'prompt',
