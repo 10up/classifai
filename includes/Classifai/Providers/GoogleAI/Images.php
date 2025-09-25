@@ -321,7 +321,7 @@ class Images extends Provider {
 		if ( ! is_wp_error( $response ) && ! empty( $response['predictions'] ) ) {
 			foreach ( $response['predictions'] as $candidate ) {
 				if ( isset( $candidate['bytesBase64Encoded'] ) ) {
-					$cleaned_responses[] = [ 'url' => sanitize_text_field( trim( $candidate['bytesBase64Encoded'] ) ) ];
+					$cleaned_responses[] = sanitize_text_field( trim( $candidate['bytesBase64Encoded'] ) );
 				}
 			}
 		} elseif ( is_wp_error( $response ) ) {

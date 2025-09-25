@@ -244,9 +244,9 @@ class Images extends Provider {
 				foreach ( $response['data'] as $data ) {
 					if ( ! empty( $data[ $args['format'] ] ) ) {
 						if ( 'url' === $args['format'] ) {
-							$cleaned_responses[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
+							$cleaned_responses[] = esc_url_raw( $data[ $args['format'] ] );
 						} else {
-							$cleaned_responses[] = [ 'url' => $data[ $args['format'] ] ];
+							$cleaned_responses[] = $data[ $args['format'] ];
 						}
 					}
 				}

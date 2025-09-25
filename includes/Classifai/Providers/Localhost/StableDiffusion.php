@@ -343,7 +343,7 @@ class StableDiffusion extends Provider {
 			// Extract out the image response, if it exists.
 			if ( ! is_wp_error( $response ) && ! empty( $response['images'] ) ) {
 				foreach ( $response['images'] as $image ) {
-					$cleaned_responses[] = [ 'url' => $image ];
+					$cleaned_responses[] = $image;
 				}
 			} elseif ( is_wp_error( $response ) ) {
 				return $response;
