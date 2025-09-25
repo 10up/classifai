@@ -362,13 +362,14 @@ Disallow: /
 			'mcp',
 			'ClassifAI MCP Server',
 			'Custom MCP Server for ClassifAI Features',
-			'v1.0.0',
+			'1.0.0',
 			[
 				RestTransport::class,
 			],
 			ErrorLogMcpErrorHandler::class,
 			NullMcpObservabilityHandler::class,
 			[
+				'classifai/generate-image',
 				'classifai/generate-title',
 			],
 		);
