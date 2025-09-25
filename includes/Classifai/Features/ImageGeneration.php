@@ -63,6 +63,49 @@ class ImageGeneration extends Feature {
 	}
 
 	/**
+	 * Register the ability for the Feature.
+	 */
+	public function register_ability() {
+		wp_register_ability(
+			'classifai/generate-image',
+			[
+				'label'               => esc_html__( 'Generate an image', 'classifai' ),
+				'description'         => esc_html__( 'Use AI to generate an image based on a prompt. Will return the base64 encoded image.', 'classifai' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => [
+						'prompt' => [
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'description'       => esc_html__( 'Prompt to use to generate an image.', 'classifai' ),
+						],
+					],
+					'required'   => [
+						'prompt',
+					],
+				],
+				'output_schema'       => [
+					'type'       => 'object',
+					'properties' => [
+						'images' => [
+							'type'        => 'array',
+							'items'       => [
+								'type' => 'string',
+							],
+							'description' => esc_html__( 'The base64 encoded images.', 'classifai' ),
+						],
+					],
+				],
+				'execute_callback'    => [ $this, 'abilities_api_callback' ],
+				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
+				'meta'                => [
+					'type' => 'tool',
+				],
+			],
+		);
+	}
+
+	/**
 	 * Register any needed endpoints.
 	 */
 	public function register_endpoints() {
@@ -145,6 +188,30 @@ class ImageGeneration extends Feature {
 		}
 
 		return parent::rest_endpoint_callback( $request );
+	}
+
+	/**
+	 * Request handler for the abilities API.
+	 *
+	 * @param array $input The input array.
+	 * @return \WP_REST_Response
+	 */
+	public function abilities_api_callback( array $input ) {
+		$prompt = $input['prompt'] ?? null;
+
+		unset( $input['prompt'] );
+
+		$output = $this->run(
+			$prompt,
+			'image_gen',
+			$input,
+		);
+
+		if ( is_wp_error( $output ) ) {
+			return $output;
+		}
+
+		return [ 'images' => $output ];
 	}
 
 	/**
