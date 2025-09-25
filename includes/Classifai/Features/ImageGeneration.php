@@ -70,14 +70,14 @@ class ImageGeneration extends Feature {
 			'classifai/generate-image',
 			[
 				'label'               => esc_html__( 'Generate an image', 'classifai' ),
-				'description'         => esc_html__( 'Use AI to generate an image based on a prompt. Will return the base64 encoded image.', 'classifai' ),
+				'description'         => esc_html__( 'Use AI to generate one or more images based on a prompt. Will return either a URL or a base64 encoded image.', 'classifai' ),
 				'input_schema'        => [
 					'type'       => 'object',
 					'properties' => [
 						'prompt' => [
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
-							'description'       => esc_html__( 'Prompt to use to generate an image.', 'classifai' ),
+							'description'       => esc_html__( 'Prompt to use to generate one or more images.', 'classifai' ),
 						],
 					],
 					'required'   => [
@@ -90,9 +90,18 @@ class ImageGeneration extends Feature {
 						'images' => [
 							'type'        => 'array',
 							'items'       => [
-								'type' => 'string',
+								'type'       => 'object',
+								'properties' => [
+									'image' => [
+										'type'        => 'string',
+										'description' => esc_html__( 'The image, either a URL or a base64 encoded image.', 'classifai' ),
+									],
+								],
+								'required'   => [
+									'image',
+								],
 							],
-							'description' => esc_html__( 'The base64 encoded images.', 'classifai' ),
+							'description' => esc_html__( 'The generated images.', 'classifai' ),
 						],
 					],
 				],
@@ -305,7 +314,7 @@ class ImageGeneration extends Feature {
 			'classifai-plugin-image-generation-media-modal-js',
 			'classifaiDalleData',
 			[
-				'endpoint'   => 'classifai/v1/generate-image',
+				'endpoint'   => 'wp/v2/abilities/classifai/generate-image/run/',
 				'tabText'    => $number_of_images > 1 ? esc_html__( 'Generate images', 'classifai' ) : esc_html__( 'Generate image', 'classifai' ),
 				'errorText'  => esc_html__( 'Something went wrong. No results found', 'classifai' ),
 				'buttonText' => esc_html__( 'Select image', 'classifai' ),
@@ -486,7 +495,7 @@ class ImageGeneration extends Feature {
 		?>
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
-				<img src="data:image/png;base64,{{{ data.url }}}" />
+				<img src="data:image/png;base64,{{{ data.image }}}" />
 				<button type="button" class="components-button button-secondary button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
 				<button type="button" class="components-button is-tertiary button-import-insert"><?php esc_html_e( 'Import and Insert', 'classifai' ); ?></button>
 				<span class="spinner"></span>

@@ -3,7 +3,7 @@
  */
 const Image = Backbone.Model.extend( {
 	defaults: {
-		url: '',
+		image: '',
 	},
 } );
 

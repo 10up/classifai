@@ -14,6 +14,19 @@ const Images = Backbone.Collection.extend( {
 	url: wpApiSettings.root + classifaiDalleData.endpoint,
 
 	/**
+	 * Parse the response from the server.
+	 * Extract the images array from the response object.
+	 *
+	 * @param {Object} response The response from the server.
+	 * @return {Array} Array of image data.
+	 */
+	parse: function ( response ) {
+		// If the response has an images key, return that array.
+		// Otherwise, return the response as-is for backward compatibility.
+		return response.images || response;
+	},
+
+	/**
 	 * Send a request to our API endpoint.
 	 *
 	 * @param {string} prompt      Prompt used in generating images.
@@ -24,32 +37,35 @@ const Images = Backbone.Collection.extend( {
 	 */
 	makeRequest: function ( prompt, quality, size, style, aspectRatio ) {
 		const data = {
-			format: 'b64_json',
-			prompt: prompt,
+			input: {
+				format: 'b64_json',
+				prompt: prompt,
+			},
 		};
 
 		if ( quality ) {
-			data.quality = quality;
+			data.input.quality = quality;
 		}
 
 		if ( size ) {
-			data.size = size;
+			data.input.size = size;
 		}
 
 		if ( style ) {
-			data.style = style;
+			data.input.style = style;
 		}
 
 		if ( aspectRatio ) {
-			data.aspect_ratio = aspectRatio;
+			data.input.aspect_ratio = aspectRatio;
 		}
 
 		this.fetch( {
-			type: 'get',
+			type: 'post',
+			contentType: 'application/json',
 			beforeSend: function ( xhr ) {
 				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 			},
-			data: data,
+			data: JSON.stringify( data ),
 			reset: true,
 			error: function ( collection, response ) {
 				new ErrorMessage( { error: response.responseJSON.message } );
