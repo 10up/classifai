@@ -462,7 +462,7 @@ class Images extends Provider {
 	 */
 	public function register_rest_args( array $args = [] ): array {
 		$provider_args = [
-			'n'       => [
+			'num'     => [
 				'type'              => 'integer',
 				'minimum'           => 1,
 				'maximum'           => 10,
