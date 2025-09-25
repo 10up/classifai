@@ -5,7 +5,6 @@
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch, select, subscribe } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 
 const { classifaiDalleData } = window;
 
@@ -60,22 +59,21 @@ const imageFetcher = async ( { search = '' } ) => {
 	}
 
 	const images = await apiFetch( {
-		path: addQueryArgs( classifaiDalleData.endpoint, {
-			prompt: search,
-			format: 'b64_json',
-		} ),
-		method: 'GET',
+		path: classifaiDalleData.endpoint,
+		method: 'POST',
+		data: { input: { prompt: search, format: 'b64_json' } },
 	} )
-		.then( ( response ) =>
-			response.map( ( item ) => ( {
+		.then( ( response ) => {
+			response = response.images || response;
+			return response.map( ( item ) => ( {
 				title: search,
-				url: `data:image/png;base64,${ item.url }`,
-				previewUrl: `data:image/png;base64,${ item.url }`,
+				url: `data:image/png;base64,${ item.image }`,
+				previewUrl: `data:image/png;base64,${ item.image }`,
 				id: undefined,
 				alt: search,
 				caption: classifaiDalleData.caption,
-			} ) )
-		)
+			} ) );
+		} )
 		.catch( () => [] );
 
 	return images;

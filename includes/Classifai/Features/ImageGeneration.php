@@ -63,6 +63,83 @@ class ImageGeneration extends Feature {
 	}
 
 	/**
+	 * Register the ability for the Feature.
+	 */
+	public function register_ability() {
+		/**
+		 * Filter the input schema for the ability.
+		 *
+		 * This allows for adding or modifying the arguments for the ability.
+		 * TODO: If we get rid of our custom REST endpoint, we can change
+		 * how this filter works. Right now we're trying to match what the
+		 * REST endpoint uses but that means we have some unnecessary code here,
+		 * particularly the args part.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_{feature}_ability_input_schema
+		 *
+		 * @param array $schema Array of arguments for the input schema.
+		 *
+		 * @return array Modified array of arguments.
+		 */
+		$input_schema = apply_filters(
+			'classifai_' . static::ID . '_ability_input_schema',
+			[
+				'args' => [
+					'prompt' => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'description'       => esc_html__( 'Prompt to use to generate one or more images.', 'classifai' ),
+					],
+				],
+			]
+		);
+
+		wp_register_ability(
+			'classifai/generate-image',
+			[
+				'label'               => esc_html__( 'Generate an image', 'classifai' ),
+				'description'         => esc_html__( 'Use AI to generate one or more images based on a prompt. Will return either a URL or a base64 encoded image.', 'classifai' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => [
+						$input_schema['args'],
+					],
+					'required'   => [
+						'prompt',
+					],
+				],
+				'output_schema'       => [
+					'type'       => 'object',
+					'properties' => [
+						'images' => [
+							'type'        => 'array',
+							'items'       => [
+								'type'       => 'object',
+								'properties' => [
+									'image' => [
+										'type'        => 'string',
+										'description' => esc_html__( 'The image, either a URL or a base64 encoded image.', 'classifai' ),
+									],
+								],
+								'required'   => [
+									'image',
+								],
+							],
+							'description' => esc_html__( 'The generated images.', 'classifai' ),
+						],
+					],
+				],
+				'execute_callback'    => [ $this, 'abilities_api_callback' ],
+				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
+				'meta'                => [
+					'type' => 'tool',
+				],
+			],
+		);
+	}
+
+	/**
 	 * Register any needed endpoints.
 	 */
 	public function register_endpoints() {
@@ -145,6 +222,30 @@ class ImageGeneration extends Feature {
 		}
 
 		return parent::rest_endpoint_callback( $request );
+	}
+
+	/**
+	 * Request handler for the abilities API.
+	 *
+	 * @param array $input The input array.
+	 * @return \WP_REST_Response
+	 */
+	public function abilities_api_callback( array $input ) {
+		$prompt = $input['prompt'] ?? null;
+
+		unset( $input['prompt'] );
+
+		$output = $this->run(
+			$prompt,
+			'image_gen',
+			$input,
+		);
+
+		if ( is_wp_error( $output ) ) {
+			return $output;
+		}
+
+		return [ 'images' => $output ];
 	}
 
 	/**
@@ -238,7 +339,7 @@ class ImageGeneration extends Feature {
 			'classifai-plugin-image-generation-media-modal-js',
 			'classifaiDalleData',
 			[
-				'endpoint'   => 'classifai/v1/generate-image',
+				'endpoint'   => 'wp/v2/abilities/classifai/generate-image/run/',
 				'tabText'    => $number_of_images > 1 ? esc_html__( 'Generate images', 'classifai' ) : esc_html__( 'Generate image', 'classifai' ),
 				'errorText'  => esc_html__( 'Something went wrong. No results found', 'classifai' ),
 				'buttonText' => esc_html__( 'Select image', 'classifai' ),
@@ -419,7 +520,7 @@ class ImageGeneration extends Feature {
 		?>
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
-				<img src="data:image/png;base64,{{{ data.url }}}" />
+				<img src="data:image/png;base64,{{{ data.image }}}" />
 				<button type="button" class="components-button button-secondary button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
 				<button type="button" class="components-button is-tertiary button-import-insert"><?php esc_html_e( 'Import and Insert', 'classifai' ); ?></button>
 				<span class="spinner"></span>

@@ -78,7 +78,7 @@ const GeneratedImage = wp.media.View.extend( {
 		const self = this;
 		this.enableLoadingState();
 
-		const blob = await this.convertImageToBlob( this.data.url );
+		const blob = await this.convertImageToBlob( this.data.image );
 
 		if ( ! blob ) {
 			this.$( '.error' ).text( classifaiDalleData.errorText );

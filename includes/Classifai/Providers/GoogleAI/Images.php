@@ -56,10 +56,13 @@ class Images extends Provider {
 	public function register() {
 		$feature = new ImageGeneration();
 
-		if (
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
-		) {
+		if ( $feature->get_feature_provider_instance()::ID !== static::ID ) {
+			return;
+		}
+
+		add_filter( 'classifai_' . ImageGeneration::ID . '_ability_input_schema', [ $this, 'register_rest_args' ] );
+
+		if ( ! $feature->is_feature_enabled() ) {
 			return;
 		}
 
@@ -321,7 +324,7 @@ class Images extends Provider {
 		if ( ! is_wp_error( $response ) && ! empty( $response['predictions'] ) ) {
 			foreach ( $response['predictions'] as $candidate ) {
 				if ( isset( $candidate['bytesBase64Encoded'] ) ) {
-					$cleaned_responses[] = [ 'url' => sanitize_text_field( trim( $candidate['bytesBase64Encoded'] ) ) ];
+					$cleaned_responses[] = [ 'image' => sanitize_text_field( trim( $candidate['bytesBase64Encoded'] ) ) ];
 				}
 			}
 		} elseif ( is_wp_error( $response ) ) {

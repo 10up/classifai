@@ -42,10 +42,13 @@ class StableDiffusion extends Provider {
 	public function register() {
 		$feature = new ImageGeneration();
 
-		if (
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
-		) {
+		if ( $feature->get_feature_provider_instance()::ID !== static::ID ) {
+			return;
+		}
+
+		add_filter( 'classifai_' . ImageGeneration::ID . '_ability_input_schema', [ $this, 'register_rest_args' ] );
+
+		if ( ! $feature->is_feature_enabled() ) {
 			return;
 		}
 
@@ -343,7 +346,7 @@ class StableDiffusion extends Provider {
 			// Extract out the image response, if it exists.
 			if ( ! is_wp_error( $response ) && ! empty( $response['images'] ) ) {
 				foreach ( $response['images'] as $image ) {
-					$cleaned_responses[] = [ 'url' => $image ];
+					$cleaned_responses[] = [ 'image' => $image ];
 				}
 			} elseif ( is_wp_error( $response ) ) {
 				return $response;

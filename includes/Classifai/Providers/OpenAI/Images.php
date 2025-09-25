@@ -52,10 +52,13 @@ class Images extends Provider {
 	public function register() {
 		$feature = new ImageGeneration();
 
-		if (
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
-		) {
+		if ( $feature->get_feature_provider_instance()::ID !== static::ID ) {
+			return;
+		}
+
+		add_filter( 'classifai_' . ImageGeneration::ID . '_ability_input_schema', [ $this, 'register_rest_args' ] );
+
+		if ( ! $feature->is_feature_enabled() ) {
 			return;
 		}
 
@@ -410,9 +413,9 @@ class Images extends Provider {
 				foreach ( $response['data'] as $data ) {
 					if ( ! empty( $data[ $args['format'] ] ) ) {
 						if ( 'url' === $args['format'] ) {
-							$cleaned_responses[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
+							$cleaned_responses[] = [ 'image' => esc_url_raw( $data[ $args['format'] ] ) ];
 						} else {
-							$cleaned_responses[] = [ 'url' => $data[ $args['format'] ] ];
+							$cleaned_responses[] = [ 'image' => $data[ $args['format'] ] ];
 						}
 					}
 				}
