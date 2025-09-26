@@ -230,8 +230,10 @@ class ImageGeneration extends Feature {
 	 */
 	public function abilities_api_callback( array $input ) {
 		$prompt = $input['prompt'] ?? null;
+		$format = $input['format'] ?? 'b64_json';
 
 		unset( $input['prompt'] );
+		unset( $input['format'] );
 
 		$output = $this->run(
 			$prompt,
@@ -243,7 +245,99 @@ class ImageGeneration extends Feature {
 			return $output;
 		}
 
-		return [ 'images' => $output ];
+		// If the format is not url, return the output as-is.
+		if ( 'url' !== $format ) {
+			return [ 'images' => $output ];
+		}
+
+		// If the format is url, import the images into the Media Library so we have URLs.
+		$cleaned_output = [];
+
+		foreach ( $output as $image ) {
+			$image_url = $this->import_base64_image( $image['image'], $prompt );
+
+			if ( ! is_wp_error( $image_url ) ) {
+				$cleaned_output[] = [ 'image' => $image_url ];
+			} else {
+				return $image_url;
+			}
+		}
+
+		return [ 'images' => $cleaned_output ];
+	}
+
+	/**
+	 * Import a base64 encoded image into the Media Library.
+	 *
+	 * @param string $image The base64 encoded image.
+	 * @param string $title The title of the image. Defaults to using the prompt.
+	 * @return string|WP_Error
+	 */
+	public function import_base64_image( string $image, string $title = '' ) {
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+
+		// We expect a base64 encoded image so we decode that here.
+		$image = base64_decode( $image ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+
+		if ( ! $image ) {
+			return new WP_Error( 'image_creation_failed', esc_html__( 'Failed to create image from base64 string.', 'classifai' ) );
+		}
+
+		// Ensure the filename isn't too long.
+		$filename = $this->sanitize_filename( $title );
+
+		// Upload the image to the Media Library.
+		$image = wp_upload_bits( $filename . '.png', null, $image );
+
+		if ( isset( $image['error'] ) && false !== $image['error'] ) {
+			/* translators: %s is the error message. */
+			return new WP_Error( 'image_upload_failed', sprintf( esc_html__( 'Failed to upload image: %s', 'classifai' ), $image['error'] ) );
+		}
+
+		// Ensure the uploaded image is treated as an attachment.
+		$image_id = wp_insert_attachment(
+			[
+				'post_mime_type' => 'image/png',
+				'post_title'     => $filename,
+			],
+			$image['file']
+		);
+
+		if ( ! $image_id ) {
+			return new WP_Error( 'image_insert_failed', esc_html__( 'Failed to insert image into Media Library.', 'classifai' ) );
+		}
+
+		// Generate the attachment metadata.
+		wp_generate_attachment_metadata( $image_id, $image['file'] );
+
+		return $image['url'];
+	}
+
+	/**
+	 * Create a safe filename from a longer string.
+	 *
+	 * Try and truncate at a word boundary.
+	 *
+	 * @param string $filename The filename to sanitize.
+	 * @param int    $max_length The maximum length of the filename.
+	 * @return string
+	 */
+	private function sanitize_filename( string $filename, int $max_length = 80 ): string {
+		if ( strlen( $filename ) <= $max_length ) {
+			return $filename;
+		}
+
+		$filename = substr( $filename, 0, $max_length );
+		$filename = sanitize_file_name( $filename );
+
+		$last_hyphen = strrpos( $filename, '-' );
+		if ( $last_hyphen > $max_length * 0.5 ) {
+			$filename = substr( $filename, 0, $last_hyphen );
+		}
+
+		return $filename;
 	}
 
 	/**
