@@ -48,9 +48,6 @@ jobs:
     - name: Install composer dependencies
       run: composer install --no-dev -o
 
-    - name: Run Strauss to namespace dependencies
-      run: php -d memory_limit=2048M -d max_execution_time=300 bin/strauss.phar
-
     - name: Build
       run: |
         npm run build
