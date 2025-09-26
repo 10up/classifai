@@ -47,9 +47,9 @@ class ImageProcessing extends Service {
 		 * @since 3.0.0
 		 * @hook classifai_image_processing_service_providers
 		 *
-		 * @param {array} $providers Array of available providers for the service.
+		 * @param array $providers Array of available providers for the service.
 		 *
-		 * @return {array} The filtered available providers.
+		 * @return array The filtered available providers.
 		 */
 		return apply_filters(
 			'classifai_image_processing_service_providers',
@@ -60,6 +60,8 @@ class ImageProcessing extends Service {
 				'Classifai\Providers\GoogleAI\Images',
 				'Classifai\Providers\XAI\Grok',
 				'Classifai\Providers\Localhost\OllamaMultimodal',
+				'Classifai\Providers\Localhost\StableDiffusion',
+				'Classifai\Providers\TogetherAI\Images',
 			]
 		);
 	}

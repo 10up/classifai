@@ -274,8 +274,8 @@ EOD;
 		 * @since 3.0.0
 		 * @hook classifai_render_attachment_metabox
 		 *
-		 * @param {WP_Post} $post The post object.
-		 * @param {object} $this The Provider object.
+		 * @param \WP_Post $post The post object.
+		 * @param object   $this The Provider object.
 		 */
 		do_action( 'classifai_render_attachment_metabox', $post, $this );
 	}
@@ -430,10 +430,10 @@ EOD;
 		 * @since 3.2.0
 		 * @hook classifai_feature_image_tags_generator_setting_taxonomies
 		 *
-		 * @param {array} $supported Array of supported image taxonomies.
-		 * @param {object} $this Current instance of the class.
+		 * @param array  $supported Array of supported image taxonomies.
+		 * @param object $this      Current instance of the class.
 		 *
-		 * @return {array} Array of taxonomies.
+		 * @return array Array of taxonomies.
 		 */
 		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $taxonomies, $this );
 	}

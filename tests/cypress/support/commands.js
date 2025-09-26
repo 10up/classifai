@@ -622,6 +622,17 @@ Cypress.Commands.add( 'saveFeatureSettings', () => {
 } );
 
 /**
+ * Save general settings.
+ */
+Cypress.Commands.add( 'saveGeneralSettings', () => {
+	cy.intercept( 'POST', '/wp-json/classifai/v1/registration/*' ).as(
+		'saveSettings'
+	);
+	cy.get( '.classifai-settings-footer button.is-primary' ).click();
+	cy.wait( '@saveSettings' );
+} );
+
+/**
  * Enable Feature.
  */
 Cypress.Commands.add( 'enableFeature', ( disableCredentialReuseModal = true ) => {

@@ -6,6 +6,7 @@
 namespace Classifai\Services;
 
 use function Classifai\should_use_legacy_settings_panel;
+use function Classifai\safe_wp_remote_post;
 
 class ServicesManager {
 
@@ -46,7 +47,7 @@ class ServicesManager {
 	public function register() {
 		add_filter( 'language_processing_features', [ $this, 'register_language_processing_features' ] );
 		add_filter( 'image_processing_features', [ $this, 'register_image_processing_features' ] );
-		add_filter( 'personalizer_features', [ $this, 'register_recommendation_service_features' ] );
+		add_filter( 'content_recommendation_features', [ $this, 'register_recommendation_service_features' ] );
 
 		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
@@ -137,7 +138,7 @@ class ServicesManager {
 	/**
 	 * Get general ClassifAI settings
 	 *
-	 * @param string $index Optional specific setting to be retrieved.
+	 * @param string|bool $index Optional specific setting to be retrieved. If false, all settings will be returned.
 	 * @return mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -186,8 +187,9 @@ class ServicesManager {
 	public function sanitize_settings( $settings ): array {
 		$new_settings = [];
 
-		if ( isset( $settings['email'] )
-			&& isset( $settings['license_key'] )
+		// Save registration settings.
+		if ( ! empty( $settings['email'] )
+			&& ! empty( $settings['license_key'] )
 			&& $this->check_license_key( $settings['email'], $settings['license_key'] )
 		) {
 			$new_settings['valid_license'] = true;
@@ -205,6 +207,9 @@ class ServicesManager {
 				'error'
 			);
 		}
+
+		// Save block AI bots setting.
+		$new_settings['block_ai_bots'] = $settings['block_ai_bots'] ?? '0';
 
 		return $new_settings;
 	}
@@ -360,7 +365,7 @@ class ServicesManager {
 	 */
 	public function check_license_key( string $email, string $license_key ): bool {
 
-		$request = wp_remote_post(
+		$request = safe_wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
 			[
 				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout

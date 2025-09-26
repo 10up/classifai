@@ -108,15 +108,15 @@ export const ServiceNavigation = () => {
 					</NavLink>
 				) ) }
 				<NavLink
-					to="classifai_registration"
-					key="classifai_registration"
+					to="settings"
+					key="settings"
 					className={ ( { isActive } ) =>
 						isActive
 							? 'active-tab classifai-tabs-item'
 							: 'classifai-tabs-item'
 					}
 				>
-					{ __( 'ClassifAI Registration', 'classifai' ) }
+					{ __( 'Settings', 'classifai' ) }
 				</NavLink>
 			</div>
 		</>
@@ -239,7 +239,7 @@ export const ClassifAISettings = () => {
 							element={ <FeatureSettingsWrapper /> }
 						/>
 						<Route
-							path="classifai_registration"
+							path="settings"
 							element={ <ClassifAIRegistration /> }
 						/>
 						{ /* When no routes match, it will redirect to this route path. Note that it should be registered above. */ }

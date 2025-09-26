@@ -22,7 +22,7 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 		cy.allowFeatureToAdmin();
 		cy.saveFeatureSettings();
 
-		cy.get( '#true_model' ).select( 'deepseek-llm:latest' );
+		cy.get( '#ollama_model' ).select( 'deepseek-llm:latest' );
 		cy.saveFeatureSettings();
 	} );
 

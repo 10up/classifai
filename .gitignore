@@ -54,3 +54,6 @@ tests/cypress/reports
 
 # Strauss
 bin/strauss.phar
+
+# docs
+wp-hooks-docs/docs/01.get-started/05.CHANGELOG.md

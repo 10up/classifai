@@ -237,12 +237,12 @@ class Classification extends Feature {
 		 * @since 3.1.0
 		 * @hook classifai_feature_classification_pre_save_results
 		 *
-		 * @param {array} $supported Term results.
-		 * @param {int} $post_id Post ID.
-		 * @param {bool} $link Whether to link the terms or not.
-		 * @param {object} $this Current instance of the class.
+		 * @param array  $supported Term results.
+		 * @param int    $post_id   Post ID.
+		 * @param bool   $link      Whether to link the terms or not.
+		 * @param object $this      Current instance of the class.
 		 *
-		 * @return {array} Term results.
+		 * @return array Term results.
 		 */
 		$results = apply_filters( 'classifai_' . static::ID . '_pre_save_results', $results, $post_id, $link, $this );
 
@@ -345,6 +345,14 @@ class Classification extends Feature {
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification.js',
 			array_merge( get_asset_info( 'classifai-plugin-classification', 'dependencies' ), array( 'lodash' ), array( Feature::PLUGIN_AREA_SCRIPT ) ),
 			get_asset_info( 'classifai-plugin-classification', 'version' ),
+			true
+		);
+
+		wp_enqueue_script(
+			'classifai-plugin-classification-pre-publish-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-pre-publish.js',
+			array_merge( get_asset_info( 'classifai-plugin-classification-pre-publish', 'dependencies' ), array( 'lodash' ), array( Feature::PLUGIN_AREA_SCRIPT ) ),
+			get_asset_info( 'classifai-plugin-classification-pre-publish', 'version' ),
 			true
 		);
 
@@ -893,7 +901,7 @@ class Classification extends Feature {
 		if ( ! empty( $provider_instance->nlu_features ) ) {
 			foreach ( array_keys( $provider_instance->nlu_features ) as $feature_name ) {
 				$new_settings[ $feature_name ]               = absint( $new_settings[ $feature_name ] ?? $settings[ $feature_name ] );
-				$new_settings[ "{$feature_name}_threshold" ] = absint( $new_settings[ "{$feature_name}_threshold" ] ?? $settings[ "{$feature_name}_threshold" ] );
+				$new_settings[ "{$feature_name}_threshold" ] = floatval( $new_settings[ "{$feature_name}_threshold" ] ?? $settings[ "{$feature_name}_threshold" ] );
 				$new_settings[ "{$feature_name}_taxonomy" ]  = sanitize_text_field( $new_settings[ "{$feature_name}_taxonomy" ] ?? $settings[ "{$feature_name}_taxonomy" ] );
 			}
 		}
@@ -963,6 +971,9 @@ class Classification extends Feature {
 			'label_for'     => "{$feature}_threshold",
 			'input_type'    => 'number',
 			'default_value' => $labels['threshold_default'],
+			'min'           => 0,
+			'max'           => 100,
+			'step'          => 0.01,
 		];
 		?>
 
