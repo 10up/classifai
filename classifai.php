@@ -83,16 +83,21 @@ require_once __DIR__ . '/config.php';
  */
 function classifai_autoload() {
 
+	// Track if the autoloader was loaded.
+	$loaded = false;
+
 	// Load the prefixed vendor autoloader (contains AWS SDK and all other dependencies)
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php' ) ) {
+
 		require_once CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php';
+
+		// Set the loaded flag to true.
+		$loaded = true;
 	}
 
 	// Load the main vendor autoloader (contains plugin classes and other dependencies)
-	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
+	if ( $loaded && file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
 		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php';
-
-		return true;
 	} else {
 		error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			sprintf( 'Warning: Composer not setup in %s', CLASSIFAI_PLUGIN_DIR )
@@ -100,6 +105,8 @@ function classifai_autoload() {
 
 		return false;
 	}
+
+	return $loaded;
 }
 
 /**
