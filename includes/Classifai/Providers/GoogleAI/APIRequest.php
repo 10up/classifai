@@ -6,8 +6,6 @@ use WP_Error;
 use function Classifai\safe_wp_remote_get;
 use function Classifai\safe_wp_remote_post;
 
-use function Classifai\safe_wp_remote_get;
-
 /**
  * The APIRequest class is a low level class to make Google AI API
  * requests.

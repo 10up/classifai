@@ -13,8 +13,6 @@ use WP_Error;
 use function Classifai\safe_wp_remote_post;
 use function Classifai\safe_wp_remote_get;
 
-use function Classifai\safe_wp_remote_get;
-
 class Speech extends Provider {
 
 	const ID = 'ms_azure_text_to_speech';
