@@ -215,7 +215,6 @@ class Speech extends Provider {
 			$default['endpoint_url']
 		);
 
-
 		$request_params['timeout'] = $request_params['timeout'] ?? 20;
 		$response                  = safe_wp_remote_get(
 			$request_url,
