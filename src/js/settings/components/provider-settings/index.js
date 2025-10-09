@@ -23,7 +23,6 @@ import { OpenAIModerationSettings } from './openai-moderation';
 import { OpenAIEmbeddingsSettings } from './openai-embeddings';
 import { OpenAISpeechToTextSettings } from './openai-speech-to-text';
 import { AzureAIVisionSettings } from './azure-ai-vision';
-import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIImagesSettings } from './openai-images';
 import { StableDiffusionSettings } from './stable-diffusion';
 import { AmazonPollySettings } from './amazon-polly';
@@ -36,6 +35,8 @@ import { OllamaSettings } from './ollama';
 import { OllamaMultimodalSettings } from './ollama-multimodal';
 import { OllamaEmbeddingsSettings } from './ollama-embeddings';
 import { TogetherAIImagesSettings } from './together-ai-images';
+import { ElevenLabsSpeechToTextSettings } from './elevenlabs/speech-to-text';
+import { ElevenLabsTextToSpeechSettings } from './elevenlabs/text-to-speech';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -78,6 +79,16 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 		case 'openai_whisper':
 			return <OpenAISpeechToTextSettings isConfigured={ isConfigured } />;
 
+		case 'elevenlabs_speech_to_text':
+			return (
+				<ElevenLabsSpeechToTextSettings isConfigured={ isConfigured } />
+			);
+
+		case 'elevenlabs_text_to_speech':
+			return (
+				<ElevenLabsTextToSpeechSettings isConfigured={ isConfigured } />
+			);
+
 		case 'openai_moderation':
 			return <OpenAIModerationSettings isConfigured={ isConfigured } />;
 
@@ -92,9 +103,6 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 
 		case 'ms_computer_vision':
 			return <AzureAIVisionSettings isConfigured={ isConfigured } />;
-
-		case 'ms_azure_personalizer':
-			return <AzurePersonalizerSettings isConfigured={ isConfigured } />;
 
 		case 'aws_polly':
 			return <AmazonPollySettings isConfigured={ isConfigured } />;

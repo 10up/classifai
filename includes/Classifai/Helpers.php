@@ -104,9 +104,9 @@ function get_post_types_for_language_settings(): array {
 	 * @since 1.6.0
 	 * @hook classifai_language_settings_post_types
 	 *
-	 * @param {array} $post_types Array of post types to show in language processing settings.
+	 * @param array $post_types Array of post types to show in language processing settings.
 	 *
-	 * @return {array} Array of post types.
+	 * @return array Array of post types.
 	 */
 	return apply_filters( 'classifai_language_settings_post_types', $post_types );
 }
@@ -127,9 +127,9 @@ function get_post_statuses_for_language_settings(): array {
 	 * @since 1.7.1
 	 * @hook classifai_language_settings_post_statuses
 	 *
-	 * @param {array} $post_statuses Array of post statuses to show in language processing settings.
+	 * @param array $post_statuses Array of post statuses to show in language processing settings.
 	 *
-	 * @return {array} Array of post statuses.
+	 * @return array Array of post statuses.
 	 */
 	return apply_filters( 'classifai_language_settings_post_statuses', $post_statuses );
 }
@@ -148,9 +148,9 @@ function computer_vision_max_filesize(): int {
 	 * @since 1.5.0
 	 * @hook classifai_computer_vision_max_filesize
 	 *
-	 * @param {int} file_size The maximum allowed filesize for Computer Vision in bytes. Default `4 * MB_IN_BYTES`.
+	 * @param int file_size The maximum allowed filesize for Computer Vision in bytes. Default `4 * MB_IN_BYTES`.
 	 *
-	 * @return {int} Filtered filesize in bytes.
+	 * @return int Filtered filesize in bytes.
 	 */
 	return apply_filters( 'classifai_computer_vision_max_filesize', 20 * MB_IN_BYTES ); // 20MB default.
 }
@@ -270,10 +270,10 @@ function get_modified_image_source_url( int $post_id ) {
 	 * @since 1.6.0
 	 * @hook classifai_generate_image_alt_tags_source_url
 	 *
-	 * @param {mixed} $image_url New image path for given attachment ID.
-	 * @param {int}   $post_id   The ID of the attachment to be used in classification.
+	 * @param mixed $image_url New image path for given attachment ID.
+	 * @param int   $post_id   The ID of the attachment to be used in classification.
 	 *
-	 * @return {mixed} NULL or filtered URl for given attachment id.
+	 * @return mixed NULL or filtered URl for given attachment id.
 	 */
 	return apply_filters( 'classifai_generate_image_alt_tags_source_url', null, $post_id );
 }
@@ -436,9 +436,9 @@ function get_all_post_statuses(): array {
 	 * @since 2.2.2
 	 * @hook classifai_all_post_statuses
 	 *
-	 * @param {array} $all_statuses Array of post statuses.
+	 * @param array $all_statuses Array of post statuses.
 	 *
-	 * @return {array} Array of post statuses.
+	 * @return array Array of post statuses.
 	 */
 	return apply_filters( 'classifai_all_post_statuses', $all_statuses );
 }
@@ -629,10 +629,10 @@ function get_classification_feature_taxonomy( string $classify_by = '' ): string
 	 * @since 3.0.0
 	 * @hook classifai_feature_classification_taxonomy_for_feature
 	 *
-	 * @param {string} $taxonomy The slug of the taxonomy to use.
-	 * @param {string} $classify_by The NLU feature this taxonomy is for.
+	 * @param string $taxonomy    The slug of the taxonomy to use.
+	 * @param string $classify_by The NLU feature this taxonomy is for.
 	 *
-	 * @return {string} The filtered taxonomy slug.
+	 * @return string The filtered taxonomy slug.
 	 */
 	return apply_filters( 'classifai_feature_classification_taxonomy_for_feature', $taxonomy, $classify_by );
 }
@@ -678,9 +678,9 @@ function should_use_legacy_settings_panel(): bool {
 	 * @since 3.2.0
 	 * @hook classifai_use_legacy_settings_panel
 	 *
-	 * @param {bool} $use_legacy_settings_panel Whether to use the legacy settings panel.
+	 * @param bool $use_legacy_settings_panel Whether to use the legacy settings panel.
 	 *
-	 * @return {bool} Whether to use the legacy settings panel.
+	 * @return bool Whether to use the legacy settings panel.
 	 */
 	return apply_filters( 'classifai_use_legacy_settings_panel', false );
 }
@@ -836,7 +836,7 @@ function is_local_path( string $resource_ref ): bool {
  * - Fall back to wp_remote_request() on other scenarios.
  * - Respect all call args (timeout, headers, method, etc).
  *
- * @since x.x.x
+ * @since 3.6.0
  *
  * @param string $method HTTP method.
  * @param string $url    Request URL.
@@ -889,7 +889,7 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
  * Important: This function intentionally does NOT return WP_Error to match the
  * native signature; callers should check for strict false.
  *
- * @since x.x.x
+ * @since 3.6.0
  *
  * @param string $file_path Path or URL.
  * @param array  $args     Optional HTTP args (timeout, headers, etc.).
@@ -929,7 +929,7 @@ function safe_file_get_contents( string $file_path, array $args = [] ) {
  * - Fall back to wp_remote_get() on other scenarios.
  * - Respect all call args (timeout, headers, etc).
  *
- * @since x.x.x
+ * @since 3.6.0
  *
  * @param string $url Request URL.
  * @param array  $args Request args.
@@ -946,7 +946,7 @@ function safe_wp_remote_get( string $url, array $args = [] ) {
  * - Fall back to wp_remote_post() on other scenarios.
  * - Respect all call args (timeout, headers, etc).
  *
- * @since x.x.x
+ * @since 3.6.0
  *
  * @param string $url Request URL.
  * @param array  $args Request args.
@@ -956,3 +956,23 @@ function safe_wp_remote_post( string $url, array $args = [] ) {
 	return safe_wp_remote_request( 'POST', $url, $args );
 }
 
+/**
+ * Get the temperature for the request.
+ *
+ * We increase the base temperature proportionally
+ * to the number of results, ensuring it never exceeds 2.
+ *
+ * The goal here is to get more diverse results when
+ * we are requesting more results.
+ *
+ * @param float $temperature The temperature.
+ * @param int   $results The number of results.
+ * @return float The temperature.
+ */
+function get_temperature( float $temperature, int $results = 1 ): float {
+	if ( 1 === $results ) {
+		return $temperature;
+	}
+
+	return (float) min( 2.0, $temperature + ( $results / 10 ) );
+}

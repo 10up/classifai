@@ -61,11 +61,11 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_request_get_url
 		 *
-		 * @param {string} $url The URL for the request.
-		 * @param {array} $options The options for the request.
-		 * @param {string} $this->feature The feature name.
+		 * @param string $url           The URL for the request.
+		 * @param array  $options       The options for the request.
+		 * @param string $this->feature The feature name.
 		 *
-		 * @return {string} The URL for the request.
+		 * @return string The URL for the request.
 		 */
 		$url = apply_filters( 'classifai_openai_api_request_get_url', $url, $options, $this->feature );
 
@@ -75,11 +75,11 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_request_get_options
 		 *
-		 * @param {array} $options The options for the request.
-		 * @param {string} $url The URL for the request.
-		 * @param {string} $this->feature The feature name.
+		 * @param array  $options       The options for the request.
+		 * @param string $url           The URL for the request.
+		 * @param string $this->feature The feature name.
 		 *
-		 * @return {array} The options for the request.
+		 * @return array The options for the request.
 		 */
 		$options = apply_filters( 'classifai_openai_api_request_get_options', $options, $url, $this->feature );
 
@@ -91,12 +91,12 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_response_get
 		 *
-		 * @param {array|WP_Error} $response The API response.
-		 * @param {string} $url Request URL.
-		 * @param {array} $options Request body options.
-		 * @param {string} $this->feature Feature name.
+		 * @param array|\WP_Error $response      The API response.
+		 * @param string          $url           Request URL.
+		 * @param array           $options       Request body options.
+		 * @param string          $this->feature Feature name.
 		 *
-		 * @return {array} API response.
+		 * @return array API response.
 		 */
 		return apply_filters(
 			'classifai_openai_api_response_get',
@@ -128,11 +128,11 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_request_post_url
 		 *
-		 * @param {string} $url The URL for the request.
-		 * @param {array} $options The options for the request.
-		 * @param {string} $this->feature The feature name.
+		 * @param string $url           The URL for the request.
+		 * @param array  $options       The options for the request.
+		 * @param string $this->feature The feature name.
 		 *
-		 * @return {string} The URL for the request.
+		 * @return string The URL for the request.
 		 */
 		$url = apply_filters( 'classifai_openai_api_request_post_url', $url, $options, $this->feature );
 
@@ -142,11 +142,11 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_request_post_options
 		 *
-		 * @param {array} $options The options for the request.
-		 * @param {string} $url The URL for the request.
-		 * @param {string} $this->feature The feature name.
+		 * @param array  $options       The options for the request.
+		 * @param string $url           The URL for the request.
+		 * @param string $this->feature The feature name.
 		 *
-		 * @return {array} The options for the request.
+		 * @return array The options for the request.
 		 */
 		$options = apply_filters( 'classifai_openai_api_request_post_options', $options, $url, $this->feature );
 
@@ -158,12 +158,12 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_response_post
 		 *
-		 * @param {array|WP_Error} $response The API response.
-		 * @param {string} $url Request URL.
-		 * @param {array} $options Request body options.
-		 * @param {string} $this->feature Feature name.
+		 * @param array|\WP_Error $response      The API response.
+		 * @param string          $url           Request URL.
+		 * @param array           $options       Request body options.
+		 * @param string          $this->feature Feature name.
 		 *
-		 * @return {array} API response.
+		 * @return array API response.
 		 */
 		return apply_filters(
 			'classifai_openai_api_response_post',
@@ -188,10 +188,10 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_request_post_form_url
 		 *
-		 * @param {string} $url The URL for the request.
-		 * @param {string} $this->feature The feature name.
+		 * @param string $url           The URL for the request.
+		 * @param string $this->feature The feature name.
 		 *
-		 * @return {string} The URL for the request.
+		 * @return string The URL for the request.
 		 */
 		$url = apply_filters( 'classifai_openai_api_request_post_form_url', $url, $this->feature );
 
@@ -224,12 +224,12 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_request_post_form_options
 		 *
-		 * @param {array} $options The options for the request.
-		 * @param {string} $url The URL for the request.
-		 * @param {array} $body The body of the request.
-		 * @param {string} $this->feature The feature name.
+		 * @param array  $options       The options for the request.
+		 * @param string $url           The URL for the request.
+		 * @param array  $body          The body of the request.
+		 * @param string $this->feature The feature name.
 		 *
-		 * @return {array} The options for the request.
+		 * @return array The options for the request.
 		 */
 		$options = apply_filters(
 			'classifai_openai_api_request_post_form_options',
@@ -253,12 +253,12 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_response_post_form
 		 *
-		 * @param {array|WP_Error} $response The API response.
-		 * @param {string} $url Request URL.
-		 * @param {array} $options Request body options.
-		 * @param {string} $this->feature Feature name.
+		 * @param array|\WP_Error $response      The API response.
+		 * @param string          $url           Request URL.
+		 * @param array           $options       Request body options.
+		 * @param string          $this->feature Feature name.
 		 *
-		 * @return {array} API response.
+		 * @return array API response.
 		 */
 		return apply_filters(
 			'classifai_openai_api_response_post_form',

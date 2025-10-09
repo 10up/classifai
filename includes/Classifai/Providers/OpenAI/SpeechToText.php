@@ -77,9 +77,9 @@ class SpeechToText extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_speech_to_text_model
 		 *
-		 * @param {string} $model The current model to use.
+		 * @param string $model The current model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
 		return apply_filters( 'classifai_openai_speech_to_text_model', $model );
 	}
@@ -97,9 +97,9 @@ class SpeechToText extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_speech_to_text_api_url
 		 *
-		 * @param {string} $url The default API URL.
+		 * @param string $url The default API URL.
 		 *
-		 * @return {string} The API URL.
+		 * @return string The API URL.
 		 */
 		return apply_filters( 'classifai_openai_speech_to_text_api_url', sprintf( '%s%s', trailingslashit( $this->audio_url ), $path ) );
 	}
@@ -193,9 +193,9 @@ class SpeechToText extends Provider {
 		switch ( $route_to_call ) {
 			case 'transcript':
 				if ( is_attachment( $audio_resource ) ) {
-					return $this->transcribe_from_attachment( $audio_resource, $args );
+					return $this->feature_instance->transcribe_from_attachment( $audio_resource, $args );
 				} elseif ( is_remote_url( $audio_resource ) ) {
-					return $this->transcribe_from_path( $audio_resource );
+					return $this->feature_instance->transcribe_from_path( $audio_resource );
 				} elseif ( is_local_path( $audio_resource ) ) {
 					return $this->transcribe_audio( $audio_resource, $args );
 				}
@@ -205,73 +205,6 @@ class SpeechToText extends Provider {
 		}
 
 		return $return;
-	}
-
-	/**
-	 * Generates a transcript from a given attachment ID.
-	 *
-	 * Validates that the current user can edit the attachment,
-	 * ensures the feature is enabled, and checks whether the attachment
-	 * meets the processing criteria (e.g., correct file type and size).
-	 *
-	 * @param int   $attachment_id Attachment post ID.
-	 * @param array $args          Optional arguments to pass to the route.
-	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
-	 */
-	private function transcribe_from_attachment( int $attachment_id = 0, array $args = [] ) {
-		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
-			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
-		}
-
-		$feature = new AudioTranscriptsGeneration();
-
-		if ( ! $feature->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Transcript generation is disabled. Please check your settings.', 'classifai' ) );
-		}
-
-		if ( ! $feature->should_process( $attachment_id ) ) {
-			return new WP_Error( 'process_error', esc_html__( 'Attachment does not meet processing requirements. Ensure the file type and size meet requirements.', 'classifai' ) );
-		}
-
-		return $this->transcribe_audio(
-			get_attached_file( $attachment_id ),
-			array_merge( $args, array( 'attachment_id' => $attachment_id ) )
-		);
-	}
-
-	/**
-	 * Generates a transcript from a file path or remote URL.
-	 *
-	 * If the path is a remote URL, it is downloaded to a temporary
-	 * location and deleted after processing. If it's a local path
-	 * and the file exists, it is processed directly.
-	 *
-	 * @param string $path Absolute local path or remote URL to an audio file.
-	 * @param array  $args  Optional arguments to pass to the route.
-	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
-	 */
-	private function transcribe_from_path( string $path, array $args = [] ) {
-		$result = '';
-
-		if ( \Classifai\is_remote_url( $path ) ) {
-			$temp_file_path = AudioTranscriptsGeneration::remote_url_to_path( $path );
-
-			if ( is_wp_error( $temp_file_path ) ) {
-				return $temp_file_path;
-			}
-
-			$result = $this->transcribe_audio( $temp_file_path, $args );
-			wp_delete_file( $temp_file_path );
-		} elseif ( \Classifai\is_local_path( $path ) ) {
-			if ( file_exists( $path ) ) {
-				return $this->transcribe_audio( $path, $args );
-
-			} else {
-				return $result;
-			}
-		}
-
-		return $result;
 	}
 
 	/**
@@ -297,11 +230,11 @@ class SpeechToText extends Provider {
 		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_request_body
 		 *
-		 * @param {array}  $body      Request body that will be sent to OpenAI.
-		 * @param {string} $file_path Path of the attachment we are transcribing.
-		 * @param {args}   $args      Additional args.
+		 * @param array  $body      Request body that will be sent to OpenAI.
+		 * @param string $file_path Path of the attachment we are transcribing.
+		 * @param array  $args      Additional args.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_whisper_transcribe_request_body',

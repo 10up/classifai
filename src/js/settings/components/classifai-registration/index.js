@@ -11,6 +11,7 @@ import {
 	Flex,
 	FlexItem,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	ToggleControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -105,6 +106,7 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 							onChange={ ( value ) => {
 								setSettings( { ...settings, email: value } );
 							} }
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 					<SettingsRow
@@ -140,6 +142,37 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 									license_key: value,
 								} );
 							} }
+							__next40pxDefaultSize
+						/>
+					</SettingsRow>
+				</PanelBody>
+			</Panel>
+			<Panel
+				header={ __( 'General Settings', 'classifai' ) }
+				className="settings-panel"
+			>
+				<PanelBody>
+					<SettingsRow
+						label={ __( 'Block AI Bots', 'classifai' ) }
+						description={
+							<>
+								{ __(
+									'If you turn on this setting, ClassifAI will modify your robots.txt file to request that known AI data scraping bots do not index your site. This will not block AI search bots, just data scraping bots. At the moment, the following bots are blocked: Applebot-Extended, CCBot, ClaudeBot, FacebookBot, Google-Extended, GPTbot, Meta-ExternalAgent.',
+									'classifai'
+								) }
+							</>
+						}
+					>
+						<ToggleControl
+							className="classifai-enable-bot-block"
+							checked={ settings?.block_ai_bots === '1' }
+							onChange={ ( value ) => {
+								setSettings( {
+									...settings,
+									block_ai_bots: value ? '1' : '0',
+								} );
+							} }
+							__nextHasNoMarginBottom
 						/>
 					</SettingsRow>
 				</PanelBody>

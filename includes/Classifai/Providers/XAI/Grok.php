@@ -18,6 +18,7 @@ use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\get_largest_size_and_dimensions_image_url;
+use function Classifai\get_temperature;
 
 class Grok extends Provider {
 	/**
@@ -39,21 +40,21 @@ class Grok extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $models_url = 'https://api.x.ai/v1/models';
+	protected $models_url = 'https://api.x.ai/v1/language-models';
 
 	/**
-	 * xAI Grok model
+	 * xAI Grok default model
 	 *
 	 * @var string
 	 */
-	protected $model = 'grok-2-1212';
+	protected $default_model = 'grok-2-1212';
 
 	/**
-	 * xAI Grok vision model
+	 * xAI Grok default vision model
 	 *
 	 * @var string
 	 */
-	protected $vision_model = 'grok-2-vision-1212';
+	protected $default_vision_model = 'grok-2-vision-1212';
 
 	/**
 	 * Maximum number of tokens our model supports
@@ -77,6 +78,9 @@ class Grok extends Provider {
 	 * @return string
 	 */
 	public function get_model(): string {
+		$settings = $this->feature_instance->get_settings();
+		$model    = ! empty( $settings[ static::ID ]['model'] ) ? $settings[ static::ID ]['model'] : $this->default_model;
+
 		/**
 		 * Filter the model name.
 		 *
@@ -86,11 +90,11 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_model
 		 *
-		 * @param {string} $model The default model to use.
+		 * @param string $model The default model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
-		return apply_filters( 'classifai_xai_grok_model', $this->model );
+		return apply_filters( 'classifai_xai_grok_model', $model );
 	}
 
 	/**
@@ -99,6 +103,9 @@ class Grok extends Provider {
 	 * @return string
 	 */
 	public function get_vision_model(): string {
+		$settings = $this->feature_instance->get_settings();
+		$model    = ! empty( $settings[ static::ID ]['model'] ) ? $settings[ static::ID ]['model'] : $this->default_vision_model;
+
 		/**
 		 * Filter the vision model name (The model with image and text capabilities).
 		 *
@@ -108,11 +115,11 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_vision_model
 		 *
-		 * @param {string} $model The default model to use.
+		 * @param string $model The default model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
-		return apply_filters( 'classifai_xai_grok_vision_model', $this->vision_model );
+		return apply_filters( 'classifai_xai_grok_vision_model', $model );
 	}
 
 	/**
@@ -124,6 +131,8 @@ class Grok extends Provider {
 		$common_settings = [
 			'api_key'       => '',
 			'authenticated' => false,
+			'model'         => $this->default_model,
+			'models'        => [],
 		];
 
 		/**
@@ -136,6 +145,7 @@ class Grok extends Provider {
 				break;
 
 			case DescriptiveTextGenerator::ID:
+				$common_settings['model']  = $this->default_vision_model;
 				$common_settings['prompt'] = [
 					[
 						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
@@ -159,9 +169,16 @@ class Grok extends Provider {
 	public function sanitize_settings( array $new_settings ): array {
 		$settings         = $this->feature_instance->get_settings();
 		$api_key_settings = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$model            = ! empty( $new_settings[ static::ID ]['model'] ) ? sanitize_text_field( $new_settings[ static::ID ]['model'] ) : $this->default_model;
+
+		if ( DescriptiveTextGenerator::ID === $this->feature_instance::ID ) {
+			$model = ! empty( $new_settings[ static::ID ]['model'] ) ? sanitize_text_field( $new_settings[ static::ID ]['model'] ) : $this->default_vision_model;
+		}
 
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
+		$new_settings[ static::ID ]['model']         = $model;
+		$new_settings[ static::ID ]['models']        = $api_key_settings[ static::ID ]['models'];
 
 		switch ( $this->feature_instance::ID ) {
 			case ContentResizing::ID:
@@ -181,16 +198,17 @@ class Grok extends Provider {
 	 * @return array
 	 */
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
-		$authenticated = $this->authenticate_credentials( $new_settings[ static::ID ]['api_key'] ?? '' );
+		$models = $this->get_models( $new_settings[ static::ID ]['api_key'] ?? '' );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
+		$new_settings[ static::ID ]['models']        = $settings[ static::ID ]['models'] ?? [];
 
-		if ( is_wp_error( $authenticated ) ) {
+		if ( is_wp_error( $models ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
-			$error_message                               = $authenticated->get_error_message();
+			$error_message                               = $models->get_error_message();
 
 			// For response code 429, credentials are valid but rate limit is reached.
-			if ( 429 === (int) $authenticated->get_error_code() ) {
+			if ( 429 === (int) $models->get_error_code() ) {
 				$new_settings[ static::ID ]['authenticated'] = true;
 			}
 
@@ -202,6 +220,27 @@ class Grok extends Provider {
 			);
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
+			switch ( $this->feature_instance::ID ) {
+				case ContentResizing::ID:
+				case TitleGeneration::ID:
+				case ExcerptGeneration::ID:
+					$text_models      = array_filter( $models, fn( $model ) => in_array( 'text', $model['input_modalities'], true ) );
+					$formatted_models = array();
+					foreach ( $text_models as $model ) {
+						$formatted_models[ $model['id'] ] = $model['id'];
+					}
+					$new_settings[ static::ID ]['models'] = $formatted_models;
+					break;
+
+				case DescriptiveTextGenerator::ID:
+					$image_models     = array_filter( $models, fn( $model ) => in_array( 'image', $model['input_modalities'], true ) );
+					$formatted_models = array();
+					foreach ( $image_models as $model ) {
+						$formatted_models[ $model['id'] ] = $model['id'];
+					}
+					$new_settings[ static::ID ]['models'] = $formatted_models;
+					break;
+			}
 		}
 
 		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
@@ -213,9 +252,9 @@ class Grok extends Provider {
 	 * Authenticate our credentials.
 	 *
 	 * @param string $api_key Api Key.
-	 * @return bool|WP_Error
+	 * @return array|WP_Error
 	 */
-	protected function authenticate_credentials( string $api_key = '' ) {
+	protected function get_models( string $api_key = '' ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your xAI API key.', 'classifai' ) );
@@ -225,7 +264,23 @@ class Grok extends Provider {
 		$request  = new APIRequest( $api_key );
 		$response = $request->get( $this->models_url );
 
-		return ! is_wp_error( $response ) ? true : $response;
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$models = $response['models'] ?? [];
+
+		/**
+		 * Filter the models returned by the xAI Grok API.
+		 *
+		 * @since 3.6.0
+		 * @hook classifai_xai_grok_models
+		 *
+		 * @param {array} $models The models.
+		 *
+		 * @return {array} The models.
+		 */
+		return apply_filters( 'classifai_xai_grok_models', $models );
 	}
 
 	/**
@@ -320,10 +375,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_descriptive_text_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to xAI Grok.
-		 * @param {int} $post_id ID of attachment we are describing.
+		 * @param string $prompt  Prompt we are sending to xAI Grok.
+		 * @param int    $post_id ID of attachment we are describing.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_xai_grok_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $post_id );
 
@@ -333,10 +388,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_descriptive_text_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to xAI Grok.
-		 * @param {int} $post_id ID of attachment we are describing.
+		 * @param array $body    Request body that will be sent to xAI Grok.
+		 * @param int   $post_id ID of attachment we are describing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_descriptive_text_request_body',
@@ -438,11 +493,11 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_excerpt_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to xAI Grok. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
-		 * @param {int} $excerpt_length Length of final excerpt.
+		 * @param string $prompt         Prompt we are sending to xAI Grok. Gets added before post content.
+		 * @param int    $post_id        ID of post we are summarizing.
+		 * @param int    $excerpt_length Length of final excerpt.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_xai_grok_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
@@ -460,10 +515,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_excerpt_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to xAI Grok.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body    Request body that will be sent to xAI Grok.
+		 * @param int   $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_excerpt_request_body',
@@ -542,11 +597,11 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_title_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to xAI Grok. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Prompt we are sending to xAI Grok. Gets added before post content.
+		 * @param int    $post_id ID of post we are summarizing.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_xai_grok_title_prompt', $prompt, $post_id, $args );
 
@@ -564,17 +619,17 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_title_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to xAI Grok.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body    Request body that will be sent to xAI Grok.
+		 * @param int   $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_title_request_body',
 			[
 				'model'       => $this->get_model(),
 				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'stream'      => false,
 				'n'           => absint( $args['num'] ),
 			],
@@ -646,11 +701,11 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_' . $args['resize_type'] . '_content_prompt
 		 *
-		 * @param {string} $prompt Resize prompt we are sending to xAI Grok. Gets added as a system prompt.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Resize prompt we are sending to xAI Grok. Gets added as a system prompt.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_xai_grok_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
 
@@ -660,10 +715,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_resize_content_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to xAI Grok.
-		 * @param {int}   $post_id ID of post.
+		 * @param array $body Request body that will be sent to xAI Grok.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_resize_content_request_body',
@@ -679,7 +734,7 @@ class Grok extends Provider {
 						'content' => '"""' . esc_html( $args['content'] ) . '"""',
 					],
 				],
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'stream'      => false,
 				'n'           => absint( $args['num'] ),
 			],
@@ -771,10 +826,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_content
 		 *
-		 * @param {string} $content Content that will be sent to xAI Grok.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param string $content Content that will be sent to xAI Grok.
+		 * @param int    $post_id ID of post we are summarizing.
 		 *
-		 * @return {string} Content.
+		 * @return string Content.
 		 */
 		return apply_filters( 'classifai_xai_grok_content', $content, $post_id );
 	}
@@ -789,6 +844,7 @@ class Grok extends Provider {
 		$provider_settings = $settings[ static::ID ];
 		$debug_info        = [];
 
+		$debug_info[ __( 'Model', 'classifai' ) ] = $this->get_model();
 		if ( $this->feature_instance instanceof TitleGeneration ) {
 			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_suggestions'] ?? 1;
 			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? [] );

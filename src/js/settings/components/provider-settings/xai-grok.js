@@ -2,8 +2,10 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-import { __experimentalInputControl as InputControl } from '@wordpress/components';
+import {
+	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	SelectControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -55,7 +57,7 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 		<>
 			{ __( 'Add a custom prompt, if desired. See our', 'classifai' ) }{ ' ' }
 			<a
-				href="https://10up.github.io/classifai/tutorial-prompt-examples.html"
+				href="https://10up.github.io/classifai/advanced-docs/prompt-examples"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
@@ -65,6 +67,47 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 				'for some example prompts you can try that have been tested for specific use cases.',
 				'classifai'
 			) }
+		</>
+	);
+
+	const models = [];
+
+	// Convert providerSettings.models to an array from an object.
+	if (
+		providerSettings?.models &&
+		! Array.isArray( providerSettings.models )
+	) {
+		for ( const [ key, value ] of Object.entries(
+			providerSettings.models
+		) ) {
+			models.push( { label: value, value: key } );
+		}
+	} else {
+		models.push( {
+			label: __( '-- Choose Model --', 'classifai' ),
+			value: '',
+		} );
+	}
+
+	const ModelDescription = () => (
+		<>
+			{ __(
+				'Choose the model you want to use for requests.',
+				'classifai'
+			) }{ ' ' }
+			{ __(
+				'Not sure which model to use? You can find more details on models',
+				'classifai'
+			) }{ ' ' }
+			<a
+				title={ __( 'Learn more about models', 'classifai' ) }
+				href="https://docs.x.ai/docs/models"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				{ __( 'here', 'classifai' ) }
+			</a>
+			.
 		</>
 	);
 
@@ -83,6 +126,19 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 					/>
 				</SettingsRow>
 			) }
+			<SettingsRow
+				label={ __( 'Model', 'classifai' ) }
+				description={ <ModelDescription /> }
+			>
+				<SelectControl
+					id={ `${ providerName }_model` }
+					onChange={ ( value ) => onChange( { model: value } ) }
+					value={ providerSettings?.model || '' }
+					options={ models }
+					disabled={ models.length <= 1 }
+					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
 			{ [
 				'feature_content_resizing',
 				'feature_title_generation',
@@ -97,6 +153,8 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 					<InputControl
 						id={ `${ providerName }_number_of_suggestions` }
 						type="number"
+						min={ 1 }
+						max={ 10 }
 						value={ providerSettings.number_of_suggestions || 1 }
 						onChange={ ( value ) =>
 							onChange( { number_of_suggestions: value } )

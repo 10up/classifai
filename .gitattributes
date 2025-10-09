@@ -5,7 +5,7 @@
 /.vscode export-ignore
 /bin export-ignore
 /docs export-ignore
-/hookdocs export-ignore
+/wp-hooks-docs export-ignore
 /node_modules export-ignore
 /release export-ignore
 /src export-ignore
@@ -21,7 +21,6 @@
 /composer.lock export-ignore
 /CONTRIBUTING.md export-ignore
 /CREDITS.md export-ignore
-/hookdoc-conf.json export-ignore
 /LICENSE.md export-ignore
 /package-lock.json export-ignore
 /package.json export-ignore
@@ -32,3 +31,4 @@
 /README.md export-ignore
 /tsconfig.json export-ignore
 /webpack.config.js export-ignore
+/wp-hooks-doc.json export-ignore

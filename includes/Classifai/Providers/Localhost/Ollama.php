@@ -228,11 +228,11 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_excerpt_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
-		 * @param {int} $post_id ID of post.
-		 * @param {int} $excerpt_length Length of final excerpt.
+		 * @param string $prompt         Prompt we are sending to Ollama. Gets added before post content.
+		 * @param int    $post_id        ID of post.
+		 * @param int    $excerpt_length Length of final excerpt.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
@@ -250,10 +250,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_excerpt_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $post_id ID of post.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_excerpt_request_body',
@@ -329,11 +329,11 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_title_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Prompt we are sending to Ollama. Gets added before post content.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_title_prompt', $prompt, $post_id, $args );
 
@@ -351,10 +351,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_title_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $post_id ID of post.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_title_request_body',
@@ -444,11 +444,11 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_' . $args['resize_type'] . '_content_prompt
 		 *
-		 * @param {string} $prompt Resize prompt we are sending to Ollama. Gets added as a system prompt.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Resize prompt we are sending to Ollama. Gets added as a system prompt.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
 
@@ -458,10 +458,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_resize_content_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int}   $post_id ID of post.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_resize_content_request_body',
@@ -565,10 +565,10 @@ class Ollama extends Provider {
 		 * @since 3.5.0
 		 * @hook classifai_ollama_key_takeaways_auto_run
 		 *
-		 * @param {bool} $run Whether to run the key takeaways generation.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param bool $run     Whether to run the key takeaways generation.
+		 * @param int  $post_id ID of post we are summarizing.
 		 *
-		 * @return {bool} Whether to run the key takeaways generation.
+		 * @return bool Whether to run the key takeaways generation.
 		 */
 		$run = apply_filters( 'classifai_ollama_key_takeaways_auto_run', true, $post_id );
 
@@ -595,10 +595,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_key_takeaways_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param string $prompt  Prompt we are sending to Ollama. Gets added before post content.
+		 * @param int    $post_id ID of post we are summarizing.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_key_takeaways_prompt', $prompt, $post_id );
 
@@ -608,10 +608,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_key_takeaways_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_key_takeaways_request_body',
@@ -702,11 +702,11 @@ class Ollama extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_ollama_content_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before summary.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Prompt we are sending to Ollama. Gets added before summary.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_content_prompt', esc_textarea( get_default_prompt( $settings['prompt'] ) ?? $feature->prompt ), $post_id, $args );
 
@@ -761,10 +761,10 @@ class Ollama extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_ollama_content_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $post_id ID of post.
+		 * @param array $body    Request body that will be sent to Ollama.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_content_request_body',
@@ -866,10 +866,10 @@ class Ollama extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_content
 		 *
-		 * @param {string} $content Content that will be sent to Ollama.
-		 * @param {int} $post_id ID of post.
+		 * @param string $content Content that will be sent to Ollama.
+		 * @param int    $post_id ID of post.
 		 *
-		 * @return {string} Content.
+		 * @return string Content.
 		 */
 		return apply_filters( 'classifai_ollama_content', $content, $post_id );
 	}

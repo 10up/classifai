@@ -17,6 +17,7 @@ use WP_Error;
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
 use function Classifai\safe_wp_remote_post;
+use function Classifai\get_temperature;
 
 class OpenAI extends Provider {
 
@@ -46,14 +47,14 @@ class OpenAI extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $chat_completion_api_version = '2023-05-15';
+	protected $chat_completion_api_version = '2024-10-21';
 
 	/**
 	 * Completion API version.
 	 *
 	 * @var string
 	 */
-	protected $completion_api_version = '2023-05-15';
+	protected $completion_api_version = '2024-10-21';
 
 	/**
 	 * GeminiAPI constructor.
@@ -62,6 +63,25 @@ class OpenAI extends Provider {
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
+	}
+
+	/**
+	 * Get the API version.
+	 *
+	 * @return string
+	 */
+	public function get_api_version(): string {
+		/**
+		 * Filter the API version.
+		 *
+		 * @since 3.7.0
+		 * @hook classifai_azure_openai_api_version
+		 *
+		 * @param string $version The default API version.
+		 *
+		 * @return string The API version.
+		 */
+		return apply_filters( 'classifai_azure_openai_api_version', $this->chat_completion_api_version );
 	}
 
 	/**
@@ -254,11 +274,12 @@ class OpenAI extends Provider {
 			( $feature instanceof ContentResizing ||
 			$feature instanceof ExcerptGeneration ||
 			$feature instanceof TitleGeneration ||
-			$feature instanceof KeyTakeaways ) &&
+			$feature instanceof KeyTakeaways ||
+			$feature instanceof ContentGeneration ) &&
 			$deployment
 		) {
 			$endpoint = trailingslashit( $endpoint ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
-			$endpoint = add_query_arg( 'api-version', $this->chat_completion_api_version, $endpoint );
+			$endpoint = add_query_arg( 'api-version', $this->get_api_version(), $endpoint );
 		}
 
 		return $endpoint;
@@ -396,11 +417,11 @@ class OpenAI extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_azure_openai_excerpt_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
-		 * @param {int} $excerpt_length Length of final excerpt.
+		 * @param string $prompt         Prompt we are sending. Gets added before post content.
+		 * @param int    $post_id        ID of post we are summarizing.
+		 * @param int    $excerpt_length Length of final excerpt.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_azure_openai_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
@@ -418,10 +439,10 @@ class OpenAI extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_azure_openai_excerpt_request_body
 		 *
-		 * @param {array} $body Request body that will be sent.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body    Request body that will be sent.
+		 * @param int   $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_excerpt_request_body',
@@ -502,11 +523,11 @@ class OpenAI extends Provider {
 		 * @since 2.2.0
 		 * @hook classifai_azure_openai_title_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Prompt we are sending. Gets added before post content.
+		 * @param int    $post_id ID of post we are summarizing.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_azure_openai_title_prompt', $prompt, $post_id, $args );
 
@@ -524,16 +545,16 @@ class OpenAI extends Provider {
 		 * @since 2.2.0
 		 * @hook classifai_azure_openai_title_request_body
 		 *
-		 * @param {array} $body Request body that will be sent.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body Request body that will be sent.
+		 * @param int $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_title_request_body',
 			[
 				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id
@@ -608,11 +629,11 @@ class OpenAI extends Provider {
 		 * @since 2.3.0
 		 * @hook classifai_azure_openai_' . $args['resize_type'] . '_content_prompt
 		 *
-		 * @param {string} $prompt Resize prompt we are sending. Gets added as a system prompt.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Resize prompt we are sending. Gets added as a system prompt.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_azure_openai_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
 
@@ -622,10 +643,10 @@ class OpenAI extends Provider {
 		 * @since 2.3.0
 		 * @hook classifai_azure_openai_resize_content_request_body
 		 *
-		 * @param {array} $body Request body that will be sent.
-		 * @param {int}   $post_id ID of post.
+		 * @param array $body    Request body that will be sent.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_resize_content_request_body',
@@ -640,7 +661,7 @@ class OpenAI extends Provider {
 						'content' => '"""' . esc_html( $args['content'] ) . '"""',
 					],
 				],
-				'temperature' => 0.9,
+				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id
@@ -721,10 +742,10 @@ class OpenAI extends Provider {
 		 * @since 3.5.0
 		 * @hook classifai_azure_openai_key_takeaways_auto_run
 		 *
-		 * @param {bool} $run Whether to run the key takeaways generation.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param bool $run     Whether to run the key takeaways generation.
+		 * @param int  $post_id ID of post we are summarizing.
 		 *
-		 * @return {bool} Whether to run the key takeaways generation.
+		 * @return bool Whether to run the key takeaways generation.
 		 */
 		$run = apply_filters( 'classifai_azure_openai_key_takeaways_auto_run', true, $post_id );
 
@@ -751,10 +772,10 @@ class OpenAI extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_azure_openai_key_takeaways_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Azure. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param string $prompt  Prompt we are sending to Azure. Gets added before post content.
+		 * @param int    $post_id ID of post we are summarizing.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_azure_openai_key_takeaways_prompt', $prompt, $post_id );
 
@@ -764,10 +785,10 @@ class OpenAI extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_azure_openai_key_takeaways_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Azure.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body Request body that will be sent to Azure.
+		 * @param int $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_key_takeaways_request_body',
@@ -887,11 +908,11 @@ class OpenAI extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_azure_openai_content_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Azure OpenAI. Gets added before summary.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Prompt we are sending to Azure OpenAI. Gets added before summary.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_azure_openai_content_prompt', esc_textarea( get_default_prompt( $settings['prompt'] ) ?? $feature->prompt ), $post_id, $args );
 
@@ -946,10 +967,10 @@ class OpenAI extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_azure_openai_content_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Azure OpenAI.
-		 * @param {int} $post_id ID of post.
+		 * @param array $body Request body that will be sent to Azure OpenAI.
+		 * @param int $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_content_request_body',
@@ -1025,10 +1046,10 @@ class OpenAI extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_azure_openai_content
 		 *
-		 * @param {string} $content Content that will be sent.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param string $content Content that will be sent.
+		 * @param int    $post_id ID of post we are summarizing.
 		 *
-		 * @return {string} Content.
+		 * @return string Content.
 		 */
 		return apply_filters( 'classifai_azure_openai_content', $content, $post_id );
 	}
