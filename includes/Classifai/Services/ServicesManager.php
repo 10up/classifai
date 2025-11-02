@@ -265,7 +265,7 @@ class ServicesManager {
 		$license_key = $this->get_settings( 'license_key' );
 		?>
 		<input type="password" name="classifai_settings[license_key]" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>"/>
-		<br /><span class="description"><?php _e( __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ) );// @codingStandardsIgnoreLine ?></span>
+		<br /><span class="description"><?php _e( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' );// @codingStandardsIgnoreLine ?></span>
 		<?php
 	}
 
