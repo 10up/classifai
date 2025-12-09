@@ -251,6 +251,8 @@ class Grok extends Provider {
 	/**
 	 * Authenticate our credentials.
 	 *
+	 * @since 3.8.0 Added credential filtering support via classifai_provider_credentials filter.
+	 *
 	 * @param string $api_key Api Key.
 	 * @return array|WP_Error
 	 */
