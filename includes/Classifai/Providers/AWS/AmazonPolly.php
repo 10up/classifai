@@ -218,14 +218,26 @@ class AmazonPolly extends Provider {
 			}
 
 			if ( $is_credentials_changed ) {
+				// Get filtered credentials for authentication check.
+				$temp_settings = [
+					'access_key_id'     => $new_access_key_id,
+					'secret_access_key' => $new_secret_access_key,
+					'aws_region'        => $new_aws_region,
+				];
+				$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+					static::ID,
+					$this->feature_instance::ID,
+					$temp_settings
+				);
+
 				$new_settings[ static::ID ]['access_key_id']     = $new_access_key_id;
 				$new_settings[ static::ID ]['secret_access_key'] = $new_secret_access_key;
 				$new_settings[ static::ID ]['aws_region']        = $new_aws_region;
 				$new_settings[ static::ID ]['voices']            = $this->connect_to_service(
 					array(
-						'access_key_id'     => $new_access_key_id,
-						'secret_access_key' => $new_secret_access_key,
-						'aws_region'        => $new_aws_region,
+						'access_key_id'     => $credentials['access_key_id'] ?? $new_access_key_id,
+						'secret_access_key' => $credentials['secret_access_key'] ?? $new_secret_access_key,
+						'aws_region'        => $credentials['aws_region'] ?? $new_aws_region,
 					)
 				);
 
@@ -534,6 +546,16 @@ class AmazonPolly extends Provider {
 		);
 
 		$default = wp_parse_args( $aws_config, $default );
+
+		// Get filtered credentials if no config was passed.
+		if ( empty( $aws_config ) ) {
+			$credentials = $this->get_provider_credentials( $this->feature_instance::ID );
+			$default     = array_merge( $default, [
+				'access_key_id'     => $credentials['access_key_id'] ?? $default['access_key_id'],
+				'secret_access_key' => $credentials['secret_access_key'] ?? $default['secret_access_key'],
+				'aws_region'        => $credentials['aws_region'] ?? $default['aws_region'],
+			] );
+		}
 
 		// Return if credentials don't exist.
 		if ( empty( $default['access_key_id'] ) || empty( $default['secret_access_key'] ) ) {

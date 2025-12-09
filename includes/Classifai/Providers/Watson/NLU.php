@@ -371,10 +371,17 @@ class NLU extends Provider {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your credentials.', 'classifai' ) );
 		}
 
+		// Get filtered credentials for authentication check.
+		$credentials = \Classifai\Helpers\Credentials::get_credentials(
+			static::ID,
+			$this->feature_instance::ID,
+			$settings[ static::ID ]
+		);
+
 		$request           = new APIRequest();
-		$request->username = $settings[ static::ID ]['username'];
-		$request->password = $settings[ static::ID ]['password'];
-		$base_url          = trailingslashit( $settings[ static::ID ]['endpoint_url'] ) . 'v1/analyze';
+		$request->username = $credentials['username'] ?? $settings[ static::ID ]['username'];
+		$request->password = $credentials['password'] ?? $settings[ static::ID ]['password'];
+		$base_url          = trailingslashit( $credentials['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] ) . 'v1/analyze';
 		$url               = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
 		$options           = [
 			'body' => wp_json_encode(

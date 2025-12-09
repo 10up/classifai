@@ -63,8 +63,19 @@ trait GoogleAI {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your Google AI (Gemini) key.', 'classifai' ) );
 		}
 
+		// Get filtered credentials for authentication check.
+		if ( $this->feature_instance ) {
+			$temp_settings = [ 'api_key' => $api_key ];
+			$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+				static::ID,
+				$this->feature_instance::ID,
+				$temp_settings
+			);
+			$api_key = $credentials['api_key'] ?? $api_key;
+		}
+
 		// Make request to ensure credentials work.
-		$request  = new APIRequest( $api_key );
+		$request  = new APIRequest( $api_key, $this->feature_instance ? $this->feature_instance->get_option_name() : '', static::ID );
 		$response = $request->get( $this->model_url );
 
 		if ( is_wp_error( $response ) ) {

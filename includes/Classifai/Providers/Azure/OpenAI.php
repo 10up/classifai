@@ -218,10 +218,18 @@ class OpenAI extends Provider {
 			$is_deployment_same = $new_settings[ static::ID ]['deployment'] === $settings[ static::ID ]['deployment'];
 
 			if ( ! ( $is_authenticated && $is_endpoint_same && $is_api_key_same && $is_deployment_same ) ) {
+				// Get filtered credentials for authentication check.
+				$temp_settings = [ static::ID => $new_settings[ static::ID ] ];
+				$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+					static::ID,
+					$this->feature_instance::ID,
+					$temp_settings[ static::ID ]
+				);
+
 				$auth_check = $this->authenticate_credentials(
-					$new_settings[ static::ID ]['endpoint_url'],
-					$new_settings[ static::ID ]['api_key'],
-					$new_settings[ static::ID ]['deployment']
+					$credentials['endpoint_url'] ?? $new_settings[ static::ID ]['endpoint_url'],
+					$credentials['api_key'] ?? $new_settings[ static::ID ]['api_key'],
+					$credentials['deployment'] ?? $new_settings[ static::ID ]['deployment']
 				);
 
 				if ( is_wp_error( $auth_check ) ) {
@@ -262,9 +270,9 @@ class OpenAI extends Provider {
 	 * @return string
 	 */
 	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
-		$settings   = $feature->get_settings( static::ID );
-		$endpoint   = $settings['endpoint_url'] ?? '';
-		$deployment = $settings['deployment'] ?? '';
+		$credentials = $this->get_provider_credentials( $feature::ID );
+		$endpoint    = $credentials['endpoint_url'] ?? '';
+		$deployment  = $credentials['deployment'] ?? '';
 
 		if ( ! $endpoint ) {
 			return '';
@@ -453,12 +461,15 @@ class OpenAI extends Provider {
 			$post_id
 		);
 
+		// Get filtered credentials.
+		$credentials = $this->get_provider_credentials( $feature::ID );
+
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -560,12 +571,15 @@ class OpenAI extends Provider {
 			$post_id
 		);
 
+		// Get filtered credentials.
+		$credentials = $this->get_provider_credentials( $feature::ID );
+
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -667,12 +681,15 @@ class OpenAI extends Provider {
 			$post_id
 		);
 
+		// Get filtered credentials.
+		$credentials = $this->get_provider_credentials( $feature::ID );
+
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -828,12 +845,15 @@ class OpenAI extends Provider {
 			$post_id
 		);
 
+		// Get filtered credentials.
+		$credentials = $this->get_provider_credentials( $feature::ID );
+
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -981,12 +1001,15 @@ class OpenAI extends Provider {
 			$post_id
 		);
 
+		// Get filtered credentials.
+		$credentials = $this->get_provider_credentials( $feature::ID );
+
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),

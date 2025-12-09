@@ -218,9 +218,17 @@ class ComputerVision extends Provider {
 			$is_api_key_same  = $new_settings[ static::ID ]['api_key'] === $settings[ static::ID ]['api_key'];
 
 			if ( ! ( $is_authenticated && $is_endpoint_same && $is_api_key_same ) ) {
+				// Get filtered credentials for authentication check.
+				$temp_settings = [ static::ID => $new_settings[ static::ID ] ];
+				$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+					static::ID,
+					$this->feature_instance::ID,
+					$temp_settings[ static::ID ]
+				);
+
 				$auth_check = $this->authenticate_credentials(
-					$new_settings[ static::ID ]['endpoint_url'],
-					$new_settings[ static::ID ]['api_key']
+					$credentials['endpoint_url'] ?? $new_settings[ static::ID ]['endpoint_url'],
+					$credentials['api_key'] ?? $new_settings[ static::ID ]['api_key']
 				);
 
 				if ( is_wp_error( $auth_check ) ) {
@@ -331,8 +339,9 @@ class ComputerVision extends Provider {
 	 * @param int    $attachment_id Attachment ID.
 	 */
 	public function do_read_cron( string $operation_url, int $attachment_id ) {
-		$feature  = new PDFTextExtraction();
-		$settings = $feature->get_settings( static::ID );
+		$feature     = new PDFTextExtraction();
+		$raw_settings = $feature->get_settings( static::ID );
+		$settings     = $this->get_provider_credentials( $feature::ID );
 
 		( new Read( $settings, intval( $attachment_id ), $feature ) )->check_read_result( $operation_url );
 	}
@@ -351,8 +360,9 @@ class ComputerVision extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
 		}
 
-		$feature  = new ImageCropping();
-		$settings = $feature->get_settings( static::ID );
+		$feature       = new ImageCropping();
+		$raw_settings  = $feature->get_settings( static::ID );
+		$settings      = $this->get_provider_credentials( $feature::ID );
 
 		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Invalid data found. Please check your settings and try again.', 'classifai' ) );
@@ -547,7 +557,8 @@ class ComputerVision extends Provider {
 	 */
 	public function read_pdf( int $attachment_id ) {
 		$feature         = new PDFTextExtraction();
-		$settings        = $feature->get_settings( static::ID );
+		$raw_settings   = $feature->get_settings( static::ID );
+		$settings       = $this->get_provider_credentials( $feature::ID );
 		$should_read_pdf = $feature->is_feature_enabled();
 
 		if ( ! $should_read_pdf ) {
@@ -659,6 +670,9 @@ class ComputerVision extends Provider {
 
 		$endpoint_url = $this->prep_api_url( $feature );
 
+		// Get filtered credentials.
+		$credentials = $this->get_provider_credentials( $feature::ID );
+
 		/*
 		 * Azure AI Vision requires full image URL. So, if the file URL is relative,
 		 * then we transform it into a full URL.
@@ -671,7 +685,7 @@ class ComputerVision extends Provider {
 			$endpoint_url,
 			[
 				'headers' => [
-					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
+					'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 					'Content-Type'              => 'application/json',
 				],
 				/**
@@ -722,7 +736,7 @@ class ComputerVision extends Provider {
 	 * @return string
 	 */
 	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
-		$settings     = $feature->get_settings( static::ID );
+		$credentials  = $this->get_provider_credentials( $feature::ID );
 		$api_features = [];
 
 		if ( $feature instanceof DescriptiveTextGenerator && $feature->is_feature_enabled() && ! empty( $feature->get_alt_text_settings() ) ) {
@@ -737,7 +751,7 @@ class ComputerVision extends Provider {
 			$api_features[] = 'read';
 		}
 
-		$endpoint = add_query_arg( 'features', implode( ',', $api_features ), trailingslashit( $settings['endpoint_url'] ) . $this->analyze_url );
+		$endpoint = add_query_arg( 'features', implode( ',', $api_features ), trailingslashit( $credentials['endpoint_url'] ?? '' ) . $this->analyze_url );
 
 		return $endpoint;
 	}

@@ -203,10 +203,13 @@ class TextToSpeech extends Provider {
 			$post_content
 		);
 
+		// Get filtered credentials.
+		$credentials = $this->get_provider_credentials( $this->feature_instance::ID );
+
 		// Make our API request.
 		$response = $this->request(
 			$this->get_api_url( $this->api_path . '/' . $voice_id ),
-			$settings['api_key'] ?? '',
+			$credentials['api_key'] ?? $settings['api_key'] ?? '',
 			'post',
 			[
 				'body'    => wp_json_encode( $body ),

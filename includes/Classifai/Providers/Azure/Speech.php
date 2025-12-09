@@ -147,12 +147,23 @@ class Speech extends Provider {
 			}
 
 			if ( $is_credentials_changed ) {
+				// Get filtered credentials for authentication check.
+				$temp_settings = [ static::ID => $new_settings[ static::ID ] ];
+				$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+					static::ID,
+					$this->feature_instance::ID,
+					$temp_settings[ static::ID ]
+				);
+
+				$filtered_url = $credentials['endpoint_url'] ?? $new_url;
+				$filtered_key = $credentials['api_key'] ?? $new_key;
+
 				$new_settings[ static::ID ]['endpoint_url'] = $new_url;
 				$new_settings[ static::ID ]['api_key']      = $new_key;
 				$new_settings[ static::ID ]['voices']       = $this->connect_to_service(
 					array(
-						'endpoint_url' => $new_url,
-						'api_key'      => $new_key,
+						'endpoint_url' => $filtered_url,
+						'api_key'      => $filtered_key,
 					)
 				);
 
@@ -363,19 +374,22 @@ class Speech extends Provider {
 			$post_content
 		);
 
+		// Get filtered credentials.
+		$credentials = $this->get_provider_credentials( $this->feature_instance::ID );
+
 		// Request parameters.
 		$request_params = array(
 			'method'  => 'POST',
 			'body'    => $request_body,
 			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			'headers' => array(
-				'Ocp-Apim-Subscription-Key' => $settings[ static::ID ]['api_key'],
+				'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 				'Content-Type'              => 'application/ssml+xml',
 				'X-Microsoft-OutputFormat'  => 'audio-16khz-128kbitrate-mono-mp3',
 			),
 		);
 
-		$remote_url = sprintf( '%s%s', $settings[ static::ID ]['endpoint_url'], self::API_PATH );
+		$remote_url = sprintf( '%s%s', $credentials['endpoint_url'] ?? '', self::API_PATH );
 		$response   = safe_wp_remote_post( $remote_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {

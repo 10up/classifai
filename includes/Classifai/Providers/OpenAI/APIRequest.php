@@ -35,14 +35,23 @@ class APIRequest {
 	public $feature;
 
 	/**
+	 * The provider ID.
+	 *
+	 * @var string
+	 */
+	public $provider_id;
+
+	/**
 	 * OpenAI APIRequest constructor.
 	 *
-	 * @param string $api_key OpenAI API key.
-	 * @param string $feature Feature name.
+	 * @param string $api_key    OpenAI API key.
+	 * @param string $feature    Feature name.
+	 * @param string $provider_id Provider ID (optional, for credential filtering).
 	 */
-	public function __construct( string $api_key = '', string $feature = '' ) {
-		$this->api_key = $api_key;
-		$this->feature = $feature;
+	public function __construct( string $api_key = '', string $feature = '', string $provider_id = '' ) {
+		$this->api_key    = $api_key;
+		$this->feature    = $feature;
+		$this->provider_id = $provider_id;
 	}
 
 	/**
@@ -342,6 +351,21 @@ class APIRequest {
 	 * @return string
 	 */
 	public function get_api_key() {
+		// If provider_id is set, filter the API key.
+		if ( ! empty( $this->provider_id ) && ! empty( $this->feature ) ) {
+			$settings = [
+				'api_key' => $this->api_key,
+			];
+
+			$credentials = \Classifai\Helpers\Credentials::get_credentials(
+				$this->provider_id,
+				$this->feature,
+				$settings
+			);
+
+			return $credentials['api_key'] ?? $this->api_key;
+		}
+
 		return $this->api_key;
 	}
 }

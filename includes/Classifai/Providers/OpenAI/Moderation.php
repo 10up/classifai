@@ -202,7 +202,7 @@ class Moderation extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Moderation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), static::ID );
 		$comment = get_comment( $comment_id );
 
 		/**

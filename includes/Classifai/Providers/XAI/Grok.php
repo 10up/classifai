@@ -260,8 +260,19 @@ class Grok extends Provider {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your xAI API key.', 'classifai' ) );
 		}
 
+		// Get filtered credentials for authentication check.
+		if ( $this->feature_instance ) {
+			$temp_settings = [ 'api_key' => $api_key ];
+			$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+				static::ID,
+				$this->feature_instance::ID,
+				$temp_settings
+			);
+			$api_key = $credentials['api_key'] ?? $api_key;
+		}
+
 		// Make request to ensure credentials work.
-		$request  = new APIRequest( $api_key );
+		$request  = new APIRequest( $api_key, $this->feature_instance ? $this->feature_instance->get_option_name() : '', static::ID );
 		$response = $request->get( $this->models_url );
 
 		if ( is_wp_error( $response ) ) {
@@ -367,7 +378,7 @@ class Grok extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Descriptive text generation is disabled or xAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), static::ID );
 
 		/**
 		 * Filter the prompt we will send to xAI Grok.
@@ -473,7 +484,7 @@ class Grok extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), static::ID );
 
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
@@ -582,7 +593,7 @@ class Grok extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or xAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), static::ID );
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
@@ -687,7 +698,7 @@ class Grok extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), static::ID );
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );

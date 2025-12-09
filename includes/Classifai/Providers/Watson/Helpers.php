@@ -16,10 +16,20 @@ use Classifai\Features\Classification;
  * @return string
  */
 function get_api_url(): string {
-	$settings = ( new Classification() )->get_settings();
+	$feature  = new Classification();
+	$settings = $feature->get_settings();
 	$creds    = ! empty( $settings[ NLU::ID ] ) ? $settings[ NLU::ID ] : [];
 
-	if ( ! empty( $creds['endpoint_url'] ) ) {
+	// Get filtered credentials.
+	$credentials = \Classifai\Helpers\Credentials::get_credentials(
+		NLU::ID,
+		$feature::ID,
+		$creds
+	);
+
+	if ( ! empty( $credentials['endpoint_url'] ) ) {
+		return $credentials['endpoint_url'];
+	} elseif ( ! empty( $creds['endpoint_url'] ) ) {
 		return $creds['endpoint_url'];
 	} elseif ( defined( 'WATSON_URL' ) ) {
 		return WATSON_URL;
@@ -37,8 +47,17 @@ function get_api_url(): string {
  * @return string
  */
 function get_username(): string {
-	$settings = ( new Classification() )->get_settings( NLU::ID );
-	$username = ! empty( $settings['username'] ) ? $settings['username'] : '';
+	$feature  = new Classification();
+	$settings = $feature->get_settings( NLU::ID );
+
+	// Get filtered credentials.
+	$credentials = \Classifai\Helpers\Credentials::get_credentials(
+		NLU::ID,
+		$feature::ID,
+		$settings
+	);
+
+	$username = ! empty( $credentials['username'] ) ? $credentials['username'] : ( ! empty( $settings['username'] ) ? $settings['username'] : '' );
 
 	if ( ! empty( $username ) ) {
 		return $username;
@@ -58,8 +77,17 @@ function get_username(): string {
  * @return string
  */
 function get_password(): string {
-	$settings = ( new Classification() )->get_settings( NLU::ID );
-	$password = ! empty( $settings['password'] ) ? $settings['password'] : '';
+	$feature  = new Classification();
+	$settings = $feature->get_settings( NLU::ID );
+
+	// Get filtered credentials.
+	$credentials = \Classifai\Helpers\Credentials::get_credentials(
+		NLU::ID,
+		$feature::ID,
+		$settings
+	);
+
+	$password = ! empty( $credentials['password'] ) ? $credentials['password'] : ( ! empty( $settings['password'] ) ? $settings['password'] : '' );
 
 	if ( ! empty( $password ) ) {
 		return $password;

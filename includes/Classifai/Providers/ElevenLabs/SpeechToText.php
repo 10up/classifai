@@ -201,10 +201,13 @@ class SpeechToText extends Provider {
 
 		$payload .= '--' . $boundary . '--';
 
+		// Get filtered credentials.
+		$credentials = $this->get_provider_credentials( $this->feature_instance::ID );
+
 		// Make our API request.
 		$response = $this->request(
 			$this->get_api_url( $this->api_path ),
-			$settings['api_key'] ?? '',
+			$credentials['api_key'] ?? $settings['api_key'] ?? '',
 			'post',
 			[
 				'body'    => $payload,
