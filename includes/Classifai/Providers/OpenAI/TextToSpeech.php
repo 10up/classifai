@@ -186,7 +186,7 @@ class TextToSpeech extends Provider {
 					'nova'    => __( 'Nova (female)', 'classifai' ),
 					'shimmer' => __( 'Shimmer (female)', 'classifai' ),
 				],
-				'default_value' => $settings['voice'],
+				'default_value' => $settings['alloy'],
 				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
 					'' :
 					sprintf(
