@@ -7,10 +7,6 @@ namespace Classifai\Providers\Watson;
 
 use Classifai\Features\Classification;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
  *
