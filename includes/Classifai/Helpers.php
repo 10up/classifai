@@ -12,6 +12,10 @@ use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 use WP_Error;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Miscellaneous Helper functions to access different parts of the
  * ClassifAI plugin.

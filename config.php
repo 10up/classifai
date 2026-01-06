@@ -3,6 +3,10 @@
  * Global Constants.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $plugin_version = '3.7.0';
 
 // Useful global constants

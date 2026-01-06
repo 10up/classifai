@@ -15,6 +15,10 @@ use function Classifai\get_services_menu;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\is_elasticpress_installed;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Settings {
 
 	/**

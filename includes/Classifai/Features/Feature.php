@@ -4,9 +4,14 @@ namespace Classifai\Features;
 
 use WP_REST_Request;
 use WP_Error;
+
 use function Classifai\find_provider_class;
 use function Classifai\should_use_legacy_settings_panel;
 use function Classifai\get_asset_info;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 abstract class Feature {
 	/**

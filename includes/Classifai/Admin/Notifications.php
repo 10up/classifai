@@ -7,6 +7,10 @@ use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\Classification;
 use function Classifai\should_use_legacy_settings_panel;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Notifications {
 
 	/**
@@ -284,7 +288,7 @@ class Notifications {
 		$nonce          = wp_create_nonce( 'classifai_dismissible_notice' );
 		$admin_ajax_url = esc_url( admin_url( 'admin-ajax.php' ) );
 
-		/* phpcs:disable Squiz.PHP.Heredoc.NotAllowed */
+		// phpcs:disable Squiz.PHP.Heredoc.NotAllowed, PluginCheck.CodeAnalysis.Heredoc.NotAllowed
 		$script = <<<EOD
 jQuery( function() {
 	const dismissNotices = document.querySelectorAll( '.classifai-dismissible-notice' );
