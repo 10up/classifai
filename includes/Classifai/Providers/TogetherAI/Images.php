@@ -232,7 +232,8 @@ class Images extends Provider {
 		$responses[] = $request->post(
 			$this->get_api_url( $this->api_path ),
 			[
-				'body' => wp_json_encode( $body ),
+				'body'    => wp_json_encode( $body ),
+				'use_vip' => false,
 			]
 		);
 

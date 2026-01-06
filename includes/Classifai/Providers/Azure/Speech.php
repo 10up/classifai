@@ -373,6 +373,7 @@ class Speech extends Provider {
 				'Content-Type'              => 'application/ssml+xml',
 				'X-Microsoft-OutputFormat'  => 'audio-16khz-128kbitrate-mono-mp3',
 			),
+			'use_vip' => false,
 		);
 
 		$remote_url = sprintf( '%s%s', $settings[ static::ID ]['endpoint_url'], self::API_PATH );

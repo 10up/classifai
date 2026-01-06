@@ -389,7 +389,8 @@ class Images extends Provider {
 				$responses[] = $request->post(
 					$this->get_api_url(),
 					[
-						'body' => wp_json_encode( $body ),
+						'body'    => wp_json_encode( $body ),
+						'use_vip' => false,
 					]
 				);
 			}
@@ -397,7 +398,8 @@ class Images extends Provider {
 			$responses[] = $request->post(
 				$this->get_api_url(),
 				[
-					'body' => wp_json_encode( $body ),
+					'body'    => wp_json_encode( $body ),
+					'use_vip' => false,
 				]
 			);
 		}

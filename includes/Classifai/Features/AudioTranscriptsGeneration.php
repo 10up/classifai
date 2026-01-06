@@ -378,6 +378,7 @@ class AudioTranscriptsGeneration extends Feature {
 			$url,
 			[
 				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'use_vip' => false,
 			]
 		);
 

@@ -421,7 +421,8 @@ class TextToSpeech extends Provider {
 		$response = $request->post(
 			$this->get_api_url(),
 			[
-				'body' => wp_json_encode( $request_body ),
+				'body'    => wp_json_encode( $request_body ),
+				'use_vip' => false,
 			]
 		);
 

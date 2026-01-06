@@ -237,6 +237,7 @@ class APIRequest {
 					'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
 				],
 				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'use_vip' => false,
 			],
 			$url,
 			$body,

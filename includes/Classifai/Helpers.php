@@ -864,7 +864,7 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
 	}
 
 	// Use VIP-safe wrapper if available and wanted. Some requests need a longer timeout than VIP allows.
-	if ( function_exists( 'vip_safe_wp_remote_request' ) && $use_vip ) {
+	if ( function_exists( 'vip_safe_wp_remote_request' ) && (bool) $use_vip ) {
 		$fallback  = '';
 		$threshold = 3;
 		$retry     = 20;

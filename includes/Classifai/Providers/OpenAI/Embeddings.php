@@ -1489,7 +1489,8 @@ class Embeddings extends Provider {
 		$response = $request->post(
 			$this->get_api_url(),
 			[
-				'body' => wp_json_encode( $body ),
+				'body'    => wp_json_encode( $body ),
+				'use_vip' => false,
 			]
 		);
 
@@ -1565,7 +1566,8 @@ class Embeddings extends Provider {
 		$response = $request->post(
 			$this->get_api_url(),
 			[
-				'body' => wp_json_encode( $body ),
+				'body'    => wp_json_encode( $body ),
+				'use_vip' => false,
 			]
 		);
 

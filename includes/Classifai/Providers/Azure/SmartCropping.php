@@ -250,6 +250,7 @@ class SmartCropping {
 					'Content-Type'              => 'application/json',
 					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
 				],
+				'use_vip' => false,
 			]
 		);
 

@@ -691,6 +691,7 @@ class ComputerVision extends Provider {
 					60
 				),
 				'body'    => '{"url":"' . $image_url . '"}',
+				'use_vip' => false,
 			]
 		);
 

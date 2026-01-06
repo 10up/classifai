@@ -211,6 +211,7 @@ class SpeechToText extends Provider {
 				'headers' => [
 					'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
 				],
+				'use_vip' => false,
 			]
 		);
 

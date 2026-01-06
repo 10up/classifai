@@ -213,6 +213,7 @@ class TextToSpeech extends Provider {
 				'headers' => [
 					'Content-Type' => 'application/json',
 				],
+				'use_vip' => false,
 			]
 		);
 
