@@ -40,7 +40,7 @@ You are an assistant that generates image tags. You will be provided with an ima
 - Another tag
 - ...
 EOD;
-	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
+	// phpcs:enable
 
 	/**
 	 * Constructor.
