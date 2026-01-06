@@ -46,6 +46,11 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "phpstan/extension-installer": true
+    },
+    "audit": {
+      "ignore": {
+        "PKSA-dxyf-6n16-t87m": "Latest version of aws/aws-sdk-php that we can use as newer versions drop support for PHP 7.4"
+      }
     }
   },
   "archive": {
