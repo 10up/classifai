@@ -1,6 +1,10 @@
 <?php
 namespace Classifai;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Plugin {
 
 	/**

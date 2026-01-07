@@ -5,6 +5,10 @@ namespace Classifai\Admin;
 use Classifai\Plugin;
 use Classifai\Services\ServicesManager;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Onboarding {
 
 	/**

@@ -15,6 +15,10 @@
  * Domain Path:       /languages
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Get the minimum version of PHP required by this plugin.
  *

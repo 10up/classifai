@@ -10,6 +10,10 @@ use WP_Error;
 
 use function Classifai\clean_input;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ImageCropping
  */
