@@ -5,6 +5,10 @@
  * @package ClassifAI
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $onboarding = new Classifai\Admin\Onboarding();
 $args       = array(
 	'step'       => 2,

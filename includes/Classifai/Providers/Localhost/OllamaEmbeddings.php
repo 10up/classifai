@@ -17,6 +17,10 @@ use WP_Error;
 
 use function Classifai\should_use_legacy_settings_panel;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Ollama Embeddings class
  */

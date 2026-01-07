@@ -15,6 +15,10 @@ use function Classifai\safe_wp_remote_get;
 use function Classifai\is_remote_url;
 use function Classifai\is_local_path;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class AudioTranscriptsGeneration
  */

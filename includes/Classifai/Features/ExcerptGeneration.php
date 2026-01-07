@@ -16,6 +16,10 @@ use WP_Error;
 use function Classifai\get_asset_info;
 use function Classifai\sanitize_prompts;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ExcerptGeneration
  */

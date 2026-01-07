@@ -14,6 +14,10 @@ use WP_Error;
 
 use function Classifai\get_classification_feature_taxonomy;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class NLU extends Provider {
 
 	const ID = 'ibm_watson_nlu';
