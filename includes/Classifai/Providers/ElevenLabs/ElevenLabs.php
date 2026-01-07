@@ -219,7 +219,7 @@ trait ElevenLabs {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your ElevenLabs API key.', 'classifai' ) );
 		}
 
-		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get' );
+		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get', [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -260,7 +260,7 @@ trait ElevenLabs {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your ElevenLabs API key.', 'classifai' ) );
 		}
 
-		$response = $this->request( $this->get_api_url( 'voices?per_page=100' ), $api_key, 'get' );
+		$response = $this->request( $this->get_api_url( 'voices?per_page=100' ), $api_key, 'get', [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;

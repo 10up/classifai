@@ -229,6 +229,7 @@ class StableDiffusion extends Provider {
 			$this->get_api_model_url( $default['endpoint_url'] ),
 			[
 				'timeout' => 30, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'use_vip' => true,
 			]
 		);
 

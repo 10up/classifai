@@ -377,6 +377,7 @@ class ServicesManager {
 					'license_key' => $license_key,
 					'email'       => $email,
 				],
+				'use_vip' => true,
 			]
 		);
 

@@ -207,6 +207,7 @@ class Speech extends Provider {
 				'Ocp-Apim-Subscription-Key' => $default['api_key'],
 				'Content-Type'              => 'application/json',
 			),
+			'use_vip' => true,
 		);
 
 		// Create request URL.

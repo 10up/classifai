@@ -262,7 +262,7 @@ class Grok extends Provider {
 
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( $api_key );
-		$response = $request->get( $this->models_url );
+		$response = $request->get( $this->models_url, [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
