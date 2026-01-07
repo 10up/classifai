@@ -184,6 +184,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		} elseif ( ! empty( $args ) ) {
 			$text = $args[0];
 		} else {
+			$text = '';
 			\WP_CLI::error( 'Please specify text to classify' );
 		}
 
