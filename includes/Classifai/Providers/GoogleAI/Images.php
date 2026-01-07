@@ -9,6 +9,10 @@ use Classifai\Features\ImageGeneration;
 use Classifai\Providers\Provider;
 use WP_Error;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Images extends Provider {
 
 	use \Classifai\Providers\GoogleAI\GoogleAI;

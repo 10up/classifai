@@ -11,6 +11,10 @@ use WP_Error;
 use function Classifai\attachment_is_pdf;
 use function Classifai\clean_input;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class PDFTextExtraction
  */

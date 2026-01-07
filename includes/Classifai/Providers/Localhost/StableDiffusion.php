@@ -10,6 +10,10 @@ use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Features\ImageGeneration;
 use WP_Error;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Stable Diffusion class
  */

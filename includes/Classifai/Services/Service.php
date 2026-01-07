@@ -5,6 +5,10 @@
 
 namespace Classifai\Services;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 abstract class Service {
 
 	/**

@@ -8,6 +8,10 @@
 
 namespace Classifai\Admin;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Adds information useful for debugging to the Site Health screen introduced to core in 5.2.
  *

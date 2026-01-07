@@ -10,6 +10,10 @@ use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Features\ImageGeneration;
 use WP_Error;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Images extends Provider {
 
 	use \Classifai\Providers\TogetherAI\TogetherAI;

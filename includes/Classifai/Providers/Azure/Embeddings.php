@@ -14,6 +14,10 @@ use Classifai\EmbeddingsScheduler;
 use WP_Error;
 use function Classifai\safe_wp_remote_post;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Embeddings extends OpenAI {
 	const ID = 'azure_openai_embeddings';
 

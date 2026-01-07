@@ -8,6 +8,10 @@ namespace Classifai\Services;
 use function Classifai\should_use_legacy_settings_panel;
 use function Classifai\safe_wp_remote_post;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class ServicesManager {
 
 	/**

@@ -8,6 +8,10 @@ use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class Moderation
  */
