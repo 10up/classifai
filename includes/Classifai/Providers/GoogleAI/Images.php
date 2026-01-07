@@ -315,8 +315,7 @@ class Images extends Provider {
 		$response = $request->post(
 			trailingslashit( $this->get_api_url() ) . 'models/' . $this->get_model() . ':predict',
 			[
-				'body'    => wp_json_encode( $body ),
-				'use_vip' => false,
+				'body' => wp_json_encode( $body ),
 			]
 		);
 

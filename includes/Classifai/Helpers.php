@@ -846,7 +846,7 @@ function is_local_path( string $resource_ref ): bool {
 function safe_wp_remote_request( string $method, string $url, array $args = [] ) {
 	$method         = strtoupper( $method );
 	$args['method'] = $method;
-	$use_vip        = $args['use_vip'] ?? true;
+	$use_vip        = $args['use_vip'] ?? false;
 
 	unset( $args['use_vip'] );
 

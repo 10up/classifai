@@ -337,7 +337,6 @@ class StableDiffusion extends Provider {
 				[
 					'body'    => wp_json_encode( $body ),
 					'timeout' => 180, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-					'use_vip' => false,
 				]
 			);
 		}

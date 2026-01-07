@@ -337,8 +337,7 @@ class ChatGPT extends Provider {
 		$response = $request->post(
 			$this->chatgpt_url,
 			[
-				'body'    => wp_json_encode( $body ),
-				'use_vip' => false,
+				'body' => wp_json_encode( $body ),
 			]
 		);
 
@@ -439,8 +438,7 @@ class ChatGPT extends Provider {
 		$response = $request->post(
 			$this->chatgpt_url,
 			[
-				'body'    => wp_json_encode( $body ),
-				'use_vip' => false,
+				'body' => wp_json_encode( $body ),
 			]
 		);
 
@@ -551,8 +549,7 @@ class ChatGPT extends Provider {
 		$response = $request->post(
 			$this->chatgpt_url,
 			[
-				'body'    => wp_json_encode( $body ),
-				'use_vip' => false,
+				'body' => wp_json_encode( $body ),
 			]
 		);
 

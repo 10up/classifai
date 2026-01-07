@@ -425,8 +425,7 @@ class Grok extends Provider {
 		$response = $request->post(
 			$this->completions_url,
 			[
-				'body'    => wp_json_encode( $body ),
-				'use_vip' => false,
+				'body' => wp_json_encode( $body ),
 			]
 		);
 

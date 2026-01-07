@@ -1006,7 +1006,6 @@ class Embeddings extends OpenAI {
 				],
 				'body'    => wp_json_encode( $body ),
 				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-				'use_vip' => false,
 			]
 		);
 		$response = $this->get_result( $response );
@@ -1086,7 +1085,6 @@ class Embeddings extends OpenAI {
 				],
 				'body'    => wp_json_encode( $body ),
 				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-				'use_vip' => false,
 			]
 		);
 		$response = $this->get_result( $response );
