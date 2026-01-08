@@ -763,6 +763,7 @@ class ComputerVision extends Provider {
 					'Content-Type'              => 'application/json',
 				],
 				'body'    => '{"url":"https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/header.png"}',
+				'use_vip' => true,
 			]
 		);
 

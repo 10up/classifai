@@ -381,7 +381,7 @@ class NLU extends Provider {
 		$base_url          = trailingslashit( $settings[ static::ID ]['endpoint_url'] ) . 'v1/analyze';
 		$url               = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
 		$options           = [
-			'body' => wp_json_encode(
+			'body'    => wp_json_encode(
 				[
 					'text'     => 'Lorem ipsum dolor sit amet.',
 					'language' => 'en',
@@ -393,6 +393,7 @@ class NLU extends Provider {
 					],
 				]
 			),
+			'use_vip' => true,
 		];
 
 		$response = $request->post( $url, $options );

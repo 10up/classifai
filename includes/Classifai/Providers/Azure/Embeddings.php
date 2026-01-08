@@ -296,6 +296,7 @@ class Embeddings extends OpenAI {
 						'dimensions' => $this->get_dimensions(),
 					]
 				),
+				'use_vip' => true,
 			]
 		);
 
