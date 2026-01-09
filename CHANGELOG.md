@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 ### Security
 
 - Bump `tar-fs` from 3.1.0 to 3.1.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1013](https://github.com/10up/classifai/pull/1013)).
+- Bump `react-router-dom` and `react-router` from 7.11.0 to 7.12.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1027](https://github.com/10up/classifai/pull/1027)).
 
 ### Developer
 
