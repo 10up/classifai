@@ -9,6 +9,10 @@ use ElasticPress\Indexables;
 use ElasticPress\Elasticsearch;
 use WP_Error;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * ElasticPress Integration class.
  */

@@ -10,10 +10,10 @@
   "type": "wordpress-plugin",
   "license": "GPLv2",
   "require": {
+    "aws/aws-sdk-php": "3.337.3",
     "php": ">=7.4",
-    "yahnis-elsts/plugin-update-checker": "5.1",
-    "aws/aws-sdk-php": "^3.300",
-    "woocommerce/action-scheduler": "3.8.1"
+    "woocommerce/action-scheduler": "3.8.1",
+    "yahnis-elsts/plugin-update-checker": "5.1"
   },
   "autoload": {
     "psr-4": {
@@ -25,15 +25,15 @@
     ]
   },
   "require-dev": {
-    "10up/phpcs-composer": "^3.0",
-    "yoast/phpunit-polyfills": "^1.0.0",
-    "szepeviktor/phpstan-wordpress": "^2.0.1",
-    "phpstan/extension-installer": "1.4.x-dev",
+    "10up/phpcs-composer": "3.0.1",
+    "johnbillion/wp-compat": "^1.4.0",
     "php-stubs/wp-cli-stubs": "dev-master",
-    "johnbillion/wp-compat": "^1.1.0",
-    "phpstan/phpstan-deprecation-rules": "^2.0.1",
-    "sirbrillig/phpcs-changed": "^2.11",
-    "phpcompatibility/php-compatibility": "dev-develop as 9.99.99"
+    "phpcompatibility/php-compatibility": "10.0.0-alpha2 as 9.99.99",
+    "phpstan/extension-installer": "1.4.x-dev",
+    "phpstan/phpstan-deprecation-rules": "2.0.3",
+    "sirbrillig/phpcs-changed": "^2.12.0",
+    "szepeviktor/phpstan-wordpress": "^2.0.3",
+    "yoast/phpunit-polyfills": "^1.0.0"
   },
   "scripts": {
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",
@@ -46,6 +46,11 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "phpstan/extension-installer": true
+    },
+    "audit": {
+      "ignore": {
+        "PKSA-dxyf-6n16-t87m": "Latest version of aws/aws-sdk-php that we can use as newer versions drop support for PHP 7.4"
+      }
     }
   },
   "archive": {

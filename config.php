@@ -3,7 +3,11 @@
  * Global Constants.
  */
 
-$plugin_version = '3.7.0';
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+$plugin_version = '3.7.1';
 
 // Useful global constants
 classifai_define( 'CLASSIFAI_PLUGIN', __DIR__ . '/classifai.php' );

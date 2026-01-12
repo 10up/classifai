@@ -30,7 +30,7 @@ jobs:
         cache: npm
 
     - name: Install Node dependencies
-      run: npm ci --omit=optional
+      run: npm ci
 
     - name: Get updated JS files
       id: changed-files

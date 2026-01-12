@@ -832,9 +832,13 @@ function is_local_path( string $resource_ref ): bool {
 /**
  * Safe generic HTTP wrapper compatible with WP VIP.
  *
- * - Use vip_safe_wp_remote_request() when available.
- * - Fall back to wp_remote_request() on other scenarios.
- * - Respect all call args (timeout, headers, method, etc).
+ * By default this function uses the WordPress HTTP API for requests,
+ * to use vip_safe_wp_remote_request() (if available) specify
+ * `$args['use_vip'] = true`.
+ *
+ * As a general guide, prompt requests should use the WordPress HTTP API;
+ * administrative requests (API authentication, scope requests) should use the
+ * WordPress VIP API if available.
  *
  * @since 3.6.0
  *
@@ -846,6 +850,9 @@ function is_local_path( string $resource_ref ): bool {
 function safe_wp_remote_request( string $method, string $url, array $args = [] ) {
 	$method         = strtoupper( $method );
 	$args['method'] = $method;
+	$use_vip        = $args['use_vip'] ?? false;
+
+	unset( $args['use_vip'] );
 
 	// Respect timeout if caller set.
 	$timeout = isset( $args['timeout'] ) ? (int) $args['timeout'] : 20;
@@ -860,7 +867,8 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
 		$args['headers']['User-Agent'] = $cached_user_agent;
 	}
 
-	if ( function_exists( 'vip_safe_wp_remote_request' ) ) {
+	// Use VIP-safe wrapper if available and wanted. Some requests need a longer timeout than VIP allows.
+	if ( function_exists( 'vip_safe_wp_remote_request' ) && (bool) $use_vip ) {
 		$fallback  = '';
 		$threshold = 3;
 		$retry     = 20;
@@ -925,9 +933,10 @@ function safe_file_get_contents( string $file_path, array $args = [] ) {
 /**
  * Safe GET wrapper compatible with WP VIP.
  *
- * - Use vip_safe_wp_remote_get() when available.
- * - Fall back to wp_remote_get() on other scenarios.
- * - Respect all call args (timeout, headers, etc).
+ * - By default will use the WordPress HTTP API for requests.
+ * - If `$args['use_vip'] = true` and vip_safe_wp_remote_get() is available,
+ * then vip_safe_wp_remote_get() will be used instead.
+ * - Respects all call args (timeout, headers, etc).
  *
  * @since 3.6.0
  *
@@ -942,9 +951,10 @@ function safe_wp_remote_get( string $url, array $args = [] ) {
 /**
  * Safe POST wrapper compatible with WP VIP.
  *
- * - Use vip_safe_wp_remote_post() when available.
- * - Fall back to wp_remote_post() on other scenarios.
- * - Respect all call args (timeout, headers, etc).
+ * - By default will use the WordPress HTTP API for requests.
+ * - If `$args['use_vip'] = true` and vip_safe_wp_remote_post() is available,
+ * then vip_safe_wp_remote_post() will be used instead.
+ * - Respects all call args (timeout, headers, etc).
  *
  * @since 3.6.0
  *

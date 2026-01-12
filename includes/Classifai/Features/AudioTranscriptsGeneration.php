@@ -15,6 +15,10 @@ use function Classifai\safe_wp_remote_get;
 use function Classifai\is_remote_url;
 use function Classifai\is_local_path;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class AudioTranscriptsGeneration
  */
@@ -410,7 +414,7 @@ class AudioTranscriptsGeneration extends Feature {
 		if ( function_exists( 'finfo_open' ) ) {
 			$finfo          = finfo_open( FILEINFO_MIME_TYPE );
 			$real_mime_type = finfo_buffer( $finfo, $body );
-			finfo_close( $finfo );
+			finfo_close( $finfo ); // phpcs:ignore PHPCompatibility.FunctionUse.RemovedFunctions.finfo_closeDeprecated
 		}
 
 		$supported_audio_mime_types = [
