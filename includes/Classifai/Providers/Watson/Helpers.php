@@ -7,6 +7,11 @@ namespace Classifai\Providers\Watson;
 
 use Classifai\Features\Classification;
 
+// Using return instead of exit to prevent errors running PHPCS.
+if ( ! defined( 'ABSPATH' ) ) {
+	return;
+}
+
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
  *

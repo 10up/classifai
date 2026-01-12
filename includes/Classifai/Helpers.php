@@ -12,6 +12,11 @@ use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 use WP_Error;
 
+// Using return instead of exit to prevent errors running PHPCS.
+if ( ! defined( 'ABSPATH' ) ) {
+	return;
+}
+
 /**
  * Miscellaneous Helper functions to access different parts of the
  * ClassifAI plugin.
