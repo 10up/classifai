@@ -80,6 +80,8 @@ namespace Aws;
  * @method \Aws\MultiRegionClient createMultiRegionBackup(array $args = [])
  * @method \Aws\BackupGateway\BackupGatewayClient createBackupGateway(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionBackupGateway(array $args = [])
+ * @method \Aws\BackupSearch\BackupSearchClient createBackupSearch(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionBackupSearch(array $args = [])
  * @method \Aws\Batch\BatchClient createBatch(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionBatch(array $args = [])
  * @method \Aws\Bedrock\BedrockClient createBedrock(array $args = [])
@@ -364,10 +366,6 @@ namespace Aws;
  * @method \Aws\MultiRegionClient createMultiRegionInternetMonitor(array $args = [])
  * @method \Aws\Invoicing\InvoicingClient createInvoicing(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionInvoicing(array $args = [])
- * @method \Aws\IoT1ClickDevicesService\IoT1ClickDevicesServiceClient createIoT1ClickDevicesService(array $args = [])
- * @method \Aws\MultiRegionClient createMultiRegionIoT1ClickDevicesService(array $args = [])
- * @method \Aws\IoT1ClickProjects\IoT1ClickProjectsClient createIoT1ClickProjects(array $args = [])
- * @method \Aws\MultiRegionClient createMultiRegionIoT1ClickProjects(array $args = [])
  * @method \Aws\IoTAnalytics\IoTAnalyticsClient createIoTAnalytics(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionIoTAnalytics(array $args = [])
  * @method \Aws\IoTDeviceAdvisor\IoTDeviceAdvisorClient createIoTDeviceAdvisor(array $args = [])
@@ -813,7 +811,7 @@ namespace Aws;
  */
 class Sdk
 {
-    const VERSION = '3.334.2';
+    const VERSION = '3.337.3';
 
     /** @var array Arguments for creating clients */
     private $args;

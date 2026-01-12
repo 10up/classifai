@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae
+class ComposerStaticInit6169bb87673f25ee33f59094c2c17502
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -19,70 +19,70 @@ class ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae
     );
 
     public static $prefixLengthsPsr4 = array (
-        'S' => 
+        'S' =>
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
         ),
-        'P' => 
+        'P' =>
         array (
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
         ),
-        'J' => 
+        'J' =>
         array (
             'JmesPath\\' => 9,
         ),
-        'G' => 
+        'G' =>
         array (
             'GuzzleHttp\\Psr7\\' => 16,
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
         ),
-        'C' => 
+        'C' =>
         array (
             'Classifai\\' => 10,
         ),
-        'A' => 
+        'A' =>
         array (
             'Aws\\' => 4,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Symfony\\Polyfill\\Mbstring\\' => 
+        'Symfony\\Polyfill\\Mbstring\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
-        'Psr\\Http\\Message\\' => 
+        'Psr\\Http\\Message\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/http-factory/src',
             1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
-        'Psr\\Http\\Client\\' => 
+        'Psr\\Http\\Client\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/http-client/src',
         ),
-        'JmesPath\\' => 
+        'JmesPath\\' =>
         array (
             0 => __DIR__ . '/..' . '/mtdowling/jmespath.php/src',
         ),
-        'GuzzleHttp\\Psr7\\' => 
+        'GuzzleHttp\\Psr7\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
         ),
-        'GuzzleHttp\\Promise\\' => 
+        'GuzzleHttp\\Promise\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
         ),
-        'GuzzleHttp\\' => 
+        'GuzzleHttp\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
-        'Classifai\\' => 
+        'Classifai\\' =>
         array (
             0 => __DIR__ . '/../..' . '/includes/Classifai',
         ),
-        'Aws\\' => 
+        'Aws\\' =>
         array (
             0 => __DIR__ . '/..' . '/aws/aws-sdk-php/src',
         ),
@@ -194,6 +194,7 @@ class ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae
         'Aws\\Credentials\\AssumeRoleCredentialProvider' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Credentials/AssumeRoleCredentialProvider.php',
         'Aws\\Credentials\\AssumeRoleWithWebIdentityCredentialProvider' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Credentials/AssumeRoleWithWebIdentityCredentialProvider.php',
         'Aws\\Credentials\\CredentialProvider' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Credentials/CredentialProvider.php',
+        'Aws\\Credentials\\CredentialSources' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Credentials/CredentialSources.php',
         'Aws\\Credentials\\Credentials' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Credentials/Credentials.php',
         'Aws\\Credentials\\CredentialsInterface' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Credentials/CredentialsInterface.php',
         'Aws\\Credentials\\CredentialsUtils' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Credentials/CredentialsUtils.php',
@@ -301,6 +302,7 @@ class ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae
         'Aws\\Kms\\Exception\\KmsException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Kms/Exception/KmsException.php',
         'Aws\\Kms\\KmsClient' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Kms/KmsClient.php',
         'Aws\\LruArrayCache' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/LruArrayCache.php',
+        'Aws\\MetricsBuilder' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/MetricsBuilder.php',
         'Aws\\Middleware' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Middleware.php',
         'Aws\\MockHandler' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/MockHandler.php',
         'Aws\\MonitoringEventsInterface' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/MonitoringEventsInterface.php',
@@ -413,6 +415,7 @@ class ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae
         'Aws\\Token\\TokenInterface' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Token/TokenInterface.php',
         'Aws\\Token\\TokenProvider' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Token/TokenProvider.php',
         'Aws\\TraceMiddleware' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/TraceMiddleware.php',
+        'Aws\\UserAgentMiddleware' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/UserAgentMiddleware.php',
         'Aws\\Waiter' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Waiter.php',
         'Aws\\WrappedHttpHandler' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/WrappedHttpHandler.php',
         'Classifai\\Admin\\BulkActions' => __DIR__ . '/../..' . '/includes/Classifai/Admin/BulkActions.php',
@@ -622,9 +625,9 @@ class ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit5b8e12cd8201abd1db14b9c535637bae::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit6169bb87673f25ee33f59094c2c17502::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit6169bb87673f25ee33f59094c2c17502::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit6169bb87673f25ee33f59094c2c17502::$classMap;
 
         }, null, ClassLoader::class);
     }

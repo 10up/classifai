@@ -10,6 +10,10 @@ use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Features\ImageGeneration;
 use WP_Error;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Stable Diffusion class
  */
@@ -225,6 +229,7 @@ class StableDiffusion extends Provider {
 			$this->get_api_model_url( $default['endpoint_url'] ),
 			[
 				'timeout' => 30, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'use_vip' => true,
 			]
 		);
 

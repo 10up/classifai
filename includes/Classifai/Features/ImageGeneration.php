@@ -14,6 +14,10 @@ use WP_Error;
 use function Classifai\get_asset_info;
 use function Classifai\render_disable_feature_link;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ImageGeneration
  */

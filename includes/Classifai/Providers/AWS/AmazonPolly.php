@@ -13,6 +13,10 @@ use Classifai\Features\TextToSpeech;
 use WP_Error;
 use Aws\Sdk;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class AmazonPolly extends Provider {
 
 	const ID = 'aws_polly';

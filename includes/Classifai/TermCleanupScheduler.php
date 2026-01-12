@@ -5,6 +5,10 @@ namespace Classifai;
 use Classifai\Features\TermCleanup;
 use ActionScheduler_Store;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class TermCleanupScheduler {
 
 	/**

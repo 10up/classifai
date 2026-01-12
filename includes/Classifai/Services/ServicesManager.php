@@ -8,6 +8,10 @@ namespace Classifai\Services;
 use function Classifai\should_use_legacy_settings_panel;
 use function Classifai\safe_wp_remote_post;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class ServicesManager {
 
 	/**
@@ -265,7 +269,12 @@ class ServicesManager {
 		$license_key = $this->get_settings( 'license_key' );
 		?>
 		<input type="password" name="classifai_settings[license_key]" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>"/>
-		<br /><span class="description"><?php _e( __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ) );// @codingStandardsIgnoreLine ?></span>
+		<br />
+		<span class="description">
+			<?php esc_html_e( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.', 'classifai' ); ?>
+			<br />
+			<a href="https://classifaiplugin.com/#cta" target="_blank" rel="noreferrer"><?php esc_html_e( 'Register for your key', 'classifai' ); ?></a>
+		</span>
 		<?php
 	}
 
@@ -373,6 +382,7 @@ class ServicesManager {
 					'license_key' => $license_key,
 					'email'       => $email,
 				],
+				'use_vip' => true,
 			]
 		);
 
