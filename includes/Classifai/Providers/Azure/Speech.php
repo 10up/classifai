@@ -224,7 +224,7 @@ class Speech extends Provider {
 		// Create request URL.
 		$request_url = sprintf(
 			'%1$scognitiveservices/voices/list',
-			$default['endpoint_url']
+			trailingslashit( $default['endpoint_url'] )
 		);
 
 		$request_params['timeout'] = $request_params['timeout'] ?? 20;
@@ -390,7 +390,7 @@ class Speech extends Provider {
 			),
 		);
 
-		$remote_url = sprintf( '%s%s', $credentials['endpoint_url'] ?? '', self::API_PATH );
+		$remote_url = sprintf( '%s%s', trailingslashit( $credentials['endpoint_url'] ?? '' ), self::API_PATH );
 		$response   = safe_wp_remote_post( $remote_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
