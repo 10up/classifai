@@ -19,6 +19,10 @@ use WP_Query;
 
 use function Classifai\should_use_legacy_settings_panel;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Embeddings extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;

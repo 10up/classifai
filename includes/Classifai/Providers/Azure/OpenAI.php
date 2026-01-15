@@ -322,6 +322,7 @@ class OpenAI extends Provider {
 						'max_tokens' => 5,
 					]
 				),
+				'use_vip' => true,
 			]
 		);
 

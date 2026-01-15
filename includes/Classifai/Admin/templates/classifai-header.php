@@ -5,6 +5,10 @@
  * @package ClassifAI
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /* phpcs:disable PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage */
 
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended

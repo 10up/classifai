@@ -90,7 +90,7 @@ class TextToSpeech extends Provider {
 		 *
 		 * Useful if you want to modify the instructions for certain use cases.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.1
 		 * @hook classifai_openai_text_to_speech_instructions
 		 *
 		 * @param string $instructions The current instructions to use.
@@ -402,7 +402,7 @@ class TextToSpeech extends Provider {
 		/**
 		 * Filter the request body before sending to OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.1
 		 * @hook classifai_openai_text_to_speech_request_body
 		 *
 		 * @param array  $request_body The request body that will be sent to OpenAI.

@@ -5,6 +5,10 @@
  * @package ClassifAI
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $onboarding_options  = get_option( 'classifai_onboarding_options', array() );
 $enabled_features    = $onboarding_options['enabled_features'] ?? array();
 $configured_features = $onboarding_options['configured_features'] ?? array();

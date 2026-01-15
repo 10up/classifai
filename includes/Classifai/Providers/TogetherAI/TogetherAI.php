@@ -98,7 +98,7 @@ trait TogetherAI {
 		}
 
 		$request  = new APIRequest( $api_key );
-		$response = $request->get( $this->get_api_url( $this->model_path ) );
+		$response = $request->get( $this->get_api_url( $this->model_path ), [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;

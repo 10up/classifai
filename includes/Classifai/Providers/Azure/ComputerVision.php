@@ -20,6 +20,10 @@ use function Classifai\get_largest_size_and_dimensions_image_url;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\safe_wp_remote_post;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class ComputerVision extends Provider {
 
 	const ID = 'ms_computer_vision';
@@ -777,6 +781,7 @@ class ComputerVision extends Provider {
 					'Content-Type'              => 'application/json',
 				],
 				'body'    => '{"url":"https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/header.png"}',
+				'use_vip' => true,
 			]
 		);
 
