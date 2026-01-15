@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\XAI;
 
+use Classifai\Helpers\Credentials;
 use Classifai\Features\ContentResizing;
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\ExcerptGeneration;
@@ -251,26 +252,23 @@ class Grok extends Provider {
 	/**
 	 * Authenticate our credentials.
 	 *
-	 * @since 3.8.0 Added credential filtering support via classifai_provider_credentials filter.
-	 *
 	 * @param string $api_key Api Key.
 	 * @return array|WP_Error
 	 */
 	protected function get_models( string $api_key = '' ) {
+		// Get filtered credentials for authentication check.
+		if ( $this->feature_instance ) {
+			$credentials = Credentials::get_credentials(
+				static::ID,
+				$this->feature_instance::ID,
+				[ 'api_key' => $api_key ]
+			);
+			$api_key     = $credentials['api_key'] ?? $api_key;
+		}
+
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your xAI API key.', 'classifai' ) );
-		}
-
-		// Get filtered credentials for authentication check.
-		if ( $this->feature_instance ) {
-			$temp_settings = [ 'api_key' => $api_key ];
-			$credentials   = \Classifai\Helpers\Credentials::get_credentials(
-				static::ID,
-				$this->feature_instance::ID,
-				$temp_settings
-			);
-			$api_key = $credentials['api_key'] ?? $api_key;
 		}
 
 		// Make request to ensure credentials work.

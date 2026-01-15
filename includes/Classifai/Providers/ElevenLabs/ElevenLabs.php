@@ -6,6 +6,7 @@
 namespace Classifai\Providers\ElevenLabs;
 
 use Classifai\Features\TextToSpeech;
+use Classifai\Helpers\Credentials;
 use WP_Error;
 
 use function Classifai\safe_wp_remote_get;
@@ -221,13 +222,12 @@ trait ElevenLabs {
 
 		// Get filtered credentials for authentication check.
 		if ( $this->feature_instance ) {
-			$temp_settings = [ 'api_key' => $api_key ];
-			$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+			$credentials = Credentials::get_credentials(
 				static::ID,
 				$this->feature_instance::ID,
-				$temp_settings
+				[ 'api_key' => $api_key ]
 			);
-			$api_key = $credentials['api_key'] ?? $api_key;
+			$api_key     = $credentials['api_key'] ?? $api_key;
 		}
 
 		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get' );
@@ -266,20 +266,19 @@ trait ElevenLabs {
 	 * @return array|WP_Error
 	 */
 	protected function get_voices( string $api_key = '' ) {
+		// Get filtered credentials for authentication check.
+		if ( $this->feature_instance ) {
+			$credentials = Credentials::get_credentials(
+				static::ID,
+				$this->feature_instance::ID,
+				[ 'api_key' => $api_key ]
+			);
+			$api_key     = $credentials['api_key'] ?? $api_key;
+		}
+
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your ElevenLabs API key.', 'classifai' ) );
-		}
-
-		// Get filtered credentials for authentication check.
-		if ( $this->feature_instance ) {
-			$temp_settings = [ 'api_key' => $api_key ];
-			$credentials   = \Classifai\Helpers\Credentials::get_credentials(
-				static::ID,
-				$this->feature_instance::ID,
-				$temp_settings
-			);
-			$api_key = $credentials['api_key'] ?? $api_key;
 		}
 
 		$response = $this->request( $this->get_api_url( 'voices?per_page=100' ), $api_key, 'get' );

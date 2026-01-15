@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Watson;
 
 use Classifai\Features\Classification;
+use Classifai\Helpers\Credentials;
 
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
@@ -17,11 +18,11 @@ use Classifai\Features\Classification;
  */
 function get_api_url(): string {
 	$feature  = new Classification();
-	$settings = $feature->get_settings();
-	$creds    = ! empty( $settings[ NLU::ID ] ) ? $settings[ NLU::ID ] : [];
+	$settings = $feature->get_settings( NLU::ID );
+	$creds    = ! empty( $settings ) ? $settings : [];
 
 	// Get filtered credentials.
-	$credentials = \Classifai\Helpers\Credentials::get_credentials(
+	$credentials = Credentials::get_credentials(
 		NLU::ID,
 		$feature::ID,
 		$creds
@@ -51,7 +52,7 @@ function get_username(): string {
 	$settings = $feature->get_settings( NLU::ID );
 
 	// Get filtered credentials.
-	$credentials = \Classifai\Helpers\Credentials::get_credentials(
+	$credentials = Credentials::get_credentials(
 		NLU::ID,
 		$feature::ID,
 		$settings
@@ -69,7 +70,7 @@ function get_username(): string {
 }
 
 /**
- * Returns the currently configured Watson username. Lookup order is,
+ * Returns the currently configured Watson password. Lookup order is,
  *
  * - Options
  * - Constant
@@ -81,7 +82,7 @@ function get_password(): string {
 	$settings = $feature->get_settings( NLU::ID );
 
 	// Get filtered credentials.
-	$credentials = \Classifai\Helpers\Credentials::get_credentials(
+	$credentials = Credentials::get_credentials(
 		NLU::ID,
 		$feature::ID,
 		$settings

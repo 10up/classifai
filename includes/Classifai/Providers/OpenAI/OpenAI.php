@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Helpers\Credentials;
 use Classifai\Providers\OpenAI\APIRequest;
 use WP_Error;
 
@@ -72,13 +73,12 @@ trait OpenAI {
 
 		// Get filtered credentials for authentication check.
 		if ( $this->feature_instance ) {
-			$temp_settings = [ 'api_key' => $api_key ];
-			$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+			$credentials = Credentials::get_credentials(
 				static::ID,
 				$this->feature_instance::ID,
-				$temp_settings
+				[ 'api_key' => $api_key ]
 			);
-			$api_key = $credentials['api_key'] ?? $api_key;
+			$api_key     = $credentials['api_key'] ?? $api_key;
 		}
 
 		// Make request to ensure credentials work.

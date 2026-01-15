@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\Watson;
 
+use Classifai\Helpers\Credentials;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
 use Classifai\Features\Classification;
@@ -372,7 +373,7 @@ class NLU extends Provider {
 		}
 
 		// Get filtered credentials for authentication check.
-		$credentials = \Classifai\Helpers\Credentials::get_credentials(
+		$credentials = Credentials::get_credentials(
 			static::ID,
 			$this->feature_instance::ID,
 			$settings[ static::ID ]

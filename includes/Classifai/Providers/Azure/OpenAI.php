@@ -10,6 +10,7 @@ use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Features\ContentGeneration;
 use Classifai\Features\KeyTakeaways;
+use Classifai\Helpers\Credentials;
 use Classifai\Providers\Provider;
 use Classifai\Normalizer;
 use WP_Error;
@@ -219,11 +220,10 @@ class OpenAI extends Provider {
 
 			if ( ! ( $is_authenticated && $is_endpoint_same && $is_api_key_same && $is_deployment_same ) ) {
 				// Get filtered credentials for authentication check.
-				$temp_settings = [ static::ID => $new_settings[ static::ID ] ];
-				$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+				$credentials = Credentials::get_credentials(
 					static::ID,
 					$this->feature_instance::ID,
-					$temp_settings[ static::ID ]
+					$new_settings[ static::ID ]
 				);
 
 				$auth_check = $this->authenticate_credentials(
@@ -270,7 +270,7 @@ class OpenAI extends Provider {
 	 * @return string
 	 */
 	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
-		$credentials = $this->get_provider_credentials( $feature::ID );
+		$credentials = $this->get_provider_credentials( $feature::ID ?? '' );
 		$endpoint    = $credentials['endpoint_url'] ?? '';
 		$deployment  = $credentials['deployment'] ?? '';
 

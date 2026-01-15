@@ -6,6 +6,7 @@
 namespace Classifai\Providers\GoogleAI;
 
 use Classifai\Providers\GoogleAI\APIRequest;
+use Classifai\Helpers\Credentials;
 use WP_Error;
 
 trait GoogleAI {
@@ -65,13 +66,12 @@ trait GoogleAI {
 
 		// Get filtered credentials for authentication check.
 		if ( $this->feature_instance ) {
-			$temp_settings = [ 'api_key' => $api_key ];
-			$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+			$credentials = Credentials::get_credentials(
 				static::ID,
 				$this->feature_instance::ID,
-				$temp_settings
+				[ 'api_key' => $api_key ]
 			);
-			$api_key = $credentials['api_key'] ?? $api_key;
+			$api_key     = $credentials['api_key'] ?? $api_key;
 		}
 
 		// Make request to ensure credentials work.

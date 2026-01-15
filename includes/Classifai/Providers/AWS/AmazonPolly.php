@@ -10,6 +10,7 @@ namespace Classifai\Providers\AWS;
 
 use Classifai\Providers\Provider;
 use Classifai\Features\TextToSpeech;
+use Classifai\Helpers\Credentials;
 use WP_Error;
 use Aws\Sdk;
 
@@ -219,15 +220,14 @@ class AmazonPolly extends Provider {
 
 			if ( $is_credentials_changed ) {
 				// Get filtered credentials for authentication check.
-				$temp_settings = [
-					'access_key_id'     => $new_access_key_id,
-					'secret_access_key' => $new_secret_access_key,
-					'aws_region'        => $new_aws_region,
-				];
-				$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+				$credentials = Credentials::get_credentials(
 					static::ID,
 					$this->feature_instance::ID,
-					$temp_settings
+					[
+						'access_key_id'     => $new_access_key_id,
+						'secret_access_key' => $new_secret_access_key,
+						'aws_region'        => $new_aws_region,
+					]
 				);
 
 				$new_settings[ static::ID ]['access_key_id']     = $new_access_key_id;
@@ -550,11 +550,14 @@ class AmazonPolly extends Provider {
 		// Get filtered credentials if no config was passed.
 		if ( empty( $aws_config ) ) {
 			$credentials = $this->get_provider_credentials( $this->feature_instance::ID );
-			$default     = array_merge( $default, [
-				'access_key_id'     => $credentials['access_key_id'] ?? $default['access_key_id'],
-				'secret_access_key' => $credentials['secret_access_key'] ?? $default['secret_access_key'],
-				'aws_region'        => $credentials['aws_region'] ?? $default['aws_region'],
-			] );
+			$default     = array_merge(
+				$default,
+				[
+					'access_key_id'     => $credentials['access_key_id'] ?? $default['access_key_id'],
+					'secret_access_key' => $credentials['secret_access_key'] ?? $default['secret_access_key'],
+					'aws_region'        => $credentials['aws_region'] ?? $default['aws_region'],
+				]
+			);
 		}
 
 		// Return if credentials don't exist.

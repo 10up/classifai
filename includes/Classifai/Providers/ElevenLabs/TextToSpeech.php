@@ -209,7 +209,7 @@ class TextToSpeech extends Provider {
 		// Make our API request.
 		$response = $this->request(
 			$this->get_api_url( $this->api_path . '/' . $voice_id ),
-			$credentials['api_key'] ?? $settings['api_key'] ?? '',
+			$credentials['api_key'] ?? '',
 			'post',
 			[
 				'body'    => wp_json_encode( $body ),

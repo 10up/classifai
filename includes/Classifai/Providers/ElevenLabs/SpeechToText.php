@@ -207,7 +207,7 @@ class SpeechToText extends Provider {
 		// Make our API request.
 		$response = $this->request(
 			$this->get_api_url( $this->api_path ),
-			$credentials['api_key'] ?? $settings['api_key'] ?? '',
+			$credentials['api_key'] ?? '',
 			'post',
 			[
 				'body'    => $payload,

@@ -10,6 +10,7 @@ use Classifai\Features\ImageTagsGenerator;
 use Classifai\Features\ImageTextExtraction;
 use Classifai\Features\PDFTextExtraction;
 use Classifai\Features\ImageCropping;
+use Classifai\Helpers\Credentials;
 use Classifai\Providers\Azure\SmartCropping;
 use Classifai\Providers\Provider;
 use WP_Error;
@@ -219,11 +220,10 @@ class ComputerVision extends Provider {
 
 			if ( ! ( $is_authenticated && $is_endpoint_same && $is_api_key_same ) ) {
 				// Get filtered credentials for authentication check.
-				$temp_settings = [ static::ID => $new_settings[ static::ID ] ];
-				$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+				$credentials = Credentials::get_credentials(
 					static::ID,
 					$this->feature_instance::ID,
-					$temp_settings[ static::ID ]
+					$new_settings[ static::ID ]
 				);
 
 				$auth_check = $this->authenticate_credentials(
@@ -339,9 +339,11 @@ class ComputerVision extends Provider {
 	 * @param int    $attachment_id Attachment ID.
 	 */
 	public function do_read_cron( string $operation_url, int $attachment_id ) {
-		$feature     = new PDFTextExtraction();
-		$raw_settings = $feature->get_settings( static::ID );
-		$settings     = $this->get_provider_credentials( $feature::ID );
+		$feature  = new PDFTextExtraction();
+		$settings = array_merge(
+			$feature->get_settings( static::ID ),
+			$this->get_provider_credentials( $feature::ID )
+		);
 
 		( new Read( $settings, intval( $attachment_id ), $feature ) )->check_read_result( $operation_url );
 	}
@@ -360,9 +362,11 @@ class ComputerVision extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
 		}
 
-		$feature       = new ImageCropping();
-		$raw_settings  = $feature->get_settings( static::ID );
-		$settings      = $this->get_provider_credentials( $feature::ID );
+		$feature  = new ImageCropping();
+		$settings = array_merge(
+			$feature->get_settings( static::ID ),
+			$this->get_provider_credentials( $feature::ID )
+		);
 
 		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Invalid data found. Please check your settings and try again.', 'classifai' ) );
@@ -557,8 +561,10 @@ class ComputerVision extends Provider {
 	 */
 	public function read_pdf( int $attachment_id ) {
 		$feature         = new PDFTextExtraction();
-		$raw_settings   = $feature->get_settings( static::ID );
-		$settings       = $this->get_provider_credentials( $feature::ID );
+		$settings        = array_merge(
+			$feature->get_settings( static::ID ),
+			$this->get_provider_credentials( $feature::ID )
+		);
 		$should_read_pdf = $feature->is_feature_enabled();
 
 		if ( ! $should_read_pdf ) {
@@ -661,8 +667,6 @@ class ComputerVision extends Provider {
 	 * @return bool|object|WP_Error
 	 */
 	protected function scan_image( string $image_url, ?\Classifai\Features\Feature $feature = null ) {
-		$settings = $feature->get_settings( static::ID );
-
 		// Check if valid authentication is in place.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'feature_disabled', esc_html__( 'Feature not enabled.', 'classifai' ) );
@@ -736,7 +740,7 @@ class ComputerVision extends Provider {
 	 * @return string
 	 */
 	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
-		$credentials  = $this->get_provider_credentials( $feature::ID );
+		$credentials  = $this->get_provider_credentials( $feature::ID ?? '' );
 		$api_features = [];
 
 		if ( $feature instanceof DescriptiveTextGenerator && $feature->is_feature_enabled() && ! empty( $feature->get_alt_text_settings() ) ) {

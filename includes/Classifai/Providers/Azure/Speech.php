@@ -7,6 +7,7 @@ namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
 use Classifai\Features\TextToSpeech;
+use Classifai\Helpers\Credentials;
 use stdClass;
 use WP_Http;
 use WP_Error;
@@ -148,11 +149,10 @@ class Speech extends Provider {
 
 			if ( $is_credentials_changed ) {
 				// Get filtered credentials for authentication check.
-				$temp_settings = [ static::ID => $new_settings[ static::ID ] ];
-				$credentials   = \Classifai\Helpers\Credentials::get_credentials(
+				$credentials = Credentials::get_credentials(
 					static::ID,
 					$this->feature_instance::ID,
-					$temp_settings[ static::ID ]
+					$new_settings[ static::ID ]
 				);
 
 				$filtered_url = $credentials['endpoint_url'] ?? $new_url;

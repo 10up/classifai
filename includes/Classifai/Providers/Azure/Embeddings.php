@@ -247,7 +247,7 @@ class Embeddings extends OpenAI {
 	 * @return string
 	 */
 	protected function prep_api_url( ?Feature $feature = null ): string {
-		$credentials = $this->get_provider_credentials( $feature::ID );
+		$credentials = $this->get_provider_credentials( $feature::ID ?? '' );
 		$endpoint    = $credentials['endpoint_url'] ?? '';
 		$deployment  = $credentials['deployment'] ?? '';
 
@@ -965,8 +965,6 @@ class Embeddings extends OpenAI {
 			$feature = new Classification();
 		}
 
-		$settings = $feature->get_settings();
-
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
@@ -1046,8 +1044,6 @@ class Embeddings extends OpenAI {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
-
-		$settings = $feature->get_settings();
 
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {

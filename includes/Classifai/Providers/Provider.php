@@ -5,6 +5,8 @@
 
 namespace Classifai\Providers;
 
+use Classifai\Helpers\Credentials;
+
 abstract class Provider {
 
 	/**
@@ -169,9 +171,9 @@ abstract class Provider {
 	}
 
 	/**
-	 * Get filtered credentials for this provider.
+	 * Get filtered credentials for this Provider.
 	 *
-	 * @param string $feature_id The feature ID making the request.
+	 * @param string $feature_id The ID of the Feature making the request.
 	 * @return array The filtered credentials.
 	 */
 	protected function get_provider_credentials( string $feature_id ): array {
@@ -181,7 +183,7 @@ abstract class Provider {
 
 		$settings = $this->feature_instance->get_settings( static::ID );
 
-		return \Classifai\Helpers\Credentials::get_credentials(
+		return Credentials::get_credentials(
 			static::ID,
 			$feature_id,
 			$settings
