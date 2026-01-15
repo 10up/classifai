@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\TogetherAI;
 
+use Classifai\Helpers\Credentials;
 use Classifai\Providers\OpenAI\APIRequest;
 use WP_Error;
 
@@ -97,7 +98,7 @@ trait TogetherAI {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your Together AI API key.', 'classifai' ) );
 		}
 
-		$request  = new APIRequest( $api_key );
+		$request  = new APIRequest( $api_key, $this->feature_instance ? $this->feature_instance->get_option_name() : '', static::ID );
 		$response = $request->get( $this->get_api_url( $this->model_path ), [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {

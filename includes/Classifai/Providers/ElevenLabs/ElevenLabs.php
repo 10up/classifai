@@ -215,11 +215,6 @@ trait ElevenLabs {
 	 * @return array|WP_Error
 	 */
 	protected function get_models( string $api_key = '' ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your ElevenLabs API key.', 'classifai' ) );
-		}
-
 		// Get filtered credentials for authentication check.
 		if ( $this->feature_instance ) {
 			$credentials = Credentials::get_credentials(
@@ -228,6 +223,11 @@ trait ElevenLabs {
 				[ 'api_key' => $api_key ]
 			);
 			$api_key     = $credentials['api_key'] ?? $api_key;
+		}
+
+		// Check that we have credentials before hitting the API.
+		if ( empty( $api_key ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please enter your ElevenLabs API key.', 'classifai' ) );
 		}
 
 		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get', [ 'use_vip' => true ] );
