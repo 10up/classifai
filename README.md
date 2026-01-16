@@ -922,6 +922,10 @@ We recommend that you are transparent with your users that AI tools are being us
 
 According to OpenAI, they do not train their models on any data that is sent via API requests (see https://openai.com/enterprise-privacy). OpenAI may keep the data for up to 30 days to identify abuse, though you can request zero data retention (ZDR) with a qualifying use-case.
 
+### Where do I report security bugs found in this plugin?
+
+Please report security bugs found in the source code of the undefined plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/f298c330-8d56-4af5-8a69-736281841ce1).  The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+
 ## Support Level
 
 **Active:** 10up is actively working on this, and we expect to continue work for the foreseeable future including keeping tested up to the most recent version of WordPress.  Bug reports, feature requests, questions, and pull requests are welcome.
