@@ -85,13 +85,14 @@ export const OllamaBaseSettings = ( {
 					'classifai'
 				) }
 			>
-				<SelectControl
-					id={ `${ providerName }_model` }
-					onChange={ ( value ) => onChange( { model: value } ) }
-					value={ providerSettings?.model || '' }
-					options={ models }
-					__nextHasNoMarginBottom
-				/>
+			<SelectControl
+				id={ `${ providerName }_model` }
+				onChange={ ( value ) => onChange( { model: value } ) }
+				value={ providerSettings?.model || '' }
+				options={ models }
+				disabled={ models.length <= 1 }
+				__nextHasNoMarginBottom
+			/>
 			</SettingsRow>
 		</>
 	);
