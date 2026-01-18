@@ -46,6 +46,13 @@ class ContentResizing extends Feature {
 	public $expand_prompt = 'Increase the content length no more than 2 to 4 sentences.';
 
 	/**
+	 * Prompt for fixing grammar and spelling.
+	 *
+	 * @var string
+	 */
+	public $fix_grammar_prompt = 'Please correct any spelling errors and grammatical mistakes in the following text';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -125,7 +132,7 @@ class ContentResizing extends Feature {
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'The type of resize operation. "expand" or "condense".', 'classifai' ),
+						'description'       => esc_html__( 'The type of resize operation. "expand", "condense", or "fix_grammar".', 'classifai' ),
 					],
 				],
 			]
@@ -220,7 +227,7 @@ class ContentResizing extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( '"Condense this text" and "Expand this text" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' );
+		return esc_html__( '"Condense this text", "Expand this text", and "Fix grammar and spelling" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' );
 	}
 
 	/**
@@ -256,6 +263,20 @@ class ContentResizing extends Feature {
 				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
 			]
 		);
+
+		add_settings_field(
+			'fix_grammar_text_prompt',
+			esc_html__( 'Fix grammar and spelling', 'classifai' ),
+			[ $this, 'render_prompt_repeater_field' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'fix_grammar_text_prompt',
+				'placeholder'   => esc_html__( 'Please correct any spelling errors and grammatical mistakes in the following text', 'classifai' ),
+				'default_value' => $settings['fix_grammar_text_prompt'],
+				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -276,6 +297,13 @@ class ContentResizing extends Feature {
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->expand_prompt,
+					'original' => 1,
+				],
+			],
+			'fix_grammar_text_prompt' => [
+				[
+					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+					'prompt'   => $this->fix_grammar_prompt,
 					'original' => 1,
 				],
 			],
@@ -311,6 +339,15 @@ class ContentResizing extends Feature {
 			}
 		}
 
+		if ( $settings && ! empty( $settings['fix_grammar_text_prompt'] ) ) {
+			foreach ( $settings['fix_grammar_text_prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings['fix_grammar_text_prompt'][ $key ]['prompt'] = $this->fix_grammar_prompt;
+					break;
+				}
+			}
+		}
+
 		return $settings;
 	}
 
@@ -325,6 +362,7 @@ class ContentResizing extends Feature {
 
 		$new_settings['condense_text_prompt'] = sanitize_prompts( 'condense_text_prompt', $new_settings );
 		$new_settings['expand_text_prompt']   = sanitize_prompts( 'expand_text_prompt', $new_settings );
+		$new_settings['fix_grammar_text_prompt'] = sanitize_prompts( 'fix_grammar_text_prompt', $new_settings );
 
 		return $new_settings;
 	}

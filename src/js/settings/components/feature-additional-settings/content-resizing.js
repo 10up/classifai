@@ -54,6 +54,20 @@ export const ContentResizingSettings = () => {
 					} }
 				/>
 			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Fix grammar and spelling', 'classifai' ) }
+				description={ __( 'Enter your custom prompt.', 'classifai' ) }
+				className="settings-fix-grammar-text-prompt"
+			>
+				<PromptRepeater
+					prompts={ featureSettings.fix_grammar_text_prompt }
+					setPrompts={ ( prompts ) => {
+						setFeatureSettings( {
+							fix_grammar_text_prompt: prompts,
+						} );
+					} }
+				/>
+			</SettingsRow>
 		</>
 	);
 };

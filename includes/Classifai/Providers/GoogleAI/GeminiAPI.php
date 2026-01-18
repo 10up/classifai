@@ -452,6 +452,8 @@ class GeminiAPI extends Provider {
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
+		} elseif ( 'fix_grammar' === $args['resize_type'] ) {
+			$prompt = esc_textarea( get_default_prompt( $settings['fix_grammar_text_prompt'] ) ?? $feature->fix_grammar_prompt );
 		} else {
 			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
 		}
@@ -595,10 +597,11 @@ class GeminiAPI extends Provider {
 			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? [] );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_excerpt_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ContentResizing ) {
-			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = 1;
-			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
-			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
-			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_content_resizing_latest_response' ) );
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]        = 1;
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]        = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ]      = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Fix grammar and spelling', 'classifai' ) ] = wp_json_encode( $settings['fix_grammar_text_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]           = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_content_resizing_latest_response' ) );
 		}
 
 		return apply_filters(
