@@ -205,3 +205,51 @@ export const isProviderConfigurationNeeded = ( feature ) => {
 
 	return isEnabled && ! authenticated;
 };
+
+/**
+ * Find the profile that contains the given Provider ID.
+ *
+ * @param {string} providerId Provider ID (e.g. openai_chatgpt).
+ * @param {Object} profiles   Provider profiles from Provider-configs { profileId: { provider_ids, credential_fields, label } }.
+ * @return {{ profileId: string, credential_fields: string[] }|null} Profile info or null.
+ */
+export const getProfileForProvider = ( providerId, profiles ) => {
+	if ( ! providerId || ! profiles || typeof profiles !== 'object' ) {
+		return null;
+	}
+	for ( const [ id, p ] of Object.entries( profiles ) ) {
+		if (
+			Array.isArray( p?.provider_ids ) &&
+			p.provider_ids.includes( providerId )
+		) {
+			return {
+				profileId: id,
+				credential_fields: p.credential_fields || [],
+			};
+		}
+	}
+	return null;
+};
+
+/**
+ * Check if Feature has non-empty credential values for the Provider (Feature-level override).
+ *
+ * @param {Object}   featureSettings  Feature settings (Provider block).
+ * @param {string[]} credentialFields Field names to check (excluding 'authenticated').
+ * @return {boolean} True if any credential field is non-empty.
+ */
+export const hasFeatureLevelCredentials = (
+	featureSettings,
+	credentialFields
+) => {
+	if ( ! featureSettings || ! Array.isArray( credentialFields ) ) {
+		return false;
+	}
+	return credentialFields.some(
+		( f ) =>
+			f !== 'authenticated' &&
+			featureSettings[ f ] !== null &&
+			featureSettings[ f ] !== undefined &&
+			String( featureSettings[ f ] ).trim() !== ''
+	);
+};

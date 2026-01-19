@@ -185,9 +185,15 @@ export const SnackbarNotifications = () => {
  * @return {React.ReactElement} The ClassifAISettings component.
  */
 export const ClassifAISettings = () => {
-	const { setSettings, setIsLoaded, setError } = useDispatch( STORE_NAME );
+	const {
+		setSettings,
+		setIsLoaded,
+		setError,
+		setProviderProfiles,
+		setProviderConfigs,
+	} = useDispatch( STORE_NAME );
 
-	// Load the settings.
+	// Load the settings and Provider configs.
 	useEffect( () => {
 		( async () => {
 			try {
@@ -209,9 +215,28 @@ export const ClassifAISettings = () => {
 					)
 				);
 			}
+			try {
+				const providerConfigsResponse = await apiFetch( {
+					path: '/classifai/v1/provider-configs',
+				} );
+				if ( providerConfigsResponse?.profiles ) {
+					setProviderProfiles( providerConfigsResponse.profiles );
+				}
+				if ( providerConfigsResponse?.configs ) {
+					setProviderConfigs( providerConfigsResponse.configs );
+				}
+			} catch ( e ) {
+				// Provider configs are optional (e.g. older installs); ignore.
+			}
 			setIsLoaded( true );
 		} )();
-	}, [ setSettings, setIsLoaded, setError ] );
+	}, [
+		setSettings,
+		setIsLoaded,
+		setError,
+		setProviderProfiles,
+		setProviderConfigs,
+	] );
 
 	// Render admin notices after the header.
 	useEffect( () => {

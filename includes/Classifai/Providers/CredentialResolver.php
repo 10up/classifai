@@ -42,7 +42,16 @@ class CredentialResolver {
 		$credential_fields = ProviderProfiles::get_credential_fields( $profile_id );
 		$block             = $feature_settings[ $provider_id ] ?? [];
 
-		// Treat as override if any credential field (excluding 'authenticated') has a non-empty value.
+		// Explicit override: use Feature-level credentials when true; use only global when false.
+		if ( array_key_exists( 'override', $block ) ) {
+			if ( ! empty( $block['override'] ) ) {
+				return $block;
+			}
+			$global = ProviderConfigStore::get( $profile_id );
+			return is_array( $global ) ? $global : [];
+		}
+
+		// Legacy: infer override when any credential field (excluding 'authenticated') is non-empty.
 		$fields_to_check = array_diff( $credential_fields, [ 'authenticated' ] );
 		$has_override    = false;
 		foreach ( $fields_to_check as $field ) {

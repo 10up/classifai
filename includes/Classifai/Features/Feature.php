@@ -2,6 +2,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\CredentialResolver;
 use WP_REST_Request;
 use WP_Error;
 
@@ -301,6 +302,12 @@ abstract class Feature {
 		// Sanitize the feature specific settings.
 		$new_settings = $this->sanitize_default_feature_settings( $new_settings );
 
+		// Sanitize Provider-level override flag (use global vs Feature-level credentials).
+		$provider_id = $new_settings['provider'] ?? '';
+		if ( '' !== $provider_id && array_key_exists( 'override', $new_settings[ $provider_id ] ?? [] ) ) {
+			$new_settings[ $provider_id ]['override'] = ! empty( $new_settings[ $provider_id ]['override'] );
+		}
+
 		// Sanitize the provider specific settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
 
@@ -372,6 +379,14 @@ abstract class Feature {
 		// If saved provider is not supported anymore, reset it.
 		if ( ! in_array( $settings['provider'], array_keys( $this->get_providers() ), true ) ) {
 			$settings['provider'] = '';
+		}
+
+		// Merge in resolved credentials (global or Feature-level override) for the selected Provider.
+		$provider_id = $settings['provider'] ?? '';
+		if ( '' !== $provider_id ) {
+			$raw_block                = $settings[ $provider_id ] ?? [];
+			$resolved                 = CredentialResolver::resolve( $provider_id, static::ID, $settings );
+			$settings[ $provider_id ] = array_merge( $raw_block, $resolved );
 		}
 
 		if ( $index && isset( $settings[ $index ] ) ) {

@@ -2,7 +2,13 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { SelectControl, Slot, Icon, Tooltip } from '@wordpress/components';
+import {
+	SelectControl,
+	Slot,
+	Icon,
+	Tooltip,
+	Notice,
+} from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
@@ -10,7 +16,13 @@ import { PluginArea } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
-import { getFeature, getScope, isProviderConfigured } from '../../utils/utils';
+import {
+	getFeature,
+	getScope,
+	getProfileForProvider,
+	hasFeatureLevelCredentials,
+	isProviderConfigured,
+} from '../../utils/utils';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { OpenAIChatGPTSettings } from './openai-chatgpt';
@@ -149,6 +161,33 @@ export const ProviderSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
+	const { providerProfiles, providerConfigs } = useSelect(
+		( select ) => ( {
+			providerProfiles: select( STORE_NAME ).getProviderProfiles?.(),
+			providerConfigs: select( STORE_NAME ).getProviderConfigs?.(),
+		} ),
+		[]
+	);
+
+	const profile = getProfileForProvider( provider, providerProfiles );
+	const credentialFields = profile?.credential_fields ?? [];
+	const hasCredentialFields = credentialFields.length > 0;
+	const globalConfig = profile
+		? providerConfigs?.[ profile.profileId ]
+		: null;
+	const hasGlobal =
+		globalConfig &&
+		credentialFields.some(
+			( f ) =>
+				f !== 'authenticated' &&
+				globalConfig[ f ] !== null &&
+				globalConfig[ f ] !== undefined &&
+				String( globalConfig[ f ] ).trim() !== ''
+		);
+	const hasFeatureCreds = hasFeatureLevelCredentials(
+		featureSettings?.[ provider ],
+		credentialFields
+	);
 
 	// Remove the Chrome AI Provider from the list of providers if the browser AI is not available.
 	if ( feature?.providers?.chrome_ai && ! window.LanguageModel ) {
@@ -197,6 +236,18 @@ export const ProviderSettings = () => {
 									/>
 								</>
 							</Tooltip>
+							{ hasFeatureCreds && (
+								<Notice
+									status="info"
+									isDismissible={ false }
+									className="classifai-provider-notice"
+								>
+									{ __(
+										"You're using Feature-level credentials. To use a single Provider across Features, you can configure it in the Providers tab.",
+										'classifai'
+									) }
+								</Notice>
+							) }
 						</>
 					</SettingsRow>
 				</>
@@ -215,6 +266,20 @@ export const ProviderSettings = () => {
 							options={ providers }
 							__nextHasNoMarginBottom
 						/>
+						{ hasCredentialFields &&
+							! hasGlobal &&
+							! hasFeatureCreds && (
+								<Notice
+									status="info"
+									isDismissible={ false }
+									className="classifai-provider-notice"
+								>
+									{ __(
+										'To reuse this Provider across Features, configure it in the Providers tab. You can also add credentials below for this Feature only.',
+										'classifai'
+									) }
+								</Notice>
+							) }
 					</SettingsRow>
 				) }
 				<ProviderFields
