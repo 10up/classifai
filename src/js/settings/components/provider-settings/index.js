@@ -186,6 +186,7 @@ export const ProviderSettings = () => {
 		credentialFields.some(
 			( f ) =>
 				f !== 'authenticated' &&
+				f !== 'override' &&
 				globalConfig[ f ] !== null &&
 				globalConfig[ f ] !== undefined &&
 				String( globalConfig[ f ] ).trim() !== ''
@@ -202,6 +203,8 @@ export const ProviderSettings = () => {
 	useEffect( () => {
 		if ( hasFeatureCreds && ov === undefined && provider ) {
 			setProviderSettings( provider, { override: true } );
+		} else if ( ! hasFeatureCreds && provider ) {
+			setProviderSettings( provider, { override: false } );
 		}
 	}, [ hasFeatureCreds, ov, provider, setProviderSettings ] );
 
@@ -218,7 +221,7 @@ export const ProviderSettings = () => {
 			globalConfig
 		) {
 			const credFields = credentialFields.filter(
-				( f ) => f !== 'authenticated'
+				( f ) => f !== 'authenticated' && f !== 'override'
 			);
 			const updates = {};
 			for ( const f of credFields ) {

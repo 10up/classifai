@@ -3,8 +3,12 @@
  */
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-import { __experimentalInputControl as InputControl } from '@wordpress/components';
+import {
+	Button,
+	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	Flex,
+	FlexItem,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { store as noticesStore } from '@wordpress/notices';
@@ -159,6 +163,11 @@ export function ProviderProfileForm( { profileId, profile, config, onSaved } ) {
 					type: 'text',
 				};
 				const controlId = `provider-${ profileId }-${ field }`;
+
+				if ( field.includes( 'api' ) || field.includes( 'secret' ) ) {
+					meta.type = 'password';
+				}
+
 				return (
 					<SettingsRow
 						key={ field }
@@ -166,7 +175,7 @@ export function ProviderProfileForm( { profileId, profile, config, onSaved } ) {
 					>
 						<InputControl
 							id={ controlId }
-							type={ meta.type === 'url' ? 'text' : meta.type }
+							type={ meta.type }
 							value={ formValues[ field ] ?? '' }
 							onChange={ ( v ) => updateField( field, v ?? '' ) }
 							__next40pxDefaultSize
@@ -175,17 +184,19 @@ export function ProviderProfileForm( { profileId, profile, config, onSaved } ) {
 				);
 			} ) }
 			<div className="classifai-provider-profile-form__actions">
-				<button
-					type="button"
-					className="button button-primary"
-					onClick={ handleSave }
-					disabled={ isSaving }
-					aria-busy={ isSaving }
-				>
-					{ isSaving
-						? __( 'Saving…', 'classifai' )
-						: __( 'Save', 'classifai' ) }
-				</button>
+				<Flex justify="end" expanded={ false }>
+					<FlexItem>
+						<Button
+							variant="primary"
+							onClick={ handleSave }
+							isBusy={ isSaving }
+						>
+							{ isSaving
+								? __( 'Saving…', 'classifai' )
+								: __( 'Save', 'classifai' ) }
+						</Button>
+					</FlexItem>
+				</Flex>
 			</div>
 		</div>
 	);

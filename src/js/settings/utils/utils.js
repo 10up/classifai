@@ -272,6 +272,7 @@ export const hasFeatureLevelCredentials = (
 	return credentialFields.some(
 		( f ) =>
 			f !== 'authenticated' &&
+			f !== 'override' &&
 			featureSettings[ f ] !== null &&
 			featureSettings[ f ] !== undefined &&
 			String( featureSettings[ f ] ).trim() !== ''

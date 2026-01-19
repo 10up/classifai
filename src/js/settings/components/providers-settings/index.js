@@ -5,7 +5,13 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
-import { Panel, PanelBody, Spinner } from '@wordpress/components';
+import {
+	Icon,
+	Panel,
+	PanelBody,
+	Spinner,
+	Tooltip,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -52,64 +58,70 @@ export const ProvidersSettings = () => {
 	const hasProfiles = profileIds.length > 0;
 
 	return (
-		<div className="classifai-providers-settings">
-			<h2 className="classifai-providers-settings__title">
-				{ __( 'Providers', 'classifai' ) }
-			</h2>
-			<p className="classifai-providers-settings__description">
-				{ __(
-					'Configure your AI Provider credentials here to use them across multiple Features. You can still override credentials for individual Features when needed.',
-					'classifai'
-				) }
-			</p>
-
+		<div className="classifai-settings-dashboard classifai-providers-settings">
 			{ ! hasProfiles && (
 				<div className="classifai-providers-settings__loading">
 					<Spinner />
 				</div>
 			) }
 
-			{ hasProfiles && (
-				<Panel>
-					{ profileIds.map( ( profileId ) => {
-						const profile = providerProfiles[ profileId ];
-						const config = providerConfigs[ profileId ];
-						const credFields = profile?.credential_fields ?? [];
-						const needsConfig = credFields.length > 0;
-						const isAuthenticated =
-							needsConfig &&
-							config &&
-							config.authenticated === true;
+			{ hasProfiles &&
+				profileIds.map( ( profileId ) => {
+					const profile = providerProfiles[ profileId ];
+					const config = providerConfigs[ profileId ];
+					const credFields = profile?.credential_fields ?? [];
+					const needsConfig = credFields.length > 0;
+					const isAuthenticated =
+						needsConfig && config && config.authenticated === true;
 
-						let statusText;
-						if ( ! needsConfig ) {
-							statusText = __(
-								'No configuration needed',
-								'classifai'
-							);
-						} else if ( isAuthenticated ) {
-							statusText = __( 'Verified', 'classifai' );
-						} else {
-							statusText = __( 'Not configured', 'classifai' );
-						}
-
-						const title = (
-							<>
-								<span className="classifai-providers-settings__label">
-									{ profile?.label ?? profileId }
-								</span>
-								<span className="classifai-providers-settings__status">
-									{ statusText }
-								</span>
-							</>
-						);
-
-						return (
-							<PanelBody
-								key={ profileId }
-								title={ title }
-								initialOpen={ ! isAuthenticated && needsConfig }
+					let statusText;
+					if ( ! needsConfig ) {
+						statusText = (
+							<Tooltip
+								text={ __(
+									'No configuration needed',
+									'classifai'
+								) }
 							>
+								<>
+									<Icon icon="yes-alt" />
+								</>
+							</Tooltip>
+						);
+					} else if ( isAuthenticated ) {
+						statusText = (
+							<Tooltip text={ __( 'Configured', 'classifai' ) }>
+								<>
+									<Icon icon="yes-alt" />
+								</>
+							</Tooltip>
+						);
+					} else {
+						statusText = (
+							<Tooltip
+								text={ __( 'Not configured', 'classifai' ) }
+							>
+								<>
+									<Icon icon="dismiss" />
+								</>
+							</Tooltip>
+						);
+					}
+
+					const title = (
+						<>
+							<span className="classifai-providers-settings__status">
+								{ statusText }
+							</span>
+							<span className="classifai-providers-settings__label">
+								{ profile?.label ?? profileId }
+							</span>
+						</>
+					);
+
+					return (
+						<Panel key={ profileId } className="settings-panel">
+							<PanelBody title={ title } initialOpen={ false }>
 								{ needsConfig ? (
 									<ProviderProfileForm
 										profileId={ profileId }
@@ -125,10 +137,9 @@ export const ProvidersSettings = () => {
 									</p>
 								) }
 							</PanelBody>
-						);
-					} ) }
-				</Panel>
-			) }
+						</Panel>
+					);
+				} ) }
 		</div>
 	);
 };
