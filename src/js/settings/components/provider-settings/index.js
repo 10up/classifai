@@ -11,7 +11,7 @@ import {
 	ToggleControl,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef, useMemo } from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
 import { Link } from 'react-router-dom';
 
@@ -173,7 +173,10 @@ export const ProviderSettings = () => {
 	);
 
 	const profile = getProfileForProvider( provider, providerProfiles );
-	const credentialFields = profile?.credential_fields ?? [];
+	const credentialFields = useMemo(
+		() => profile?.credential_fields ?? [],
+		[ profile?.credential_fields ]
+	);
 	const hasCredentialFields = credentialFields.length > 0;
 	const globalConfig = profile
 		? providerConfigs?.[ profile.profileId ]
@@ -201,6 +204,49 @@ export const ProviderSettings = () => {
 			setProviderSettings( provider, { override: true } );
 		}
 	}, [ hasFeatureCreds, ov, provider, setProviderSettings ] );
+
+	const hasClearedGlobalOnLoadRef = useRef( false );
+
+	// When override is already on (e.g. on load), clear any credential fields that
+	// match global so the form is not pre-populated with global data.
+	useEffect( () => {
+		if (
+			! hasClearedGlobalOnLoadRef.current &&
+			isOverridden &&
+			hasCredentialFields &&
+			provider &&
+			globalConfig
+		) {
+			const credFields = credentialFields.filter(
+				( f ) => f !== 'authenticated'
+			);
+			const updates = {};
+			for ( const f of credFields ) {
+				if (
+					featureSettings?.[ provider ]?.[ f ] === globalConfig?.[ f ]
+				) {
+					updates[ f ] = '';
+				}
+			}
+			if ( Object.keys( updates ).length > 0 ) {
+				setProviderSettings( provider, updates );
+				hasClearedGlobalOnLoadRef.current = true;
+			}
+		}
+	}, [
+		isOverridden,
+		hasCredentialFields,
+		provider,
+		globalConfig,
+		credentialFields,
+		featureSettings,
+		setProviderSettings,
+	] );
+
+	// Reset so we re-check when the user switches provider.
+	useEffect( () => {
+		hasClearedGlobalOnLoadRef.current = false;
+	}, [ provider ] );
 
 	// Remove the Chrome AI Provider from the list of providers if the browser AI is not available.
 	if ( feature?.providers?.chrome_ai && ! window.LanguageModel ) {
@@ -267,7 +313,7 @@ export const ProviderSettings = () => {
 										{ __( 'Providers tab', 'classifai' ) }
 									</Link>{ ' ' }
 									{ __(
-										'and turn off the Override Provider credentials to use global configuration.',
+										'and turn off the Override Provider credentials setting to use the global configuration.',
 										'classifai'
 									) }
 								</Notice>
@@ -333,14 +379,6 @@ export const ProviderSettings = () => {
 								provider={ provider }
 								isConfigured={ configured }
 							/>
-						) }
-						{ ! isOverridden && hasGlobal && (
-							<p className="classifai-provider-using-global">
-								{ __(
-									'This Feature is using the global Provider settings.',
-									'classifai'
-								) }
-							</p>
 						) }
 					</>
 				) : (
