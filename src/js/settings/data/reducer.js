@@ -7,6 +7,8 @@ const DEFAULT_STATE = {
 	currentService: initialService,
 	currentFeature: initialFeature,
 	settings: classifAISettings.settings || {},
+	providerProfiles: {},
+	providerConfigs: {},
 	isLoaded: false,
 	isSaving: false,
 	error: null,
@@ -65,6 +67,27 @@ export const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				error: action.payload,
+			};
+
+		case 'SET_PROVIDER_PROFILES':
+			return {
+				...state,
+				providerProfiles: action.payload,
+			};
+
+		case 'SET_PROVIDER_CONFIGS':
+			return {
+				...state,
+				providerConfigs: action.payload,
+			};
+
+		case 'SET_PROVIDER_CONFIG':
+			return {
+				...state,
+				providerConfigs: {
+					...state.providerConfigs,
+					[ action.profileId ]: action.payload,
+				},
 			};
 
 		default:

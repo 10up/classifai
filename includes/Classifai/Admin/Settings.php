@@ -4,6 +4,8 @@ namespace Classifai\Admin;
 
 use Classifai\Features\Classification;
 use Classifai\Features\RecommendedContent;
+use Classifai\Providers\ProviderConfigStore;
+use Classifai\Providers\ProviderProfiles;
 use Classifai\Services\ServicesManager;
 use Classifai\Taxonomy\TaxonomyFactory;
 use Classifai\Helpers\CredentialReuse;
@@ -357,6 +359,47 @@ class Settings {
 				],
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1',
+			'provider-configs',
+			[
+				[
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_provider_configs_callback' ],
+					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
+				],
+				[
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'update_provider_config_callback' ],
+					'args'                => [
+						'profile_id' => [
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => function ( $value ) {
+								$profiles = ProviderProfiles::get_all_profiles();
+								if ( ! isset( $profiles[ $value ] ) ) {
+									return new \WP_Error(
+										'invalid_profile',
+										__( 'Invalid profile ID.', 'classifai' ),
+										[ 'status' => 400 ]
+									);
+								}
+								return true;
+							},
+							'description'       => __( 'Profile ID to update.', 'classifai' ),
+						],
+						'config'     => [
+							'required'    => true,
+							'type'        => 'object',
+							'description' => __( 'Config to save for the profile.', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
+				],
+			]
+		);
 	}
 
 	/**
@@ -607,6 +650,55 @@ class Settings {
 		}
 
 		return rest_ensure_response( [ 'success' => true ] );
+	}
+
+	/**
+	 * Get Provider profiles and global configs.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_provider_configs_callback(): \WP_REST_Response {
+		return rest_ensure_response(
+			[
+				'profiles' => ProviderProfiles::get_all_profiles(),
+				'configs'  => ProviderConfigStore::get_all(),
+			]
+		);
+	}
+
+	/**
+	 * Update global config for a single profile.
+	 *
+	 * @param \WP_REST_Request $request Full request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function update_provider_config_callback( \WP_REST_Request $request ) {
+		$profile_id = $request->get_param( 'profile_id' );
+		$config     = (array) $request->get_param( 'config' );
+		$fields     = ProviderProfiles::get_credential_fields( $profile_id );
+		$existing   = ProviderConfigStore::get( $profile_id ) ?? [];
+
+		$sanitized = [];
+		foreach ( $fields as $field ) {
+			if ( ! array_key_exists( $field, $config ) ) {
+				continue;
+			}
+			$val = $config[ $field ];
+			if ( 'authenticated' === $field ) {
+				$sanitized[ $field ] = (bool) $val;
+			} elseif ( is_scalar( $val ) ) {
+				$sanitized[ $field ] = sanitize_text_field( (string) $val );
+			}
+		}
+
+		ProviderConfigStore::set( $profile_id, array_merge( $existing, $sanitized ) );
+
+		return rest_ensure_response(
+			[
+				'success' => true,
+				'configs' => ProviderConfigStore::get_all(),
+			]
+		);
 	}
 
 	/**

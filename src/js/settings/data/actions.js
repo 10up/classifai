@@ -61,3 +61,19 @@ export const setError = ( error ) => ( {
 	type: 'SET_ERROR',
 	payload: error,
 } );
+
+export const setProviderProfiles = ( profiles ) => ( {
+	type: 'SET_PROVIDER_PROFILES',
+	payload: profiles,
+} );
+
+export const setProviderConfigs = ( configs ) => ( {
+	type: 'SET_PROVIDER_CONFIGS',
+	payload: configs,
+} );
+
+export const setProviderConfig = ( profileId, config ) => ( {
+	type: 'SET_PROVIDER_CONFIG',
+	profileId,
+	payload: config,
+} );

@@ -439,6 +439,54 @@
 			padding: 0px 20px 0px 0px;
 		}
 	}
+
+	.classifai-providers-settings {
+		margin-top: 16px;
+
+		&__title {
+			margin-bottom: 0.5rem;
+		}
+
+		&__description {
+			color: #757575;
+			font-size: 13px;
+			margin-bottom: 1rem;
+		}
+
+		&__loading {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 24px 0;
+		}
+
+		&__list {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		&__item {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 10px 0;
+			border-bottom: 1px solid #f0f0f1;
+
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+
+		&__label {
+			font-weight: 500;
+		}
+
+		&__status {
+			font-size: 13px;
+			color: #757575;
+		}
+	}
 }
 
 .classifai-onboarding {
