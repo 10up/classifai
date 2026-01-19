@@ -5,6 +5,7 @@ namespace Classifai\Admin;
 use Classifai\Features\Classification;
 use Classifai\Features\RecommendedContent;
 use Classifai\Providers\ProviderConfigStore;
+use Classifai\Providers\ProviderCredentialsVerifier;
 use Classifai\Providers\ProviderProfiles;
 use Classifai\Services\ServicesManager;
 use Classifai\Taxonomy\TaxonomyFactory;
@@ -569,32 +570,49 @@ class Settings {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function update_provider_config_callback( \WP_REST_Request $request ) {
-		$profile_id = $request->get_param( 'profile_id' );
-		$config     = (array) $request->get_param( 'config' );
+		$params     = $request->get_json_params();
+		$profile_id = $params['profile_id'] ?? $request->get_param( 'profile_id' );
+		$config     = (array) ( $params['config'] ?? $request->get_param( 'config' ) ?? [] );
 		$fields     = ProviderProfiles::get_credential_fields( $profile_id );
 		$existing   = ProviderConfigStore::get( $profile_id ) ?? [];
 
 		$sanitized = [];
 		foreach ( $fields as $field ) {
-			if ( ! array_key_exists( $field, $config ) ) {
+			if ( 'authenticated' === $field || ! array_key_exists( $field, $config ) ) {
 				continue;
 			}
-			$val = $config[ $field ];
-			if ( 'authenticated' === $field ) {
-				$sanitized[ $field ] = (bool) $val;
-			} elseif ( is_scalar( $val ) ) {
-				$sanitized[ $field ] = sanitize_text_field( (string) $val );
+
+			if ( is_scalar( $config[ $field ] ) ) {
+				$sanitized[ $field ] = sanitize_text_field( (string) $config[ $field ] );
 			}
 		}
 
-		ProviderConfigStore::set( $profile_id, array_merge( $existing, $sanitized ) );
+		$merged = array_merge( $existing, $sanitized );
 
-		return rest_ensure_response(
-			[
-				'success' => true,
-				'configs' => ProviderConfigStore::get_all(),
-			]
-		);
+		// Verify credentials when the profile supports it.
+		$credential_only = array_diff( $fields, [ 'authenticated' ] );
+		$verify_result   = [
+			'authenticated' => false,
+			'error'         => null,
+		];
+
+		if ( count( $credential_only ) > 0 ) {
+			$verify_result           = ProviderCredentialsVerifier::verify( $profile_id, $merged );
+			$merged['authenticated'] = $verify_result['authenticated'];
+		}
+
+		ProviderConfigStore::set( $profile_id, $merged );
+
+		$response = [
+			'success' => true,
+			'configs' => ProviderConfigStore::get_all(),
+		];
+
+		if ( $verify_result['error'] instanceof \WP_Error ) {
+			$response['verification_error'] = $verify_result['error']->get_error_message();
+		}
+
+		return rest_ensure_response( $response );
 	}
 
 	/**

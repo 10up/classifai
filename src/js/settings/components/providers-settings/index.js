@@ -11,6 +11,7 @@ import { Panel, PanelBody, Spinner } from '@wordpress/components';
  * Internal dependencies
  */
 import { STORE_NAME } from '../../data/store';
+import { ProviderProfileForm } from './provider-profile-form';
 
 /**
  * ProvidersSettings component.
@@ -70,58 +71,62 @@ export const ProvidersSettings = () => {
 
 			{ hasProfiles && (
 				<Panel>
-					<PanelBody initialOpen={ true }>
-						<ul className="classifai-providers-settings__list">
-							{ profileIds.map( ( profileId ) => {
-								const profile = providerProfiles[ profileId ];
-								const config = providerConfigs[ profileId ];
-								const credFields =
-									profile?.credential_fields ?? [];
-								const needsConfig = credFields.length > 0;
-								const hasCreds =
-									needsConfig &&
-									config &&
-									credFields.some(
-										( f ) =>
-											f !== 'authenticated' &&
-											config[ f ] !== null &&
-											String( config[ f ] ).trim() !== ''
-									);
+					{ profileIds.map( ( profileId ) => {
+						const profile = providerProfiles[ profileId ];
+						const config = providerConfigs[ profileId ];
+						const credFields = profile?.credential_fields ?? [];
+						const needsConfig = credFields.length > 0;
+						const isAuthenticated =
+							needsConfig &&
+							config &&
+							config.authenticated === true;
 
-								let statusText;
-								if ( ! needsConfig ) {
-									statusText = __(
-										'No configuration needed',
-										'classifai'
-									);
-								} else if ( hasCreds ) {
-									statusText = __(
-										'Configured',
-										'classifai'
-									);
-								} else {
-									statusText = __(
-										'Not configured',
-										'classifai'
-									);
-								}
+						let statusText;
+						if ( ! needsConfig ) {
+							statusText = __(
+								'No configuration needed',
+								'classifai'
+							);
+						} else if ( isAuthenticated ) {
+							statusText = __( 'Verified', 'classifai' );
+						} else {
+							statusText = __( 'Not configured', 'classifai' );
+						}
 
-								return (
-									<li
-										key={ profileId }
-										className="classifai-providers-settings__item"
-									>
-										<span className="classifai-providers-settings__label">
-											{ profile?.label ?? profileId }
-										</span>
-										<span className="classifai-providers-settings__status">
-											{ statusText }
-										</span>
-									</li>
-								);
-							} ) }
-						</ul>
-					</PanelBody>
+						const title = (
+							<>
+								<span className="classifai-providers-settings__label">
+									{ profile?.label ?? profileId }
+								</span>
+								<span className="classifai-providers-settings__status">
+									{ statusText }
+								</span>
+							</>
+						);
+
+						return (
+							<PanelBody
+								key={ profileId }
+								title={ title }
+								initialOpen={ ! isAuthenticated && needsConfig }
+							>
+								{ needsConfig ? (
+									<ProviderProfileForm
+										profileId={ profileId }
+										profile={ profile }
+										config={ config }
+									/>
+								) : (
+									<p className="classifai-providers-settings__no-config">
+										{ __(
+											'This Provider does not require any configuration.',
+											'classifai'
+										) }
+									</p>
+								) }
+							</PanelBody>
+						);
+					} ) }
 				</Panel>
 			) }
 		</div>

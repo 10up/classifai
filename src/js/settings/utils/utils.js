@@ -102,16 +102,40 @@ export const getScope = ( name ) => {
 /**
  * Check if the provider is configured.
  *
- * @param {Object} featureSettings The feature settings.
+ * Considers both Feature-level and global Provider configs. When providerProfiles
+ * and providerConfigs are passed, falls back to the global config if the feature
+ * block does not have authenticated (e.g. when using global credentials).
+ *
+ * @param {Object} featureSettings    The Feature settings (merged with global when from REST).
+ * @param {Object} [providerProfiles] Optional. Provider profiles from Provider-configs.
+ * @param {Object} [providerConfigs]  Optional. Global Provider configs.
  * @return {boolean} True if the provider is configured, false otherwise.
  */
-export const isProviderConfigured = ( featureSettings ) => {
+export const isProviderConfigured = (
+	featureSettings,
+	providerProfiles = null,
+	providerConfigs = null
+) => {
 	const selectedProvider = featureSettings?.provider;
 	if ( ! selectedProvider ) {
 		return false;
 	}
 
-	return featureSettings[ selectedProvider ]?.authenticated || false;
+	if ( featureSettings[ selectedProvider ]?.authenticated ) {
+		return true;
+	}
+
+	if ( providerProfiles && providerConfigs ) {
+		const profile = getProfileForProvider(
+			selectedProvider,
+			providerProfiles
+		);
+		if ( profile && providerConfigs[ profile.profileId ]?.authenticated ) {
+			return true;
+		}
+	}
+
+	return false;
 };
 
 /**

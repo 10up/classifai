@@ -12,6 +12,7 @@ import {
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
+import { Link } from 'react-router-dom';
 
 /**
  * Internal dependencies
@@ -205,7 +206,11 @@ export const ProviderSettings = () => {
 	);
 
 	const configured =
-		isProviderConfigured( featureSettings ) &&
+		isProviderConfigured(
+			featureSettings,
+			providerProfiles,
+			providerConfigs
+		) &&
 		featureName !== editProvider &&
 		providerLabel;
 
@@ -243,9 +248,13 @@ export const ProviderSettings = () => {
 									className="classifai-provider-notice"
 								>
 									{ __(
-										"You're using Feature-level credentials. To use a single Provider across Features, you can configure it in the Providers tab.",
+										'Using feature-level credentials. To use a single Provider across Features, configure it in the',
 										'classifai'
-									) }
+									) }{ ' ' }
+									<Link to="/providers">
+										{ __( 'Providers tab', 'classifai' ) }
+									</Link>
+									.
 								</Notice>
 							) }
 						</>
@@ -275,7 +284,14 @@ export const ProviderSettings = () => {
 									className="classifai-provider-notice"
 								>
 									{ __(
-										'To reuse this Provider across Features, configure it in the Providers tab. You can also add credentials below for this Feature only.',
+										'Configure this Provider in the',
+										'classifai'
+									) }{ ' ' }
+									<Link to="/providers">
+										{ __( 'Providers tab', 'classifai' ) }
+									</Link>
+									{ __(
+										'to use it across Features, or add credentials below for this Feature only.',
 										'classifai'
 									) }
 								</Notice>
