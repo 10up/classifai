@@ -28,30 +28,53 @@ class CredentialResolver {
 	 * profile is returned. Existing installs with Feature-level creds effectively
 	 * keep using them as overrides.
 	 *
-	 * @param string $provider_id     Capability-specific Provider ID (e.g. openai_chatgpt).
-	 * @param string $feature_id      Feature ID (unused for now; for future per-Feature overrides).
+	 * @param string $provider_id Capability-specific Provider ID (e.g. openai_chatgpt).
+	 * @param string $feature_id Feature ID.
 	 * @param array  $feature_settings Full feature settings including [ $provider_id => [ ... ] ].
 	 * @return array Effective credentials for the Provider (e.g. [ 'api_key' => '...', 'authenticated' => true ]).
 	 */
 	public static function resolve( string $provider_id, string $feature_id, array $feature_settings ): array {
+		$resolved = [];
+
 		$profile_id = ProviderProfiles::get_profile_for_provider( $provider_id );
 		if ( null === $profile_id ) {
-			return $feature_settings[ $provider_id ] ?? [];
+			$resolved = $feature_settings[ $provider_id ] ?? [];
+
+			/**
+			 * Filter the resolved Provider credentials for a Feature.
+			 *
+			 * @since x.x.x
+			 * @hook classifai_resolved_credentials
+			 *
+			 * @param array  $resolved        Resolved credentials (e.g. api_key, authenticated).
+			 * @param string $provider_id     Provider ID (e.g. openai_chatgpt).
+			 * @param string $feature_id      Feature ID (e.g. classification, title_generation).
+			 * @param array  $feature_settings Full feature settings.
+			 *
+			 * @return array Filtered credentials.
+			 */
+			return apply_filters( 'classifai_resolved_credentials', $resolved, $provider_id, $feature_id, $feature_settings );
 		}
 
 		$credential_fields = ProviderProfiles::get_credential_fields( $profile_id );
 		$block             = $feature_settings[ $provider_id ] ?? [];
 
-		// Explicit override: use Feature-level credentials when true; use only global when false.
+		// Use Feature-level credentials when override is true; use only global when false.
 		if ( array_key_exists( 'override', $block ) ) {
 			if ( ! empty( $block['override'] ) ) {
-				return $block;
+				$resolved = $block;
+			} else {
+				$global   = ProviderConfigStore::get( $profile_id );
+				$resolved = is_array( $global ) ? $global : [];
 			}
-			$global = ProviderConfigStore::get( $profile_id );
-			return is_array( $global ) ? $global : [];
+
+			/**
+			 * Filter documented above.
+			 */
+			return apply_filters( 'classifai_resolved_credentials', $resolved, $provider_id, $feature_id, $feature_settings );
 		}
 
-		// Legacy: infer override when any credential field (excluding 'authenticated') is non-empty.
+		// Infer override when any credential field (excluding 'authenticated') is non-empty.
 		$fields_to_check = array_diff( $credential_fields, [ 'authenticated' ] );
 		$has_override    = false;
 		foreach ( $fields_to_check as $field ) {
@@ -63,10 +86,15 @@ class CredentialResolver {
 		}
 
 		if ( $has_override ) {
-			return $block;
+			$resolved = $block;
+		} else {
+			$global   = ProviderConfigStore::get( $profile_id );
+			$resolved = is_array( $global ) ? $global : [];
 		}
 
-		$global = ProviderConfigStore::get( $profile_id );
-		return is_array( $global ) ? $global : [];
+		/**
+		 * Filter documented above.
+		 */
+		return apply_filters( 'classifai_resolved_credentials', $resolved, $provider_id, $feature_id, $feature_settings );
 	}
 }
