@@ -8,9 +8,10 @@ import {
 	Icon,
 	Tooltip,
 	Notice,
+	ToggleControl,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
 import { Link } from 'react-router-dom';
 
@@ -152,7 +153,8 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 export const ProviderSettings = () => {
 	const [ editProvider, setEditProvider ] = useState( false );
 	const { featureName } = useFeatureContext();
-	const { setFeatureSettings } = useDispatch( STORE_NAME );
+	const { setFeatureSettings, setProviderSettings } =
+		useDispatch( STORE_NAME );
 	const feature = getFeature( featureName );
 	const provider = useSelect(
 		( select ) =>
@@ -189,6 +191,16 @@ export const ProviderSettings = () => {
 		featureSettings?.[ provider ],
 		credentialFields
 	);
+
+	const ov = featureSettings?.[ provider ]?.override;
+	const isOverridden = ov === true || ( ov !== false && hasFeatureCreds );
+
+	// Seed override for existing users with Feature-level creds so it persists on save.
+	useEffect( () => {
+		if ( hasFeatureCreds && ov === undefined && provider ) {
+			setProviderSettings( provider, { override: true } );
+		}
+	}, [ hasFeatureCreds, ov, provider, setProviderSettings ] );
 
 	// Remove the Chrome AI Provider from the list of providers if the browser AI is not available.
 	if ( feature?.providers?.chrome_ai && ! window.LanguageModel ) {
@@ -241,20 +253,23 @@ export const ProviderSettings = () => {
 									/>
 								</>
 							</Tooltip>
-							{ hasFeatureCreds && (
+							{ isOverridden && hasFeatureCreds && (
 								<Notice
 									status="info"
 									isDismissible={ false }
 									className="classifai-provider-notice"
 								>
 									{ __(
-										'Using feature-level credentials. To use a single Provider across Features, configure it in the',
+										'Using Feature-level credentials. Configure this Provider in the',
 										'classifai'
 									) }{ ' ' }
 									<Link to="/providers">
 										{ __( 'Providers tab', 'classifai' ) }
-									</Link>
-									.
+									</Link>{ ' ' }
+									{ __(
+										'and turn off the Override Provider credentials to use global configuration.',
+										'classifai'
+									) }
 								</Notice>
 							) }
 						</>
@@ -275,33 +290,65 @@ export const ProviderSettings = () => {
 							options={ providers }
 							__nextHasNoMarginBottom
 						/>
-						{ hasCredentialFields &&
-							! hasGlobal &&
-							! hasFeatureCreds && (
-								<Notice
-									status="info"
-									isDismissible={ false }
-									className="classifai-provider-notice"
-								>
-									{ __(
-										'Configure this Provider in the',
-										'classifai'
-									) }{ ' ' }
-									<Link to="/providers">
-										{ __( 'Providers tab', 'classifai' ) }
-									</Link>
-									{ __(
-										'to use it across Features, or add credentials below for this Feature only.',
-										'classifai'
-									) }
-								</Notice>
-							) }
+						{ ! isOverridden && ! hasGlobal && (
+							<Notice
+								status="info"
+								isDismissible={ false }
+								className="classifai-provider-notice"
+							>
+								{ __(
+									'Configure this Provider in the',
+									'classifai'
+								) }{ ' ' }
+								<Link to="/providers">
+									{ __( 'Providers tab', 'classifai' ) }
+								</Link>{ ' ' }
+								{ __(
+									'to use it across Features.',
+									'classifai'
+								) }
+							</Notice>
+						) }
 					</SettingsRow>
 				) }
-				<ProviderFields
-					provider={ provider }
-					isConfigured={ configured }
-				/>
+				{ hasCredentialFields ? (
+					<>
+						<SettingsRow
+							label={ __(
+								'Override Provider credentials',
+								'classifai'
+							) }
+						>
+							<ToggleControl
+								checked={ isOverridden }
+								onChange={ ( value ) =>
+									setProviderSettings( provider, {
+										override: !! value,
+									} )
+								}
+							/>
+						</SettingsRow>
+						{ isOverridden && (
+							<ProviderFields
+								provider={ provider }
+								isConfigured={ configured }
+							/>
+						) }
+						{ ! isOverridden && hasGlobal && (
+							<p className="classifai-provider-using-global">
+								{ __(
+									'This Feature is using the global Provider settings.',
+									'classifai'
+								) }
+							</p>
+						) }
+					</>
+				) : (
+					<ProviderFields
+						provider={ provider }
+						isConfigured={ configured }
+					/>
+				) }
 				<Slot name="ClassifAIProviderSettings">
 					{ ( fills ) => <> { fills }</> }
 				</Slot>
