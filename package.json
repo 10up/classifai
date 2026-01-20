@@ -39,7 +39,7 @@
   "devDependencies": {
     "@10up/cypress-wp-utils": "^0.6.0",
     "@types/wordpress__blocks": "^12.5.18",
-    "@wordpress/env": "^10.37.0",
+    "@wordpress/env": "^10.38.0",
     "@wordpress/scripts": "^31.2.0",
     "cypress": "^15.8.2",
     "cypress-file-upload": "^5.0.8",
