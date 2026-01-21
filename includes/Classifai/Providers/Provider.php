@@ -178,9 +178,16 @@ abstract class Provider {
 	 *
 	 * @since x.x.x
 	 *
+	 * @param array $settings Feature settings. Optional, will default to using saved settings.
 	 * @return array
 	 */
-	public function get_credentials(): array {
+	public function get_credentials( array $settings = [] ): array {
+		// Get our Provider-specific settings.
+		$feature_provider_settings = $settings[ static::ID ] ?? [];
+		if ( empty( $feature_provider_settings ) ) {
+			$feature_provider_settings = $this->feature_instance->get_settings( static::ID ) ?? [];
+		}
+
 		/**
 		 * Filter the credentials for the Provider.
 		 *
@@ -197,11 +204,11 @@ abstract class Provider {
 			'classifai_provider_credentials',
 			CredentialResolver::resolve(
 				static::ID,
-				$this->feature_instance->get_settings( static::ID ) ?? []
+				$feature_provider_settings
 			),
 			static::ID,
 			$this->feature_instance::ID ?? null,
-			$this->feature_instance->get_settings( static::ID ) ?? []
+			$feature_provider_settings
 		);
 	}
 
@@ -209,10 +216,11 @@ abstract class Provider {
 	 * Get a credential field value for the Provider.
 	 *
 	 * @param string $credential_key The credential field name.
+	 * @param array  $settings       Feature settings. Optional, will default to using saved settings.
 	 * @return mixed The credential value, or null if not set.
 	 */
-	public function get_credential( string $credential_key ) {
-		$credentials = $this->get_credentials();
+	public function get_credential( string $credential_key, array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
 		return $credentials[ $credential_key ] ?? null;
 	}
 }

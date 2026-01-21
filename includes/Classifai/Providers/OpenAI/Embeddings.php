@@ -1459,14 +1459,13 @@ class Embeddings extends Provider {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
-		$settings = $feature->get_settings();
 
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Embedding generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( $this, $feature->get_option_name() );
 
 		/**
 		 * Filter the request body before sending to OpenAI.
@@ -1535,14 +1534,12 @@ class Embeddings extends Provider {
 			$feature = new Classification();
 		}
 
-		$settings = $feature->get_settings();
-
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Embedding generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( $this, $feature->get_option_name() );
 
 		/**
 		 * Filter the request body before sending to OpenAI.

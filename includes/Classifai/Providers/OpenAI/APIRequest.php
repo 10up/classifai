@@ -2,7 +2,9 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Providers\Provider;
 use WP_Error;
+
 use function Classifai\safe_wp_remote_post;
 use function Classifai\safe_wp_remote_get;
 
@@ -21,28 +23,37 @@ use function Classifai\safe_wp_remote_get;
 class APIRequest {
 
 	/**
-	 * The OpenAI API key.
+	 * The Provider instance.
 	 *
-	 * @var string
+	 * @var Provider
 	 */
-	public $api_key;
+	public Provider $provider;
 
 	/**
-	 * The feature name.
+	 * The Feature name.
 	 *
 	 * @var string
 	 */
 	public $feature;
 
 	/**
+	 * The Feature settings.
+	 *
+	 * @var array
+	 */
+	public $settings;
+
+	/**
 	 * OpenAI APIRequest constructor.
 	 *
-	 * @param string $api_key OpenAI API key.
-	 * @param string $feature Feature name.
+	 * @param Provider $provider Provider instance.
+	 * @param string   $feature Feature name.
+	 * @param array    $settings Feature settings. Optional, useful when settings aren't saved yet.
 	 */
-	public function __construct( string $api_key = '', string $feature = '' ) {
-		$this->api_key = $api_key;
-		$this->feature = $feature;
+	public function __construct( Provider $provider, string $feature = '', array $settings = [] ) {
+		$this->provider = $provider;
+		$this->feature  = $feature;
+		$this->settings = $settings;
 	}
 
 	/**
@@ -342,6 +353,6 @@ class APIRequest {
 	 * @return string
 	 */
 	public function get_api_key() {
-		return $this->api_key;
+		return $this->provider->get_credential( 'api_key', $this->settings ) ?? '';
 	}
 }
