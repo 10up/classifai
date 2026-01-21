@@ -183,8 +183,13 @@ abstract class Provider {
 	 */
 	public function get_credentials( array $settings = [] ): array {
 		// Get our Provider-specific settings.
-		$feature_provider_settings = $settings[ static::ID ] ?? [];
-		if ( empty( $feature_provider_settings ) ) {
+		if (
+			! empty( $settings ) &&
+			array_key_exists( static::ID, $settings ) &&
+			! empty( $settings[ static::ID ] )
+		) {
+			$feature_provider_settings = $settings[ static::ID ];
+		} else {
 			$feature_provider_settings = $this->feature_instance->get_settings( static::ID ) ?? [];
 		}
 

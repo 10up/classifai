@@ -177,6 +177,8 @@ class ProviderProfiles {
 	/**
 	 * Get the display label for a profile.
 	 *
+	 * TODO: Remove this method if not used.
+	 *
 	 * @param string $profile_id Profile ID.
 	 * @return string Human-readable label.
 	 */
