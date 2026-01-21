@@ -2,10 +2,10 @@
 /**
  * Provider profile registry.
  *
- * Maps capability-specific provider IDs (e.g. openai_chatgpt) to vendor-level
+ * Maps capability-specific Provider IDs (e.g. openai_chatgpt) to vendor-level
  * profiles (e.g. openai) so credentials can be configured globally. Grouped
- * profiles share one credential set across multiple providers; ungrouped
- * profiles are 1:1 with a provider.
+ * profiles share one credential set across multiple Providers; ungrouped
+ * profiles are 1:1 with a Provider.
  *
  * @since x.x.x
  */
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class ProviderProfiles {
 
 	/**
-	 * Profile definitions: profile_id => [ provider_ids, credential_fields, label ].
+	 * Profile definitions.
 	 *
 	 * Grouped profiles (OpenAI, Ollama, ElevenLabs, Google AI) share credentials.
 	 * Ungrouped (e.g. Azure, AWS) use distinct endpoint/key per capability.

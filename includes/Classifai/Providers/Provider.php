@@ -5,6 +5,8 @@
 
 namespace Classifai\Providers;
 
+use Classifai\Providers\CredentialResolver;
+
 abstract class Provider {
 
 	/**
@@ -166,5 +168,51 @@ abstract class Provider {
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
+	}
+
+	/**
+	 * Get the credentials for the Provider.
+	 *
+	 * Will return either the Feature-level credentials,
+	 * if they are being overridden, or the global credentials.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return array
+	 */
+	public function get_credentials(): array {
+		/**
+		 * Filter the credentials for the Provider.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_provider_credentials
+		 *
+		 * @param array $credentials The credentials for the Provider.
+		 * @param string $provider_id The ID of the Provider.
+		 * @param string|null $feature_id The ID of the Feature, or null if not set.
+		 * @param array $feature_provider_settings The Provider specific Feature settings.
+		 * @return array The filtered credentials.
+		 */
+		return apply_filters(
+			'classifai_provider_credentials',
+			CredentialResolver::resolve(
+				static::ID,
+				$this->feature_instance->get_settings( static::ID ) ?? []
+			),
+			static::ID,
+			$this->feature_instance::ID ?? null,
+			$this->feature_instance->get_settings( static::ID ) ?? []
+		);
+	}
+
+	/**
+	 * Get a credential field value for the Provider.
+	 *
+	 * @param string $credential_key The credential field name.
+	 * @return mixed The credential value, or null if not set.
+	 */
+	public function get_credential( string $credential_key ) {
+		$credentials = $this->get_credentials();
+		return $credentials[ $credential_key ] ?? null;
 	}
 }

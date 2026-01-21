@@ -381,14 +381,6 @@ abstract class Feature {
 			$settings['provider'] = '';
 		}
 
-		// Merge in resolved credentials (global or Feature-level override) for the selected Provider.
-		$provider_id = $settings['provider'] ?? '';
-		if ( '' !== $provider_id ) {
-			$raw_block                = $settings[ $provider_id ] ?? [];
-			$resolved                 = CredentialResolver::resolve( $provider_id, static::ID, $settings );
-			$settings[ $provider_id ] = array_merge( $raw_block, $resolved );
-		}
-
 		if ( $index && isset( $settings[ $index ] ) ) {
 			return $settings[ $index ];
 		}

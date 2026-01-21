@@ -2,7 +2,7 @@
 /**
  * Credential resolution for Providers.
  *
- * Determines the effective credentials for a Provider by preferring feature-level
+ * Determines the effective credentials for a Provider by preferring Feature-level
  * overrides over global Provider config. Used at runtime when Providers need
  * api_key, endpoint_url, etc.
  *
@@ -10,6 +10,9 @@
  */
 
 namespace Classifai\Providers;
+
+use Classifai\Providers\ProviderConfigStore;
+use Classifai\Providers\ProviderProfiles;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -21,64 +24,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 class CredentialResolver {
 
 	/**
-	 * Resolve effective credentials for a Provider in a Feature.
+	 * Resolve credentials for a Provider.
 	 *
 	 * If the Feature has non-empty credential values for this Provider, they are
 	 * treated as an override and returned. Otherwise the global config for the
-	 * profile is returned. Existing installs with Feature-level creds effectively
-	 * keep using them as overrides.
+	 * profile is returned.
 	 *
 	 * @param string $provider_id Capability-specific Provider ID (e.g. openai_chatgpt).
-	 * @param string $feature_id Feature ID.
-	 * @param array  $feature_settings Full feature settings including [ $provider_id => [ ... ] ].
-	 * @return array Effective credentials for the Provider (e.g. [ 'api_key' => '...', 'authenticated' => true ]).
+	 * @param array  $feature_provider_settings The Provider specific Feature settings.
+	 * @return array Effective credentials for the Provider.
 	 */
-	public static function resolve( string $provider_id, string $feature_id, array $feature_settings ): array {
+	public static function resolve( string $provider_id, array $feature_provider_settings = [] ): array {
 		$resolved = [];
-// TODO: rethink this whole thing. I'd rather not merge global credentials into the feature settings as it gets confusing and isn't needed there. Introduce new functions/methods to just get credentials. And adjust the settings methods/functions to not return credentials unless overridden.
+
 		$profile_id = ProviderProfiles::get_profile_for_provider( $provider_id );
 		if ( null === $profile_id ) {
-			$resolved = $feature_settings[ $provider_id ] ?? [];
-
-			/**
-			 * Filter the resolved Provider credentials for a Feature.
-			 *
-			 * @since x.x.x
-			 * @hook classifai_resolved_credentials
-			 *
-			 * @param array  $resolved        Resolved credentials (e.g. api_key, authenticated).
-			 * @param string $provider_id     Provider ID (e.g. openai_chatgpt).
-			 * @param string $feature_id      Feature ID (e.g. classification, title_generation).
-			 * @param array  $feature_settings Full feature settings.
-			 *
-			 * @return array Filtered credentials.
-			 */
-			return apply_filters( 'classifai_resolved_credentials', $resolved, $provider_id, $feature_id, $feature_settings ); // TODO: how does this work with the existing credential filter PR?
+			return $feature_provider_settings;
 		}
 
+		// Get the credential fields the profile supports.
 		$credential_fields = ProviderProfiles::get_credential_fields( $profile_id );
-		$block             = $feature_settings[ $provider_id ] ?? [];
 
 		// Use Feature-level credentials when override is true; use only global when false.
-		if ( array_key_exists( 'override', $block ) ) {
-			if ( ! empty( $block['override'] ) ) {
-				$resolved = $block;
+		if ( array_key_exists( 'override', $feature_provider_settings ) ) {
+			if ( ! empty( $feature_provider_settings['override'] ) ) {
+				// Ensure the Feature-level Provider settings only has credential fields.
+				$resolved = array_intersect_key( $feature_provider_settings, array_flip( $credential_fields ) );
 			} else {
 				$global   = ProviderConfigStore::get( $profile_id );
 				$resolved = is_array( $global ) ? $global : [];
 			}
 
-			/**
-			 * Filter documented above.
-			 */
-			return apply_filters( 'classifai_resolved_credentials', $resolved, $provider_id, $feature_id, $feature_settings );
+			return $resolved;
 		}
 
 		// Infer override when any credential field (excluding 'authenticated') is non-empty.
 		$fields_to_check = array_diff( $credential_fields, [ 'authenticated' ] );
 		$has_override    = false;
 		foreach ( $fields_to_check as $field ) {
-			$v = $block[ $field ] ?? null;
+			$v = $feature_provider_settings[ $field ] ?? null;
 			if ( '' !== $v && null !== $v && false !== $v ) {
 				$has_override = true;
 				break;
@@ -86,15 +70,13 @@ class CredentialResolver {
 		}
 
 		if ( $has_override ) {
-			$resolved = $block;
+			// Ensure the Feature-level Provider settings only has credential fields.
+			$resolved = array_intersect_key( $feature_provider_settings, array_flip( $credential_fields ) );
 		} else {
 			$global   = ProviderConfigStore::get( $profile_id );
 			$resolved = is_array( $global ) ? $global : [];
 		}
 
-		/**
-		 * Filter documented above.
-		 */
-		return apply_filters( 'classifai_resolved_credentials', $resolved, $provider_id, $feature_id, $feature_settings );
+		return $resolved;
 	}
 }
