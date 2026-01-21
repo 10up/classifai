@@ -30,7 +30,7 @@ class ProviderCredentialsVerifier {
 	public static function verify( string $profile_id, array $config ): array {
 		switch ( $profile_id ) {
 			case 'openai':
-				return self::verify_openai( $config );
+				return self::verify_openai( $config ); // TODO: finish this but would also be great to pull in verification from the Provider to avoid duplication. Or bring that all in here.
 			case 'ollama':
 				return self::verify_ollama( $config );
 			default:

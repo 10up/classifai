@@ -168,6 +168,7 @@ export function ProviderProfileForm( { profileId, profile, config, onSaved } ) {
 					meta.type = 'password';
 				}
 
+				// TODO: Ideally this pulls in the actual credential form from the Provider to avoid duplication.
 				return (
 					<SettingsRow
 						key={ field }

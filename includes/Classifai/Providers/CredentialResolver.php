@@ -35,7 +35,7 @@ class CredentialResolver {
 	 */
 	public static function resolve( string $provider_id, string $feature_id, array $feature_settings ): array {
 		$resolved = [];
-
+// TODO: rethink this whole thing. I'd rather not merge global credentials into the feature settings as it gets confusing and isn't needed there. Introduce new functions/methods to just get credentials. And adjust the settings methods/functions to not return credentials unless overridden.
 		$profile_id = ProviderProfiles::get_profile_for_provider( $provider_id );
 		if ( null === $profile_id ) {
 			$resolved = $feature_settings[ $provider_id ] ?? [];
@@ -53,7 +53,7 @@ class CredentialResolver {
 			 *
 			 * @return array Filtered credentials.
 			 */
-			return apply_filters( 'classifai_resolved_credentials', $resolved, $provider_id, $feature_id, $feature_settings );
+			return apply_filters( 'classifai_resolved_credentials', $resolved, $provider_id, $feature_id, $feature_settings ); // TODO: how does this work with the existing credential filter PR?
 		}
 
 		$credential_fields = ProviderProfiles::get_credential_fields( $profile_id );
