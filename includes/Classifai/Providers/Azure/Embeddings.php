@@ -12,6 +12,7 @@ use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use Classifai\EmbeddingsScheduler;
 use WP_Error;
+
 use function Classifai\safe_wp_remote_post;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -251,9 +252,9 @@ class Embeddings extends OpenAI {
 	 * @return string
 	 */
 	protected function prep_api_url( ?Feature $feature = null ): string {
-		$settings   = $feature->get_settings( static::ID );
-		$endpoint   = $settings['endpoint_url'] ?? '';
-		$deployment = $settings['deployment'] ?? '';
+		$credentials = $this->get_credentials( $feature->get_settings() ?? [] );
+		$endpoint    = $credentials['endpoint_url'] ?? '';
+		$deployment  = $credentials['deployment'] ?? '';
 
 		if ( ! $endpoint ) {
 			return '';
@@ -276,18 +277,27 @@ class Embeddings extends OpenAI {
 	 * @return bool|WP_Error
 	 */
 	protected function authenticate_credentials( string $url, string $api_key, string $deployment ) {
-		$rtn = false;
+		$credentials = $this->get_credentials(
+			[
+				static::ID => [
+					'endpoint_url' => $url,
+					'api_key'      => $api_key,
+					'deployment'   => $deployment,
+				],
+			]
+		);
+		$rtn         = false;
 
 		// This does basically the same thing that prep_api_url does but when running authentication,
 		// we don't have settings saved yet, which prep_api_url needs.
-		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->embeddings_url );
+		$endpoint = trailingslashit( $credentials['endpoint_url'] ?? '' ) . str_replace( '{deployment-id}', $credentials['deployment'] ?? '', $this->embeddings_url );
 		$endpoint = add_query_arg( 'api-version', $this->api_version, $endpoint );
 
 		$request = safe_wp_remote_post(
 			$endpoint,
 			[
 				'headers' => [
-					'api-key'      => $api_key,
+					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode(
@@ -311,7 +321,6 @@ class Embeddings extends OpenAI {
 
 		return $rtn;
 	}
-
 
 	/**
 	 * Get the threshold for the similarity calculation.
@@ -970,8 +979,6 @@ class Embeddings extends OpenAI {
 			$feature = new Classification();
 		}
 
-		$settings = $feature->get_settings();
-
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
@@ -997,12 +1004,14 @@ class Embeddings extends OpenAI {
 			$text
 		);
 
+		$api_key = $this->get_credential( 'api_key' );
+
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $api_key ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -1049,8 +1058,6 @@ class Embeddings extends OpenAI {
 			$feature = new Classification();
 		}
 
-		$settings = $feature->get_settings();
-
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
@@ -1076,12 +1083,14 @@ class Embeddings extends OpenAI {
 			$strings
 		);
 
+		$api_key = $this->get_credential( 'api_key' );
+
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $api_key ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
