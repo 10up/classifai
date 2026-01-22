@@ -96,7 +96,7 @@ class OllamaMultimodal extends Ollama {
 	 */
 	public function request( string $url, array $body ) {
 		// Make our API request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( $this, $this->feature_instance::ID ?? '' );
 		$response = $request->post(
 			$url,
 			[

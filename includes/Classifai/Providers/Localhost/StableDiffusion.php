@@ -224,7 +224,7 @@ class StableDiffusion extends Provider {
 		}
 
 		// Make our request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( $this, $this->feature_instance::ID ?? '', [ static::ID => $default ] );
 		$response = $request->get(
 			$this->get_api_model_url( $default['endpoint_url'] ),
 			[
@@ -304,7 +304,7 @@ class StableDiffusion extends Provider {
 			return new WP_Error( 'invalid_param', sprintf( esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed %d characters.', 'classifai' ), $this->max_prompt_chars ) );
 		}
 
-		$request = new APIRequest( 'test', 'generate-image' );
+		$request = new APIRequest( $this, $this->feature_instance::ID ?? '' );
 
 		$dimensions = $this->get_dimensions_from_size( $args['size'] );
 		$body       = [

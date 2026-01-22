@@ -144,7 +144,7 @@ class Ollama extends Provider {
 		}
 
 		// Make our request.
-		$request  = new APIRequest( $this, $this->feature_instance::ID ?? '' );
+		$request  = new APIRequest( $this, $this->feature_instance::ID ?? '', [ static::ID => $default ] );
 		$response = $request->get(
 			$this->get_api_model_url( $default['endpoint_url'] ),
 			[
