@@ -130,7 +130,7 @@ class Ollama extends Provider {
 	 * @return array
 	 */
 	public function get_models( array $args = [] ): array {
-		$settings = $this->feature_instance->get_settings( static::ID );
+		$settings = $this->feature_instance ? $this->feature_instance->get_settings( static::ID ) : [];
 
 		$default = [
 			'endpoint_url' => $settings[ static::ID ]['endpoint_url'] ?? '',
@@ -154,16 +154,18 @@ class Ollama extends Provider {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			add_settings_error(
-				$this->feature_instance->get_option_name(),
-				'ollama-request-failed',
-				sprintf(
-					/* translators: %s is replaced with the error message */
-					esc_html__( 'Error making request, please ensure the Ollama service is running: %s', 'classifai' ),
-					$response->get_error_message()
-				),
-				'error'
-			);
+			if ( function_exists( 'add_settings_error' ) ) {
+				add_settings_error(
+					$this->feature_instance->get_option_name(),
+					'ollama-request-failed',
+					sprintf(
+						/* translators: %s is replaced with the error message */
+						esc_html__( 'Error making request, please ensure the Ollama service is running: %s', 'classifai' ),
+						$response->get_error_message()
+					),
+					'error'
+				);
+			}
 
 			return [];
 		}

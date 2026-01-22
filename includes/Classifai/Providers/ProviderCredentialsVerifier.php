@@ -10,6 +10,7 @@
 namespace Classifai\Providers;
 
 use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\Localhost\Ollama;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -75,46 +76,25 @@ class ProviderCredentialsVerifier {
 	}
 
 	/**
-	 * Verify Ollama endpoint via /api/tags.
+	 * Verify Ollama endpoint.
 	 *
-	 * @param array $config Must contain 'endpoint_url'.
+	 * @param array $config Provider config containing credentials.
 	 * @return array{ authenticated: bool, error: WP_Error|null }
 	 */
 	private static function verify_ollama( array $config ): array {
-		$url = isset( $config['endpoint_url'] ) ? trim( (string) $config['endpoint_url'] ) : '';
+		$provider = new Ollama();
+		$models   = $provider->get_models( $config );
 
-		if ( '' === $url ) {
+		if ( empty( $models ) ) {
 			return [
 				'authenticated' => false,
-				'error'         => new WP_Error( 'auth', __( 'Please enter an endpoint URL.', 'classifai' ) ),
+				'error'         => new WP_Error( 'auth', esc_html__( 'Error making request, please ensure the Ollama service is running', 'classifai' ), ),
 			];
 		}
-
-		$url      = trailingslashit( esc_url_raw( $url ) ) . 'api/tags';
-		$response = wp_remote_get( $url, [ 'timeout' => 10 ] );
-
-		if ( is_wp_error( $response ) ) {
-			return [
-				'authenticated' => false,
-				'error'         => $response,
-			];
-		}
-
-		$code = (int) wp_remote_retrieve_response_code( $response );
-
-		if ( 200 !== $code ) {
-			return [
-				'authenticated' => false,
-				'error'         => new WP_Error( 'auth', __( 'Could not reach the Ollama endpoint.', 'classifai' ) ),
-			];
-		}
-
-		$body       = json_decode( wp_remote_retrieve_body( $response ), true );
-		$has_models = ! empty( $body['models'] ) && is_array( $body['models'] );
 
 		return [
-			'authenticated' => $has_models,
-			'error'         => $has_models ? null : new WP_Error( 'auth', __( 'Ollama responded but returned no models.', 'classifai' ) ),
+			'authenticated' => true,
+			'error'         => null,
 		];
 	}
 }
