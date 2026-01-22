@@ -47,9 +47,9 @@ class APIRequest {
 	/**
 	 * OpenAI APIRequest constructor.
 	 *
-	 * @param Provider $provider Provider instance.
-	 * @param Feature  $feature Feature instance.
-	 * @param array    $settings Feature settings. Optional, useful when settings aren't saved yet.
+	 * @param Provider     $provider Provider instance.
+	 * @param Feature|null $feature Feature instance.
+	 * @param array        $settings Feature settings. Optional, useful when settings aren't saved yet.
 	 */
 	public function __construct( Provider $provider, ?Feature $feature, array $settings = [] ) {
 		$this->provider = $provider;

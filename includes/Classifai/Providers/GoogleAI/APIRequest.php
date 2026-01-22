@@ -2,6 +2,7 @@
 
 namespace Classifai\Providers\GoogleAI;
 
+use Classifai\Features\Feature;
 use Classifai\Providers\Provider;
 use WP_Error;
 
@@ -46,13 +47,13 @@ class APIRequest {
 	/**
 	 * Google AI APIRequest constructor.
 	 *
-	 * @param Provider $provider Provider instance.
-	 * @param string   $feature Feature name.
-	 * @param array    $settings Feature settings. Optional, useful when settings aren't saved yet.
+	 * @param Provider     $provider Provider instance.
+	 * @param Feature|null $feature Feature instance.
+	 * @param array        $settings Feature settings. Optional, useful when settings aren't saved yet.
 	 */
-	public function __construct( Provider $provider, string $feature = '', array $settings = [] ) {
+	public function __construct( Provider $provider, ?Feature $feature, array $settings = [] ) {
 		$this->provider = $provider;
-		$this->feature  = $feature;
+		$this->feature  = $feature ? $feature::ID : '';
 		$this->settings = $settings;
 	}
 

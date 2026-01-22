@@ -92,7 +92,7 @@ trait TogetherAI {
 	 * @return array|WP_Error
 	 */
 	protected function get_models( array $settings = [] ) {
-		$request  = new APIRequest( $this, $this->feature_instance::ID ?? '', $settings );
+		$request  = new APIRequest( $this, $this->feature_instance, $settings );
 		$response = $request->get( $this->get_api_url( $this->model_path ), [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {

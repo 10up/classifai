@@ -1052,7 +1052,7 @@ class OllamaEmbeddings extends Ollama {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or Ollama connection failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $this, $this->feature_instance::ID ?? '' );
+		$request = new APIRequest( $this, $this->feature_instance );
 
 		/**
 		 * Filter the request body before sending to Ollama.
@@ -1126,7 +1126,7 @@ class OllamaEmbeddings extends Ollama {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or Ollama connection failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $this, $this->feature_instance::ID ?? '' );
+		$request = new APIRequest( $this, $this->feature_instance );
 
 		/**
 		 * Filter the request body before sending to Ollama.
