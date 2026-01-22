@@ -59,7 +59,7 @@ trait GoogleAI {
 	 */
 	protected function get_models( array $settings = [] ) {
 		// Make request to ensure credentials work.
-		$request  = new APIRequest( $this, '', $settings );
+		$request  = new APIRequest( $this, $this->feature_instance::ID ?? '', $settings );
 		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {

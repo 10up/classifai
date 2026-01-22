@@ -221,7 +221,7 @@ class SpeechToText extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Audio Transcripts Generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $this, $feature->get_option_name() );
+		$request = new APIRequest( $this, $this->feature_instance::ID ?? '' );
 
 		/**
 		 * Filter the request body before sending to OpenAI.
