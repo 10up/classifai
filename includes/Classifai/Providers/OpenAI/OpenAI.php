@@ -64,9 +64,9 @@ trait OpenAI {
 	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	public function authenticate_credentials( array $settings = [] ) {
 		// Make request to ensure credentials work.
-		$request  = new APIRequest( $this, $this->feature_instance::ID ?? '', $settings );
+		$request  = new APIRequest( $this, $this->feature_instance, $settings );
 		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
 
 		return ! is_wp_error( $response ) ? true : $response;

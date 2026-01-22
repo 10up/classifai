@@ -9,6 +9,7 @@
 
 namespace Classifai\Providers;
 
+use Classifai\Providers\OpenAI\ChatGPT;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,6 +29,7 @@ class ProviderCredentialsVerifier {
 	 * @return array{ authenticated: bool, error: WP_Error|null }
 	 */
 	public static function verify( string $profile_id, array $config ): array {
+		// TODO: pass config through our credentials resolver so they can be filtered. Or this may happen when we verify credentials.
 		switch ( $profile_id ) {
 			case 'openai':
 				return self::verify_openai( $config ); // TODO: finish this but would also be great to pull in verification from the Provider to avoid duplication. Or bring that all in here.
@@ -42,54 +44,33 @@ class ProviderCredentialsVerifier {
 	}
 
 	/**
-	 * Verify OpenAI API key via /v1/models.
+	 * Verify OpenAI API key.
 	 *
-	 * @param array $config Must contain 'api_key'.
+	 * @param array $config Provider config containing credentials.
 	 * @return array{ authenticated: bool, error: WP_Error|null }
 	 */
 	private static function verify_openai( array $config ): array {
-		$api_key = isset( $config['api_key'] ) ? trim( (string) $config['api_key'] ) : '';
+		$provider      = new ChatGPT();
+		$authenticated = $provider->authenticate_credentials( [ $provider::ID => $config ] );
 
-		if ( '' === $api_key ) {
-			return [
-				'authenticated' => false,
-				'error'         => new WP_Error( 'auth', __( 'Please enter your OpenAI API key.', 'classifai' ) ),
-			];
+		if ( is_wp_error( $authenticated ) ) {
+			// For response code 429, credentials are valid but rate limit is reached.
+			if ( 429 === (int) $authenticated->get_error_code() ) {
+				return [
+					'authenticated' => true,
+					'error'         => new WP_Error( 'auth', str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $authenticated->get_error_message() ) ),
+				];
+			} else {
+				return [
+					'authenticated' => false,
+					'error'         => new WP_Error( 'auth', str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $authenticated->get_error_message() ) ),
+				];
+			}
 		}
-
-		$response = wp_remote_get(
-			'https://api.openai.com/v1/models',
-			[
-				'headers' => [
-					'Authorization' => 'Bearer ' . $api_key,
-				],
-				'timeout' => 15,
-			]
-		);
-
-		if ( is_wp_error( $response ) ) {
-			return [
-				'authenticated' => false,
-				'error'         => $response,
-			];
-		}
-
-		$code = (int) wp_remote_retrieve_response_code( $response );
-
-		// 200 = OK; 429 = rate limit (credentials are valid).
-		if ( 200 === $code || 429 === $code ) {
-			return [
-				'authenticated' => true,
-				'error'         => null,
-			];
-		}
-
-		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-		$msg  = isset( $body['error']['message'] ) ? $body['error']['message'] : __( 'OpenAI API request failed.', 'classifai' );
 
 		return [
-			'authenticated' => false,
-			'error'         => new WP_Error( 'auth', $msg ),
+			'authenticated' => true,
+			'error'         => null,
 		];
 	}
 

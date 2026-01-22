@@ -212,7 +212,7 @@ abstract class Provider {
 				$feature_provider_settings
 			),
 			static::ID,
-			$this->feature_instance::ID ?? null,
+			$this->feature_instance ? $this->feature_instance::ID : null,
 			$feature_provider_settings
 		);
 	}

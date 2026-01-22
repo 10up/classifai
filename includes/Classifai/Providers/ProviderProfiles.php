@@ -173,17 +173,4 @@ class ProviderProfiles {
 		$profiles = self::get_all_profiles();
 		return $profiles[ $profile_id ]['credential_fields'] ?? [];
 	}
-
-	/**
-	 * Get the display label for a profile.
-	 *
-	 * TODO: Remove this method if not used.
-	 *
-	 * @param string $profile_id Profile ID.
-	 * @return string Human-readable label.
-	 */
-	public static function get_profile_label( string $profile_id ): string {
-		$profiles = self::get_all_profiles();
-		return $profiles[ $profile_id ]['label'] ?? $profile_id;
-	}
 }
