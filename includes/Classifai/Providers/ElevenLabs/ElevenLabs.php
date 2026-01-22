@@ -103,7 +103,7 @@ trait ElevenLabs {
 		}
 
 		if ( ! isset( $options['headers']['xi-api-key'] ) ) {
-			$options['headers']['xi-api-key'] = $api_key;
+			$options['headers']['xi-api-key'] = $this->get_credential( 'api_key', [ static::ID => [ 'api_key' => $api_key ] ] ) ?? '';
 		}
 
 		if ( ! isset( $options['headers']['Content-Type'] ) ) {
