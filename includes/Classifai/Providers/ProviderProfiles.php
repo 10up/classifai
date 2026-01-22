@@ -90,7 +90,7 @@ class ProviderProfiles {
 		],
 		'ibm_watson_nlu'          => [
 			'provider_ids'      => [ 'ibm_watson_nlu' ],
-			'credential_fields' => [ 'endpoint_url', 'apikey', 'authenticated' ],
+			'credential_fields' => [ 'endpoint_url', 'apikey', 'username', 'password', 'authenticated' ],
 			'label'             => 'IBM Watson NLU',
 		],
 		'xai_grok'                => [
