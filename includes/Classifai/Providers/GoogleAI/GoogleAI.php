@@ -25,7 +25,7 @@ trait GoogleAI {
 	 * @return array
 	 */
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
-		$models = $this->get_models( $new_settings[ static::ID ]['api_key'] ?? '' );
+		$models = $this->get_models( $new_settings );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 
@@ -54,17 +54,12 @@ trait GoogleAI {
 	 * Get the available models.
 	 * This function also authenticates the credentials.
 	 *
-	 * @param string $api_key Api Key.
+	 * @param array $settings Settings being saved.
 	 * @return array|WP_Error
 	 */
-	protected function get_models( string $api_key = '' ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your Google AI (Gemini) key.', 'classifai' ) );
-		}
-
+	protected function get_models( array $settings = [] ) {
 		// Make request to ensure credentials work.
-		$request  = new APIRequest( $api_key );
+		$request  = new APIRequest( $this, '', $settings );
 		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {
