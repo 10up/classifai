@@ -335,10 +335,10 @@ class ComputerVision extends Provider {
 	 * @param int    $attachment_id Attachment ID.
 	 */
 	public function do_read_cron( string $operation_url, int $attachment_id ) {
-		$feature  = new PDFTextExtraction();
-		$settings = $feature->get_settings( static::ID );
+		$feature     = new PDFTextExtraction();
+		$credentials = $this->get_credentials();
 
-		( new Read( $settings, intval( $attachment_id ), $feature ) )->check_read_result( $operation_url );
+		( new Read( $credentials, intval( $attachment_id ), $feature ) )->check_read_result( $operation_url );
 	}
 
 	/**
@@ -355,10 +355,10 @@ class ComputerVision extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
 		}
 
-		$feature  = new ImageCropping();
-		$settings = $feature->get_settings( static::ID );
+		$feature     = new ImageCropping();
+		$credentials = $this->get_credentials();
 
-		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
+		if ( ! is_array( $metadata ) || ! is_array( $credentials ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Invalid data found. Please check your settings and try again.', 'classifai' ) );
 		}
 
@@ -390,7 +390,7 @@ class ComputerVision extends Provider {
 			return new WP_Error( 'access', esc_html__( 'Access to the filesystem is required for this feature to work.', 'classifai' ) );
 		}
 
-		$smart_cropping = new SmartCropping( $settings );
+		$smart_cropping = new SmartCropping( $credentials );
 
 		return $smart_cropping->generate_cropped_images( $metadata, intval( $attachment_id ) );
 	}
@@ -551,7 +551,7 @@ class ComputerVision extends Provider {
 	 */
 	public function read_pdf( int $attachment_id ) {
 		$feature         = new PDFTextExtraction();
-		$settings        = $feature->get_settings( static::ID );
+		$credentials     = $this->get_credentials();
 		$should_read_pdf = $feature->is_feature_enabled();
 
 		if ( ! $should_read_pdf ) {
@@ -569,7 +569,7 @@ class ComputerVision extends Provider {
 			return new WP_Error( 'invalid_access_type', 'Invalid access type! Direct file system access is required.' );
 		}
 
-		$read = new Read( $settings, intval( $attachment_id ), $feature );
+		$read = new Read( $credentials, intval( $attachment_id ), $feature );
 
 		return $read->read_document();
 	}
@@ -654,7 +654,7 @@ class ComputerVision extends Provider {
 	 * @return bool|object|WP_Error
 	 */
 	protected function scan_image( string $image_url, ?\Classifai\Features\Feature $feature = null ) {
-		$settings = $feature->get_settings( static::ID );
+		$credentials = $this->get_credentials();
 
 		// Check if valid authentication is in place.
 		if ( ! $feature->is_feature_enabled() ) {
@@ -675,7 +675,7 @@ class ComputerVision extends Provider {
 			$endpoint_url,
 			[
 				'headers' => [
-					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
+					'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 					'Content-Type'              => 'application/json',
 				],
 				/**
@@ -726,7 +726,7 @@ class ComputerVision extends Provider {
 	 * @return string
 	 */
 	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
-		$settings     = $feature->get_settings( static::ID );
+		$credentials  = $this->get_credentials( $feature->get_settings() );
 		$api_features = [];
 
 		if ( $feature instanceof DescriptiveTextGenerator && $feature->is_feature_enabled() && ! empty( $feature->get_alt_text_settings() ) ) {
@@ -741,7 +741,7 @@ class ComputerVision extends Provider {
 			$api_features[] = 'read';
 		}
 
-		$endpoint = add_query_arg( 'features', implode( ',', $api_features ), trailingslashit( $settings['endpoint_url'] ) . $this->analyze_url );
+		$endpoint = add_query_arg( 'features', implode( ',', $api_features ), trailingslashit( $credentials['endpoint_url'] ?? '' ) . $this->analyze_url );
 
 		return $endpoint;
 	}
@@ -754,12 +754,20 @@ class ComputerVision extends Provider {
 	 * @return bool|WP_Error
 	 */
 	protected function authenticate_credentials( string $url, string $api_key ) {
-		$rtn     = false;
-		$request = safe_wp_remote_post(
-			add_query_arg( 'features', 'caption', trailingslashit( $url ) . $this->analyze_url ),
+		$credentials = $this->get_credentials(
+			[
+				static::ID => [
+					'endpoint_url' => $url,
+					'api_key'      => $api_key,
+				],
+			]
+		);
+		$rtn         = false;
+		$request     = safe_wp_remote_post(
+			add_query_arg( 'features', 'caption', trailingslashit( $credentials['endpoint_url'] ?? '' ) . $this->analyze_url ),
 			[
 				'headers' => [
-					'Ocp-Apim-Subscription-Key' => $api_key,
+					'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 					'Content-Type'              => 'application/json',
 				],
 				'body'    => '{"url":"https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/header.png"}',
