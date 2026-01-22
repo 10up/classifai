@@ -262,9 +262,9 @@ class OpenAI extends Provider {
 	 * @return string
 	 */
 	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
-		$settings   = $feature->get_settings( static::ID );
-		$endpoint   = $settings['endpoint_url'] ?? '';
-		$deployment = $settings['deployment'] ?? '';
+		$credentials = $this->get_credentials( $feature->get_settings() ?? [] );
+		$endpoint    = $credentials['endpoint_url'] ?? '';
+		$deployment  = $credentials['deployment'] ?? '';
 
 		if ( ! $endpoint ) {
 			return '';
@@ -294,18 +294,27 @@ class OpenAI extends Provider {
 	 * @return bool|WP_Error
 	 */
 	protected function authenticate_credentials( string $url, string $api_key, string $deployment ) {
-		$rtn = false;
+		$credentials = $this->get_credentials(
+			[
+				static::ID => [
+					'endpoint_url' => $url,
+					'api_key'      => $api_key,
+					'deployment'   => $deployment,
+				],
+			]
+		);
+		$rtn         = false;
 
 		// This does basically the same thing that prep_api_url does but when running authentication,
 		// we don't have settings saved yet, which prep_api_url needs.
-		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
+		$endpoint = trailingslashit( $credentials['endpoint_url'] ?? '' ) . str_replace( '{deployment-id}', $credentials['deployment'] ?? '', $this->chat_completion_url );
 		$endpoint = add_query_arg( 'api-version', $this->completion_api_version, $endpoint );
 
 		$request = safe_wp_remote_post(
 			$endpoint,
 			[
 				'headers' => [
-					'api-key'      => $api_key,
+					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode(
@@ -459,7 +468,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -566,7 +575,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -673,7 +682,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -834,7 +843,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -987,7 +996,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
