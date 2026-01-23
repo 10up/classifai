@@ -53,7 +53,7 @@ trait TogetherAI {
 	 * @return array
 	 */
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
-		$models = $this->get_models( $new_settings );
+		$models = $this->authenticate_credentials( $new_settings );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 		$new_settings[ static::ID ]['models']        = $settings[ static::ID ]['models'];
@@ -86,12 +86,12 @@ trait TogetherAI {
 	}
 
 	/**
-	 * Get the available models.
+	 * Get the available models and authenticate credentials.
 	 *
 	 * @param array $settings Settings being saved.
 	 * @return array|WP_Error
 	 */
-	protected function get_models( array $settings = [] ) {
+	public function authenticate_credentials( array $settings = [] ) {
 		$request  = new APIRequest( $this, $this->feature_instance, $settings );
 		$response = $request->get( $this->get_api_url( $this->model_path ), [ 'use_vip' => true ] );
 
