@@ -1,54 +1,36 @@
 /**
  * WordPress dependencies
  */
-import {
-	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
-	SelectControl,
-	ToggleControl,
-} from '@wordpress/components';
+import { SelectControl, ToggleControl } from '@wordpress/components';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
-import { useSelect, useDispatch } from '@wordpress/data';
-import { STORE_NAME } from '../../data/store';
+import { SettingsRow } from '../../settings-row';
+import { STORE_NAME } from '../../../data/store';
+import { StableDiffusionBaseSettings } from './base';
 
 /**
- * Component for the Stable Diffusion Provider settings.
+ * Component for the Stable Diffusion Images settings.
  *
  * @param {Object}  props              Component props.
+ * @param {string}  props.providerName The provider name.
  * @param {boolean} props.isConfigured Whether the provider is configured.
  *
- * @return {React.ReactElement} StableDiffusionSettings component.
+ * @return {React.ReactElement} StableDiffusionImagesSettings component.
  */
-export const StableDiffusionSettings = ( { isConfigured = false } ) => {
-	const providerName = 'stable_diffusion';
+export const StableDiffusionImagesSettings = ( {
+	providerName,
+	isConfigured = false,
+} ) => {
 	const providerSettings = useSelect(
 		( select ) =>
 			select( STORE_NAME ).getFeatureSettings( providerName ) || {}
 	);
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
-
-	const Description = () => (
-		<>
-			{ __(
-				"URL of the locally hosted Stable Diffusion instance. Defaults to http://127.0.0.1:7860/. Don't have Stable Diffusion installed yet?",
-				'classifai'
-			) }
-			<a
-				title={ __( 'Install Stable Diffusion', 'classifai' ) }
-				href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/#installation-and-running"
-				target="_blank"
-				rel="noopener noreferrer"
-			>
-				{ ' ' }
-				{ __( 'Download Stable Diffusion', 'classifai' ) }
-			</a>
-		</>
-	);
 
 	const models = [
 		{ label: __( '-- Choose Model --', 'classifai' ), value: '' },
@@ -69,20 +51,12 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<SettingsRow
-					label={ __( 'Endpoint URL', 'classifai' ) }
-					description={ <Description /> }
-				>
-					<InputControl
-						id={ `${ providerName }_endpoint_url` }
-						type="text"
-						value={ providerSettings?.endpoint_url || '' }
-						onChange={ ( value ) =>
-							onChange( { endpoint_url: value } )
-						}
-					/>
-				</SettingsRow>
+				<StableDiffusionBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
 			) }
+
 			<SettingsRow
 				label={ __( 'Model', 'classifai' ) }
 				description={ __(
@@ -97,6 +71,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 					options={ models }
 					disabled={ ! isConfigured }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -117,6 +92,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 						value: i + 1,
 					} ) ) }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -145,6 +121,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -160,6 +137,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 						onChange( { per_image_settings: value } )
 					}
 					checked={ providerSettings.per_image_settings || false }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</>

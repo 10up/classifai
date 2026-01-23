@@ -9,22 +9,24 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
-import { STORE_NAME } from '../../data/store';
-import { useFeatureContext } from '../feature-settings/context';
+import { SettingsRow } from '../../../settings-row';
+import { STORE_NAME } from '../../../../data/store';
+import { useFeatureContext } from '../../../feature-settings/context';
+import { AzureAIVisionBaseSettings } from './base';
 
 /**
  * Component for Azure AI Vision Provider settings.
  *
- * This component is used within the ProviderSettings component to allow users to configure the Azure AI Vision Provider settings.
- *
  * @param {Object}  props              Component props.
+ * @param {string}  props.providerName The provider name.
  * @param {boolean} props.isConfigured Whether the provider is configured.
  *
  * @return {React.ReactElement} AzureAIVisionSettings component.
  */
-export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
-	const providerName = 'ms_computer_vision';
+export const AzureAIVisionSettings = ( {
+	providerName,
+	isConfigured = false,
+} ) => {
 	const { featureName } = useFeatureContext();
 	const providerSettings = useSelect(
 		( select ) =>
@@ -33,47 +35,17 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
 
-	const Description = () => (
-		<>
-			{ __(
-				'Supported protocol and hostname endpoints, e.g.,',
-				'classifai'
-			) }
-			<code>
-				{ __( 'https://EXAMPLE.openai.azure.com', 'classifai' ) }
-			</code>
-		</>
-	);
-
 	return (
 		<>
 			{ ! isConfigured && (
 				<>
-					<SettingsRow
-						label={ __( 'Endpoint URL', 'classifai' ) }
-						description={ <Description /> }
-					>
-						<InputControl
-							id={ `${ providerName }_endpoint_url` }
-							type="text"
-							value={ providerSettings.endpoint_url || '' }
-							onChange={ ( value ) =>
-								onChange( { endpoint_url: value } )
-							}
-						/>
-					</SettingsRow>
-					<SettingsRow label={ __( 'API Key', 'classifai' ) }>
-						<InputControl
-							id={ `${ providerName }_api_key` }
-							type="password"
-							value={ providerSettings.api_key || '' }
-							onChange={ ( value ) =>
-								onChange( { api_key: value } )
-							}
-						/>
-					</SettingsRow>
+					<AzureAIVisionBaseSettings
+						providerSettings={ providerSettings }
+						onChange={ onChange }
+					/>
 				</>
 			) }
+
 			{ 'feature_descriptive_text_generator' === featureName && (
 				<SettingsRow
 					label={ __( 'Confidence threshold', 'classifai' ) }
@@ -100,6 +72,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 					/>
 				</SettingsRow>
 			) }
+
 			{ 'feature_image_tags_generator' === featureName && (
 				<SettingsRow
 					label={ __( 'Confidence threshold', 'classifai' ) }

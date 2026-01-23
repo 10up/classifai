@@ -1,12 +1,18 @@
+/**
+ * WordPress dependencies
+ */
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { __experimentalInputControl as InputControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 
 /**
  * Component for OpenAI Provider settings.
  *
- * This component is used within the ProviderSettings component to allow users to configure the OpenAI Provider settings.
  * This is the base component for OpenAI settings.
  *
  * @param {Object}   props                  Component props.
@@ -22,6 +28,8 @@ export const OpenAISettings = ( { providerSettings, onChange } ) => {
 			<a
 				title={ __( 'Sign up for an OpenAI account', 'classifai' ) }
 				href="https://platform.openai.com/signup"
+				target="_blank"
+				rel="noopener noreferrer"
 			>
 				{ __( 'Sign up for one', 'classifai' ) }
 			</a>{ ' ' }
@@ -40,6 +48,7 @@ export const OpenAISettings = ( { providerSettings, onChange } ) => {
 					type="password"
 					value={ providerSettings.api_key || '' }
 					onChange={ ( value ) => onChange( { api_key: value } ) }
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>

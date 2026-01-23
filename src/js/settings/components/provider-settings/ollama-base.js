@@ -22,12 +22,14 @@ import { SettingsRow } from '../settings-row';
  * @param {Object}   props.providerSettings The provider settings.
  * @param {Function} props.onChange         Function to call when the provider settings change.
  * @param {string}   props.providerName     Name of Provider.
+ * @param {boolean}  props.showModels       Whether to show the models dropdown.
  * @return {React.ReactElement} OllamaBaseSettings component.
  */
 export const OllamaBaseSettings = ( {
 	providerSettings,
 	onChange,
 	providerName,
+	showModels = true,
 } ) => {
 	const Description = () => (
 		<>
@@ -76,23 +78,27 @@ export const OllamaBaseSettings = ( {
 					onChange={ ( value ) =>
 						onChange( { endpoint_url: value } )
 					}
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Model', 'classifai' ) }
-				description={ __(
-					'Choose the model you want to use for requests. If no models are shown or you want to use a different model, please ensure this is installed in Ollama first.',
-					'classifai'
-				) }
-			>
-				<SelectControl
-					id={ `${ providerName }_model` }
-					onChange={ ( value ) => onChange( { model: value } ) }
-					value={ providerSettings?.model || '' }
-					options={ models }
-					__nextHasNoMarginBottom
-				/>
-			</SettingsRow>
+			{ showModels && (
+				<SettingsRow
+					label={ __( 'Model', 'classifai' ) }
+					description={ __(
+						'Choose the model you want to use for requests. If no models are shown or you want to use a different model, please ensure this is installed in Ollama first.',
+						'classifai'
+					) }
+				>
+					<SelectControl
+						id={ `${ providerName }_model` }
+						onChange={ ( value ) => onChange( { model: value } ) }
+						value={ providerSettings?.model || '' }
+						options={ models }
+						__nextHasNoMarginBottom
+						__next40pxDefaultSize
+					/>
+				</SettingsRow>
+			) }
 		</>
 	);
 };

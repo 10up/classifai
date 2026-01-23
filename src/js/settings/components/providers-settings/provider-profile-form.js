@@ -3,12 +3,7 @@
  */
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import {
-	Button,
-	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
-	Flex,
-	FlexItem,
-} from '@wordpress/components';
+import { Button, Flex, FlexItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { store as noticesStore } from '@wordpress/notices';
@@ -16,34 +11,19 @@ import { store as noticesStore } from '@wordpress/notices';
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-
-/**
- * Translated label for a credential field.
- *
- * @param {string} field Field name.
- * @return {string} Translated label.
- */
-function getCredentialFieldLabel( field ) {
-	switch ( field ) {
-		case 'api_key':
-		case 'apikey':
-			return __( 'API Key', 'classifai' );
-		case 'endpoint_url':
-			return __( 'Endpoint URL', 'classifai' );
-		case 'deployment':
-			return __( 'Deployment name', 'classifai' );
-		case 'access_key_id':
-			return __( 'Access Key ID', 'classifai' );
-		case 'secret_access_key':
-			return __( 'Secret Access Key', 'classifai' );
-		case 'aws_region':
-			return __( 'AWS Region', 'classifai' );
-		default:
-			return field;
-	}
-}
+import { OpenAISettings } from '../provider-settings/openai';
+import { GoogleAISettings } from '../provider-settings/googleai';
+import { ElevenLabsSettings } from '../provider-settings/elevenlabs/base';
+import { TogetherAISettings } from '../provider-settings/together-ai';
+import { OllamaBaseSettings } from '../provider-settings/ollama-base';
+import { AzureOpenAIBaseSettings } from '../provider-settings/azure/azure-openai/base';
+import { AzureAIVisionBaseSettings } from '../provider-settings/azure/azure-ai-vision/base';
+import { AzureTextToSpeechBaseSettings } from '../provider-settings/azure/azure-text-to-speech/base';
+import { AmazonPollyBaseSettings } from '../provider-settings/amazon-polly/base';
+import { IBMWatsonBaseSettings } from '../provider-settings/watson/base';
+import { XAIBaseSettings } from '../provider-settings/xai/base';
+import { StableDiffusionBaseSettings } from '../provider-settings/stable-diffusion/base';
 
 /**
  * Build form config object from credential_fields (excl. authenticated).
@@ -63,6 +43,127 @@ function getInitialFormValues( credentialFields, savedConfig ) {
 			v !== null && v !== undefined && typeof v === 'string' ? v : '';
 	}
 	return out;
+}
+
+/**
+ * Render provider-specific settings component.
+ *
+ * @param {string}   profileId        Profile ID.
+ * @param {Object}   providerSettings Provider settings values.
+ * @param {Function} onChange         Change handler.
+ * @return {React.ReactElement|null} Provider settings component or null.
+ */
+function renderProviderSettings( profileId, providerSettings, onChange ) {
+	switch ( profileId ) {
+		case 'openai':
+			return (
+				<OpenAISettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+
+		case 'googleai':
+			return (
+				<GoogleAISettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+
+		case 'elevenlabs':
+			return (
+				<ElevenLabsSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+
+		case 'togetherai_image':
+			return (
+				<TogetherAISettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+
+		case 'ollama':
+			return (
+				<OllamaBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+					providerName="ollama"
+					showModels={ false }
+				/>
+			);
+
+		case 'azure_openai':
+		case 'azure_openai_embeddings': {
+			return (
+				<AzureOpenAIBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+		}
+
+		case 'ms_computer_vision': {
+			return (
+				<AzureAIVisionBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+		}
+
+		case 'ms_azure_text_to_speech': {
+			return (
+				<AzureTextToSpeechBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+		}
+
+		case 'aws_polly': {
+			return (
+				<AmazonPollyBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+		}
+
+		case 'ibm_watson_nlu': {
+			return (
+				<IBMWatsonBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+		}
+
+		case 'xai_grok': {
+			return (
+				<XAIBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+		}
+
+		case 'stable_diffusion': {
+			return (
+				<StableDiffusionBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			);
+		}
+
+		default:
+			return null;
+	}
 }
 
 /**
@@ -95,8 +196,8 @@ export function ProviderProfileForm( { profileId, profile, config, onSaved } ) {
 		setFormValues( getInitialFormValues( credFields, config ) );
 	}, [ profileId, config, credFields ] );
 
-	const updateField = ( field, value ) => {
-		setFormValues( ( prev ) => ( { ...prev, [ field ]: value } ) );
+	const updateField = ( updates ) => {
+		setFormValues( ( prev ) => ( { ...prev, ...updates } ) );
 	};
 
 	const handleSave = async () => {
@@ -157,33 +258,8 @@ export function ProviderProfileForm( { profileId, profile, config, onSaved } ) {
 
 	return (
 		<div className="classifai-provider-profile-form">
-			{ inputFields.map( ( field ) => {
-				const meta = {
-					label: field,
-					type: 'text',
-				};
-				const controlId = `provider-${ profileId }-${ field }`;
+			{ renderProviderSettings( profileId, formValues, updateField ) }
 
-				if ( field.includes( 'api' ) || field.includes( 'secret' ) ) {
-					meta.type = 'password';
-				}
-
-				// TODO: Ideally this pulls in the actual credential form from the Provider to avoid duplication.
-				return (
-					<SettingsRow
-						key={ field }
-						label={ getCredentialFieldLabel( field ) }
-					>
-						<InputControl
-							id={ controlId }
-							type={ meta.type }
-							value={ formValues[ field ] ?? '' }
-							onChange={ ( v ) => updateField( field, v ?? '' ) }
-							__next40pxDefaultSize
-						/>
-					</SettingsRow>
-				);
-			} ) }
 			<div className="classifai-provider-profile-form__actions">
 				<Flex justify="end" expanded={ false }>
 					<FlexItem>

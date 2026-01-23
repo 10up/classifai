@@ -1,0 +1,165 @@
+/**
+ * WordPress dependencies
+ */
+import { useSelect, useDispatch } from '@wordpress/data';
+import {
+	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	SelectControl,
+} from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { SettingsRow } from '../../settings-row';
+import { STORE_NAME } from '../../../data/store';
+import { useFeatureContext } from '../../feature-settings/context';
+import { PromptRepeater } from '../../feature-additional-settings/prompt-repeater';
+import { XAIBaseSettings } from './base';
+
+/**
+ * Component for xAI Grok Provider settings.
+ *
+ * @param {Object}  props              Component props.
+ * @param {string}  props.providerName The provider name.
+ * @param {boolean} props.isConfigured Whether the provider is configured.
+ *
+ * @return {React.ReactElement} XAIGrokSettings component.
+ */
+export const XAIGrokSettings = ( { providerName, isConfigured = false } ) => {
+	const { featureName } = useFeatureContext();
+	const providerSettings = useSelect(
+		( select ) =>
+			select( STORE_NAME ).getFeatureSettings( providerName ) || {}
+	);
+	const { setProviderSettings } = useDispatch( STORE_NAME );
+	const onChange = ( data ) => setProviderSettings( providerName, data );
+	const setPrompts = ( prompts ) => {
+		setProviderSettings( providerName, {
+			prompt: prompts,
+		} );
+	};
+
+	const promptExamples = (
+		<>
+			{ __( 'Add a custom prompt, if desired. See our', 'classifai' ) }{ ' ' }
+			<a
+				href="https://10up.github.io/classifai/advanced-docs/prompt-examples"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				{ __( 'documentation', 'classifai' ) }
+			</a>{ ' ' }
+			{ __(
+				'for some example prompts you can try that have been tested for specific use cases.',
+				'classifai'
+			) }
+		</>
+	);
+
+	const models = [];
+
+	// Convert providerSettings.models to an array from an object.
+	if (
+		providerSettings?.models &&
+		! Array.isArray( providerSettings.models )
+	) {
+		for ( const [ key, value ] of Object.entries(
+			providerSettings.models
+		) ) {
+			models.push( { label: value, value: key } );
+		}
+	} else {
+		models.push( {
+			label: __( '-- Choose Model --', 'classifai' ),
+			value: '',
+		} );
+	}
+
+	const ModelDescription = () => (
+		<>
+			{ __(
+				'Choose the model you want to use for requests.',
+				'classifai'
+			) }{ ' ' }
+			{ __(
+				'Not sure which model to use? You can find more details on models',
+				'classifai'
+			) }{ ' ' }
+			<a
+				title={ __( 'Learn more about models', 'classifai' ) }
+				href="https://docs.x.ai/docs/models"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				{ __( 'here', 'classifai' ) }
+			</a>
+			.
+		</>
+	);
+
+	return (
+		<>
+			{ ! isConfigured && (
+				<>
+					<XAIBaseSettings
+						providerSettings={ providerSettings }
+						onChange={ onChange }
+					/>
+				</>
+			) }
+
+			<SettingsRow
+				label={ __( 'Model', 'classifai' ) }
+				description={ <ModelDescription /> }
+			>
+				<SelectControl
+					id={ `${ providerName }_model` }
+					onChange={ ( value ) => onChange( { model: value } ) }
+					value={ providerSettings?.model || '' }
+					options={ models }
+					disabled={ models.length <= 1 }
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+				/>
+			</SettingsRow>
+			{ [
+				'feature_content_resizing',
+				'feature_title_generation',
+			].includes( featureName ) && (
+				<SettingsRow
+					label={ __( 'Number of suggestions', 'classifai' ) }
+					description={ __(
+						'Number of suggestions that will be generated in one request.',
+						'classifai'
+					) }
+				>
+					<InputControl
+						id={ `${ providerName }_number_of_suggestions` }
+						type="number"
+						min={ 1 }
+						max={ 10 }
+						value={ providerSettings.number_of_suggestions || 1 }
+						onChange={ ( value ) =>
+							onChange( { number_of_suggestions: value } )
+						}
+						__next40pxDefaultSize
+					/>
+				</SettingsRow>
+			) }
+			{ [ 'feature_descriptive_text_generator' ].includes(
+				featureName
+			) && (
+				<SettingsRow
+					label={ __( 'Prompt', 'classifai' ) }
+					description={ promptExamples }
+				>
+					<PromptRepeater
+						prompts={ providerSettings.prompt }
+						setPrompts={ setPrompts }
+					/>
+				</SettingsRow>
+			) }
+		</>
+	);
+};

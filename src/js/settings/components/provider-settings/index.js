@@ -30,20 +30,20 @@ import { STORE_NAME } from '../../data/store';
 import { OpenAIChatGPTSettings } from './openai-chatgpt';
 import { GoogleAIGeminiSettings } from './googleai-gemini';
 import { GoogleAIImagesSettings } from './googleai-images';
-import { AzureOpenAISettings } from './azure-openai';
+import { AzureOpenAISettings } from './azure/azure-openai/openai';
 import { useFeatureContext } from '../feature-settings/context';
-import { IBMWatsonNLUSettings } from './ibm-watson-nlu';
+import { IBMWatsonNLUSettings } from './watson/nlu';
 import { OpenAIModerationSettings } from './openai-moderation';
 import { OpenAIEmbeddingsSettings } from './openai-embeddings';
 import { OpenAISpeechToTextSettings } from './openai-speech-to-text';
-import { AzureAIVisionSettings } from './azure-ai-vision';
+import { AzureAIVisionSettings } from './azure/azure-ai-vision/ai-vision';
 import { OpenAIImagesSettings } from './openai-images';
-import { StableDiffusionSettings } from './stable-diffusion';
-import { AmazonPollySettings } from './amazon-polly';
-import { AzureTextToSpeechSettings } from './azure-text-to-speech';
+import { StableDiffusionImagesSettings } from './stable-diffusion/images';
+import { AmazonPollyTextToSpeechSettings } from './amazon-polly/text-to-speech';
+import { AzureTextToSpeechSettings } from './azure/azure-text-to-speech/text-to-speech';
 import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
 import { ChromeAISettings } from './chrome-ai';
-import { XAIGrokSettings } from './xai-grok';
+import { XAIGrokSettings } from './xai/grok';
 import { OllamaSettings } from './ollama';
 import { OllamaMultimodalSettings } from './ollama-multimodal';
 import { OllamaEmbeddingsSettings } from './ollama-embeddings';
@@ -81,7 +81,12 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 			);
 
 		case 'ibm_watson_nlu':
-			return <IBMWatsonNLUSettings isConfigured={ isConfigured } />;
+			return (
+				<IBMWatsonNLUSettings
+					providerName={ provider }
+					isConfigured={ isConfigured }
+				/>
+			);
 
 		case 'openai_embeddings':
 			return <OpenAIEmbeddingsSettings isConfigured={ isConfigured } />;
@@ -106,25 +111,50 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 			return <OpenAIImagesSettings isConfigured={ isConfigured } />;
 
 		case 'stable_diffusion':
-			return <StableDiffusionSettings isConfigured={ isConfigured } />;
+			return (
+				<StableDiffusionImagesSettings
+					providerName={ provider }
+					isConfigured={ isConfigured }
+				/>
+			);
 
 		case 'togetherai_image':
 			return <TogetherAIImagesSettings isConfigured={ isConfigured } />;
 
 		case 'ms_computer_vision':
-			return <AzureAIVisionSettings isConfigured={ isConfigured } />;
+			return (
+				<AzureAIVisionSettings
+					providerName={ provider }
+					isConfigured={ isConfigured }
+				/>
+			);
 
 		case 'aws_polly':
-			return <AmazonPollySettings isConfigured={ isConfigured } />;
+			return (
+				<AmazonPollyTextToSpeechSettings
+					providerName={ provider }
+					isConfigured={ isConfigured }
+				/>
+			);
 
 		case 'ms_azure_text_to_speech':
-			return <AzureTextToSpeechSettings isConfigured={ isConfigured } />;
+			return (
+				<AzureTextToSpeechSettings
+					providerName={ provider }
+					isConfigured={ isConfigured }
+				/>
+			);
 
 		case 'openai_text_to_speech':
 			return <OpenAITextToSpeechSettings isConfigured={ isConfigured } />;
 
 		case 'xai_grok':
-			return <XAIGrokSettings isConfigured={ isConfigured } />;
+			return (
+				<XAIGrokSettings
+					providerName={ provider }
+					isConfigured={ isConfigured }
+				/>
+			);
 
 		case 'chrome_ai':
 			return <ChromeAISettings />;

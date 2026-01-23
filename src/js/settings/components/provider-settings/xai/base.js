@@ -1,26 +1,34 @@
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-import { __experimentalInputControl as InputControl } from '@wordpress/components';
+/**
+ * WordPress dependencies
+ */
+import {
+	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { SettingsRow } from '../settings-row';
 
 /**
- * Component for Together AI Provider settings.
+ * Internal dependencies
+ */
+import { SettingsRow } from '../../settings-row';
+
+/**
+ * Component for xAI Provider settings.
  *
- * This is the base component for Together AI settings.
+ * This is the base component for xAI settings.
  *
  * @param {Object}   props                  Component props.
  * @param {Object}   props.providerSettings The provider settings.
  * @param {Function} props.onChange         Function to call when the provider settings change.
  *
- * @return {React.ReactElement} TogetherAISettings component.
+ * @return {React.ReactElement} XAIBaseSettings component.
  */
-export const TogetherAISettings = ( { providerSettings, onChange } ) => {
+export const XAIBaseSettings = ( { providerSettings, onChange } ) => {
 	const Description = () => (
 		<>
-			{ __( "Don't have a Together AI account yet?", 'classifai' ) }{ ' ' }
+			{ __( "Don't have an xAI account yet?", 'classifai' ) }{ ' ' }
 			<a
-				title={ __( 'Sign up for a Together AI account', 'classifai' ) }
-				href="https://api.together.ai/"
+				title={ __( 'Sign up for an xAI account', 'classifai' ) }
+				href="https://accounts.x.ai/sign-up"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
@@ -37,7 +45,7 @@ export const TogetherAISettings = ( { providerSettings, onChange } ) => {
 				description={ <Description /> }
 			>
 				<InputControl
-					id="togetherai_api_key"
+					id="xai_grok_api_key"
 					type="password"
 					value={ providerSettings.api_key || '' }
 					onChange={ ( value ) => onChange( { api_key: value } ) }
