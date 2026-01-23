@@ -19,6 +19,7 @@ use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\Speech as AzureSpeech;
 use Classifai\Providers\AWS\AmazonPolly;
+use Classifai\Providers\Watson\NLU;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -50,6 +51,8 @@ class ProviderCredentialsVerifier {
 				return self::verify_provider( new ElevenLabsTextToSpeech(), $config );
 			case 'googleai':
 				return self::verify_provider( new GeminiAPI(), $config );
+			case 'ibm_watson_nlu':
+				return self::verify_provider( new NLU(), $config );
 			case 'ms_azure_text_to_speech':
 				return self::verify_provider( new AzureSpeech(), $config );
 			case 'ms_computer_vision':
