@@ -8,26 +8,26 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
+import { SettingsRow } from '../../settings-row';
 
 /**
- * Component for OpenAI Provider settings.
+ * Component for Together AI Provider settings.
  *
- * This is the base component for OpenAI settings.
+ * This is the base component for Together AI settings.
  *
  * @param {Object}   props                  Component props.
  * @param {Object}   props.providerSettings The provider settings.
  * @param {Function} props.onChange         Function to call when the provider settings change.
  *
- * @return {React.ReactElement} OpenAISettings component.
+ * @return {React.ReactElement} TogetherAIBaseSettings component.
  */
-export const OpenAISettings = ( { providerSettings, onChange } ) => {
+export const TogetherAIBaseSettings = ( { providerSettings, onChange } ) => {
 	const Description = () => (
 		<>
-			{ __( "Don't have an OpenAI account yet?", 'classifai' ) }{ ' ' }
+			{ __( "Don't have a Together AI account yet?", 'classifai' ) }{ ' ' }
 			<a
-				title={ __( 'Sign up for an OpenAI account', 'classifai' ) }
-				href="https://platform.openai.com/signup"
+				title={ __( 'Sign up for a Together AI account', 'classifai' ) }
+				href="https://api.together.ai/"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
@@ -44,7 +44,7 @@ export const OpenAISettings = ( { providerSettings, onChange } ) => {
 				description={ <Description /> }
 			>
 				<InputControl
-					id="openai_api_key"
+					id="togetherai_api_key"
 					type="password"
 					value={ providerSettings.api_key || '' }
 					onChange={ ( value ) => onChange( { api_key: value } ) }

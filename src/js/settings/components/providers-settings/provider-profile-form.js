@@ -12,11 +12,11 @@ import { store as noticesStore } from '@wordpress/notices';
  * Internal dependencies
  */
 import { STORE_NAME } from '../../data/store';
-import { OpenAISettings } from '../provider-settings/openai';
-import { GoogleAISettings } from '../provider-settings/googleai';
+import { OpenAIBaseSettings } from '../provider-settings/openai/base';
+import { GoogleAIBaseSettings } from '../provider-settings/google/base';
 import { ElevenLabsSettings } from '../provider-settings/elevenlabs/base';
-import { TogetherAISettings } from '../provider-settings/together-ai';
-import { OllamaBaseSettings } from '../provider-settings/ollama-base';
+import { TogetherAIBaseSettings } from '../provider-settings/together-ai/base';
+import { OllamaBaseSettings } from '../provider-settings/ollama/base';
 import { AzureOpenAIBaseSettings } from '../provider-settings/azure/azure-openai/base';
 import { AzureAIVisionBaseSettings } from '../provider-settings/azure/azure-ai-vision/base';
 import { AzureTextToSpeechBaseSettings } from '../provider-settings/azure/azure-text-to-speech/base';
@@ -57,7 +57,7 @@ function renderProviderSettings( profileId, providerSettings, onChange ) {
 	switch ( profileId ) {
 		case 'openai':
 			return (
-				<OpenAISettings
+				<OpenAIBaseSettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
 				/>
@@ -65,7 +65,7 @@ function renderProviderSettings( profileId, providerSettings, onChange ) {
 
 		case 'googleai':
 			return (
-				<GoogleAISettings
+				<GoogleAIBaseSettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
 				/>
@@ -81,7 +81,7 @@ function renderProviderSettings( profileId, providerSettings, onChange ) {
 
 		case 'togetherai_image':
 			return (
-				<TogetherAISettings
+				<TogetherAIBaseSettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
 				/>

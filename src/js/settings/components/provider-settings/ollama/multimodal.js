@@ -7,11 +7,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
-import { STORE_NAME } from '../../data/store';
-import { OllamaBaseSettings } from './ollama-base';
-import { useFeatureContext } from '../feature-settings/context';
-import { PromptRepeater } from '../feature-additional-settings/prompt-repeater';
+import { SettingsRow } from '../../settings-row';
+import { STORE_NAME } from '../../../data/store';
+import { OllamaBaseSettings } from './base';
+import { useFeatureContext } from '../../feature-settings/context';
+import { PromptRepeater } from '../../feature-additional-settings/prompt-repeater';
 
 /**
  * Component for Ollama Multimodal Provider settings.

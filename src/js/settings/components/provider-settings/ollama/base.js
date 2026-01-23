@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
+import { SettingsRow } from '../../settings-row';
 
 /**
  * Component for the base Ollama Provider settings.

@@ -99,6 +99,7 @@ export const AmazonPollyTextToSpeechSettings = ( {
 								},
 							] }
 							__nextHasNoMarginBottom
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 					<SettingsRow label={ __( 'Voice', 'classifai' ) }>
@@ -121,6 +122,7 @@ export const AmazonPollyTextToSpeechSettings = ( {
 									};
 								} ) }
 							__nextHasNoMarginBottom
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 				</>

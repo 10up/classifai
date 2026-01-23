@@ -64,6 +64,7 @@ export const AzureOpenAISettings = ( {
 						onChange={ ( value ) =>
 							onChange( { number_of_suggestions: value } )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }

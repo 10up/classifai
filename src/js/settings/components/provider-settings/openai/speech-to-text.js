@@ -8,9 +8,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
-import { STORE_NAME } from '../../data/store';
-import { OpenAISettings } from './openai';
+import { SettingsRow } from '../../settings-row';
+import { STORE_NAME } from '../../../data/store';
+import { OpenAIBaseSettings } from './base';
 
 /**
  * Component for OpenAI Speech to Text settings.
@@ -32,7 +32,7 @@ export const OpenAISpeechToTextSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<OpenAISettings
+				<OpenAIBaseSettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
 				/>

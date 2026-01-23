@@ -6,21 +6,22 @@ import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from '../../data/store';
-import { OpenAISettings } from './openai';
+import { STORE_NAME } from '../../../data/store';
+import { OllamaBaseSettings } from './base';
 
 /**
- * Component for OpenAI Moderation settings.
+ * React Component for Ollama Embeddings settings.
  *
- * This component is used within the ProviderSettings component to allow users to configure the OpenAI Moderation settings.
+ * This component is used within the ProviderSettings component to
+ * allow users to configure the Ollama Embeddings settings.
  *
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.
  *
- * @return {React.ReactElement} OpenAIModerationSettings component.
+ * @return {React.ReactElement} OllamaEmbeddingsSettings component.
  */
-export const OpenAIModerationSettings = ( { isConfigured = false } ) => {
-	const providerName = 'openai_moderation';
+export const OllamaEmbeddingsSettings = ( { isConfigured = false } ) => {
+	const providerName = 'ollama_embeddings';
 	const providerSettings = useSelect(
 		( select ) =>
 			select( STORE_NAME ).getFeatureSettings( providerName ) || {}
@@ -33,8 +34,9 @@ export const OpenAIModerationSettings = ( { isConfigured = false } ) => {
 	}
 
 	return (
-		<OpenAISettings
+		<OllamaBaseSettings
 			providerSettings={ providerSettings }
+			providerName={ providerName }
 			onChange={ onChange }
 		/>
 	);

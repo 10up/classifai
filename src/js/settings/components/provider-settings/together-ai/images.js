@@ -2,15 +2,15 @@
  * WordPress dependencies
  */
 import { SelectControl, ToggleControl } from '@wordpress/components';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
-import { useSelect, useDispatch } from '@wordpress/data';
-import { STORE_NAME } from '../../data/store';
-import { TogetherAISettings } from './together-ai';
+import { SettingsRow } from '../../settings-row';
+import { STORE_NAME } from '../../../data/store';
+import { TogetherAIBaseSettings } from './base';
 
 /**
  * Component for the Together AI Images Provider settings.
@@ -51,7 +51,7 @@ export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<TogetherAISettings
+				<TogetherAIBaseSettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
 				/>
@@ -70,6 +70,7 @@ export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
 					options={ models }
 					disabled={ models.length <= 1 }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -90,6 +91,7 @@ export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
 						value: i + 1,
 					} ) ) }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -118,6 +120,7 @@ export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -133,6 +136,7 @@ export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
 						onChange( { per_image_settings: value } )
 					}
 					checked={ providerSettings.per_image_settings || false }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</>

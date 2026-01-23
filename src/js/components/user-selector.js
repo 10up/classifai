@@ -126,6 +126,7 @@ export const UserSelector = ( { value, onChange } ) => {
 				__experimentalInvalid: __( 'Invalid user', 'classifai' ),
 			} }
 			__nextHasNoMarginBottom
+			__next40pxDefaultSize
 		/>
 	);
 };

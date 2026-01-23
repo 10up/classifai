@@ -3,14 +3,14 @@
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { SelectControl } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from '../../data/store';
-import { SettingsRow } from '../settings-row';
-import { GoogleAISettings } from './googleai';
-import { __ } from '@wordpress/i18n';
+import { STORE_NAME } from '../../../data/store';
+import { SettingsRow } from '../../settings-row';
+import { GoogleAIBaseSettings } from './base';
 
 /**
  * Component for Google AI (Gemini) Provider settings.
@@ -73,7 +73,7 @@ export const GoogleAIGeminiSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<GoogleAISettings
+				<GoogleAIBaseSettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
 				/>
@@ -89,6 +89,7 @@ export const GoogleAIGeminiSettings = ( { isConfigured = false } ) => {
 					options={ models }
 					disabled={ models.length <= 1 }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>

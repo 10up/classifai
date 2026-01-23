@@ -10,10 +10,10 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
-import { STORE_NAME } from '../../data/store';
-import { OpenAISettings } from './openai';
-import { useFeatureContext } from '../feature-settings/context';
+import { SettingsRow } from '../../settings-row';
+import { STORE_NAME } from '../../../data/store';
+import { OpenAIBaseSettings } from './base';
+import { useFeatureContext } from '../../feature-settings/context';
 
 /**
  * React Component for OpenAI Embeddings settings.
@@ -38,7 +38,7 @@ export const OpenAIEmbeddingsSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<OpenAISettings
+				<OpenAIBaseSettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
 				/>
@@ -56,6 +56,7 @@ export const OpenAIEmbeddingsSettings = ( { isConfigured = false } ) => {
 						min="1"
 						max="100"
 						step="0.01"
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }

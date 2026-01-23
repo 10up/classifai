@@ -2,15 +2,15 @@
  * WordPress dependencies
  */
 import { SelectControl, ToggleControl } from '@wordpress/components';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
-import { useSelect, useDispatch } from '@wordpress/data';
-import { STORE_NAME } from '../../data/store';
-import { OpenAISettings } from './openai';
+import { SettingsRow } from '../../settings-row';
+import { STORE_NAME } from '../../../data/store';
+import { OpenAIBaseSettings } from './base';
 
 /**
  * Component for OpenAI Images Provider settings.
@@ -32,7 +32,7 @@ export const OpenAIImagesSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<OpenAISettings
+				<OpenAIBaseSettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
 				/>
@@ -55,6 +55,7 @@ export const OpenAIImagesSettings = ( { isConfigured = false } ) => {
 						value: i + 1,
 					} ) ) }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -87,6 +88,7 @@ export const OpenAIImagesSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -115,6 +117,7 @@ export const OpenAIImagesSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -130,6 +133,7 @@ export const OpenAIImagesSettings = ( { isConfigured = false } ) => {
 						onChange( { per_image_settings: value } )
 					}
 					checked={ providerSettings.per_image_settings || false }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</>

@@ -9,16 +9,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from '../../data/store';
-import { OllamaBaseSettings } from './ollama-base';
-import { useFeatureContext } from '../feature-settings/context';
-import { SettingsRow } from '../settings-row';
+import { STORE_NAME } from '../../../data/store';
+import { OllamaBaseSettings } from './base';
+import { useFeatureContext } from '../../feature-settings/context';
+import { SettingsRow } from '../../settings-row';
 
 /**
  * Component for Ollama Provider settings.
- *
- * This component is used within the ProviderSettings component to
- * allow users to configure the Ollama Provider settings.
  *
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.
@@ -64,6 +61,7 @@ export const OllamaSettings = ( { isConfigured = false } ) => {
 						onChange={ ( value ) =>
 							onChange( { number_of_suggestions: value } )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }

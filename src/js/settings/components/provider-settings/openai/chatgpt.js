@@ -9,15 +9,14 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
-import { STORE_NAME } from '../../data/store';
-import { useFeatureContext } from '../feature-settings/context';
-import { PromptRepeater } from '../feature-additional-settings/prompt-repeater';
+import { SettingsRow } from '../../settings-row';
+import { STORE_NAME } from '../../../data/store';
+import { useFeatureContext } from '../../feature-settings/context';
+import { PromptRepeater } from '../../feature-additional-settings/prompt-repeater';
+import { OpenAIBaseSettings } from './base';
 
 /**
  * Component for OpenAI ChatGPT Provider settings.
- *
- * This component is used within the ProviderSettings component to allow users to configure the OpenAI ChatGPT Provider settings.
  *
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.
@@ -39,18 +38,6 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 		} );
 	};
 
-	const Description = () => (
-		<>
-			{ __( "Don't have an OpenAI account yet?", 'classifai' ) }{ ' ' }
-			<a
-				title={ __( 'Sign up for an OpenAI account', 'classifai' ) }
-				href="https://platform.openai.com/signup"
-			>
-				{ __( 'Sign up for one', 'classifai' ) }
-			</a>{ ' ' }
-			{ __( 'in order to get your API key.', 'classifai' ) }
-		</>
-	);
 	const promptExamples = (
 		<>
 			{ __( 'Add a custom prompt, if desired. See our', 'classifai' ) }{ ' ' }
@@ -71,18 +58,12 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<SettingsRow
-					label={ __( 'API Key', 'classifai' ) }
-					description={ <Description /> }
-				>
-					<InputControl
-						id={ `${ providerName }_api_key` }
-						type="password"
-						value={ providerSettings.api_key || '' }
-						onChange={ ( value ) => onChange( { api_key: value } ) }
-					/>
-				</SettingsRow>
+				<OpenAIBaseSettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
 			) }
+
 			{ [
 				'feature_content_resizing',
 				'feature_title_generation',
@@ -103,6 +84,7 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 						onChange={ ( value ) =>
 							onChange( { number_of_suggestions: value } )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }

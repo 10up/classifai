@@ -27,27 +27,27 @@ import {
 } from '../../utils/utils';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { OpenAIChatGPTSettings } from './openai-chatgpt';
-import { GoogleAIGeminiSettings } from './googleai-gemini';
-import { GoogleAIImagesSettings } from './googleai-images';
+import { OpenAIChatGPTSettings } from './openai/chatgpt';
+import { GoogleAIGeminiSettings } from './google/gemini';
+import { GoogleAIImagesSettings } from './google/images';
 import { AzureOpenAISettings } from './azure/azure-openai/openai';
 import { useFeatureContext } from '../feature-settings/context';
 import { IBMWatsonNLUSettings } from './watson/nlu';
-import { OpenAIModerationSettings } from './openai-moderation';
-import { OpenAIEmbeddingsSettings } from './openai-embeddings';
-import { OpenAISpeechToTextSettings } from './openai-speech-to-text';
+import { OpenAIModerationSettings } from './openai/moderation';
+import { OpenAIEmbeddingsSettings } from './openai/embeddings';
+import { OpenAISpeechToTextSettings } from './openai/speech-to-text';
 import { AzureAIVisionSettings } from './azure/azure-ai-vision/ai-vision';
-import { OpenAIImagesSettings } from './openai-images';
+import { OpenAIImagesSettings } from './openai/images';
 import { StableDiffusionImagesSettings } from './stable-diffusion/images';
 import { AmazonPollyTextToSpeechSettings } from './amazon-polly/text-to-speech';
 import { AzureTextToSpeechSettings } from './azure/azure-text-to-speech/text-to-speech';
-import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
+import { OpenAITextToSpeechSettings } from './openai/text-to-speech';
 import { ChromeAISettings } from './chrome-ai';
 import { XAIGrokSettings } from './xai/grok';
-import { OllamaSettings } from './ollama';
-import { OllamaMultimodalSettings } from './ollama-multimodal';
-import { OllamaEmbeddingsSettings } from './ollama-embeddings';
-import { TogetherAIImagesSettings } from './together-ai-images';
+import { OllamaSettings } from './ollama/ollama';
+import { OllamaMultimodalSettings } from './ollama/multimodal';
+import { OllamaEmbeddingsSettings } from './ollama/embeddings';
+import { TogetherAIImagesSettings } from './together-ai/images';
 import { ElevenLabsSpeechToTextSettings } from './elevenlabs/speech-to-text';
 import { ElevenLabsTextToSpeechSettings } from './elevenlabs/text-to-speech';
 
@@ -368,6 +368,7 @@ export const ProviderSettings = () => {
 							value={ provider }
 							options={ providers }
 							__nextHasNoMarginBottom
+							__next40pxDefaultSize
 						/>
 						{ ! isOverridden && ! hasGlobal && (
 							<Notice
@@ -405,6 +406,7 @@ export const ProviderSettings = () => {
 										override: !! value,
 									} )
 								}
+								__nextHasNoMarginBottom
 							/>
 						</SettingsRow>
 						{ isOverridden && (

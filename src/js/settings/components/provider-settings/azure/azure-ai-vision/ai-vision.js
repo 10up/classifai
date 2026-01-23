@@ -69,6 +69,7 @@ export const AzureAIVisionSettings = ( {
 								descriptive_confidence_threshold: value,
 							} )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }
@@ -95,6 +96,7 @@ export const AzureAIVisionSettings = ( {
 								tag_confidence_threshold: value,
 							} )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }

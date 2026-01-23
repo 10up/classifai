@@ -1,7 +1,14 @@
+/**
+ * WordPress dependencies
+ */
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { __experimentalInputControl as InputControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { SettingsRow } from '../settings-row';
+
+/**
+ * Internal dependencies
+ */
+import { SettingsRow } from '../../settings-row';
 
 /**
  * Component for Google AI Provider settings.
@@ -12,9 +19,9 @@ import { SettingsRow } from '../settings-row';
  * @param {Object}   props.providerSettings The provider settings.
  * @param {Function} props.onChange         Function to call when the provider settings change.
  *
- * @return {React.ReactElement} GoogleAISettings component.
+ * @return {React.ReactElement} GoogleAIBaseSettings component.
  */
-export const GoogleAISettings = ( { providerSettings, onChange } ) => {
+export const GoogleAIBaseSettings = ( { providerSettings, onChange } ) => {
 	const Description = () => (
 		<>
 			{ __( "Don't have an Google AI (Gemini API) key?", 'classifai' ) }{ ' ' }
