@@ -198,7 +198,7 @@ class Grok extends Provider {
 	 * @return array
 	 */
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
-		$models = $this->get_models( $new_settings );
+		$models = $this->authenticate_credentials( $new_settings );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 		$new_settings[ static::ID ]['models']        = $settings[ static::ID ]['models'] ?? [];
@@ -254,7 +254,7 @@ class Grok extends Provider {
 	 * @param array $settings Settings being saved.
 	 * @return array|WP_Error
 	 */
-	protected function get_models( array $settings = [] ) {
+	public function authenticate_credentials( array $settings = [] ) {
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( $this, $this->feature_instance, $settings );
 		$response = $request->get( $this->models_url, [ 'use_vip' => true ] );
