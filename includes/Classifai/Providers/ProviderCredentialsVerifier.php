@@ -16,6 +16,7 @@ use Classifai\Providers\Localhost\Ollama;
 use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\Azure\OpenAI as AzureOpenAI;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
+use Classifai\Providers\Azure\ComputerVision;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,6 +46,8 @@ class ProviderCredentialsVerifier {
 				return self::verify_provider( new ElevenLabsTextToSpeech(), $config );
 			case 'googleai':
 				return self::verify_provider( new GeminiAPI(), $config );
+			case 'ms_computer_vision':
+				return self::verify_provider( new ComputerVision(), $config );
 			case 'openai':
 				return self::verify_provider( new ChatGPT(), $config ); // TODO: finish this but would also be great to pull in verification from the Provider to avoid duplication. Or bring that all in here.
 			case 'ollama':

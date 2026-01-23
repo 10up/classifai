@@ -222,10 +222,7 @@ class ComputerVision extends Provider {
 			$is_api_key_same  = $new_settings[ static::ID ]['api_key'] === $settings[ static::ID ]['api_key'];
 
 			if ( ! ( $is_authenticated && $is_endpoint_same && $is_api_key_same ) ) {
-				$auth_check = $this->authenticate_credentials(
-					$new_settings[ static::ID ]['endpoint_url'],
-					$new_settings[ static::ID ]['api_key']
-				);
+				$auth_check = $this->authenticate_credentials( $new_settings );
 
 				if ( is_wp_error( $auth_check ) ) {
 					$new_settings[ static::ID ]['authenticated'] = false;
@@ -749,19 +746,11 @@ class ComputerVision extends Provider {
 	/**
 	 * Authenticates our credentials.
 	 *
-	 * @param string $url     Endpoint URL.
-	 * @param string $api_key Api Key.
+	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( string $url, string $api_key ) {
-		$credentials = $this->get_credentials(
-			[
-				static::ID => [
-					'endpoint_url' => $url,
-					'api_key'      => $api_key,
-				],
-			]
-		);
+	public function authenticate_credentials( array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
 		$rtn         = false;
 		$request     = safe_wp_remote_post(
 			add_query_arg( 'features', 'caption', trailingslashit( $credentials['endpoint_url'] ?? '' ) . $this->analyze_url ),
@@ -782,6 +771,8 @@ class ComputerVision extends Provider {
 			} else {
 				$rtn = true;
 			}
+		} else {
+			$rtn = $request;
 		}
 
 		return $rtn;
