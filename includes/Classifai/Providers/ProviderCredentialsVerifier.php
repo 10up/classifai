@@ -9,20 +9,20 @@
 
 namespace Classifai\Providers;
 
-use Classifai\Providers\Provider;
-use Classifai\Providers\OpenAI\ChatGPT;
-use Classifai\Providers\ElevenLabs\TextToSpeech as ElevenLabsTextToSpeech;
-use Classifai\Providers\Localhost\Ollama;
-use Classifai\Providers\GoogleAI\GeminiAPI;
+use Classifai\Providers\AWS\AmazonPolly;
 use Classifai\Providers\Azure\OpenAI as AzureOpenAI;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\Speech as AzureSpeech;
-use Classifai\Providers\AWS\AmazonPolly;
+use Classifai\Providers\ElevenLabs\TextToSpeech as ElevenLabsTextToSpeech;
+use Classifai\Providers\GoogleAI\GeminiAPI;
+use Classifai\Providers\Localhost\Ollama;
+use Classifai\Providers\Localhost\StableDiffusion;
+use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\Provider;
+use Classifai\Providers\TogetherAI\Images as TogetherAIImages;
 use Classifai\Providers\Watson\NLU;
 use Classifai\Providers\XAI\Grok;
-use Classifai\Providers\TogetherAI\Images as TogetherAIImages;
-use Classifai\Providers\Localhost\StableDiffusion;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -42,7 +42,6 @@ class ProviderCredentialsVerifier {
 	 * @return array{ authenticated: bool, error: WP_Error|null }
 	 */
 	public static function verify( string $profile_id, array $config ): array {
-		// TODO: pass config through our credentials resolver so they can be filtered. Or this may happen when we verify credentials.
 		switch ( $profile_id ) {
 			case 'aws_polly':
 				return self::verify_provider( new AmazonPolly(), $config );
@@ -61,7 +60,7 @@ class ProviderCredentialsVerifier {
 			case 'ms_computer_vision':
 				return self::verify_provider( new ComputerVision(), $config );
 			case 'openai':
-				return self::verify_provider( new ChatGPT(), $config ); // TODO: finish this but would also be great to pull in verification from the Provider to avoid duplication. Or bring that all in here.
+				return self::verify_provider( new ChatGPT(), $config );
 			case 'ollama':
 				return self::verify_provider( new Ollama(), $config );
 			case 'stable_diffusion':
