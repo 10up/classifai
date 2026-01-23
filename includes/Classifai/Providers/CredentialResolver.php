@@ -64,7 +64,7 @@ class CredentialResolver {
 		$has_override    = false;
 		foreach ( $fields_to_check as $field ) {
 			$v = $feature_provider_settings[ $field ] ?? null;
-			if ( '' !== $v && null !== $v && false !== $v ) {
+			if ( null !== $v && false !== $v ) {
 				$has_override = true;
 				break;
 			}

@@ -208,6 +208,21 @@ trait ElevenLabs {
 	}
 
 	/**
+	 * Authenticate our credentials.
+	 *
+	 * @param array $settings The settings.
+	 * @return bool|WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		$api_key = $settings[ static::ID ]['api_key'] ?? '';
+
+		// Make request to ensure credentials work.
+		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get', [ 'use_vip' => true ] );
+
+		return ! is_wp_error( $response ) ? true : $response;
+	}
+
+	/**
 	 * Get the available models.
 	 *
 	 * @param string $api_key The API key.

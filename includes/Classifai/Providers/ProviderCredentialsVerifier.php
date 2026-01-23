@@ -9,7 +9,9 @@
 
 namespace Classifai\Providers;
 
+use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\ElevenLabs\TextToSpeech as ElevenLabsTextToSpeech;
 use Classifai\Providers\Localhost\Ollama;
 use WP_Error;
 
@@ -32,10 +34,12 @@ class ProviderCredentialsVerifier {
 	public static function verify( string $profile_id, array $config ): array {
 		// TODO: pass config through our credentials resolver so they can be filtered. Or this may happen when we verify credentials.
 		switch ( $profile_id ) {
+			case 'elevenlabs':
+				return self::verify_provider( new ElevenLabsTextToSpeech(), $config );
 			case 'openai':
-				return self::verify_openai( $config ); // TODO: finish this but would also be great to pull in verification from the Provider to avoid duplication. Or bring that all in here.
+				return self::verify_provider( new ChatGPT(), $config ); // TODO: finish this but would also be great to pull in verification from the Provider to avoid duplication. Or bring that all in here.
 			case 'ollama':
-				return self::verify_ollama( $config );
+				return self::verify_provider( new Ollama(), $config );
 			default:
 				return [
 					'authenticated' => false,
@@ -45,50 +49,40 @@ class ProviderCredentialsVerifier {
 	}
 
 	/**
-	 * Verify OpenAI API key.
+	 * Verify provider credentials.
 	 *
-	 * @param array $config Provider config containing credentials.
+	 * @param Provider $provider The provider.
+	 * @param array    $config Provider config containing credentials.
 	 * @return array{ authenticated: bool, error: WP_Error|null }
 	 */
-	private static function verify_openai( array $config ): array {
-		$provider      = new ChatGPT();
+	private static function verify_provider( Provider $provider, array $config ): array {
 		$authenticated = $provider->authenticate_credentials( [ $provider::ID => $config ] );
 
 		if ( is_wp_error( $authenticated ) ) {
-			// For response code 429, credentials are valid but rate limit is reached.
-			if ( 429 === (int) $authenticated->get_error_code() ) {
-				return [
-					'authenticated' => true,
-					'error'         => $authenticated,
-				];
-			} else {
-				return [
-					'authenticated' => false,
-					'error'         => $authenticated,
-				];
+			$error = $authenticated;
+
+			if ( 'openai_chatgpt' === $provider::ID ) {
+				// For response code 429, credentials are valid but rate limit is reached.
+				if ( 429 === (int) $authenticated->get_error_code() ) {
+					return [
+						'authenticated' => true,
+						'error'         => $authenticated,
+					];
+				} else {
+					return [
+						'authenticated' => false,
+						'error'         => $authenticated,
+					];
+				}
 			}
-		}
 
-		return [
-			'authenticated' => true,
-			'error'         => null,
-		];
-	}
+			if ( 'ollama' === $provider::ID ) {
+				$error = new WP_Error( $authenticated->get_error_code(), esc_html__( 'Error making request, please ensure the Ollama service is running', 'classifai' ), );
+			}
 
-	/**
-	 * Verify Ollama endpoint.
-	 *
-	 * @param array $config Provider config containing credentials.
-	 * @return array{ authenticated: bool, error: WP_Error|null }
-	 */
-	private static function verify_ollama( array $config ): array {
-		$provider      = new Ollama();
-		$authenticated = $provider->authenticate_credentials( [ $provider::ID => $config ] );
-
-		if ( is_wp_error( $authenticated ) ) {
 			return [
 				'authenticated' => false,
-				'error'         => new WP_Error( $authenticated->get_error_code(), esc_html__( 'Error making request, please ensure the Ollama service is running', 'classifai' ), ),
+				'error'         => $error,
 			];
 		}
 
