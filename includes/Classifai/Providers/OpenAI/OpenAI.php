@@ -38,9 +38,6 @@ trait OpenAI {
 			// For response code 429, credentials are valid but rate limit is reached.
 			if ( 429 === (int) $authenticated->get_error_code() ) {
 				$new_settings[ static::ID ]['authenticated'] = true;
-				$error_message                               = str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $error_message );
-			} else {
-				$error_message = str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $error_message );
 			}
 
 			add_settings_error(
@@ -68,6 +65,15 @@ trait OpenAI {
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( $this, $this->feature_instance, $settings );
 		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
+
+		if ( is_wp_error( $response ) ) {
+			// For response code 429, credentials are valid but rate limit is reached.
+			if ( 429 === (int) $response->get_error_code() ) {
+				$response = new WP_Error( 429, str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $response->get_error_message() ) );
+			} else {
+				$response = new WP_Error( $response->get_error_code(), str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $response->get_error_message() ) );
+			}
+		}
 
 		return ! is_wp_error( $response ) ? true : $response;
 	}

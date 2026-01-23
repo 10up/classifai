@@ -124,13 +124,33 @@ class Ollama extends Provider {
 	}
 
 	/**
+	 * Authenticate our credentials.
+	 *
+	 * @param array $settings Settings being saved.
+	 * @return bool|WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		// Make request to ensure credentials work.
+		$request  = new APIRequest( $this, $this->feature_instance, $settings );
+		$response = $request->get(
+			$this->get_api_model_url( $settings[ static::ID ]['endpoint_url'] ),
+			[
+				'timeout' => 30, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'use_vip' => true,
+			]
+		);
+
+		return ! is_wp_error( $response ) ? true : $response;
+	}
+
+	/**
 	 * Connects to Ollama and retrieves supported models.
 	 *
 	 * @param array $args Overridable args.
 	 * @return array
 	 */
 	public function get_models( array $args = [] ): array {
-		$settings = $this->feature_instance ? $this->feature_instance->get_settings( static::ID ) : [];
+		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = [
 			'endpoint_url' => $settings[ static::ID ]['endpoint_url'] ?? '',

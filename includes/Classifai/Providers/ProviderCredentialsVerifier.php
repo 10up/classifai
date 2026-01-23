@@ -59,12 +59,12 @@ class ProviderCredentialsVerifier {
 			if ( 429 === (int) $authenticated->get_error_code() ) {
 				return [
 					'authenticated' => true,
-					'error'         => new WP_Error( 'auth', str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $authenticated->get_error_message() ) ),
+					'error'         => $authenticated,
 				];
 			} else {
 				return [
 					'authenticated' => false,
-					'error'         => new WP_Error( 'auth', str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $authenticated->get_error_message() ) ),
+					'error'         => $authenticated,
 				];
 			}
 		}
@@ -82,13 +82,13 @@ class ProviderCredentialsVerifier {
 	 * @return array{ authenticated: bool, error: WP_Error|null }
 	 */
 	private static function verify_ollama( array $config ): array {
-		$provider = new Ollama();
-		$models   = $provider->get_models( $config );
+		$provider      = new Ollama();
+		$authenticated = $provider->authenticate_credentials( [ $provider::ID => $config ] );
 
-		if ( empty( $models ) ) {
+		if ( is_wp_error( $authenticated ) ) {
 			return [
 				'authenticated' => false,
-				'error'         => new WP_Error( 'auth', esc_html__( 'Error making request, please ensure the Ollama service is running', 'classifai' ), ),
+				'error'         => new WP_Error( $authenticated->get_error_code(), esc_html__( 'Error making request, please ensure the Ollama service is running', 'classifai' ), ),
 			];
 		}
 
