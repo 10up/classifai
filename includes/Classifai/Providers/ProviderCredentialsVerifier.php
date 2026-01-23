@@ -14,6 +14,8 @@ use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\ElevenLabs\TextToSpeech as ElevenLabsTextToSpeech;
 use Classifai\Providers\Localhost\Ollama;
 use Classifai\Providers\GoogleAI\GeminiAPI;
+use Classifai\Providers\Azure\OpenAI as AzureOpenAI;
+use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,6 +37,10 @@ class ProviderCredentialsVerifier {
 	public static function verify( string $profile_id, array $config ): array {
 		// TODO: pass config through our credentials resolver so they can be filtered. Or this may happen when we verify credentials.
 		switch ( $profile_id ) {
+			case 'azure_openai':
+				return self::verify_provider( new AzureOpenAI(), $config );
+			case 'azure_openai_embeddings':
+				return self::verify_provider( new AzureEmbeddings(), $config );
 			case 'elevenlabs':
 				return self::verify_provider( new ElevenLabsTextToSpeech(), $config );
 			case 'googleai':
@@ -90,8 +96,8 @@ class ProviderCredentialsVerifier {
 		}
 
 		return [
-			'authenticated' => true,
-			'error'         => null,
+			'authenticated' => (bool) $authenticated,
+			'error'         => (bool) $authenticated ? null : new WP_Error( 'auth', esc_html__( 'Error making request, please ensure the credentials are valid', 'classifai' ), ),
 		];
 	}
 }

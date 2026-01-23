@@ -271,21 +271,11 @@ class Embeddings extends OpenAI {
 	/**
 	 * Authenticates our credentials.
 	 *
-	 * @param string $url Endpoint URL.
-	 * @param string $api_key Api Key.
-	 * @param string $deployment Deployment name.
+	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( string $url, string $api_key, string $deployment ) {
-		$credentials = $this->get_credentials(
-			[
-				static::ID => [
-					'endpoint_url' => $url,
-					'api_key'      => $api_key,
-					'deployment'   => $deployment,
-				],
-			]
-		);
+	public function authenticate_credentials( array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
 		$rtn         = false;
 
 		// This does basically the same thing that prep_api_url does but when running authentication,
@@ -317,6 +307,8 @@ class Embeddings extends OpenAI {
 			} else {
 				$rtn = true;
 			}
+		} else {
+			$rtn = $request;
 		}
 
 		return $rtn;

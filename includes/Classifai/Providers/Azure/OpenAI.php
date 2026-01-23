@@ -218,11 +218,7 @@ class OpenAI extends Provider {
 			$is_deployment_same = $new_settings[ static::ID ]['deployment'] === $settings[ static::ID ]['deployment'];
 
 			if ( ! ( $is_authenticated && $is_endpoint_same && $is_api_key_same && $is_deployment_same ) ) {
-				$auth_check = $this->authenticate_credentials(
-					$new_settings[ static::ID ]['endpoint_url'],
-					$new_settings[ static::ID ]['api_key'],
-					$new_settings[ static::ID ]['deployment']
-				);
+				$auth_check = $this->authenticate_credentials( $new_settings );
 
 				if ( is_wp_error( $auth_check ) ) {
 					$new_settings[ static::ID ]['authenticated'] = false;
@@ -288,21 +284,11 @@ class OpenAI extends Provider {
 	/**
 	 * Authenticates our credentials.
 	 *
-	 * @param string $url Endpoint URL.
-	 * @param string $api_key Api Key.
-	 * @param string $deployment Deployment name.
+	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( string $url, string $api_key, string $deployment ) {
-		$credentials = $this->get_credentials(
-			[
-				static::ID => [
-					'endpoint_url' => $url,
-					'api_key'      => $api_key,
-					'deployment'   => $deployment,
-				],
-			]
-		);
+	public function authenticate_credentials( array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
 		$rtn         = false;
 
 		// This does basically the same thing that prep_api_url does but when running authentication,
@@ -334,6 +320,8 @@ class OpenAI extends Provider {
 			} else {
 				$rtn = true;
 			}
+		} else {
+			$rtn = $request;
 		}
 
 		return $rtn;
