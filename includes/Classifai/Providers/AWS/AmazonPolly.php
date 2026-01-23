@@ -261,6 +261,52 @@ class AmazonPolly extends Provider {
 	}
 
 	/**
+	 * Authenticate our credentials.
+	 *
+	 * @param array $settings Settings being saved.
+	 * @return bool|WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		$response = false;
+
+		try {
+			/**
+			 * Filters the return value of the connect to services function.
+			 *
+			 * Returning a non-false value from the filter will short-circuit the describe voices request and return early with that value.
+			 * This filter is useful for E2E tests.
+			 *
+			 * @since 3.1.0
+			 * @hook classifai_aws_polly_pre_connect_to_service
+			 *
+			 * @param bool $pre The value of pre connect to service. Default false. non-false value will short-circuit the describe voices request.
+			 *
+			 * @return bool|mixed The filtered value of connect to service.
+			 */
+			$pre = apply_filters( 'classifai_' . self::ID . '_pre_connect_to_service', false );
+
+			if ( false !== $pre ) {
+				return $pre;
+			}
+
+			$polly_client = $this->get_polly_client( $settings[ static::ID ] );
+
+			if ( $polly_client ) {
+				$polly_voices = $polly_client->describeVoices();
+				$polly_voices = $polly_voices->get( 'Voices' );
+			} else {
+				$polly_voices = [];
+			}
+
+			$response = ! empty( $polly_voices ) ? true : new WP_Error( 'auth', esc_html__( 'Connection to Amazon Polly failed.', 'classifai' ) );
+		} catch ( \Exception $e ) {
+			$response = new WP_Error( 'auth', esc_html__( 'Connection to Amazon Polly failed.', 'classifai' ) );
+		}
+
+		return ! is_wp_error( $response ) ? true : $response;
+	}
+
+	/**
 	 * Connects to the Amazon Polly service.
 	 *
 	 * @param array $args Overridable args.

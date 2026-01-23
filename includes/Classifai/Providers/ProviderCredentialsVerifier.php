@@ -18,6 +18,7 @@ use Classifai\Providers\Azure\OpenAI as AzureOpenAI;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\Speech as AzureSpeech;
+use Classifai\Providers\AWS\AmazonPolly;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -39,6 +40,8 @@ class ProviderCredentialsVerifier {
 	public static function verify( string $profile_id, array $config ): array {
 		// TODO: pass config through our credentials resolver so they can be filtered. Or this may happen when we verify credentials.
 		switch ( $profile_id ) {
+			case 'aws_polly':
+				return self::verify_provider( new AmazonPolly(), $config );
 			case 'azure_openai':
 				return self::verify_provider( new AzureOpenAI(), $config );
 			case 'azure_openai_embeddings':
