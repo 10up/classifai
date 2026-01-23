@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+### Deprecated
+
+- The legacy settings screen (enabled via the `classifai_use_legacy_settings_panel` filter) is now formally deprecated and scheduled for removal in a future release. An admin notice will be displayed when this filter is active. Please migrate to the new React-based settings experience (props [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul) via [#1036](https://github.com/10up/classifai/pull/1036)).
+
 ## [3.7.1] - 2026-01-12
 
 **Note that this release bumps the WordPress minimum from 6.7 to 6.8.**
