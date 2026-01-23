@@ -50,6 +50,7 @@ class Notifications {
 		$this->thresholds_update_notice();
 		$this->v3_migration_completed_notice();
 		$this->render_embeddings_notice();
+		$this->render_legacy_settings_deprecation_notice();
 		$this->render_notices();
 	}
 
@@ -268,6 +269,46 @@ class Notifications {
 						// translators: %1$s: Feature specific message; %2$s: URL to Feature settings.
 						__( 'ClassifAI has updated to the <code>text-embedding-3-small</code> embeddings model. <br>This requires regenerating any stored embeddings for functionality to work properly. <br><a href="%1$s">Click here to do that</a>, noting this will make multiple API requests to OpenAI.', 'classifai' ),
 						wp_nonce_url( admin_url( 'admin-post.php?action=classifai_regen_embeddings' ), 'regen_embeddings', 'embeddings_nonce' )
+					)
+				);
+				?>
+			</p>
+		</div>
+
+		<?php
+	}
+
+	/**
+	 * Render a deprecation notice when the legacy settings filter is active.
+	 *
+	 * @since 3.8.0
+	 */
+	public function render_legacy_settings_deprecation_notice() {
+		// Only show if the legacy settings filter is active.
+		if ( ! should_use_legacy_settings_panel() ) {
+			return;
+		}
+
+		$key = 'legacy_settings_deprecation';
+
+		// Don't show the notice if the user has already dismissed it.
+		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
+			return;
+		}
+		?>
+
+		<div class="notice notice-warning is-dismissible classifai-dismissible-notice" data-notice="<?php echo esc_attr( $key ); ?>">
+			<p>
+				<strong><?php esc_html_e( 'ClassifAI Legacy Settings Deprecation Notice', 'classifai' ); ?></strong>
+			</p>
+			<p>
+				<?php
+				echo wp_kses_post(
+					sprintf(
+						/* translators: %1$s: filter name, %2$s: documentation URL */
+						__( 'The legacy settings screen is deprecated and will be removed in a future release. You are currently using the <code>%1$s</code> filter to enable it. Please migrate to the new React-based settings experience and remove this filter from your code. <a href="%2$s" target="_blank" rel="noopener noreferrer">Learn more about the new settings</a>.', 'classifai' ),
+						'classifai_use_legacy_settings_panel',
+						'https://github.com/10up/classifai/'
 					)
 				);
 				?>
