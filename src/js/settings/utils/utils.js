@@ -241,6 +241,7 @@ export const getProfileForProvider = ( providerId, profiles ) => {
 	if ( ! providerId || ! profiles || typeof profiles !== 'object' ) {
 		return null;
 	}
+
 	for ( const [ id, p ] of Object.entries( profiles ) ) {
 		if (
 			Array.isArray( p?.provider_ids ) &&
@@ -252,6 +253,7 @@ export const getProfileForProvider = ( providerId, profiles ) => {
 			};
 		}
 	}
+
 	return null;
 };
 

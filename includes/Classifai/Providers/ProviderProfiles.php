@@ -41,77 +41,63 @@ class ProviderProfiles {
 				'openai_text_to_speech',
 			],
 			'credential_fields' => [ 'api_key', 'authenticated' ],
-			'label'             => 'OpenAI',
 		],
 		// Grouped: one Ollama endpoint for all.
 		'ollama'                  => [
 			'provider_ids'      => [ 'ollama', 'ollama_embeddings', 'ollama_multimodal' ],
 			'credential_fields' => [ 'endpoint_url', 'authenticated' ],
-			'label'             => 'Ollama',
 		],
 		// Grouped: one ElevenLabs key for TTS and STT.
 		'elevenlabs'              => [
 			'provider_ids'      => [ 'elevenlabs_text_to_speech', 'elevenlabs_speech_to_text' ],
 			'credential_fields' => [ 'api_key', 'authenticated' ],
-			'label'             => 'ElevenLabs',
 		],
 		// Grouped: one Google AI key for Gemini and Images.
 		'googleai'                => [
 			'provider_ids'      => [ 'googleai_gemini_api', 'googleai_images' ],
 			'credential_fields' => [ 'api_key', 'authenticated' ],
-			'label'             => 'Google AI',
 		],
 
 		// Ungrouped: Azure and others use distinct creds per capability.
 		'azure_openai'            => [
 			'provider_ids'      => [ 'azure_openai' ],
 			'credential_fields' => [ 'endpoint_url', 'api_key', 'deployment', 'authenticated' ],
-			'label'             => 'Azure OpenAI',
 		],
 		'azure_openai_embeddings' => [
 			'provider_ids'      => [ 'azure_openai_embeddings' ],
 			'credential_fields' => [ 'endpoint_url', 'api_key', 'deployment', 'authenticated' ],
-			'label'             => 'Azure OpenAI Embeddings',
 		],
 		'ms_computer_vision'      => [
 			'provider_ids'      => [ 'ms_computer_vision' ],
 			'credential_fields' => [ 'endpoint_url', 'api_key', 'authenticated' ],
-			'label'             => 'Microsoft Azure AI Vision',
 		],
 		'ms_azure_text_to_speech' => [
 			'provider_ids'      => [ 'ms_azure_text_to_speech' ],
 			'credential_fields' => [ 'endpoint_url', 'api_key', 'authenticated' ],
-			'label'             => 'Microsoft Azure AI Speech',
 		],
 		'aws_polly'               => [
 			'provider_ids'      => [ 'aws_polly' ],
 			'credential_fields' => [ 'access_key_id', 'secret_access_key', 'aws_region', 'authenticated' ],
-			'label'             => 'Amazon Polly',
 		],
 		'ibm_watson_nlu'          => [
 			'provider_ids'      => [ 'ibm_watson_nlu' ],
 			'credential_fields' => [ 'endpoint_url', 'apikey', 'username', 'password', 'authenticated' ],
-			'label'             => 'IBM Watson NLU',
 		],
 		'xai_grok'                => [
 			'provider_ids'      => [ 'xai_grok' ],
 			'credential_fields' => [ 'api_key', 'authenticated' ],
-			'label'             => 'xAI Grok',
 		],
 		'togetherai_image'        => [
 			'provider_ids'      => [ 'togetherai_image' ],
 			'credential_fields' => [ 'api_key', 'authenticated' ],
-			'label'             => 'Together AI',
 		],
 		'stable_diffusion'        => [
 			'provider_ids'      => [ 'stable_diffusion' ],
 			'credential_fields' => [ 'endpoint_url', 'authenticated' ],
-			'label'             => 'Stable Diffusion',
 		],
 		'chrome_ai'               => [
 			'provider_ids'      => [ 'chrome_ai' ],
 			'credential_fields' => [],
-			'label'             => 'Chrome AI',
 		],
 	];
 
@@ -119,7 +105,7 @@ class ProviderProfiles {
 	 * Get all profile definitions.
 	 *
 	 * @return array Associative array of profile_id =>
-	 * [ 'provider_ids', 'credential_fields', 'label' ].
+	 * [ 'provider_ids', 'credential_fields' ].
 	 */
 	public static function get_all_profiles(): array {
 		/**

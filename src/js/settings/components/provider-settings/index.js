@@ -11,7 +11,7 @@ import {
 	ToggleControl,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useState, useEffect, useRef, useMemo } from '@wordpress/element';
+import { useState, useMemo } from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
 import { Link } from 'react-router-dom';
 
@@ -176,7 +176,8 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 /**
  * Provider Settings component.
  *
- * This component is used within the FeatureSettings component to allow users to configure the provider settings.
+ * This component is used within the FeatureSettings component
+ * to allow users to configure the Provider settings.
  *
  * @return {React.ReactElement} ProviderSettings component.
  */
@@ -229,59 +230,7 @@ export const ProviderSettings = () => {
 	const ov = featureSettings?.[ provider ]?.override;
 	const isOverridden = ov === true || ( ov !== false && hasFeatureCreds );
 
-	// Seed override for existing users with Feature-level creds so it persists on save.
-	useEffect( () => {
-		if ( hasFeatureCreds && ov === undefined && provider ) {
-			setProviderSettings( provider, { override: true } );
-		} else if ( ! hasFeatureCreds && provider ) {
-			setProviderSettings( provider, { override: false } );
-		}
-	}, [ hasFeatureCreds, ov, provider, setProviderSettings ] );
-
-	const hasClearedGlobalOnLoadRef = useRef( false );
-
-	// When override is already on (e.g. on load), clear any credential fields that
-	// match global so the form is not pre-populated with global data.
-	useEffect( () => {
-		if (
-			! hasClearedGlobalOnLoadRef.current &&
-			isOverridden &&
-			hasCredentialFields &&
-			provider &&
-			globalConfig
-		) {
-			const credFields = credentialFields.filter(
-				( f ) => f !== 'authenticated' && f !== 'override'
-			);
-			const updates = {};
-			for ( const f of credFields ) {
-				if (
-					featureSettings?.[ provider ]?.[ f ] === globalConfig?.[ f ]
-				) {
-					updates[ f ] = '';
-				}
-			}
-			if ( Object.keys( updates ).length > 0 ) {
-				setProviderSettings( provider, updates );
-				hasClearedGlobalOnLoadRef.current = true;
-			}
-		}
-	}, [
-		isOverridden,
-		hasCredentialFields,
-		provider,
-		globalConfig,
-		credentialFields,
-		featureSettings,
-		setProviderSettings,
-	] );
-
-	// Reset so we re-check when the user switches provider.
-	useEffect( () => {
-		hasClearedGlobalOnLoadRef.current = false;
-	}, [ provider ] );
-
-	// Remove the Chrome AI Provider from the list of providers if the browser AI is not available.
+	// Remove the Chrome AI Provider from the list of Providers if the browser AI is not available.
 	if ( feature?.providers?.chrome_ai && ! window.LanguageModel ) {
 		delete feature.providers.chrome_ai;
 	}
