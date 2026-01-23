@@ -13,6 +13,7 @@ use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\ElevenLabs\TextToSpeech as ElevenLabsTextToSpeech;
 use Classifai\Providers\Localhost\Ollama;
+use Classifai\Providers\GoogleAI\GeminiAPI;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,6 +37,8 @@ class ProviderCredentialsVerifier {
 		switch ( $profile_id ) {
 			case 'elevenlabs':
 				return self::verify_provider( new ElevenLabsTextToSpeech(), $config );
+			case 'googleai':
+				return self::verify_provider( new GeminiAPI(), $config );
 			case 'openai':
 				return self::verify_provider( new ChatGPT(), $config ); // TODO: finish this but would also be great to pull in verification from the Provider to avoid duplication. Or bring that all in here.
 			case 'ollama':

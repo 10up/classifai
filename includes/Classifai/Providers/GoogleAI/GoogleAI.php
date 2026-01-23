@@ -51,6 +51,20 @@ trait GoogleAI {
 	}
 
 	/**
+	 * Authenticate our credentials.
+	 *
+	 * @param array $settings Settings being saved.
+	 * @return bool|WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		// Make request to ensure credentials work.
+		$request  = new APIRequest( $this, $this->feature_instance, $settings );
+		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
+
+		return ! is_wp_error( $response ) ? true : $response;
+	}
+
+	/**
 	 * Get the available models.
 	 * This function also authenticates the credentials.
 	 *
