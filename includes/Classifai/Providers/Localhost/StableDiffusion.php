@@ -204,6 +204,26 @@ class StableDiffusion extends Provider {
 	}
 
 	/**
+	 * Authenticate our credentials.
+	 *
+	 * @param array $settings Settings being saved.
+	 * @return bool|WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		// Make request to ensure credentials work.
+		$request  = new APIRequest( $this, $this->feature_instance, $settings );
+		$response = $request->get(
+			$this->get_api_model_url( $settings[ static::ID ]['endpoint_url'] ),
+			[
+				'timeout' => 30, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'use_vip' => true,
+			]
+		);
+
+		return ! is_wp_error( $response ) ? true : $response;
+	}
+
+	/**
 	 * Connects to Stable Diffusion and retrieves supported models.
 	 *
 	 * @param array $args Overridable args.

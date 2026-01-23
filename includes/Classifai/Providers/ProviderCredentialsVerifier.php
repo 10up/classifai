@@ -22,6 +22,7 @@ use Classifai\Providers\AWS\AmazonPolly;
 use Classifai\Providers\Watson\NLU;
 use Classifai\Providers\XAI\Grok;
 use Classifai\Providers\TogetherAI\Images as TogetherAIImages;
+use Classifai\Providers\Localhost\StableDiffusion;
 use WP_Error;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -63,6 +64,8 @@ class ProviderCredentialsVerifier {
 				return self::verify_provider( new ChatGPT(), $config ); // TODO: finish this but would also be great to pull in verification from the Provider to avoid duplication. Or bring that all in here.
 			case 'ollama':
 				return self::verify_provider( new Ollama(), $config );
+			case 'stable_diffusion':
+				return self::verify_provider( new StableDiffusion(), $config );
 			case 'togetherai_image':
 				return self::verify_provider( new TogetherAIImages(), $config );
 			case 'xai_grok':
