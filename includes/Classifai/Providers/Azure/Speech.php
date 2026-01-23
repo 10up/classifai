@@ -183,6 +183,36 @@ class Speech extends Provider {
 	}
 
 	/**
+	 * Authenticates our credentials.
+	 *
+	 * @param array $settings Settings being saved.
+	 * @return bool|WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
+
+		// Create request arguments.
+		$request_params = array(
+			'headers' => array(
+				'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
+				'Content-Type'              => 'application/json',
+			),
+			'timeout' => 20,
+			'use_vip' => true,
+		);
+
+		// Create request URL.
+		$request_url = sprintf(
+			'%1$scognitiveservices/voices/list',
+			trailingslashit( $credentials['endpoint_url'] ?? '' )
+		);
+
+		$response = safe_wp_remote_get( $request_url, $request_params );
+
+		return ! is_wp_error( $response ) ? true : $response;
+	}
+
+	/**
 	 * Connects to Azure's Text to Speech service.
 	 *
 	 * @param array $args Overridable args.
@@ -209,6 +239,7 @@ class Speech extends Provider {
 				'Ocp-Apim-Subscription-Key' => $credentials['api_key'],
 				'Content-Type'              => 'application/json',
 			),
+			'timeout' => 20,
 			'use_vip' => true,
 		);
 
@@ -218,11 +249,7 @@ class Speech extends Provider {
 			trailingslashit( $credentials['endpoint_url'] )
 		);
 
-		$request_params['timeout'] = $request_params['timeout'] ?? 20;
-		$response                  = safe_wp_remote_get(
-			$request_url,
-			$request_params
-		);
+		$response = safe_wp_remote_get( $request_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
 			add_settings_error(
