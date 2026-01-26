@@ -197,7 +197,7 @@ class Speech extends Provider {
 				'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 				'Content-Type'              => 'application/json',
 			),
-			'timeout' => 20,
+			'timeout' => 20, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			'use_vip' => true,
 		);
 
@@ -239,7 +239,7 @@ class Speech extends Provider {
 				'Ocp-Apim-Subscription-Key' => $credentials['api_key'],
 				'Content-Type'              => 'application/json',
 			),
-			'timeout' => 20,
+			'timeout' => 20, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			'use_vip' => true,
 		);
 
