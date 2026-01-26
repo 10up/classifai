@@ -66,12 +66,12 @@ export const ClassifAIWelcomeGuide = ( { closeWelcomeGuide } ) => {
 					<li>
 						<strong>
 							{ __(
-								'Connect that AI provider to the Feature you enabled.',
+								'Configure that AI Provider and assign it to the Feature you enabled.',
 								'classifai'
 							) }
 						</strong>{ ' ' }
 						<a
-							href="https://github.com/10up/classifai?tab=readme-ov-file#set-up-classification-via-ibm-watson"
+							href="https://10up.github.io/classifai/feature-configuration/"
 							target="_blank"
 							rel="noopener noreferrer"
 						>

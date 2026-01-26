@@ -6,7 +6,7 @@ sidebar_label: "Feature Configuration"
 
 # Feature Configuration
 
-Welcome to the ClassifAI Feature Configuration guide. This section provides detailed configuration instructions for all available features in ClassifAI.
+Welcome to the ClassifAI Feature Configuration guide. This section provides detailed configuration instructions for all available Features in ClassifAI. Note the docs here show how to configure a Provider individually for a specific Feature. The recommended approach is to configured Providers once globally and then re-use them for each Feature. More details on how this can be configured can be found in the [Provider Configuration](/docs/02.provider-configuration/index.md) section.
 
 ## Language Processing Features
 
