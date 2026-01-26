@@ -17,13 +17,13 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
 		cy.selectProvider( 'azure_openai_embeddings' );
-		cy.get( 'input#azure_openai_embeddings_endpoint_url' )
+		cy.get( 'input#azure_openai_endpoint_url' )
 			.clear()
 			.type( 'https://e2e-test-azure-openai.test/' );
-		cy.get( 'input#azure_openai_embeddings_api_key' )
+		cy.get( 'input#azure_openai_api_key' )
 			.clear()
 			.type( 'password' );
-		cy.get( 'input#azure_openai_embeddings_deployment' )
+		cy.get( 'input#azure_openai_deployment' )
 			.clear()
 			.type( 'test' );
 

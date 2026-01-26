@@ -24,7 +24,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.selectProvider( 'openai_chatgpt' );
-		cy.get( '#openai_chatgpt_api_key' ).clear().type( 'password' );
+		cy.get( '#openai_api_key' ).clear().type( 'password' );
 
 		cy.enableFeature();
 		cy.allowFeatureToAdmin();

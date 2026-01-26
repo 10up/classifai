@@ -608,6 +608,7 @@ Cypress.Commands.add( 'selectProvider', ( provider ) => {
 		}
 	} );
 	cy.get( '.classifai-provider-select select' ).select( provider );
+	cy.get( '.classifai-provider-override-credentials input[type="checkbox"]' ).check();
 } );
 
 /**
@@ -677,7 +678,7 @@ Cypress.Commands.add( 'disableElasticPress', () => {
  */
 Cypress.Commands.add( 'visitFeatureSettings', ( featurePath ) => {
 	cy.visit( `/wp-admin/tools.php?page=classifai#/${ featurePath }` );
-	if ( ! featurePath.includes( 'feature_smart_404' ) ) {
+	if ( ! featurePath.includes( 'feature_smart_404' ) && ! featurePath.includes( 'providers' ) ) {
 		cy.get( '.components-panel__header h2' ).should( 'exist' );
 	}
 } );

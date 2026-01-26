@@ -6,7 +6,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 		);
 		cy.enableFeature();
 		cy.selectProvider( 'openai_chatgpt' );
-		cy.get( '#openai_chatgpt_api_key' ).type( 'abc123' );
+		cy.get( '#openai_api_key' ).type( 'abc123' );
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();

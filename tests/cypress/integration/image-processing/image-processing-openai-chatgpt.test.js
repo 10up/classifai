@@ -3,6 +3,9 @@ import { getChatGPTData } from '../../plugins/functions';
 [ 'openai_chatgpt', 'xai_grok' ].forEach( ( provider ) => {
 	const providerName =
 		'openai_chatgpt' === provider ? 'OpenAI ChatGPT' : 'xAI Grok';
+	const providerApiKey =
+		'openai_chatgpt' === provider ? 'openai_api_key' : 'xai_grok_api_key';
+
 	describe( `[${ providerName }] Descriptive Text Generator Tests`, () => {
 		let imageEditLink = '';
 		let mediaModelLink = '';
@@ -18,7 +21,7 @@ import { getChatGPTData } from '../../plugins/functions';
 				cy.visitFeatureSettings( `image_processing/${ feature }` );
 				cy.enableFeature();
 				cy.selectProvider( provider );
-				cy.get( `#${ provider }_api_key` ).clear().type( 'password' );
+				cy.get( `#${ providerApiKey }` ).clear().type( 'password' );
 				cy.get(
 					'.processing-mode-radio-control input[value="automatic"]'
 				).check();
@@ -266,7 +269,7 @@ describe( `OpenAI ChatGPT Image Tag and Text Generator Tests`, () => {
 			cy.wait( 100 );
 			cy.enableFeature();
 			cy.selectProvider( 'openai_chatgpt' );
-			cy.get( '#openai_chatgpt_api_key' ).clear().type( 'password' );
+			cy.get( '#openai_api_key' ).clear().type( 'password' );
 			cy.get(
 				'.processing-mode-radio-control input[value="automatic"]'
 			).check();

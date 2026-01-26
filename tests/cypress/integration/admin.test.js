@@ -48,6 +48,14 @@ describe( 'Admin can login and make sure plugin is activated', () => {
 			.contains( 'Image Processing' );
 	} );
 
+	it( 'Can see "Providers" menu and and visit "Providers" settings page.', () => {
+		cy.visitFeatureSettings( 'providers' );
+		cy.get( '.classifai-tabs' ).should( 'exist' );
+		cy.get( '.classifai-tabs a.active-tab' )
+			.first()
+			.contains( 'Providers' );
+	} );
+
 	it( 'Can visit the general settings page and see all settings.', () => {
 		// Check Selected Navigation menu
 		cy.visitFeatureSettings( 'settings' );

@@ -20,7 +20,7 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 			'language_processing/feature_excerpt_generation'
 		);
 		cy.selectProvider( 'openai_chatgpt' );
-		cy.get( '#openai_chatgpt_api_key' ).clear().type( 'password' );
+		cy.get( '#openai_api_key' ).clear().type( 'password' );
 
 		cy.enableFeature();
 		cy.allowFeatureToAdmin();

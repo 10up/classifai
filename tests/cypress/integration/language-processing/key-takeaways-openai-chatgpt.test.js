@@ -17,7 +17,7 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 		cy.visitFeatureSettings( 'language_processing/feature_key_takeaways' );
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.selectProvider( 'openai_chatgpt' );
-		cy.get( '#openai_chatgpt_api_key' ).clear().type( 'password' );
+		cy.get( '#openai_api_key' ).clear().type( 'password' );
 
 		cy.enableFeature();
 		cy.allowFeatureToAdmin();
