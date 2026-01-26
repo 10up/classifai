@@ -52,7 +52,7 @@ import { ElevenLabsSpeechToTextSettings } from './elevenlabs/speech-to-text';
 import { ElevenLabsTextToSpeechSettings } from './elevenlabs/text-to-speech';
 
 /**
- * Component for rendering provider setting fields based on the selected provider.
+ * Component for rendering Provider setting fields based on the selected Provider.
  *
  * @param {Object}  props              Component props.
  * @param {string}  props.provider     The selected provider.
@@ -359,12 +359,10 @@ export const ProviderSettings = () => {
 								__nextHasNoMarginBottom
 							/>
 						</SettingsRow>
-						{ isOverridden && (
-							<ProviderFields
-								provider={ provider }
-								isConfigured={ configured }
-							/>
-						) }
+						<ProviderFields
+							provider={ provider }
+							isConfigured={ ! isOverridden || configured }
+						/>
 					</>
 				) : (
 					<ProviderFields
