@@ -137,12 +137,13 @@ class GeminiAPI extends Provider {
 	public function sanitize_settings( array $new_settings ): array {
 		$settings         = $this->feature_instance->get_settings();
 		$api_key_settings = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$models           = $this->get_models( $new_settings );
 		$model            = ! empty( $new_settings[ static::ID ]['model'] ) ? sanitize_text_field( $new_settings[ static::ID ]['model'] ) : $this->default_model;
 
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 		$new_settings[ static::ID ]['model']         = $model;
-		$new_settings[ static::ID ]['models']        = $api_key_settings[ static::ID ]['models'];
+		$new_settings[ static::ID ]['models']        = is_wp_error( $models ) ? [] : $models;
 
 		return $new_settings;
 	}

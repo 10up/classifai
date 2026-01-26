@@ -25,13 +25,13 @@ trait GoogleAI {
 	 * @return array
 	 */
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
-		$models = $this->get_models( $new_settings );
+		$authenticated = $this->authenticate_credentials( $new_settings );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 
-		if ( is_wp_error( $models ) ) {
+		if ( is_wp_error( $authenticated ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
-			$error_message                               = $models->get_error_message();
+			$error_message                               = $authenticated->get_error_message();
 
 			// Add an error message.
 			add_settings_error(
@@ -42,7 +42,6 @@ trait GoogleAI {
 			);
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
-			$new_settings[ static::ID ]['models']        = $models;
 		}
 
 		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
