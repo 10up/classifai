@@ -1465,6 +1465,10 @@ class Embeddings extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Embedding generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
+
 		$request = new APIRequest( $this, $this->feature_instance );
 
 		/**
@@ -1497,6 +1501,9 @@ class Embeddings extends Provider {
 		);
 
 		set_transient( 'classifai_openai_embeddings_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -1539,6 +1546,10 @@ class Embeddings extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Embedding generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
+
 		$request = new APIRequest( $this, $this->feature_instance );
 
 		/**
@@ -1569,6 +1580,9 @@ class Embeddings extends Provider {
 				'body' => wp_json_encode( $body ),
 			]
 		);
+
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
 
 		if ( is_wp_error( $response ) ) {
 			return $response;

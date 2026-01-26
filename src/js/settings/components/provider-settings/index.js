@@ -349,6 +349,7 @@ export const ProviderSettings = () => {
 							) }
 						>
 							<ToggleControl
+								className="classifai-provider-override-credentials"
 								checked={ isOverridden }
 								onChange={ ( value ) =>
 									setProviderSettings( provider, {

@@ -976,6 +976,10 @@ class Embeddings extends OpenAI {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
+
 		/**
 		 * Filter the request body before sending to OpenAI.
 		 *
@@ -1013,6 +1017,9 @@ class Embeddings extends OpenAI {
 		$response = $this->get_result( $response );
 
 		set_transient( 'classifai_azure_openai_embeddings_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -1055,6 +1062,10 @@ class Embeddings extends OpenAI {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
+
 		/**
 		 * Filter the request body before sending to OpenAI.
 		 *
@@ -1090,6 +1101,9 @@ class Embeddings extends OpenAI {
 			]
 		);
 		$response = $this->get_result( $response );
+
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
 
 		if ( is_wp_error( $response ) ) {
 			return $response;

@@ -45,7 +45,7 @@ export const AmazonPollyTextToSpeechSettings = ( {
 				</>
 			) }
 
-			{ 'feature_text_to_speech' === featureName && (
+			{ 'feature_text_to_speech_generation' === featureName && (
 				<>
 					<SettingsRow
 						label={ __( 'Engine', 'classifai' ) }

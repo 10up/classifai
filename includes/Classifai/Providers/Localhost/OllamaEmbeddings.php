@@ -1045,6 +1045,10 @@ class OllamaEmbeddings extends Ollama {
 			$feature = new Classification();
 		}
 
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
+
 		$settings = $feature->get_settings();
 
 		// Ensure the feature is enabled.
@@ -1083,6 +1087,9 @@ class OllamaEmbeddings extends Ollama {
 			]
 		);
 
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
+
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -1118,6 +1125,10 @@ class OllamaEmbeddings extends Ollama {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
+
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
 
 		$settings = $feature->get_settings();
 
@@ -1156,6 +1167,9 @@ class OllamaEmbeddings extends Ollama {
 				'body' => wp_json_encode( $body ),
 			]
 		);
+
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
