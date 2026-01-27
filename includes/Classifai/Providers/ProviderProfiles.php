@@ -30,7 +30,6 @@ class ProviderProfiles {
 	 * @var array
 	 */
 	private static $profiles = [
-		// Grouped: one OpenAI key for all capabilities.
 		'openai'                  => [
 			'provider_ids'      => [
 				'openai_chatgpt',
@@ -43,26 +42,11 @@ class ProviderProfiles {
 			'credential_fields' => [ 'api_key', 'authenticated' ],
 			'label'             => 'OpenAI',
 		],
-		// Grouped: one Ollama endpoint for all.
-		'ollama'                  => [
-			'provider_ids'      => [ 'ollama', 'ollama_embeddings', 'ollama_multimodal' ],
-			'credential_fields' => [ 'endpoint_url', 'authenticated' ],
-			'label'             => 'Ollama',
-		],
-		// Grouped: one ElevenLabs key for TTS and STT.
-		'elevenlabs'              => [
-			'provider_ids'      => [ 'elevenlabs_text_to_speech', 'elevenlabs_speech_to_text' ],
-			'credential_fields' => [ 'api_key', 'authenticated' ],
-			'label'             => 'ElevenLabs',
-		],
-		// Grouped: one Google AI key for Gemini and Images.
 		'googleai'                => [
 			'provider_ids'      => [ 'googleai_gemini_api', 'googleai_images' ],
 			'credential_fields' => [ 'api_key', 'authenticated' ],
 			'label'             => 'Google AI',
 		],
-
-		// Ungrouped: Azure and others use distinct creds per capability.
 		'azure_openai'            => [
 			'provider_ids'      => [ 'azure_openai' ],
 			'credential_fields' => [ 'endpoint_url', 'api_key', 'deployment', 'authenticated' ],
@@ -83,11 +67,6 @@ class ProviderProfiles {
 			'credential_fields' => [ 'endpoint_url', 'api_key', 'authenticated' ],
 			'label'             => 'Azure Text to Speech',
 		],
-		'aws_polly'               => [
-			'provider_ids'      => [ 'aws_polly' ],
-			'credential_fields' => [ 'access_key_id', 'secret_access_key', 'aws_region', 'authenticated' ],
-			'label'             => 'AWS Polly',
-		],
 		'ibm_watson_nlu'          => [
 			'provider_ids'      => [ 'ibm_watson_nlu' ],
 			'credential_fields' => [ 'endpoint_url', 'apikey', 'username', 'password', 'authenticated' ],
@@ -98,6 +77,16 @@ class ProviderProfiles {
 			'credential_fields' => [ 'api_key', 'authenticated' ],
 			'label'             => 'XAI Grok',
 		],
+		'aws_polly'               => [
+			'provider_ids'      => [ 'aws_polly' ],
+			'credential_fields' => [ 'access_key_id', 'secret_access_key', 'aws_region', 'authenticated' ],
+			'label'             => 'AWS Polly',
+		],
+		'elevenlabs'              => [
+			'provider_ids'      => [ 'elevenlabs_text_to_speech', 'elevenlabs_speech_to_text' ],
+			'credential_fields' => [ 'api_key', 'authenticated' ],
+			'label'             => 'ElevenLabs',
+		],
 		'togetherai_image'        => [
 			'provider_ids'      => [ 'togetherai_image' ],
 			'credential_fields' => [ 'api_key', 'authenticated' ],
@@ -107,6 +96,11 @@ class ProviderProfiles {
 			'provider_ids'      => [ 'stable_diffusion' ],
 			'credential_fields' => [ 'endpoint_url', 'authenticated' ],
 			'label'             => 'Stable Diffusion',
+		],
+		'ollama'                  => [
+			'provider_ids'      => [ 'ollama', 'ollama_embeddings', 'ollama_multimodal' ],
+			'credential_fields' => [ 'endpoint_url', 'authenticated' ],
+			'label'             => 'Ollama',
 		],
 		'chrome_ai'               => [
 			'provider_ids'      => [ 'chrome_ai' ],
