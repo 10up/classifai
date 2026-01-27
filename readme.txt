@@ -60,7 +60,7 @@ Please report security bugs found in the source code of the undefined plugin thr
 
 == Upgrade Notice ==
 
-= 3.8.0 =
+= x.x.x =
 **Note that the legacy settings screen (enabled via the `classifai_use_legacy_settings_panel` filter) is now formally deprecated and scheduled for removal in a future release. Please migrate to the new React-based settings experience.**
 
 = 3.3.0 =
