@@ -134,12 +134,6 @@ export const moderationHelperText = {
 					'classifai'
 				) }
 			</p>
-			<p>
-				{ __(
-					'For more information on how OpenAI moderation works, <a href="https://platform.openai.com/docs/guides/moderation#content-classifications" target="_blank" rel="noopener noreferrer">see their documentation</a>.',
-					'classifai'
-				) }
-			</p>
 		</>
 	),
 };
