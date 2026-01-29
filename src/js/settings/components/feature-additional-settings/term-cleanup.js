@@ -4,10 +4,14 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	CheckboxControl,
+	Icon,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	__experimentalInputControlSuffixWrapper as InputControlSuffixWrapper, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	Popover,
 } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { info } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -33,7 +37,7 @@ export const TermCleanupSettings = () => {
 	);
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const { taxonomies = {} } = getFeature( featureName );
-	const [ thresholdInfoStates, setThresholdInfoStates ] = useState( {} );
+
 	const options = Object.keys( taxonomies ).map( ( slug ) => {
 		return {
 			value: slug,
@@ -48,13 +52,6 @@ export const TermCleanupSettings = () => {
 			defaultThreshold: 75,
 		};
 	} );
-
-	const toggleThresholdInfo = ( feature ) => {
-		setThresholdInfoStates( ( prev ) => ( {
-			...prev,
-			[ feature ]: ! prev[ feature ],
-		} ) );
-	};
 
 	const Description = () => {
 		if ( window.classifAISettings?.isEPinstalled ) {
@@ -78,6 +75,31 @@ export const TermCleanupSettings = () => {
 				{ __(
 					'plugin to use Elasticsearch for finding similar terms.',
 					'classifai'
+				) }
+			</>
+		);
+	};
+
+	const ThresholdPopover = () => {
+		const [ popoverAnchor, setPopoverAnchor ] = useState();
+		const [ isVisible, setIsVisible ] = useState( false );
+		const toggleVisible = () => {
+			setIsVisible( ( state ) => ! state );
+		};
+
+		return (
+			<>
+				<Icon
+					ref={ setPopoverAnchor }
+					icon={ info }
+					onClick={ toggleVisible }
+				/>
+				{ isVisible && (
+					<Popover anchor={ popoverAnchor }>
+						<div style={ { minWidth: '300px', padding: '0 20px' } }>
+							{ thresholdInfo.helper }
+						</div>
+					</Popover>
 				) }
 			</>
 		);
@@ -150,28 +172,16 @@ export const TermCleanupSettings = () => {
 										},
 									} );
 								} }
+								__unstableInputWidth="8em"
+								suffix={
+									<InputControlSuffixWrapper variant="control">
+										<ThresholdPopover />
+									</InputControlSuffixWrapper>
+								}
 								min="0"
 								max="100"
 								step="0.01"
 							/>
-							<div className="display-container-wrapper">
-								<button
-									className="dashicons dashicons-info-outline helper-text-icon"
-									title={ __(
-										'Click to show more information',
-										'classifai'
-									) }
-									onClick={ () =>
-										toggleThresholdInfo( feature )
-									}
-									aria-label={ __(
-										'Click to show threshold information',
-										'classifai'
-									) }
-								></button>
-								{ thresholdInfoStates[ feature ] &&
-									thresholdInfo.helper }
-							</div>
 						</SettingsRow>
 					);
 				} ) }

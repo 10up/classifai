@@ -5,28 +5,26 @@ import { __ } from '@wordpress/i18n';
 
 export const thresholdInfo = {
 	helper: (
-		<div className="settings-helper-text display-container">
-			<div className="helper-text-content">
-				<p>
-					{ __(
-						'Determines how confident the AI must be before suggesting a term.',
-						'classifai'
-					) }
-				</p>
-				<p>
-					{ __(
-						'Higher % = More precise (fewer, more accurate terms)',
-						'classifai'
-					) }
-				</p>
-				<p>
-					{ __(
-						'Lower % = More verbose (more suggestions, including lower-confidence terms)',
-						'classifai'
-					) }
-				</p>
-			</div>
-		</div>
+		<>
+			<p>
+				{ __(
+					'Determines how confident the AI must be before suggesting a term.',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Higher % = More precise (fewer, more accurate terms)',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Lower % = More verbose (more suggestions, including lower-confidence terms)',
+					'classifai'
+				) }
+			</p>
+		</>
 	),
 };
 
