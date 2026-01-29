@@ -63,9 +63,9 @@ export const nluHelperText = {
 
 export const moderationHelperText = {
 	content_types: __(
-		'<p>The Moderation endpoint provides a simple interface to classify user-generated content into specific content categories.</p>' +
-			'<p>Categories include: hate, threatening, harassment, self-harm, sexual, violence</p>' +
-			'<p><a href="https://platform.openai.com/docs/guides/moderation/overview#content-classifications" target="_blank">Learn more</a></p>',
+		'<p>The OpenAI moderation endpoint will check if text is potentially harmful.</p>' +
+			'<p>Text will be checked against certain categories, like hate, threatening, harassment, self-harm, sexual, violence, and more. Each category is scored on a scale of 0 to 1, with 0 indicating no harm and 1 indicating the highest level of harm. If something is found to be harmful, it will be flagged and blocked.</p>' +
+			'<p>For more information on how OpenAI moderation works, <a href="https://platform.openai.com/docs/guides/moderation#content-classifications" target="_blank" rel="noopener noreferrer">see their documentation</a>.</p>',
 		'classifai'
 	),
 };
