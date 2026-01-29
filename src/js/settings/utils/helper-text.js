@@ -29,41 +29,117 @@ export const thresholdInfo = {
 };
 
 export const nluHelperText = {
-	category: __(
-		'<p>IBM Watson analyzes your content and assigns a broad topic hierarchy that best describes the overall subject.</p>' +
-			'<p>Example:<code>/technology and computing/software</code></p>' +
-			'<p>Categories are useful for general classification and site-wide content grouping.</p>' +
-			'<p><a href="https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories" target="_blank" rel="noopener noreferrer">Learn more</a></p>',
-		'classifai'
+	category: (
+		<>
+			<p>
+				{ __(
+					'IBM Watson analyzes your content and assigns a broad topic hierarchy that best describes the overall subject.',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Example: /technology and computing/software',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Categories are useful for general classification and site-wide content grouping.',
+					'classifai'
+				) }
+			</p>
+		</>
 	),
-	keyword: __(
-		'<p>Keywords represent important terms in your content that are contextually significant.</p>' +
-			'<p>Watson extracts these to help identify core concepts, topics, and SEO-friendly tags.</p>' +
-			'<p>Keywords often map well to WordPress tags.</p>' +
-			'<p><a href="https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords" target="_blank" rel="noopener noreferrer">Learn more</a></p>',
-		'classifai'
+	keyword: (
+		<>
+			<p>
+				{ __(
+					'Keywords represent important terms in your content that are contextually significant.',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Watson extracts these to help identify core concepts, topics, and SEO-friendly tags.',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Keywords often map well to WordPress tags.',
+					'classifai'
+				) }
+			</p>
+		</>
 	),
-	entity: __(
-		'<p>Entities are named people, places, brands, and other proper nouns mentioned in your content.</p>' +
-			'<p>Watson identifies and classifies these by type (e.g., Person, Company, Location) and optionally links them to known databases like Wikipedia.</p>' +
-			'<p>Entities are helpful for structured data and enhancing rich snippets or metadata.</p>' +
-			'<p><a href="https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities" target="_blank" rel="noopener noreferrer">Learn more</a></p>',
-		'classifai'
+	entity: (
+		<>
+			<p>
+				{ __(
+					'Entities are named people, places, brands, and other proper nouns mentioned in your content.',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Watson identifies and classifies these by type (e.g., Person, Company, Location).',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Entities are helpful for structured data and enhancing rich snippets or metadata.',
+					'classifai'
+				) }
+			</p>
+		</>
 	),
-	concept: __(
-		"<p>Concepts reflect high-level abstract ideas Watson identifies in your content, even if the term isn't explicitly used.</p>" +
-			'<p>For example, an article about "the iPhone" might be linked to the concept of "Apple Inc."</p>' +
-			'<p>Concepts are great for semantic tagging and content recommendation systems.</p>' +
-			'<p><a href="https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts" target="_blank" rel="noopener noreferrer">Learn more</a></p>',
-		'classifai'
+	concept: (
+		<>
+			<p>
+				{ __(
+					"Concepts reflect high-level abstract ideas Watson identifies in your content, even if the term isn't explicitly used.",
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'For example, an article about "the iPhone" might be linked to the concept of "Apple Inc."',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Concepts are great for semantic tagging and content recommendation systems.',
+					'classifai'
+				) }
+			</p>
+		</>
 	),
 };
 
 export const moderationHelperText = {
-	content_types: __(
-		'<p>The OpenAI moderation endpoint will check if text is potentially harmful.</p>' +
-			'<p>Text will be checked against certain categories, like hate, threatening, harassment, self-harm, sexual, violence, and more. Each category is scored on a scale of 0 to 1, with 0 indicating no harm and 1 indicating the highest level of harm. If something is found to be harmful, it will be flagged and blocked.</p>' +
-			'<p>For more information on how OpenAI moderation works, <a href="https://platform.openai.com/docs/guides/moderation#content-classifications" target="_blank" rel="noopener noreferrer">see their documentation</a>.</p>',
-		'classifai'
+	content_types: (
+		<>
+			<p>
+				{ __(
+					'The OpenAI moderation endpoint will check if text is potentially harmful.',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'Text will be checked against certain categories, like hate, threatening, harassment, self-harm, sexual, violence, and more. Each category is scored on a scale of 0 to 1, with 0 indicating no harm and 1 indicating the highest level of harm. If something is found to be harmful, it will be flagged and blocked.',
+					'classifai'
+				) }
+			</p>
+			<p>
+				{ __(
+					'For more information on how OpenAI moderation works, <a href="https://platform.openai.com/docs/guides/moderation#content-classifications" target="_blank" rel="noopener noreferrer">see their documentation</a>.',
+					'classifai'
+				) }
+			</p>
+		</>
 	),
 };

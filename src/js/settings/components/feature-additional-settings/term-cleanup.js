@@ -4,13 +4,9 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	CheckboxControl,
-	Icon,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 	__experimentalInputControlSuffixWrapper as InputControlSuffixWrapper, // eslint-disable-line @wordpress/no-unsafe-wp-apis
-	Popover,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
-import { info } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -21,6 +17,7 @@ import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
 import { getFeature } from '../../utils/utils';
 import { thresholdInfo } from '../../utils/helper-text';
+import { TooltipPopover } from '../../utils/utils';
 
 /**
  * Component for Term Cleanup feature settings.
@@ -75,39 +72,6 @@ export const TermCleanupSettings = () => {
 				{ __(
 					'plugin to use Elasticsearch for finding similar terms.',
 					'classifai'
-				) }
-			</>
-		);
-	};
-
-	const ThresholdPopover = () => {
-		const [ popoverAnchor, setPopoverAnchor ] = useState();
-		const [ isVisible, setIsVisible ] = useState( false );
-		const toggleVisible = () => {
-			setIsVisible( ( state ) => ! state );
-		};
-
-		return (
-			<>
-				<Icon
-					ref={ setPopoverAnchor }
-					icon={ info }
-					onClick={ toggleVisible }
-					aria-label={ __(
-						'Click to show threshold information',
-						'classifai'
-					) }
-					title={ __(
-						'Click to show threshold information',
-						'classifai'
-					) }
-				/>
-				{ isVisible && (
-					<Popover anchor={ popoverAnchor }>
-						<div style={ { minWidth: '300px', padding: '0 20px' } }>
-							{ thresholdInfo.helper }
-						</div>
-					</Popover>
 				) }
 			</>
 		);
@@ -183,7 +147,11 @@ export const TermCleanupSettings = () => {
 								__unstableInputWidth="8em"
 								suffix={
 									<InputControlSuffixWrapper variant="control">
-										<ThresholdPopover />
+										<TooltipPopover
+											tooltipContent={
+												thresholdInfo.helper
+											}
+										/>
 									</InputControlSuffixWrapper>
 								}
 								min="0"

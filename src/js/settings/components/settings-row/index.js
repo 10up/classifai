@@ -2,7 +2,11 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { useState } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { TooltipPopover } from '../../utils/utils';
 
 /**
  * Settings row component.
@@ -12,29 +16,12 @@ import { useState } from '@wordpress/element';
  * @param {Object} props.children The children of the component.
  */
 export const SettingsRow = ( props ) => {
-	const [ showTooltip, setShowTooltip ] = useState( false );
-
 	return (
 		<div className={ classNames( 'settings-row', props?.className ) }>
 			<div className="settings-label">
 				{ props.label }
 				{ props.helperText && (
-					<div
-						className="tooltip-container"
-						onMouseEnter={ () => setShowTooltip( true ) }
-						onMouseLeave={ () => setShowTooltip( false ) }
-					>
-						<span className="dashicons dashicons-info-outline helper-text-icon"></span>
-						{ showTooltip && (
-							<div className="settings-helper-text tooltip">
-								<div
-									dangerouslySetInnerHTML={ {
-										__html: props.helperText,
-									} }
-								/>
-							</div>
-						) }
-					</div>
+					<TooltipPopover tooltipContent={ props.helperText } />
 				) }
 			</div>
 			<div className="settings-control">

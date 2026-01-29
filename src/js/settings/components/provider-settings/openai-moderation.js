@@ -40,11 +40,7 @@ export const OpenAIModerationSettings = ( { isConfigured = false } ) => {
 
 			<div className="display-container-wrapper">
 				<div className="helper-text-content">
-					<div
-						dangerouslySetInnerHTML={ {
-							__html: moderationHelperText.content_types,
-						} }
-					/>
+					<div>{ moderationHelperText.content_types }</div>
 				</div>
 			</div>
 		</>

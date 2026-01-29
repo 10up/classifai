@@ -4,15 +4,11 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	CheckboxControl,
-	Icon,
-	Popover,
 	SelectControl,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 	__experimentalInputControlSuffixWrapper as InputControlSuffixWrapper, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
-import { info } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -21,6 +17,7 @@ import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { getFeature } from '../../utils/utils';
 import { thresholdInfo, nluHelperText } from '../../utils/helper-text';
+import { TooltipPopover } from '../../utils/utils';
 
 /**
  * Component for render settings fields when IBM Watson NLU is selected as the provider.
@@ -101,39 +98,6 @@ export const NLUFeatureSettings = () => {
 		} );
 	}
 
-	const ThresholdPopover = () => {
-		const [ popoverAnchor, setPopoverAnchor ] = useState();
-		const [ isVisible, setIsVisible ] = useState( false );
-		const toggleVisible = () => {
-			setIsVisible( ( state ) => ! state );
-		};
-
-		return (
-			<>
-				<Icon
-					ref={ setPopoverAnchor }
-					icon={ info }
-					onClick={ toggleVisible }
-					aria-label={ __(
-						'Click to show threshold information',
-						'classifai'
-					) }
-					title={ __(
-						'Click to show threshold information',
-						'classifai'
-					) }
-				/>
-				{ isVisible && (
-					<Popover anchor={ popoverAnchor }>
-						<div style={ { minWidth: '300px', padding: '0 20px' } }>
-							{ thresholdInfo.helper }
-						</div>
-					</Popover>
-				) }
-			</>
-		);
-	};
-
 	return (
 		<>
 			{ Object.keys( features ).map( ( feature ) => {
@@ -177,7 +141,9 @@ export const NLUFeatureSettings = () => {
 							__unstableInputWidth="8em"
 							suffix={
 								<InputControlSuffixWrapper variant="control">
-									<ThresholdPopover />
+									<TooltipPopover
+										tooltipContent={ thresholdInfo.helper }
+									/>
 								</InputControlSuffixWrapper>
 							}
 							min="0"
