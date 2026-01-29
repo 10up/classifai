@@ -8,7 +8,7 @@ import { FormTokenField } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { getEntitiesInfo, useTaxonomies } from './utils';
-import { useState, Fragment } from '@wordpress/element';
+import { useState, Fragment, useRef, useEffect, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 const termsPerPage = -1;
@@ -46,6 +46,10 @@ const TaxonomyControls = ( { onChange, query } ) => {
 	const featureTaxonomies = query.featureTaxonomies || [];
 	const taxTermsAI = query.taxTermsAI || [];
 	const [ newTermsInfo, setNewTermsInfo ] = useState( {} );
+
+	// State for editing AI tokens inline
+	const [ editingToken, setEditingToken ] = useState( null );
+	const tokenFieldRefs = useRef( {} );
 
 	const appendAIPrefix = ( terms, slug ) => {
 		if (
@@ -98,6 +102,168 @@ const TaxonomyControls = ( { onChange, query } ) => {
 	if ( Object.keys( newTermsInfo ).length > 0 ) {
 		taxonomiesInfo = newTermsInfo;
 	}
+
+	/**
+	 * Handle clicking on an [AI] token to edit it inline.
+	 * This allows users to tweak AI-suggested terms before saving.
+	 *
+	 * @param {string} taxonomySlug The taxonomy slug.
+	 * @param {number} termId       The term ID being edited.
+	 * @param {string} termName     The term name (with [AI] prefix).
+	 */
+	const handleAITokenClick = useCallback(
+		( taxonomySlug, termId, termName ) => {
+			// Extract the term name without the [AI] prefix
+			const cleanName = termName.replace( /^\[AI\]\s*/, '' );
+
+			// Store the editing state
+			setEditingToken( {
+				taxonomySlug,
+				termId,
+				originalName: termName,
+				cleanName,
+			} );
+
+			// Get current terms and remove the clicked AI term
+			const currentTerms = query.taxQuery[ taxonomySlug ] || [];
+			const termValues = Object.values( currentTerms );
+			const newTermValues = termValues.filter( ( id ) => id !== termId );
+
+			// Update the taxQuery to remove the AI term
+			const newTaxQuery = {
+				...query.taxQuery,
+				[ taxonomySlug ]: newTermValues.reduce(
+					( acc, id, idx ) => ( { ...acc, [ idx ]: id } ),
+					{}
+				),
+			};
+
+			onChange( { taxQuery: newTaxQuery } );
+
+			// Focus the input and pre-fill with the clean term name
+			setTimeout( () => {
+				const fieldRef = tokenFieldRefs.current[ taxonomySlug ];
+				if ( fieldRef ) {
+					const input = fieldRef.querySelector(
+						'.components-form-token-field__input'
+					);
+					if ( input ) {
+						input.value = cleanName;
+						input.focus();
+						// Trigger input event to update React state
+						const event = new Event( 'input', { bubbles: true } );
+						input.dispatchEvent( event );
+					}
+				}
+			}, 50 );
+		},
+		[ query.taxQuery, onChange ]
+	);
+
+	/**
+	 * Mark [AI] tokens as editable (for styling) after render.
+	 */
+	useEffect( () => {
+		const markEditableTokens = () => {
+			Object.keys( tokenFieldRefs.current ).forEach( ( taxonomySlug ) => {
+				const fieldRef = tokenFieldRefs.current[ taxonomySlug ];
+				if ( ! fieldRef ) {
+					return;
+				}
+
+				// Find all token buttons that contain [AI] text
+				const tokens = fieldRef.querySelectorAll(
+					'.components-form-token-field__token'
+				);
+
+				tokens.forEach( ( token ) => {
+					const tokenText =
+						token.querySelector(
+							'.components-form-token-field__token-text'
+						)?.textContent || '';
+
+					if ( tokenText.includes( '[AI]' ) ) {
+						// Add clickable class for styling
+						token.classList.add( 'classifai-ai-token--editable' );
+
+						// Add tooltip to token text
+						const tokenTextEl = token.querySelector(
+							'.components-form-token-field__token-text'
+						);
+						if ( tokenTextEl ) {
+							tokenTextEl.title = __(
+								'Click to edit this term',
+								'classifai'
+							);
+						}
+					}
+				} );
+			} );
+		};
+
+		// Small delay to ensure DOM is updated
+		const timeoutId = setTimeout( markEditableTokens, 100 );
+		return () => clearTimeout( timeoutId );
+	}, [ taxonomiesInfo, query.taxQuery ] );
+
+	/**
+	 * Handle click events on the wrapper using event delegation.
+	 * This avoids stale closure issues with direct event listeners.
+	 *
+	 * @param {string} taxonomySlug The taxonomy slug for this field.
+	 * @return {Function} Click handler function.
+	 */
+	const handleWrapperClick = useCallback(
+		( taxonomySlug ) => ( e ) => {
+			// Check if the click was on a token text element
+			const tokenTextEl = e.target.closest(
+				'.components-form-token-field__token-text'
+			);
+			if ( ! tokenTextEl ) {
+				return;
+			}
+
+			// Get the token element and check if it's an AI token
+			const tokenEl = tokenTextEl.closest(
+				'.components-form-token-field__token'
+			);
+			if (
+				! tokenEl ||
+				! tokenEl.classList.contains( 'classifai-ai-token--editable' )
+			) {
+				return;
+			}
+
+			// Get the token text
+			const tokenText = tokenTextEl.textContent || '';
+			if ( ! tokenText.includes( '[AI]' ) ) {
+				return;
+			}
+
+			e.preventDefault();
+			e.stopPropagation();
+
+			// Find the term ID from the token
+			const taxonomyInfo = taxonomiesInfo?.find(
+				( { slug } ) => slug === taxonomySlug
+			);
+			if ( taxonomyInfo ) {
+				// Find the term by matching the name
+				const termEntry = Object.entries(
+					taxonomyInfo.terms.mapById
+				).find( ( [ , term ] ) => term.name === tokenText );
+
+				if ( termEntry ) {
+					handleAITokenClick(
+						taxonomySlug,
+						parseInt( termEntry[ 0 ], 10 ),
+						tokenText
+					);
+				}
+			}
+		},
+		[ taxonomiesInfo, handleAITokenClick ]
+	);
 
 	const onTermsChange = ( taxonomySlug ) => async ( newTermValues ) => {
 		const taxonomyInfo = taxonomiesInfo.find(
@@ -272,13 +438,22 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 					return (
 						<Fragment key={ slug }>
-							<FormTokenField
-								key={ slug }
-								label={ name }
-								value={ getExistingTaxQueryValue( slug ) }
-								suggestions={ terms.names }
-								onChange={ onTermsChange( slug ) }
-							/>
+							{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */ }
+							<div
+								ref={ ( el ) => {
+									tokenFieldRefs.current[ slug ] = el;
+								} }
+								className="classifai-taxonomy-field-wrapper"
+								onClick={ handleWrapperClick( slug ) }
+							>
+								<FormTokenField
+									key={ slug }
+									label={ name }
+									value={ getExistingTaxQueryValue( slug ) }
+									suggestions={ terms.names }
+									onChange={ onTermsChange( slug ) }
+								/>
+							</div>
 							{ ! hasAI && (
 								<>
 									<p

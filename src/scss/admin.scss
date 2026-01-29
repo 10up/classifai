@@ -883,6 +883,35 @@ input.classifai-button {
 	}
 }
 
+// Editable AI Token Styles
+.classifai-taxonomy-field-wrapper {
+	.classifai-ai-token--editable {
+		.components-form-token-field__token-text {
+			cursor: pointer;
+			position: relative;
+			border-bottom: 1px dashed var(--classifai-admin-theme-color, #007cba);
+			transition: all 0.15s ease;
+
+			&:hover {
+				background-color: rgba(var(--classifai-admin-theme-color--rgb, 0, 124, 186), 0.1);
+				border-bottom-style: solid;
+			}
+
+			&::before {
+				content: "\270E";
+				font-size: 10px;
+				margin-right: 3px;
+				opacity: 0;
+				transition: opacity 0.15s ease;
+			}
+
+			&:hover::before {
+				opacity: 0.7;
+			}
+		}
+	}
+}
+
 .classifai-modal__notes {
     max-width: 350px;
     float: left;
