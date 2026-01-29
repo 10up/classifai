@@ -14,7 +14,8 @@ import { getFeature, getScope, isProviderConfigured } from '../../utils/utils';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { OpenAIChatGPTSettings } from './openai-chatgpt';
-import { GoogleAIGeminiAPISettings } from './google-gemini-api';
+import { GoogleAIGeminiSettings } from './googleai-gemini';
+import { GoogleAIImagesSettings } from './googleai-images';
 import { AzureOpenAISettings } from './azure-openai';
 import { useFeatureContext } from '../feature-settings/context';
 import { IBMWatsonNLUSettings } from './ibm-watson-nlu';
@@ -22,8 +23,8 @@ import { OpenAIModerationSettings } from './openai-moderation';
 import { OpenAIEmbeddingsSettings } from './openai-embeddings';
 import { OpenAISpeechToTextSettings } from './openai-speech-to-text';
 import { AzureAIVisionSettings } from './azure-ai-vision';
-import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIImagesSettings } from './openai-images';
+import { StableDiffusionSettings } from './stable-diffusion';
 import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
 import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
@@ -32,6 +33,9 @@ import { XAIGrokSettings } from './xai-grok';
 import { OllamaSettings } from './ollama';
 import { OllamaMultimodalSettings } from './ollama-multimodal';
 import { OllamaEmbeddingsSettings } from './ollama-embeddings';
+import { TogetherAIImagesSettings } from './together-ai-images';
+import { ElevenLabsSpeechToTextSettings } from './elevenlabs/speech-to-text';
+import { ElevenLabsTextToSpeechSettings } from './elevenlabs/text-to-speech';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -48,7 +52,10 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 			return <OpenAIChatGPTSettings isConfigured={ isConfigured } />;
 
 		case 'googleai_gemini_api':
-			return <GoogleAIGeminiAPISettings isConfigured={ isConfigured } />;
+			return <GoogleAIGeminiSettings isConfigured={ isConfigured } />;
+
+		case 'googleai_images':
+			return <GoogleAIImagesSettings isConfigured={ isConfigured } />;
 
 		case 'azure_openai':
 		case 'azure_openai_embeddings':
@@ -68,17 +75,30 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 		case 'openai_whisper':
 			return <OpenAISpeechToTextSettings isConfigured={ isConfigured } />;
 
+		case 'elevenlabs_speech_to_text':
+			return (
+				<ElevenLabsSpeechToTextSettings isConfigured={ isConfigured } />
+			);
+
+		case 'elevenlabs_text_to_speech':
+			return (
+				<ElevenLabsTextToSpeechSettings isConfigured={ isConfigured } />
+			);
+
 		case 'openai_moderation':
 			return <OpenAIModerationSettings isConfigured={ isConfigured } />;
 
 		case 'openai_dalle':
 			return <OpenAIImagesSettings isConfigured={ isConfigured } />;
 
+		case 'stable_diffusion':
+			return <StableDiffusionSettings isConfigured={ isConfigured } />;
+
+		case 'togetherai_image':
+			return <TogetherAIImagesSettings isConfigured={ isConfigured } />;
+
 		case 'ms_computer_vision':
 			return <AzureAIVisionSettings isConfigured={ isConfigured } />;
-
-		case 'ms_azure_personalizer':
-			return <AzurePersonalizerSettings isConfigured={ isConfigured } />;
 
 		case 'aws_polly':
 			return <AmazonPollySettings isConfigured={ isConfigured } />;
@@ -131,7 +151,7 @@ export const ProviderSettings = () => {
 	);
 
 	// Remove the Chrome AI Provider from the list of providers if the browser AI is not available.
-	if ( feature?.providers?.chrome_ai && ! window.ai ) {
+	if ( feature?.providers?.chrome_ai && ! window.LanguageModel ) {
 		delete feature.providers.chrome_ai;
 	}
 

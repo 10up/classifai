@@ -9,6 +9,10 @@ use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Providers\Provider;
 use WP_Error;
 
+use function Classifai\is_attachment;
+use function Classifai\is_remote_url;
+use function Classifai\is_local_path;
+
 class SpeechToText extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
@@ -73,9 +77,9 @@ class SpeechToText extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_speech_to_text_model
 		 *
-		 * @param {string} $model The current model to use.
+		 * @param string $model The current model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
 		return apply_filters( 'classifai_openai_speech_to_text_model', $model );
 	}
@@ -93,9 +97,9 @@ class SpeechToText extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_speech_to_text_api_url
 		 *
-		 * @param {string} $url The default API URL.
+		 * @param string $url The default API URL.
 		 *
-		 * @return {string} The API URL.
+		 * @return string The API URL.
 		 */
 		return apply_filters( 'classifai_openai_speech_to_text_api_url', sprintf( '%s%s', trailingslashit( $this->audio_url ), $path ) );
 	}
@@ -178,23 +182,25 @@ class SpeechToText extends Provider {
 	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 *
-	 * @param int    $post_id The Post ID we're processing.
+	 * @param string $audio_resource Attachment ID, URL or system file path to the audio resource.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
-		if ( ! $post_id || ! get_post( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'A valid attachment ID is required to generate a transcript.', 'classifai' ) );
-		}
+	public function rest_endpoint_callback( string $audio_resource, string $route_to_call = '', array $args = [] ) {
+		$return = '';
 
-		$route_to_call = strtolower( $route_to_call );
-		$return        = '';
-
-		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'transcript':
-				$return = $this->transcribe_audio( $post_id, $args );
+				if ( is_attachment( $audio_resource ) ) {
+					return $this->feature_instance->transcribe_from_attachment( $audio_resource, $args );
+				} elseif ( is_remote_url( $audio_resource ) ) {
+					return $this->feature_instance->transcribe_from_path( $audio_resource );
+				} elseif ( is_local_path( $audio_resource ) ) {
+					return $this->transcribe_audio( $audio_resource, $args );
+				}
+				break;
+			default:
 				break;
 		}
 
@@ -202,28 +208,19 @@ class SpeechToText extends Provider {
 	}
 
 	/**
-	 * Start the audio transcription process.
+	 * Run the audio transcription process.
 	 *
-	 * @param int   $attachment_id Attachment ID to process.
-	 * @param array $args Optional arguments passed in.
+	 * @param string $file_path File system path.
+	 * @param array  $args      Optional arguments passed in.
 	 * @return WP_Error|bool
 	 */
-	public function transcribe_audio( int $attachment_id = 0, array $args = [] ) {
-		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
-			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
-		}
-
-		$feature = new AudioTranscriptsGeneration();
+	public function transcribe_audio( string $file_path = '', array $args = [] ) {
+		$feature  = new AudioTranscriptsGeneration();
+		$settings = $feature->get_settings( static::ID );
 
 		if ( ! $feature->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Transcript generation is disabled. Please check your settings.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Audio Transcripts Generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
-
-		if ( ! $feature->should_process( $attachment_id ) ) {
-			return new WP_Error( 'process_error', esc_html__( 'Attachment does not meet processing requirements. Ensure the file type and size meet requirements.', 'classifai' ) );
-		}
-
-		$settings = $feature->get_settings( static::ID );
 
 		$request = new APIRequest( $settings['api_key'] ?? '', $feature->get_option_name() );
 
@@ -233,20 +230,22 @@ class SpeechToText extends Provider {
 		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to OpenAI.
-		 * @param {int} $attachment_id ID of attachment we are transcribing.
+		 * @param array  $body      Request body that will be sent to OpenAI.
+		 * @param string $file_path Path of the attachment we are transcribing.
+		 * @param array  $args      Additional args.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_whisper_transcribe_request_body',
 			[
-				'file'            => get_attached_file( $attachment_id ) ?? '',
+				'file'            => $file_path,
 				'model'           => $this->get_model(),
 				'response_format' => 'json',
 				'temperature'     => 0,
 			],
-			$attachment_id
+			$file_path,
+			$args
 		);
 
 		// Make our API request.

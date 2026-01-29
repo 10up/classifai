@@ -13,6 +13,10 @@ use WP_Error;
 use function Classifai\get_asset_info;
 use function Classifai\sanitize_prompts;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class KeyTakeaways
  */
@@ -52,19 +56,26 @@ class KeyTakeaways extends Feature {
 	/**
 	 * Set up necessary hooks.
 	 *
-	 * We utilize this so we can register the REST route.
+	 * This is always run so useful if we need to register
+	 * things even if the feature is not enabled, not configured
+	 * or the user does not have access.
 	 */
 	public function setup() {
 		parent::setup();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+
+		if ( $this->is_configured() && $this->is_enabled() ) {
+			add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
+			$this->register_block();
+		}
 	}
 
 	/**
 	 * Set up necessary hooks.
+	 *
+	 * Only fires if the feature is enabled, configured and user has access.
 	 */
 	public function feature_setup() {
-		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
-		$this->register_block();
 	}
 
 	/**

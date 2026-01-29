@@ -13,6 +13,10 @@ use WP_Error;
 use function Classifai\clean_input;
 use function Classifai\check_term_permissions;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ImageTagsGenerator
  */
@@ -24,19 +28,19 @@ class ImageTagsGenerator extends Feature {
 	 */
 	const ID = 'feature_image_tags_generator';
 
-	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed
+	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed, PluginCheck.CodeAnalysis.Heredoc.NotAllowed
 	/**
 	 * Prompt for generating tags.
 	 *
 	 * @var string
 	 */
-	public $prompt = <<<EOD
+	public $prompt = <<<'INSTRUCTION'
 You are an assistant that generates image tags. You will be provided with an image and will generate a list of tags that best represent the image. Ensure the tags are short. Return at most the best 5 tags and return these in the following format:
 - Tag
 - Another tag
 - ...
-EOD;
-	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
+INSTRUCTION;
+	// phpcs:enable
 
 	/**
 	 * Constructor.
@@ -274,8 +278,8 @@ EOD;
 		 * @since 3.0.0
 		 * @hook classifai_render_attachment_metabox
 		 *
-		 * @param {WP_Post} $post The post object.
-		 * @param {object} $this The Provider object.
+		 * @param \WP_Post $post The post object.
+		 * @param object   $this The Provider object.
 		 */
 		do_action( 'classifai_render_attachment_metabox', $post, $this );
 	}
@@ -430,10 +434,10 @@ EOD;
 		 * @since 3.2.0
 		 * @hook classifai_feature_image_tags_generator_setting_taxonomies
 		 *
-		 * @param {array} $supported Array of supported image taxonomies.
-		 * @param {object} $this Current instance of the class.
+		 * @param array  $supported Array of supported image taxonomies.
+		 * @param object $this      Current instance of the class.
 		 *
-		 * @return {array} Array of taxonomies.
+		 * @return array Array of taxonomies.
 		 */
 		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $taxonomies, $this );
 	}

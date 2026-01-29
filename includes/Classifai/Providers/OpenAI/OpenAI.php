@@ -72,7 +72,7 @@ trait OpenAI {
 
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( $api_key );
-		$response = $request->get( $this->model_url );
+		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
 
 		return ! is_wp_error( $response ) ? true : $response;
 	}
@@ -98,10 +98,10 @@ trait OpenAI {
 		 * @since 2.2.0
 		 * @hook classifai_openai_settings_post_types
 		 *
-		 * @param {array} $post_types Array of post types to show in settings.
-		 * @param {object} $this Current instance of the class.
+		 * @param array  $post_types Array of post types to show in settings.
+		 * @param object $this       Current instance of the class.
 		 *
-		 * @return {array} Array of post types.
+		 * @return array Array of post types.
 		 */
 		return apply_filters( 'classifai_openai_settings_post_types', $post_types, $this );
 	}
@@ -120,10 +120,10 @@ trait OpenAI {
 		 * @since 2.2.0
 		 * @hook classifai_openai_settings_post_statuses
 		 *
-		 * @param {array} $post_statuses Array of post statuses to show in settings.
-		 * @param {object} $this Current instance of the class.
+		 * @param array  $post_statuses Array of post statuses to show in settings.
+		 * @param object $this          Current instance of the class.
 		 *
-		 * @return {array} Array of post statuses.
+		 * @return array Array of post statuses.
 		 */
 		return apply_filters( 'classifai_openai_settings_post_statuses', $post_statuses, $this );
 	}
@@ -148,10 +148,10 @@ trait OpenAI {
 		 * @since 2.2.0
 		 * @hook classifai_openai_settings_taxonomies
 		 *
-		 * @param {array} $supported Array of supported taxonomies.
-		 * @param {object} $this Current instance of the class.
+		 * @param array  $supported Array of supported taxonomies.
+		 * @param object $this      Current instance of the class.
 		 *
-		 * @return {array} Array of taxonomies.
+		 * @return array Array of taxonomies.
 		 */
 		return apply_filters( 'classifai_openai_settings_taxonomies', $supported, $this );
 	}

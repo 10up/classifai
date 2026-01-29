@@ -3,10 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Providers\Azure\OpenAI;
-use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
-use Classifai\Providers\Browser\ChromeAI;
-use Classifai\Providers\XAI\Grok;
 use Classifai\Providers\Localhost\Ollama;
 use Classifai\Services\LanguageProcessing;
 use WP_REST_Server;
@@ -15,6 +12,10 @@ use WP_Error;
 
 use function Classifai\sanitize_prompts;
 use function Classifai\get_asset_info;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Class ContentGeneration
@@ -34,13 +35,13 @@ class ContentGeneration extends Feature {
 	 */
 	public $prompt = 'Act as an experienced SEO copywriter tasked with writing an article based off of a given summary and an optionally provided title. Your goal is to craft a compelling, informative piece that adheres to SEO best practices, is well-researched, engaging to the target audience, and structured in a way that enhances readability. Incorporate relevant keywords naturally throughout the text, without compromising the flow or quality of the content. Ensure that the article provides value to the reader. Only return the contents of the article, not the title or other commentary.';
 
-	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed
+	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed, PluginCheck.CodeAnalysis.Heredoc.NotAllowed
 	/**
 	 * The format of how we'd like content to be returned.
 	 *
 	 * @var string
 	 */
-	public $return_format = <<<EOD
+	public $return_format = <<<'INSTRUCTION'
 The content returned should be valid WordPress block markup as described below, using elements like paragraphs and headings where appropriate. Be selective on the elements you use, defaulting to paragraphs. Please check the content before returning to ensure each element has proper opening and closing block markup and HTML tags and any required block attributes. Ensure elements don't nest inside each other, i.e. don't put a paragraph inside another paragraph or a list within a paragraph. Don't start the content with a heading, start with a paragraph.
 
 Markup available to use; don't use any other blocks, even if requested:
@@ -77,8 +78,8 @@ Markup available to use; don't use any other blocks, even if requested:
 <li>CONTENT</li>
 </ol>
 <!-- /wp:list -->
-EOD;
-	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
+INSTRUCTION;
+	// phpcs:enable
 
 	/**
 	 * Constructor.

@@ -2,9 +2,9 @@
 
 ![ClassifAI](https://github.com/10up/classifai/blob/develop/assets/img/banner-1544x500.png)
 
-[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.8%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md) [![WordPress Playground Demo](https://img.shields.io/badge/Playground_Demo-8A2BE2?logo=wordpress&logoColor=FFFFFF&labelColor=3858E9&color=3858E9)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/10up/classifai/develop/.github/blueprints/blueprint.json)
+[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.9%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md) [![WordPress Playground Demo](https://img.shields.io/badge/Playground_Demo-8A2BE2?logo=wordpress&logoColor=FFFFFF&labelColor=3858E9&color=3858E9)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/10up/classifai/develop/.github/blueprints/blueprint.json)
 
-[![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/phpunit.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpunit.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/phpcs.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpcs.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
+[![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/phpunit.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpunit.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/phpcs.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpcs.yml) [![VIPCS](https://github.com/10up/classifai/actions/workflows/vipcs.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/vipcs.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
 
 > Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
 
@@ -21,10 +21,10 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Draft a full length article using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
-* Generate new images on demand to use in-content or as a featured image using [OpenAI's Image Generation API](https://platform.openai.com/docs/guides/images-vision)
-* Generate transcripts of audio files using [OpenAI's Audio Transcription API](https://platform.openai.com/docs/guides/speech-to-text)
+* Generate new images on demand to use in-content or as a featured image using [OpenAI's Image Generation API](https://platform.openai.com/docs/guides/images-vision), [Google AI's Imagen API](https://ai.google.dev/gemini-api/docs/image-generation#imagen), [Together AI's API](https://docs.together.ai/docs/images-overview) or locally using [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
+* Generate transcripts of audio files using [OpenAI's Audio Transcription API](https://platform.openai.com/docs/guides/speech-to-text) or [ElevenLabs Speech to Text API](https://elevenlabs.io/docs/capabilities/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
-* Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
+* Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/), [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech) or [ElevenLabs' Text to Speech API](https://elevenlabs.io/docs/capabilities/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
 * Create a smart 404 page that has a recommended results section that suggests relevant content to the user based on the page URL they were trying to access using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress)
 * Find similar terms to merge together using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress). Note this only compares top-level terms and if you merge a term that has children, these become top-level terms as per default WordPress behavior
@@ -34,12 +34,13 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Scan PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
+* Modification of your `robots.txt` file to block the most common AI data scraping bots from indexing your site
 
 ### Language Processing
 
 | Tagging | Recommended Content | Excerpt Generation | Comment Moderation |
 | :-: | :-: | :-: | :-: |
-| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure AI Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI comment moderation](assets/img/screenshot-13.png "Example of automatic comment moderation with OpenAI.") |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI comment moderation](assets/img/screenshot-13.png "Example of automatic comment moderation with OpenAI.") |
 
 | Audio Transcripts | Title Generation | Expand or Condense Text | Text to Speech |
 | :-: | :-: | :-: | :-: |
@@ -58,14 +59,17 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 ## Requirements
 
 * PHP 7.4+
-* [WordPress](http://wordpress.org) 6.7+
+* [WordPress](http://wordpress.org) 6.8+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the ChatGPT, Embeddings, Text to Speech or Speech to Text Language Processing functionality or Image Generation functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
+* To utilize the ElevenLabs Speech to Text Language Processing functionality, you will need an active [ElevenLabs](https://elevenlabs.io/sign-up) account.
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
-* To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
+* To utilize the Google Gemini Language Processing functionality or Image Generation functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
+* To utilize the Together AI Image Generation functionality, you will need an active [Together AI](https://api.together.ai/) account.
 * To utilize the AWS Language Processing functionality, you will need an active [AWS](https://console.aws.amazon.com/) account.
 * To utilize the Ollama Language or Image Processing functionality, you will need to install [Ollama](https://ollama.com/) and download the appropriate models.
+* To utilize the Stable Diffusion Image Processing functionality, you will need to install [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) and download the appropriate models.
 * To utilize the Smart 404 feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access and you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
 * To utilize the Term Cleanup feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access. For better performance, you will need [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
 
@@ -83,7 +87,7 @@ Microsoft Azure AI Speech, which is one of the providers that powers the text to
 
 Microsoft Azure OpenAI, which is one of the providers that powers the title generation, excerpt generation and content resizing features, has a [pay per usage](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/) plan.
 
-Google Gemini, which is one of the providers that powers the title generation, excerpt generation and content resizing features, has a ["free" pricing tier](https://ai.google.dev/pricing) that offers 60 queries per minute.
+Google Gemini, which is one of the providers that powers the title generation, excerpt generation and content resizing features, has a ["free" pricing tier](https://ai.google.dev/pricing) that offers 60 queries per minute. To utilize the image generation feature, you will need a paid account.
 
 ## Installation
 
@@ -122,10 +126,10 @@ Add this repository to composer.json, specifying a release version, as shown bel
         "type": "package",
         "package": {
             "name": "10up/classifai",
-            "version": "3.4.0",
+            "version": "3.7.0",
             "type": "wordpress-plugin",
             "dist": {
-                "url": "https://github.com/10up/classifai/archive/refs/tags/3.4.0.zip",
+                "url": "https://github.com/10up/classifai/archive/refs/tags/3.7.0.zip",
                 "type": "zip"
             }
         }
@@ -137,7 +141,7 @@ Finally, require the plugin, using the version number you specified in the previ
 
 ```json
 "require": {
-    "10up/classifai": "3.4.0"
+    "10up/classifai": "3.7.0"
 }
 ```
 
@@ -155,7 +159,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Check for an email from `ClassifAI Team` which contains the registration key.
 - Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
-### 2. Configure ClassifAI Registration Key under Tools > ClassifAI > ClassifAI Registration
+### 2. Configure ClassifAI Registration Key under Tools > ClassifAI > Settings
 
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
@@ -369,6 +373,36 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Upload a new audio file.
 * Check to make sure the transcript was stored in the Description field.
 
+## Set Up Audio Transcripts Generation (via ElevenLabs Speech to Text)
+
+Note that [ElevenLabs](https://elevenlabs.io/docs/capabilities/speech-to-text) can create a transcript for audio files that meet the following requirements:
+
+* The file must be presented in mp3, mp4, mpeg, wav, or ogg format
+* The file size must be less than 100 megabytes (MB)
+
+### 1. Sign up for ElevenLabs
+
+* [Sign up for an ElevenLabs account](https://elevenlabs.io/sign-up) or sign into your existing one.
+* Log into your account and go to the [API key page](https://elevenlabs.io/app/developers/api-keys).
+* Click `Create Key` create a new API key and ensure you turn on access to the Speech to Text endpoint and turn on Read access to the Models endpoint.
+
+### 2. Configure ElevenLabs API Keys under Tools > ClassifAI > Language Processing > Audio Transcripts Generation > Settings
+
+* Select **ElevenLabs Audio Transcription** in the Provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+* Select the model you want to use for the transcription after saving and verifying the connection.
+
+### 3. Enable specific features
+
+* Choose to enable the ability to automatically generate transcripts from supported audio files.
+* Choose which user roles have access to this ability.
+* Save settings. An error will show if API authentication fails.
+
+### 4. Upload a new audio file
+
+* Upload a new audio file.
+* Check to make sure the transcript was stored in the Description field.
+
 ## Set Up Text to Speech (via Microsoft Azure)
 
 ### 1. Sign up for Azure services
@@ -449,6 +483,27 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * If connected successfully, a new dropdown with the label "Voices" will be displayed.
 * Select a voice and voice engine as per your choice.
 * Select a post type that should use this service.
+
+### 3. Using the Text to Speech service
+
+* Assuming the post type selected is "post", create a new post and publish it.
+* After a few seconds, a "Preview" button will appear under the ClassifAI settings panel.
+* Click the button to preview the generated speech audio for the post.
+* View the post on the front-end and see a read-to-me feature has been added
+
+## Set Up Text to Speech (via ElevenLabs)
+
+### 1. Sign up for ElevenLabs
+
+* [Sign up for an ElevenLabs account](https://elevenlabs.io/sign-up) or sign into your existing one.
+* Log into your account and go to the [API key page](https://elevenlabs.io/app/developers/api-keys).
+* Click `Create Key` create a new API key and ensure you turn on access to the Text to Speech endpoint and turn on Read access to the Models and Voices endpoint.
+
+### 2. Configure ElevenLabs API Keys under Tools > ClassifAI > Language Processing > Text to Speech > Settings
+
+* Select **ElevenLabs** in the Provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+* Select the model and voice you want to use for the text to speech after saving and verifying the connection.
 
 ### 3. Using the Text to Speech service
 
@@ -673,6 +728,63 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Once images are generated, choose one or more images to import into your media library
 * Choose one image to insert into the content
 
+## Set Up Image Generation (via Google AI Imagen)
+
+### 1. Sign up for Google AI
+
+* [Sign up for a Google account](https://www.google.com/) or sign into your existing one.
+* Go to [Google AI Gemini](https://ai.google.dev/) website and click on the Get API key button or go to the [API key page](https://makersuite.google.com/app/apikey) directly.
+* Note that if this page doesn't work, it's likely that Gemini is not enabled in your workspace. Contact your workspace administrator to get this enabled.
+* Click `Create API key` and copy the key that is shown.
+
+### 2. Configure API Keys under Tools > ClassifAI > Image Processing > Image Generation > Settings
+
+* Select **Google AI Imagen** in the provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Enable specific Image Generation features
+
+* Turn on the Image Generation Feature.
+* Configure other options as needed.
+
+### 4. Trigger the media flow within a content item
+
+* Create a new content item
+* Insert an Image block or choose to add a featured image and choose a new item from the Media Library
+* In the media modal that opens, click on the `Generate image` tab
+* Enter in a prompt to generate an image
+* Once images are generated, choose one or more images to import into your media library
+* Choose one image to insert into the content
+
+## Set Up Image Generation (via Together AI)
+
+### 1. Sign up for Together AI
+
+* [Sign up for a Together AI account](https://api.together.ai/) or sign into your existing one.
+* Within your account settings, find the API Keys section or go to the [API key page](https://api.together.ai/settings/api-keys) directly.
+* Copy the exisintg key or create a new one and copy it.
+
+### 2. Configure API Keys under Tools > ClassifAI > Image Processing > Image Generation > Settings
+
+* Select **Together AI** in the Provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+* Save the settings which will validate the API key.
+* Once valid, the models will be available to select from. Choose the [image generation model](https://docs.together.ai/docs/serverless-models#image-models) you want to use.
+
+### 3. Enable specific Image Generation features
+
+* Turn on the Image Generation Feature.
+* Configure other options as needed.
+
+### 4. Trigger the media flow within a content item
+
+* Create a new content item
+* Insert an Image block or choose to add a featured image and choose a new item from the Media Library
+* In the media modal that opens, click on the `Generate image` tab
+* Enter in a prompt to generate an image
+* Once images are generated, choose one or more images to import into your media library
+* Choose one image to insert into the content
+
 ## Set Up Comment Moderation (via OpenAI Moderation)
 
 ### 1. Sign up for OpenAI
@@ -717,7 +829,9 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 Some of the Features in ClassifAI can be set up to use locally hosted LLMs. This has the benefit of complete privacy and data control, as well as being able to be run without any cost. The trade-offs here are performance isn't as great and results may also be less accurate.
 
-Right now, this is powered by Ollama, a tool that allows you to host and run LLMs locally. To set this up, follow the steps below:
+Right now, text generation and image analysis are powered by Ollama, a tool that allows you to host and run LLMs locally.  Image generation is powered by Stable Diffusion, a tool that allows you to host and run image generation models locally.
+
+To set up Ollama, follow the steps below:
 
 ### 1. Install Ollama
 
@@ -734,9 +848,55 @@ Right now, this is powered by Ollama, a tool that allows you to host and run LLM
 * Once Ollama is running and the model is installed, you can proceed to use it as a Provider for the desired Feature.
 * Note that when using locally hosted LLMs, performance may be slower than using cloud-based services, especially for initial requests. Results may also be less accurate but these are the trade-offs for privacy and data control.
 
+To set up Stable Diffusion, follow the steps below:
+
+### 1. Install Stable Diffusion
+
+* [Install Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) on your local machine.
+* By default Stable Diffusion runs at `http://localhost:7860/`.
+
+### 2. Install the model
+
+* Decide which model you want to use to generate images. There are [many models available](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Installation-on-Apple-Silicon#downloading-stable-diffusion-models) with various trade-offs between quality, speed and size.
+* Install the model locally by downloading it and placing it in the `models/Stable-diffusion` directory.
+
+### 3. Configure Provider
+
+* Once Stable Diffusion is running and the model is installed, you can proceed to use it as a Provider for Image Generation.
+* Note that when using locally hosted LLMs, performance may be slower than using cloud-based services, especially for initial requests. Results may also be lower quality but these are the trade-offs for privacy and data control.
+
 ## WP CLI Commands
 
-- Check out the [ClassifAI docs](https://10up.github.io/classifai/).
+- Check out the [ClassifAI docs](https://10up.github.io/classifai/advanced-docs/wp-cli).
+
+## Building and Running Documentation Site
+
+The ClassifAI documentation site is built using [WP Hooks Documentor](https://github.com/10up/wp-hooks-documentor). Follow these steps to build and run the documentation site locally:
+
+### 1. Build Documentation
+
+```bash
+# Install dependencies and build the plugin
+npm i && npm run build:docs
+```
+
+This will:
+- Install all required dependencies
+- Process all hook documentation from the codebase
+- Generate the documentation site in the `./docs` directory
+
+### 2. Run Documentation Site Locally
+
+```bash
+# Navigate to docs directory and start the server
+cd ./docs && npm run serve
+```
+
+The documentation site will be available at [http://localhost:3000](http://localhost:3000).
+
+### 3. Deployment
+
+The documentation site will automatically deploy to GitHub Pages when changes are merged into the `trunk` branch. You can view the live documentation at [https://10up.github.io/classifai/](https://10up.github.io/classifai/).
 
 ## Frequently Asked Questions
 
@@ -761,6 +921,10 @@ We recommend that you are transparent with your users that AI tools are being us
 ### When a post is sent to OpenAI (e.g. to generate a title or excerpt), is the post content fed into OpenAI and used for other customers?
 
 According to OpenAI, they do not train their models on any data that is sent via API requests (see https://openai.com/enterprise-privacy). OpenAI may keep the data for up to 30 days to identify abuse, though you can request zero data retention (ZDR) with a qualifying use-case.
+
+### Where do I report security bugs found in this plugin?
+
+Please report security bugs found in the source code of the undefined plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/f298c330-8d56-4af5-8a69-736281841ce1).  The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 ## Support Level
 

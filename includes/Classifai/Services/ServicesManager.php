@@ -6,6 +6,11 @@
 namespace Classifai\Services;
 
 use function Classifai\should_use_legacy_settings_panel;
+use function Classifai\safe_wp_remote_post;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class ServicesManager {
 
@@ -46,7 +51,7 @@ class ServicesManager {
 	public function register() {
 		add_filter( 'language_processing_features', [ $this, 'register_language_processing_features' ] );
 		add_filter( 'image_processing_features', [ $this, 'register_image_processing_features' ] );
-		add_filter( 'personalizer_features', [ $this, 'register_recommendation_service_features' ] );
+		add_filter( 'content_recommendation_features', [ $this, 'register_recommendation_service_features' ] );
 
 		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
@@ -137,7 +142,7 @@ class ServicesManager {
 	/**
 	 * Get general ClassifAI settings
 	 *
-	 * @param string $index Optional specific setting to be retrieved.
+	 * @param string|bool $index Optional specific setting to be retrieved. If false, all settings will be returned.
 	 * @return mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -186,8 +191,9 @@ class ServicesManager {
 	public function sanitize_settings( $settings ): array {
 		$new_settings = [];
 
-		if ( isset( $settings['email'] )
-			&& isset( $settings['license_key'] )
+		// Save registration settings.
+		if ( ! empty( $settings['email'] )
+			&& ! empty( $settings['license_key'] )
 			&& $this->check_license_key( $settings['email'], $settings['license_key'] )
 		) {
 			$new_settings['valid_license'] = true;
@@ -205,6 +211,9 @@ class ServicesManager {
 				'error'
 			);
 		}
+
+		// Save block AI bots setting.
+		$new_settings['block_ai_bots'] = $settings['block_ai_bots'] ?? '0';
 
 		return $new_settings;
 	}
@@ -260,7 +269,12 @@ class ServicesManager {
 		$license_key = $this->get_settings( 'license_key' );
 		?>
 		<input type="password" name="classifai_settings[license_key]" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>"/>
-		<br /><span class="description"><?php _e( __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ) );// @codingStandardsIgnoreLine ?></span>
+		<br />
+		<span class="description">
+			<?php esc_html_e( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.', 'classifai' ); ?>
+			<br />
+			<a href="https://classifaiplugin.com/#cta" target="_blank" rel="noreferrer"><?php esc_html_e( 'Register for your key', 'classifai' ); ?></a>
+		</span>
 		<?php
 	}
 
@@ -360,7 +374,7 @@ class ServicesManager {
 	 */
 	public function check_license_key( string $email, string $license_key ): bool {
 
-		$request = wp_remote_post(
+		$request = safe_wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
 			[
 				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
@@ -368,6 +382,7 @@ class ServicesManager {
 					'license_key' => $license_key,
 					'email'       => $email,
 				],
+				'use_vip' => true,
 			]
 		);
 

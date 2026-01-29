@@ -7,6 +7,11 @@ namespace Classifai\Providers\Watson;
 
 use Classifai\Features\Classification;
 
+// Using return instead of exit to prevent errors running PHPCS.
+if ( ! defined( 'ABSPATH' ) ) {
+	return;
+}
+
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
  *
@@ -103,7 +108,7 @@ function get_feature_threshold( string $feature ): float {
 	if ( ! empty( $settings ) && ! empty( $settings[ $feature . '_threshold' ] ) ) {
 		$threshold = filter_var(
 			$settings[ $feature . '_threshold' ],
-			FILTER_VALIDATE_INT
+			FILTER_VALIDATE_FLOAT
 		);
 	}
 
@@ -111,7 +116,7 @@ function get_feature_threshold( string $feature ): float {
 		$constant = 'WATSON_' . strtoupper( $feature ) . '_THRESHOLD';
 
 		if ( defined( $constant ) ) {
-			$threshold = intval( constant( $constant ) );
+			$threshold = floatval( constant( $constant ) );
 		}
 	}
 
@@ -124,10 +129,10 @@ function get_feature_threshold( string $feature ): float {
 	 * @since 1.0.0
 	 * @hook classifai_feature_threshold
 	 *
-	 * @param {float} $threshold The threshold to use, expressed as a decimal between 0 and 1 inclusive.
-	 * @param {string} $feature  The feature in question.
+	 * @param float  $threshold The threshold to use, expressed as a decimal between 0 and 1 inclusive.
+	 * @param string $feature   The feature in question.
 	 *
-	 * @return {float} The filtered threshold.
+	 * @return float The filtered threshold.
 	 */
 	return apply_filters( 'classifai_feature_threshold', $threshold, $feature );
 }

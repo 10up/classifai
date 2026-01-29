@@ -30,19 +30,21 @@ class LanguageProcessing extends Service {
 		 * @since 3.0.0
 		 * @hook classifai_language_processing_service_providers
 		 *
-		 * @param {array} $providers Array of available providers for the service.
+		 * @param array $providers Array of available providers for the service.
 		 *
-		 * @return {array} The filtered available providers.
+		 * @return array The filtered available providers.
 		 */
 		return apply_filters(
 			'classifai_language_processing_service_providers',
 			[
 				'Classifai\Providers\Azure\Speech',
 				'Classifai\Providers\OpenAI\TextToSpeech',
+				'Classifai\Providers\ElevenLabs\TextToSpeech',
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Embeddings',
 				'Classifai\Providers\OpenAI\Moderation',
 				'Classifai\Providers\OpenAI\SpeechToText',
+				'Classifai\Providers\ElevenLabs\SpeechToText',
 				'Classifai\Providers\Watson\NLU',
 				'Classifai\Providers\GoogleAI\GeminiAPI',
 				'Classifai\Providers\Azure\OpenAI',

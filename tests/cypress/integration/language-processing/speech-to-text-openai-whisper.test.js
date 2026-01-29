@@ -21,6 +21,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			'language_processing/feature_audio_transcripts_generation'
 		);
 
+		cy.selectProvider( 'openai_whisper' );
 		cy.get( '#openai_api_key' ).clear().type( 'password' );
 		cy.get( '#openai_whisper_model' ).select( 'whisper-1' );
 

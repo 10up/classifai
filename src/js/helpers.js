@@ -93,25 +93,21 @@ export const browserAITextGeneration = async (
 export const chromeAITextGeneration = async ( prompt = '', content = '' ) => {
 	let result = '';
 	const errorMessage = __(
-		'Your browser does not support Chrome AI or the language model is not available. Please see setup instructions at https://10up.github.io/classifai/tutorial-chrome-built-in-ai.html',
+		'Your browser does not support Chrome AI or the language model is not available. Please see setup instructions at https://10up.github.io/classifai/advanced-docs/chrome-built-in-ai',
 		'classifai'
 	);
 
-	if ( ! window.ai ) {
+	if ( ! window.LanguageModel ) {
 		// eslint-disable-next-line no-alert
 		window.alert( errorMessage );
 		return result;
 	}
 
-	const supportsTextGeneration =
-		await window.ai.languageModel?.capabilities();
+	const available = await window.LanguageModel?.availability();
 
-	if (
-		supportsTextGeneration &&
-		supportsTextGeneration.available === 'readily'
-	) {
+	if ( available && available !== 'unavailable' ) {
 		try {
-			const session = await window.ai.languageModel.create( {
+			const session = await window.LanguageModel.create( {
 				initialPrompts: [
 					{
 						role: 'system',
@@ -125,9 +121,9 @@ export const chromeAITextGeneration = async ( prompt = '', content = '' ) => {
 			// eslint-disable-next-line no-alert
 			window.alert(
 				sprintf(
-					/* translators: %s: error message */
+					/* translators: %1$s: error message */
 					__(
-						'Error occurred during AI text generation: %1$s. Please ensure you have followed the setup instructions at https://10up.github.io/classifai/tutorial-chrome-built-in-ai.html',
+						'Error occurred during AI text generation: %1$s. Please ensure you have followed the setup instructions at https://10up.github.io/classifai/advanced-docs/chrome-built-in-ai',
 						'classifai'
 					),
 					e?.message

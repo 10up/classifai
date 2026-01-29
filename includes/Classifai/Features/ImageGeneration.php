@@ -3,13 +3,20 @@
 namespace Classifai\Features;
 
 use Classifai\Services\ImageProcessing;
-use Classifai\Providers\OpenAI\Images;
+use Classifai\Providers\OpenAI\Images as OpenAIImages;
+use Classifai\Providers\GoogleAI\Images as GoogleAIImagen;
+use Classifai\Providers\Localhost\StableDiffusion as LocalhostStableDiffusion;
+use Classifai\Providers\TogetherAI\Images as TogetherAIImages;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
 
 use function Classifai\get_asset_info;
 use function Classifai\render_disable_feature_link;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Class ImageGeneration
@@ -33,7 +40,10 @@ class ImageGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			Images::ID => __( 'OpenAI Images', 'classifai' ),
+			OpenAIImages::ID             => __( 'OpenAI Images', 'classifai' ),
+			GoogleAIImagen::ID           => __( 'Google AI Imagen', 'classifai' ),
+			TogetherAIImages::ID         => __( 'Together AI', 'classifai' ),
+			LocalhostStableDiffusion::ID => __( 'Stable Diffusion (local)', 'classifai' ),
 		];
 	}
 
@@ -72,9 +82,9 @@ class ImageGeneration extends Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_rest_route_{route}_args
 		 *
-		 * @param {array} $args Array of arguments for the REST route.
+		 * @param array $args Array of arguments for the REST route.
 		 *
-		 * @return {array} Modified array of arguments.
+		 * @return array Modified array of arguments.
 		 */
 		$args = apply_filters(
 			'classifai_' . static::ID . '_rest_route_' . $route . '_args',
@@ -215,9 +225,9 @@ class ImageGeneration extends Feature {
 		 * @since 2.1.0
 		 * @hook classifai_dalle_caption
 		 *
-		 * @param {string} $caption Attribution to be added as a caption to the image.
+		 * @param string $caption Attribution to be added as a caption to the image.
 		 *
-		 * @return {string} Caption.
+		 * @return string Caption.
 		 */
 		$caption = apply_filters(
 			'classifai_dalle_caption',
@@ -299,7 +309,7 @@ class ImageGeneration extends Feature {
 					}
 					?>
 				</p>
-				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ); ?>"></textarea>
+				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ?? 1000 ); ?>"></textarea>
 				<br>
 				<?php if ( $per_image_settings ) : ?>
 					<input type="checkbox" id="view-additional-image-generation-settings" />
@@ -310,7 +320,7 @@ class ImageGeneration extends Feature {
 
 				<div class="additional-image-generation-settings hidden">
 					<?php
-					$quality_options = Images::get_image_quality_options();
+					$quality_options = method_exists( $provider_instance, 'get_image_quality_options' ) ? $provider_instance->get_image_quality_options() : [];
 					if ( ! empty( $quality_options ) ) :
 						?>
 						<label>
@@ -327,7 +337,7 @@ class ImageGeneration extends Feature {
 					<?php endif; ?>
 
 					<?php
-					$size_options = Images::get_image_size_options();
+					$size_options = method_exists( $provider_instance, 'get_image_size_options' ) ? $provider_instance->get_image_size_options() : [];
 					if ( ! empty( $size_options ) ) :
 						?>
 						<label>
@@ -344,7 +354,24 @@ class ImageGeneration extends Feature {
 					<?php endif; ?>
 
 					<?php
-					$style_options = Images::get_image_style_options();
+					$aspect_ratio_options = method_exists( $provider_instance, 'get_image_aspect_ratio_options' ) ? $provider_instance->get_image_aspect_ratio_options() : [];
+					if ( ! empty( $aspect_ratio_options ) ) :
+						?>
+						<label>
+							<span><?php esc_html_e( 'Aspect ratio:', 'classifai' ); ?></span>
+							<select class="aspect-ratio" name="aspect-ratio">
+								<?php
+								$aspect_ratio = $settings[ $provider_id ]['aspect_ratio'];
+								foreach ( $aspect_ratio_options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $aspect_ratio, $key, false ) . '>' . esc_html( $value ) . '</option>';
+								}
+								?>
+							</select>
+						</label>
+					<?php endif; ?>
+
+					<?php
+					$style_options = method_exists( $provider_instance, 'get_image_style_options' ) ? $provider_instance->get_image_style_options() : [];
 					if ( ! empty( $style_options ) ) :
 						?>
 						<label>
@@ -429,10 +456,10 @@ class ImageGeneration extends Feature {
 		 * @since 2.3.0
 		 * @hook classifai_feature_image_generation_roles
 		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
+		 * @param array $roles            Array of arrays containing role information.
+		 * @param array $default_settings Default setting values.
 		 *
-		 * @return {array} Roles array.
+		 * @return array Roles array.
 		 */
 		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $roles, $default_settings );
 	}
@@ -466,7 +493,7 @@ class ImageGeneration extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => Images::ID,
+			'provider' => OpenAIImages::ID,
 		];
 	}
 

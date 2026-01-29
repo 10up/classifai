@@ -5,6 +5,10 @@
  * @package ClassifAI
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /* phpcs:disable PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage */
 
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -63,7 +67,7 @@ if ( $is_setup_page ) {
 
 $services_menu      = Classifai\get_services_menu();
 $classifai_settings = array(
-	'classifai_settings' => __( 'ClassifAI Registration', 'classifai' ),
+	'classifai_settings' => __( 'Settings', 'classifai' ),
 );
 
 $classifai_header_menu = array_merge( $classifai_settings, $services_menu );

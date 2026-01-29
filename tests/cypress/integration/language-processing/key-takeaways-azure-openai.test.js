@@ -39,9 +39,13 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 		} ).then( () => {
 			cy.getBlockEditor()
 				.find(
-					'.wp-block-classifai-key-takeaways .components-placeholder__fieldset'
+					'.wp-block-classifai-key-takeaways .wp-block-classifai-key-takeaways__content ul li'
 				)
-				.should( 'contain.text', 'Request failed' );
+				.should(
+					'contain.text',
+					'Spring symbolizes renewal and beauty, inspiring creativity and reflection.'
+				)
+				.should( 'have.length', 4 );
 		} );
 	} );
 } );

@@ -43,7 +43,7 @@ export const OllamaMultimodalSettings = ( { isConfigured = false } ) => {
 		<>
 			{ __( 'Add a custom prompt, if desired. See our', 'classifai' ) }
 			<a
-				href="https://10up.github.io/classifai/tutorial-prompt-examples.html"
+				href="https://10up.github.io/classifai/advanced-docs/prompt-examples"
 				target="_blank"
 				rel="noopener noreferrer"
 			>

@@ -150,6 +150,9 @@ export const TermCleanupSettings = () => {
 										},
 									} );
 								} }
+								min="0"
+								max="100"
+								step="0.01"
 							/>
 							<div className="display-container-wrapper">
 								<button

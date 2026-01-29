@@ -145,6 +145,9 @@ export const NLUFeatureSettings = () => {
 									[ `${ feature }_threshold` ]: value,
 								} );
 							} }
+							min="0"
+							max="100"
+							step="0.01"
 						/>
 						<div className="display-container-wrapper">
 							<button

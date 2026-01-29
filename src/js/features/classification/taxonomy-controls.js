@@ -7,10 +7,7 @@
 import { FormTokenField } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
-import {
-	getEntitiesInfo,
-	useTaxonomies,
-} from '../../../../includes/Classifai/Blocks/recommended-content-block/utils';
+import { getEntitiesInfo, useTaxonomies } from './utils';
 import { useState, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 

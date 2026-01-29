@@ -1,0 +1,10 @@
+[
+    {
+        "title": "sd-v1-4.ckpt [fe4efff1e1]",
+        "model_name": "sd-v1-4",
+        "hash": "fe4efff1e1",
+        "sha256": "fe4efff1e174c627256e44ec2991ba279b3816e364b49f9be2abc0b3ff3f8556",
+        "filename": "/stable-diffusion-webui/models/Stable-diffusion/sd-v1-4.ckpt",
+        "config": null
+    }
+]

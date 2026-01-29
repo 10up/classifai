@@ -15,6 +15,10 @@ use WP_CLI;
 
 use function ElasticPress\Utils\is_indexing_wpcli;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * ElasticPress Integration class.
  */
@@ -70,6 +74,8 @@ class Smart404EPIntegration {
 				$this->embeddings_meta_key = 'classifai_openai_embeddings';
 			} elseif ( 'azure_openai_embeddings' === $provider::ID ) {
 				$this->embeddings_meta_key = 'classifai_azure_openai_embeddings';
+			} elseif ( 'ollama_embeddings' === $provider::ID ) {
+				$this->embeddings_meta_key = 'classifai_ollama_embeddings';
 			}
 		}
 	}

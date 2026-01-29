@@ -928,6 +928,11 @@ div.classifai-openai__result-disable-link {
     padding: 0 1em 1.5em 1em;
 }
 
+div.classifai-title-generation__result-disable-link {
+    display: block;
+    padding: 0 0 20px 20px;
+}
+
 .classifai-content .classifai-term-cleanup {
 	margin-top: 20px;
 }
@@ -1077,4 +1082,15 @@ table.similar_terms.widefat th {
 
 table.similar_terms.widefat thead th {
 	font-weight: bold;
+}
+
+#wpbody {
+
+	tr[data-slug="classifai"] {
+
+		th, td {
+			box-shadow: none;
+			border-bottom: 0;
+		}
+	}
 }

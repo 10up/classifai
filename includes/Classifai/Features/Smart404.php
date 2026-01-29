@@ -5,10 +5,15 @@ namespace Classifai\Features;
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
+use Classifai\Providers\Localhost\OllamaEmbeddings;
 use WP_Error;
 use WP_Query;
 
 use function Classifai\is_elasticpress_installed;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Class Smart404
@@ -35,6 +40,7 @@ class Smart404 extends Feature {
 		$this->supported_providers = [
 			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
+			OllamaEmbeddings::ID => __( 'Ollama', 'classifai' ),
 		];
 	}
 

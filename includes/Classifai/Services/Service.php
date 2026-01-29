@@ -5,6 +5,10 @@
 
 namespace Classifai\Services;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 abstract class Service {
 
 	/**
@@ -60,9 +64,9 @@ abstract class Service {
 		 * @since 1.3.0
 		 * @hook {$this->menu_slug}_providers
 		 *
-		 * @param {array} $this->providers Array of available providers for the service.
+		 * @param array $this->providers Array of available providers for the service.
 		 *
-		 * @return {array} The filtered available providers.
+		 * @return array The filtered available providers.
 		 */
 		$this->providers = apply_filters( "{$this->menu_slug}_providers", $this->providers );
 
@@ -81,9 +85,9 @@ abstract class Service {
 		 * @since 3.0.0
 		 * @hook {$this->menu_slug}_features
 		 *
-		 * @param {array} $this->features Array of available features for the service.
+		 * @param array $this->features Array of available features for the service.
 		 *
-		 * @return {array} The filtered available features.
+		 * @return array The filtered available features.
 		 */
 		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
 
@@ -168,7 +172,7 @@ abstract class Service {
 				 * @since 3.0.0
 				 * @hook classifai_before_feature_nav
 				 *
-				 * @param {string} $active_feature Current active feature.
+				 * @param string $active_feature Current active feature.
 				 */
 				do_action( 'classifai_before_feature_nav', $active_feature );
 				?>
@@ -189,7 +193,7 @@ abstract class Service {
 					 * @since 3.0.0
 					 * @hook classifai_before_feature_settings_form
 					 *
-					 * @param {string} $active_feature Current active feature.
+					 * @param string $active_feature Current active feature.
 					 */
 					do_action( 'classifai_before_feature_settings_form', $active_feature );
 					?>
@@ -209,7 +213,7 @@ abstract class Service {
 					 * @since 3.0.0
 					 * @hook classifai_after_feature_settings_form
 					 *
-					 * @param {string} $active_feature Current active feature.
+					 * @param string $active_feature Current active feature.
 					 */
 					do_action( 'classifai_after_feature_settings_form', $active_feature );
 					?>
