@@ -93,6 +93,14 @@ export const TermCleanupSettings = () => {
 					ref={ setPopoverAnchor }
 					icon={ info }
 					onClick={ toggleVisible }
+					aria-label={ __(
+						'Click to show threshold information',
+						'classifai'
+					) }
+					title={ __(
+						'Click to show threshold information',
+						'classifai'
+					) }
 				/>
 				{ isVisible && (
 					<Popover anchor={ popoverAnchor }>

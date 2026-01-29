@@ -4,9 +4,13 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	CheckboxControl,
+	Icon,
+	Popover,
 	SelectControl,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	__experimentalInputControlSuffixWrapper as InputControlSuffixWrapper, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
+import { info } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 
@@ -26,7 +30,6 @@ import { thresholdInfo, nluHelperText } from '../../utils/helper-text';
  * @return {React.ReactElement} NLUFeatureSettings component.
  */
 export const NLUFeatureSettings = () => {
-	const [ thresholdInfoStates, setThresholdInfoStates ] = useState( {} );
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
@@ -98,11 +101,37 @@ export const NLUFeatureSettings = () => {
 		} );
 	}
 
-	const toggleThresholdInfo = ( feature ) => {
-		setThresholdInfoStates( ( prev ) => ( {
-			...prev,
-			[ feature ]: ! prev[ feature ],
-		} ) );
+	const ThresholdPopover = () => {
+		const [ popoverAnchor, setPopoverAnchor ] = useState();
+		const [ isVisible, setIsVisible ] = useState( false );
+		const toggleVisible = () => {
+			setIsVisible( ( state ) => ! state );
+		};
+
+		return (
+			<>
+				<Icon
+					ref={ setPopoverAnchor }
+					icon={ info }
+					onClick={ toggleVisible }
+					aria-label={ __(
+						'Click to show threshold information',
+						'classifai'
+					) }
+					title={ __(
+						'Click to show threshold information',
+						'classifai'
+					) }
+				/>
+				{ isVisible && (
+					<Popover anchor={ popoverAnchor }>
+						<div style={ { minWidth: '300px', padding: '0 20px' } }>
+							{ thresholdInfo.helper }
+						</div>
+					</Popover>
+				) }
+			</>
+		);
 	};
 
 	return (
@@ -145,26 +174,16 @@ export const NLUFeatureSettings = () => {
 									[ `${ feature }_threshold` ]: value,
 								} );
 							} }
+							__unstableInputWidth="8em"
+							suffix={
+								<InputControlSuffixWrapper variant="control">
+									<ThresholdPopover />
+								</InputControlSuffixWrapper>
+							}
 							min="0"
 							max="100"
 							step="0.01"
 						/>
-						<div className="display-container-wrapper">
-							<button
-								className="dashicons dashicons-info-outline helper-text-icon"
-								title={ __(
-									'Click to show more information',
-									'classifai'
-								) }
-								onClick={ () => toggleThresholdInfo( feature ) }
-								aria-label={ __(
-									'Click to show threshold information',
-									'classifai'
-								) }
-							></button>
-							{ thresholdInfoStates[ feature ] &&
-								thresholdInfo.helper }
-						</div>
 
 						{ 'ibm_watson_nlu' === featureSettings.provider && (
 							<SelectControl
