@@ -909,6 +909,32 @@ input.classifai-button {
 				opacity: 0.7;
 			}
 		}
+
+		// Make token invisible (but keep space) while editing
+		&.classifai-ai-token--editing {
+			visibility: hidden;
+		}
+	}
+
+	// Inline edit input - overlay positioned on top of token
+	.classifai-inline-edit-input {
+		display: flex;
+		align-items: center;
+		padding: 0 8px;
+		font-size: 13px;
+		line-height: 1;
+		background: #fff;
+		border: 2px solid var(--classifai-admin-theme-color, #007cba);
+		border-radius: 2px;
+		outline: none;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+		font-family: inherit;
+		box-sizing: border-box;
+
+		&:focus {
+			border-color: var(--classifai-admin-theme-color, #007cba);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
 	}
 }
 
