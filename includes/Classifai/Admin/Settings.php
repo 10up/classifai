@@ -115,6 +115,8 @@ class Settings {
 			'postStatuses'     => get_post_statuses_for_language_settings(),
 			'isEPinstalled'    => is_elasticpress_installed(),
 			'nluTaxonomies'    => $this->get_nlu_taxonomies(),
+			'providerProfiles' => ProviderProfiles::get_all_profiles(),
+			'providerConfigs'  => ProviderConfigStore::get_all(),
 		);
 
 		wp_add_inline_script(

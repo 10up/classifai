@@ -59,7 +59,6 @@ class CredentialResolver {
 		}
 
 		// Infer override when any credential field (excluding 'authenticated') is non-empty.
-		// TODO: Think about removing authenticated from the credential fields.
 		$fields_to_check = array_diff( $credential_fields, [ 'authenticated' ] );
 		$has_override    = false;
 		foreach ( $fields_to_check as $field ) {

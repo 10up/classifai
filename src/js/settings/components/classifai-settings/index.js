@@ -36,7 +36,8 @@ import { ClassifAIRegistration } from '../classifai-registration';
 import { ClassifAIWelcomeGuide } from './welcome-guide';
 import { Notices } from '../feature-settings/notices';
 
-const { services, features } = window.classifAISettings;
+const { services, features, providerProfiles, providerConfigs } =
+	window.classifAISettings;
 
 /**
  * FeatureSettingsWrapper component to render the feature settings.
@@ -215,19 +216,15 @@ export const ClassifAISettings = () => {
 					)
 				);
 			}
-			try {
-				const providerConfigsResponse = await apiFetch( {
-					path: '/classifai/v1/provider-configs',
-				} );
-				if ( providerConfigsResponse?.profiles ) {
-					setProviderProfiles( providerConfigsResponse.profiles );
-				}
-				if ( providerConfigsResponse?.configs ) {
-					setProviderConfigs( providerConfigsResponse.configs );
-				}
-			} catch ( e ) {
-				// Provider configs are optional (e.g. older installs); ignore.
+
+			// Initialize provider profiles and configs from inline data.
+			if ( providerProfiles ) {
+				setProviderProfiles( providerProfiles );
 			}
+			if ( providerConfigs ) {
+				setProviderConfigs( providerConfigs );
+			}
+
 			setIsLoaded( true );
 		} )();
 	}, [

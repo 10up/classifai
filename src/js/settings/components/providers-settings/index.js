@@ -2,11 +2,12 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import {
 	Icon,
+	Notice,
 	Panel,
 	PanelBody,
 	Spinner,
@@ -23,8 +24,8 @@ import { ProviderProfileForm } from './provider-profile-form';
  * ProvidersSettings component.
  *
  * Renders the Providers tab: a list of Provider profiles and their
- * configured/not configured status. Fetches profiles and configs from
- * the Provider-configs REST API on mount.
+ * configured/not configured status. Provider profiles and configs are
+ * loaded from inline script data on initial page load.
  *
  * @return {import('react').ReactElement} The ProvidersSettings component.
  */
@@ -39,29 +40,77 @@ export const ProvidersSettings = () => {
 		};
 	}, [] );
 
-	useEffect( () => {
-		apiFetch( { path: '/classifai/v1/provider-configs' } )
-			.then( ( res ) => {
-				if ( res.profiles ) {
-					setProviderProfiles( res.profiles );
-				}
-				if ( res.configs ) {
-					setProviderConfigs( res.configs );
-				}
-			} )
-			.catch( () => {
-				// Error loading; leave profiles/configs empty.
+	const [ loadError, setLoadError ] = useState( null );
+	const [ isRefreshing, setIsRefreshing ] = useState( false );
+
+	/**
+	 * Refresh Provider configs from the API.
+	 *
+	 * Used after saving to get updated authentication status.
+	 */
+	const refreshProviderConfigs = useCallback( async () => {
+		setIsRefreshing( true );
+		setLoadError( null );
+
+		try {
+			const res = await apiFetch( {
+				path: '/classifai/v1/provider-configs',
 			} );
+			if ( res.profiles ) {
+				setProviderProfiles( res.profiles );
+			}
+			if ( res.configs ) {
+				setProviderConfigs( res.configs );
+			}
+		} catch ( e ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Failed to load Provider configs:', e );
+			setLoadError(
+				e.message ||
+					__(
+						'Failed to load Provider configurations. Please refresh the page and try again.',
+						'classifai'
+					)
+			);
+		} finally {
+			setIsRefreshing( false );
+		}
 	}, [ setProviderProfiles, setProviderConfigs ] );
+
+	// Refresh configs on mount only if profiles are empty (fallback for edge cases).
+	useEffect( () => {
+		if ( Object.keys( providerProfiles ).length === 0 ) {
+			refreshProviderConfigs();
+		}
+	}, [] ); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const profileIds = Object.keys( providerProfiles );
 	const hasProfiles = profileIds.length > 0;
 
 	return (
 		<div className="classifai-settings-dashboard classifai-providers-settings">
-			{ ! hasProfiles && (
+			{ loadError && (
+				<Notice
+					status="error"
+					isDismissible={ true }
+					onRemove={ () => setLoadError( null ) }
+				>
+					{ loadError }
+				</Notice>
+			) }
+
+			{ ! hasProfiles && ! loadError && (
 				<div className="classifai-providers-settings__loading">
-					<Spinner />
+					{ isRefreshing ? (
+						<Spinner />
+					) : (
+						<p>
+							{ __(
+								'No Provider profiles available.',
+								'classifai'
+							) }
+						</p>
+					) }
 				</div>
 			) }
 
