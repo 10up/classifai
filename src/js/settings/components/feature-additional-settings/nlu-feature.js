@@ -15,9 +15,8 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { getFeature } from '../../utils/utils';
+import { getFeature, TooltipPopover } from '../../utils/utils';
 import { thresholdInfo, nluHelperText } from '../../utils/helper-text';
-import { TooltipPopover } from '../../utils/utils';
 
 /**
  * Component for render settings fields when IBM Watson NLU is selected as the provider.

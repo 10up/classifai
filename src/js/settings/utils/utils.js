@@ -7,7 +7,6 @@ import { useState } from '@wordpress/element';
 import { info } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 
-
 // Update URL based on the current tab and feature selected
 export const updateUrl = ( key, value ) => {
 	const urlParams = new URLSearchParams( window.location.search );

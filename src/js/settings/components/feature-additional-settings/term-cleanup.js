@@ -15,9 +15,8 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
-import { getFeature } from '../../utils/utils';
+import { getFeature, TooltipPopover } from '../../utils/utils';
 import { thresholdInfo } from '../../utils/helper-text';
-import { TooltipPopover } from '../../utils/utils';
 
 /**
  * Component for Term Cleanup feature settings.
