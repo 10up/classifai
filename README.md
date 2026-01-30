@@ -90,6 +90,14 @@ For full instructions on how to set up locally hosted LLMs, please refer to the 
 
 Check out the [ClassifAI docs](https://10up.github.io/classifai/advanced-docs/wp-cli) for instructions on how to use the WP CLI commands.
 
+## Frequently Asked Questions
+
+For a full list of frequently asked questions, please refer to the [ClassifAI documentation site](https://10up.github.io/classifai/get-started/faq).
+
+### Where do I report security bugs found in this plugin?
+
+Please report security bugs found in the source code of the undefined plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/f298c330-8d56-4af5-8a69-736281841ce1).  The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+
 ## Building and Running Documentation Site
 
 The ClassifAI documentation site is built using [WP Hooks Documentor](https://github.com/10up/wp-hooks-documentor). Follow these steps to build and run the documentation site locally:
@@ -119,14 +127,6 @@ The documentation site will be available at [http://localhost:3000](http://local
 ### 3. Deployment
 
 The documentation site will automatically deploy to GitHub Pages when changes are merged into the `trunk` branch. You can view the live documentation at [https://10up.github.io/classifai/](https://10up.github.io/classifai/).
-
-## Frequently Asked Questions
-
-For a full list of frequently asked questions, please refer to the [ClassifAI documentation site](https://10up.github.io/classifai/get-started/faq).
-
-### Where do I report security bugs found in this plugin?
-
-Please report security bugs found in the source code of the undefined plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/f298c330-8d56-4af5-8a69-736281841ce1).  The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 ## Support Level
 
