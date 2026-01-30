@@ -856,11 +856,11 @@ class Grok extends Provider {
 			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? [] );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_xai_grok_excerpt_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ContentResizing ) {
-			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]        = $provider_settings['number_of_suggestions'] ?? 1;
-			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]        = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
-			$debug_info[ __( 'Condense text prompt', 'classifai' ) ]      = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
-			$debug_info[ __( 'Fix grammar and spelling', 'classifai' ) ]  = wp_json_encode( $settings['fix_grammar_text_prompt'] ?? [] );
-			$debug_info[ __( 'Latest response', 'classifai' ) ]           = $this->get_formatted_latest_response( get_transient( 'classifai_xai_grok_content_resizing_latest_response' ) );
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]       = $provider_settings['number_of_suggestions'] ?? 1;
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]       = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ]     = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Fix grammar and spelling', 'classifai' ) ] = wp_json_encode( $settings['fix_grammar_text_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]          = $this->get_formatted_latest_response( get_transient( 'classifai_xai_grok_content_resizing_latest_response' ) );
 		}
 
 		return apply_filters(

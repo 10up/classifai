@@ -286,14 +286,14 @@ class ContentResizing extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'condense_text_prompt' => [
+			'condense_text_prompt'    => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->condense_prompt,
 					'original' => 1,
 				],
 			],
-			'expand_text_prompt'   => [
+			'expand_text_prompt'      => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->expand_prompt,
@@ -307,7 +307,7 @@ class ContentResizing extends Feature {
 					'original' => 1,
 				],
 			],
-			'provider'             => ChatGPT::ID,
+			'provider'                => ChatGPT::ID,
 		];
 	}
 
@@ -360,8 +360,8 @@ class ContentResizing extends Feature {
 	public function sanitize_default_feature_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
-		$new_settings['condense_text_prompt'] = sanitize_prompts( 'condense_text_prompt', $new_settings );
-		$new_settings['expand_text_prompt']   = sanitize_prompts( 'expand_text_prompt', $new_settings );
+		$new_settings['condense_text_prompt']    = sanitize_prompts( 'condense_text_prompt', $new_settings );
+		$new_settings['expand_text_prompt']      = sanitize_prompts( 'expand_text_prompt', $new_settings );
 		$new_settings['fix_grammar_text_prompt'] = sanitize_prompts( 'fix_grammar_text_prompt', $new_settings );
 
 		return $new_settings;
