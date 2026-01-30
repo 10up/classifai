@@ -3,6 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Threshold information.
+ *
+ * @type {Object}
+ */
 export const thresholdInfo = {
 	helper: (
 		<>
@@ -28,6 +33,11 @@ export const thresholdInfo = {
 	),
 };
 
+/**
+ * NLU helper text.
+ *
+ * @type {Object}
+ */
 export const nluHelperText = {
 	category: (
 		<>
@@ -119,6 +129,11 @@ export const nluHelperText = {
 	),
 };
 
+/**
+ * Moderation helper text.
+ *
+ * @type {Object}
+ */
 export const moderationHelperText = {
 	content_types: (
 		<>

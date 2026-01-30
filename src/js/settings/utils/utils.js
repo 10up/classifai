@@ -210,6 +210,13 @@ export const isProviderConfigurationNeeded = ( feature ) => {
 	return isEnabled && ! authenticated;
 };
 
+/**
+ * Tooltip Popover component.
+ *
+ * @param {Object} props                The props object.
+ * @param {string} props.tooltipContent The tooltip content.
+ * @return {React.ReactElement} The TooltipPopover component.
+ */
 export const TooltipPopover = ( { tooltipContent } ) => {
 	const [ popoverAnchor, setPopoverAnchor ] = useState();
 	const [ isVisible, setIsVisible ] = useState( false );
@@ -218,12 +225,14 @@ export const TooltipPopover = ( { tooltipContent } ) => {
 	};
 
 	return (
-		<>
+		<div
+			onMouseEnter={ toggleVisible }
+			onMouseLeave={ toggleVisible }
+			style={ { display: 'inline-block' } }
+		>
 			<Icon
 				ref={ setPopoverAnchor }
 				icon={ info }
-				onMouseEnter={ toggleVisible }
-				onMouseLeave={ toggleVisible }
 				aria-label={ __( 'Click to show tooltip', 'classifai' ) }
 				title={ __( 'Click to show tooltip', 'classifai' ) }
 				style={ { cursor: 'pointer', verticalAlign: 'middle' } }
@@ -235,6 +244,6 @@ export const TooltipPopover = ( { tooltipContent } ) => {
 					</div>
 				</Popover>
 			) }
-		</>
+		</div>
 	);
 };
