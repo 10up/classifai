@@ -3,7 +3,6 @@
  */
 import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
-	SelectControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -47,53 +46,17 @@ export const OllamaBaseSettings = ( {
 		</>
 	);
 
-	const models = [
-		{ label: __( '-- Choose Model --', 'classifai' ), value: '' },
-	];
-
-	// Convert providerSettings.models to an array from an object.
-	if (
-		providerSettings?.models &&
-		! Array.isArray( providerSettings.models )
-	) {
-		for ( const [ key, value ] of Object.entries(
-			providerSettings.models
-		) ) {
-			models.push( { label: value, value: key } );
-		}
-	}
-
 	return (
-		<>
-			<SettingsRow
-				label={ __( 'Endpoint URL', 'classifai' ) }
-				description={ <Description /> }
-			>
-				<InputControl
-					id={ `${ providerName }_endpoint_url` }
-					type="text"
-					value={ providerSettings?.endpoint_url || '' }
-					onChange={ ( value ) =>
-						onChange( { endpoint_url: value } )
-					}
-				/>
-			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Model', 'classifai' ) }
-				description={ __(
-					'Choose the model you want to use for requests. If no models are shown or you want to use a different model, please ensure this is installed in Ollama first.',
-					'classifai'
-				) }
-			>
-				<SelectControl
-					id={ `${ providerName }_model` }
-					onChange={ ( value ) => onChange( { model: value } ) }
-					value={ providerSettings?.model || '' }
-					options={ models }
-					disabled={ models.length <= 1 }
-					__nextHasNoMarginBottom
-				/>
-			</SettingsRow>
-		</>
+		<SettingsRow
+			label={ __( 'Endpoint URL', 'classifai' ) }
+			description={ <Description /> }
+		>
+			<InputControl
+				id={ `${ providerName }_endpoint_url` }
+				type="text"
+				value={ providerSettings?.endpoint_url || '' }
+				onChange={ ( value ) => onChange( { endpoint_url: value } ) }
+			/>
+		</SettingsRow>
 	);
 };
