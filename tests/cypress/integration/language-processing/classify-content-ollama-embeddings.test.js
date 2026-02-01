@@ -18,7 +18,6 @@ describe( '[Language processing] Classify Content (Ollama) Tests', () => {
 
 		cy.selectProvider( 'ollama_embeddings' );
 
-		cy.saveFeatureSettings();
 		cy.get( '#ollama_embeddings_model' ).select(
 			'nomic-embed-text:latest'
 		);
