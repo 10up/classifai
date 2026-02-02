@@ -78,19 +78,17 @@ class TextToSpeech extends Feature {
 	}
 
 	/**
-	 * Set up necessary hooks.
-	 *
-	 * We utilize this so we can register the REST route.
+	 * Set up necessary hooks even if the Feature is not available.
 	 */
 	public function setup() {
 		parent::setup();
+
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'classifai_schedule_text_to_speech_job', [ $this, 'generate_text_to_speech_audio' ], 10, 2 );
 
 		if ( $this->is_enabled() ) {
 			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 		}
-
-		add_action( 'classifai_schedule_text_to_speech_job', [ $this, 'generate_text_to_speech_audio' ] );
 	}
 
 	/**
@@ -225,9 +223,11 @@ class TextToSpeech extends Feature {
 		}
 
 		$job_args = [
-			'post_id' => $request->get_param( 'id' ),
+			'post_id'         => (int) $request->get_param( 'id' ),
+			'calling_user_id' => get_current_user_id(),
 		];
 
+		// We return early if the job is already scheduled.
 		if ( function_exists( 'as_has_scheduled_action' ) && \as_has_scheduled_action( 'classifai_schedule_text_to_speech_job', $job_args, 'classifai' ) ) {
 			return;
 		}
@@ -258,7 +258,7 @@ class TextToSpeech extends Feature {
 	}
 
 	/**
-	 * Register any needed endpoints.
+	 * Register any needed endpoints and meta.
 	 */
 	public function register_endpoints() {
 		$post_types = $this->get_supported_post_types();
@@ -435,7 +435,16 @@ class TextToSpeech extends Feature {
 			$post_type_label = $post_type->labels->singular_name;
 		}
 
-		$is_as_scheduled_job = function_exists( 'as_has_scheduled_action' ) && \as_has_scheduled_action( 'classifai_schedule_text_to_speech_job', [ 'post_id' => $post->ID ], 'classifai' );
+		$is_as_scheduled_job =
+			function_exists( 'as_has_scheduled_action' ) &&
+			\as_has_scheduled_action(
+				'classifai_schedule_text_to_speech_job',
+				[
+					'post_id'         => (int) $post->ID,
+					'calling_user_id' => get_current_user_id(),
+				],
+				'classifai'
+			);
 
 		if ( $is_as_scheduled_job ) : ?>
 		<p>
@@ -516,9 +525,11 @@ class TextToSpeech extends Feature {
 		}
 
 		$job_args = [
-			'post_id' => $post_id,
+			'post_id'         => (int) $post_id,
+			'calling_user_id' => get_current_user_id(),
 		];
 
+		// We return early if the job is already scheduled.
 		if (
 			! isset( $_POST['classifai_synthesize_speech'] )
 			|| (
@@ -529,6 +540,7 @@ class TextToSpeech extends Feature {
 			return;
 		}
 
+		// We enqueue the async action to generate the audio, if available.
 		if ( function_exists( 'as_enqueue_async_action' ) ) {
 			\as_enqueue_async_action( 'classifai_schedule_text_to_speech_job', $job_args, 'classifai' );
 			update_post_meta( $post_id, '_classifai_text_to_speech_scheduled', true );
@@ -538,11 +550,21 @@ class TextToSpeech extends Feature {
 	}
 
 	/**
-	 * Generate the text to speech job.
+	 * Generate the text to speech audio.
 	 *
-	 * @param int $post_id The post ID.
+	 * @param int      $post_id The post ID.
+	 * @param int|null $calling_user_id The user that made the request.
 	 */
-	public function generate_text_to_speech_audio( int $post_id ) {
+	public function generate_text_to_speech_audio( int $post_id, ?int $calling_user_id = null ) {
+		$original_user_id = get_current_user_id();
+
+		if ( ! $calling_user_id ) {
+			$calling_user_id = $original_user_id;
+		}
+
+		// Set the user to the one who started the process, to avoid permission issues.
+		wp_set_current_user( (int) $calling_user_id );
+
 		$results = $this->run( $post_id, 'synthesize' );
 
 		if ( $results && ! is_wp_error( $results ) ) {
@@ -560,6 +582,9 @@ class TextToSpeech extends Feature {
 				)
 			);
 		}
+
+		// Restore original user.
+		wp_set_current_user( $original_user_id );
 
 		delete_post_meta( $post_id, '_classifai_text_to_speech_scheduled' );
 	}
