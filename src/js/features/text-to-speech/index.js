@@ -35,6 +35,11 @@ const TextToSpeechPlugin = () => {
 		)
 	);
 
+	const isTextToSpeechScheduled = useSelect( ( select ) => {
+		const meta = select( 'core/editor' ).getCurrentPostAttribute( 'meta' );
+		return ( meta && meta._classifai_text_to_speech_scheduled ) ?? false;
+	} );
+
 	// Indicates whether generated audio should be displayed on the frontend.
 	const displayGeneratedAudio = useSelect( ( select ) =>
 		select( 'core/editor' ).getEditedPostAttribute(
@@ -150,6 +155,14 @@ const TextToSpeechPlugin = () => {
 		audioIcon = 'format-audio';
 	} else if ( isPreviewing ) {
 		audioIcon = 'controls-pause';
+	}
+
+	if ( isTextToSpeechScheduled ) {
+		return (
+			<ClassifaiEditorSettingPanel>
+				<p>{ __( 'Audio generation is in progress.', 'classifai' ) }</p>
+			</ClassifaiEditorSettingPanel>
+		);
 	}
 
 	return (

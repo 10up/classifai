@@ -89,6 +89,8 @@ class TextToSpeech extends Feature {
 		if ( $this->is_enabled() ) {
 			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 		}
+
+		add_action( 'classifai_schedule_text_to_speech_job', [ $this, 'generate_text_to_speech_audio' ] );
 	}
 
 	/**
@@ -222,6 +224,14 @@ class TextToSpeech extends Feature {
 			return;
 		}
 
+		$job_args = [
+			'post_id' => $request->get_param( 'id' ),
+		];
+
+		if ( function_exists( 'as_has_scheduled_action' ) && \as_has_scheduled_action( 'classifai_schedule_text_to_speech_job', $job_args, 'classifai' ) ) {
+			return;
+		}
+
 		$audio_id = get_post_meta( $request->get_param( 'id' ), self::AUDIO_ID_KEY, true );
 
 		// Since we have dynamic generation option agnostic to meta saves we need a flag to differentiate audio generation accurately
@@ -238,22 +248,11 @@ class TextToSpeech extends Feature {
 			( $process_content && null === $request->get_param( 'classifai_synthesize_speech' ) ) ||
 			true === $request->get_param( 'classifai_synthesize_speech' )
 		) {
-			$results = $this->run( $request->get_param( 'id' ), 'synthesize' );
-
-			if ( $results && ! is_wp_error( $results ) ) {
-				$this->save( $results, $request->get_param( 'id' ) );
-				delete_post_meta( $post->ID, '_classifai_text_to_speech_error' );
-			} elseif ( is_wp_error( $results ) ) {
-				update_post_meta(
-					$post->ID,
-					'_classifai_text_to_speech_error',
-					wp_json_encode(
-						[
-							'code'    => $results->get_error_code(),
-							'message' => $results->get_error_message(),
-						]
-					)
-				);
+			if ( function_exists( 'as_enqueue_async_action' ) ) {
+				\as_enqueue_async_action( 'classifai_schedule_text_to_speech_job', $job_args, 'classifai' );
+				update_post_meta( $request->get_param( 'id' ), '_classifai_text_to_speech_scheduled', true );
+			} else {
+				$this->generate_text_to_speech_audio( $request->get_param( 'id' ) );
 			}
 		}
 	}
@@ -267,6 +266,16 @@ class TextToSpeech extends Feature {
 			register_meta(
 				$post_type,
 				'_classifai_text_to_speech_error',
+				[
+					'show_in_rest'  => true,
+					'single'        => true,
+					'auth_callback' => '__return_true',
+				]
+			);
+
+			register_meta(
+				$post_type,
+				'_classifai_text_to_speech_scheduled',
 				[
 					'show_in_rest'  => true,
 					'single'        => true,
@@ -425,7 +434,14 @@ class TextToSpeech extends Feature {
 		if ( $post_type ) {
 			$post_type_label = $post_type->labels->singular_name;
 		}
-		?>
+
+		$is_as_scheduled_job = function_exists( 'as_has_scheduled_action' ) && \as_has_scheduled_action( 'classifai_schedule_text_to_speech_job', [ 'post_id' => $post->ID ], 'classifai' );
+
+		if ( $is_as_scheduled_job ) : ?>
+		<p>
+			<?php esc_html_e( 'Audio generation is in progress.', 'classifai' ); ?>
+		</p>
+		<?php else : ?>
 
 		<p>
 			<label for="classifai_synthesize_speech">
@@ -451,6 +467,8 @@ class TextToSpeech extends Feature {
 				?>
 			</span>
 		</p>
+
+		<?php endif; ?>
 
 		<?php
 		if ( $source_url ) {
@@ -497,25 +515,53 @@ class TextToSpeech extends Feature {
 			delete_post_meta( $post_id, self::DISPLAY_GENERATED_AUDIO );
 		}
 
-		if ( isset( $_POST['classifai_synthesize_speech'] ) ) {
-			$results = $this->run( $post_id, 'synthesize' );
+		$job_args = [
+			'post_id' => $post_id,
+		];
 
-			if ( $results && ! is_wp_error( $results ) ) {
-				$this->save( $results, $post_id );
-				delete_post_meta( $post_id, '_classifai_text_to_speech_error' );
-			} elseif ( is_wp_error( $results ) ) {
-				update_post_meta(
-					$post_id,
-					'_classifai_text_to_speech_error',
-					wp_json_encode(
-						[
-							'code'    => $results->get_error_code(),
-							'message' => $results->get_error_message(),
-						]
-					)
-				);
-			}
+		if (
+			! isset( $_POST['classifai_synthesize_speech'] )
+			|| (
+				function_exists( 'as_has_scheduled_action' )
+				&& \as_has_scheduled_action( 'classifai_schedule_text_to_speech_job', $job_args, 'classifai' )
+			)
+		) {
+			return;
 		}
+
+		if ( function_exists( 'as_enqueue_async_action' ) ) {
+			\as_enqueue_async_action( 'classifai_schedule_text_to_speech_job', $job_args, 'classifai' );
+			update_post_meta( $post_id, '_classifai_text_to_speech_scheduled', true );
+		} else {
+			$this->generate_text_to_speech_audio( $post_id );
+		}
+	}
+
+	/**
+	 * Generate the text to speech job.
+	 *
+	 * @param int $post_id The post ID.
+	 */
+	public function generate_text_to_speech_audio( int $post_id ) {
+		$results = $this->run( $post_id, 'synthesize' );
+
+		if ( $results && ! is_wp_error( $results ) ) {
+			$this->save( $results, $post_id );
+			delete_post_meta( $post_id, '_classifai_text_to_speech_error' );
+		} elseif ( is_wp_error( $results ) ) {
+			update_post_meta(
+				$post_id,
+				'_classifai_text_to_speech_error',
+				wp_json_encode(
+					[
+						'code'    => $results->get_error_code(),
+						'message' => $results->get_error_message(),
+					]
+				)
+			);
+		}
+
+		delete_post_meta( $post_id, '_classifai_text_to_speech_scheduled' );
 	}
 
 	/**
