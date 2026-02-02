@@ -95,12 +95,14 @@ class Classification extends Feature {
 		$post_types = $this->get_supported_post_types();
 		foreach ( $post_types as $post_type ) {
 			register_meta(
-				$post_type,
+				'post',
 				'_classifai_error',
 				[
-					'show_in_rest'  => true,
-					'single'        => true,
-					'auth_callback' => '__return_true',
+					'object_subtype' => $post_type,
+					'type'           => 'string',
+					'show_in_rest'   => true,
+					'single'         => true,
+					'auth_callback'  => '__return_true',
 				]
 			);
 		}
