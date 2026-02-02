@@ -13,6 +13,7 @@ import { STORE_NAME } from '../../../data/store';
 import { OllamaBaseSettings } from './base';
 import { useFeatureContext } from '../../feature-settings/context';
 import { SettingsRow } from '../../settings-row';
+import { ModelsSelector } from './models';
 
 /**
  * Component for Ollama Provider settings.
@@ -41,6 +42,13 @@ export const OllamaSettings = ( { isConfigured = false } ) => {
 					onChange={ onChange }
 				/>
 			) }
+
+			<ModelsSelector
+				providerSettings={ providerSettings }
+				providerName={ providerName }
+				onChange={ onChange }
+			/>
+
 			{ [
 				'feature_content_resizing',
 				'feature_title_generation',

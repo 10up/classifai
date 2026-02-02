@@ -12,6 +12,7 @@ import { STORE_NAME } from '../../../data/store';
 import { OllamaBaseSettings } from './base';
 import { useFeatureContext } from '../../feature-settings/context';
 import { PromptRepeater } from '../../feature-additional-settings/prompt-repeater';
+import { ModelsSelector } from './models';
 
 /**
  * Component for Ollama Multimodal Provider settings.
@@ -62,10 +63,17 @@ export const OllamaMultimodalSettings = ( { isConfigured = false } ) => {
 			{ ! isConfigured && (
 				<OllamaBaseSettings
 					providerSettings={ providerSettings }
-					providerName
+					providerName={ providerName }
 					onChange={ onChange }
 				/>
 			) }
+
+			<ModelsSelector
+				providerSettings={ providerSettings }
+				providerName={ providerName }
+				onChange={ onChange }
+			/>
+
 			{ [
 				'feature_descriptive_text_generator',
 				'feature_image_to_text_generator',

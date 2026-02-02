@@ -8,6 +8,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
  */
 import { STORE_NAME } from '../../../data/store';
 import { OpenAIBaseSettings } from './base';
+import { moderationHelperText } from '../../../utils/helper-text';
 
 /**
  * Component for OpenAI Moderation settings.
@@ -34,6 +35,12 @@ export const OpenAIModerationSettings = ( { isConfigured = false } ) => {
 					onChange={ onChange }
 				/>
 			) }
+
+			<div className="display-container-wrapper">
+				<div className="helper-text-content">
+					<div>{ moderationHelperText.content_types }</div>
+				</div>
+			</div>
 		</>
 	);
 };
