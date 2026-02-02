@@ -314,12 +314,13 @@ Disallow: /
 			new \Classifai\Features\Classification(),
 			new \Classifai\Features\TermCleanup(),
 			new \Classifai\Features\RecommendedContent(),
+			new \Classifai\Features\TextToSpeech(),
 		];
 		$is_feature_being_enabled = false;
 
 		foreach ( $features as $feature ) {
 			if ( ! $feature->get_feature_provider_instance() ) {
-				// Skip if the feature does not have a provider instance.
+				// Skip if the feature does not have a Provider instance.
 				continue;
 			}
 
@@ -328,6 +329,10 @@ Disallow: /
 				case 'openai_embeddings':
 				case 'azure_openai_embeddings':
 				case 'ollama_embeddings':
+				case 'aws_polly':
+				case 'ms_azure_text_to_speech':
+				case 'openai_text_to_speech':
+				case 'elevenlabs_text_to_speech':
 					break;
 				default:
 					continue 2;
