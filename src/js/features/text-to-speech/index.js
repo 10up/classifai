@@ -244,16 +244,10 @@ registerPlugin( 'classifai-plugin-text-to-speech', {
 	render: TextToSpeechPlugin,
 } );
 
-let saveHappened = false;
 let showingNotice = false;
 
 subscribe( () => {
-	if ( saveHappened === false ) {
-		saveHappened = wp.data.select( 'core/editor' ).isSavingPost() === true;
-	}
-
 	if (
-		saveHappened &&
 		wp.data.select( 'core/editor' ).isSavingPost() === false &&
 		showingNotice === false
 	) {
@@ -268,8 +262,6 @@ subscribe( () => {
 				.createErrorNotice(
 					`Audio generation failed. Error: ${ error.code } - ${ error.message }`
 				);
-			saveHappened = false;
-			showingNotice = false;
 		}
 	}
 } );
