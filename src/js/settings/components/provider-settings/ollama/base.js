@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { SettingsRow } from '../settings-row';
+import { SettingsRow } from '../../settings-row';
 
 /**
  * Component for the base Ollama Provider settings.
@@ -56,6 +56,7 @@ export const OllamaBaseSettings = ( {
 				type="text"
 				value={ providerSettings?.endpoint_url || '' }
 				onChange={ ( value ) => onChange( { endpoint_url: value } ) }
+				__next40pxDefaultSize
 			/>
 		</SettingsRow>
 	);
