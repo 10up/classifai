@@ -5,6 +5,20 @@ import { SelectControl } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import { SettingsRow } from '../../settings-row';
+
+/**
+ * React Component for Ollama Models selector.
+ *
+ * @param {Object}   props                  Component props.
+ * @param {Object}   props.providerSettings The provider settings.
+ * @param {string}   props.providerName     Name of Provider.
+ * @param {Function} props.onChange         Function to call when the provider settings change.
+ * @return {React.ReactElement} ModelsSelector component.
+ */
 export const ModelsSelector = ( {
 	providerSettings,
 	providerName,
@@ -56,6 +70,7 @@ export const ModelsSelector = ( {
 				options={ models }
 				disabled={ ! hasModels }
 				__nextHasNoMarginBottom
+				__next40pxDefaultSize
 			/>
 		</SettingsRow>
 	);
