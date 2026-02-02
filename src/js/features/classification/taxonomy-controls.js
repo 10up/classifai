@@ -8,7 +8,13 @@ import { FormTokenField } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { getEntitiesInfo, useTaxonomies } from './utils';
-import { useState, Fragment, useRef, useEffect, useCallback } from '@wordpress/element';
+import {
+	useState,
+	Fragment,
+	useRef,
+	useEffect,
+	useCallback,
+} from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 const termsPerPage = -1;
@@ -487,6 +493,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			}
 
 			// Watch for DOM changes to re-mark new tokens
+			// eslint-disable-next-line no-undef
 			const observer = new MutationObserver( () => {
 				markEditableTokens( fieldRef );
 			} );
@@ -503,7 +510,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			observers.forEach( ( observer ) => observer.disconnect() );
 		};
 	}, [ taxonomiesInfo, query.taxQuery, handleAITokenClick ] );
-
 
 	const onTermsChange = ( taxonomySlug ) => async ( newTermValues ) => {
 		const taxonomyInfo = taxonomiesInfo.find(
