@@ -93,7 +93,6 @@ function renderProviderSettings( profileId, providerSettings, onChange ) {
 					providerSettings={ providerSettings }
 					onChange={ onChange }
 					providerName="ollama"
-					showModels={ false }
 				/>
 			);
 
