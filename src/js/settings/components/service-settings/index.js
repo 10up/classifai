@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { NavLink, useParams, useNavigate } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
 
 /**
  * WordPress dependencies
