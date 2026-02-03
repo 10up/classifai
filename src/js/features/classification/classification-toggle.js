@@ -29,6 +29,7 @@ export const ClassificationToggle = () => {
 			onChange={ ( value ) => {
 				editPost( { classifai_process_content: value ? 'yes' : 'no' } );
 			} }
+			__nextHasNoMarginBottom
 		/>
 	);
 };
