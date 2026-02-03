@@ -225,7 +225,9 @@ class AmazonPolly extends Provider {
 				$new_settings[ static::ID ]['access_key_id']     = $new_access_key_id;
 				$new_settings[ static::ID ]['secret_access_key'] = $new_secret_access_key;
 				$new_settings[ static::ID ]['aws_region']        = $new_aws_region;
-				$new_settings[ static::ID ]['voices']            = $this->connect_to_service(
+
+				// Connect to the service and get voices.
+				$new_settings[ static::ID ]['voices'] = $this->connect_to_service(
 					array(
 						'access_key_id'     => $new_access_key_id,
 						'secret_access_key' => $new_secret_access_key,
@@ -300,7 +302,7 @@ class AmazonPolly extends Provider {
 				return $pre;
 			}
 
-			$polly_client = $this->get_polly_client( $args );
+			$polly_client = $this->get_polly_client( $default );
 			$polly_voices = $polly_client->describeVoices();
 			return $polly_voices->get( 'Voices' );
 		} catch ( \Exception $e ) {
@@ -529,29 +531,21 @@ class AmazonPolly extends Provider {
 	 * @return \Aws\Polly\PollyClient|null
 	 */
 	public function get_polly_client( array $aws_config = array() ) {
-		$settings = $this->feature_instance->get_settings( static::ID );
-
-		$default = array(
-			'access_key_id'     => $settings['access_key_id'] ?? '',
-			'secret_access_key' => $settings['secret_access_key'] ?? '',
-			'aws_region'        => $settings['aws_region'] ?? 'us-east-1',
-		);
-
-		$default = wp_parse_args( $aws_config, $default );
+		$credentials = $this->get_credentials( [ static::ID => $aws_config ] );
 
 		// Return if credentials don't exist.
-		if ( empty( $default['access_key_id'] ) || empty( $default['secret_access_key'] ) ) {
+		if ( empty( $credentials['access_key_id'] ) || empty( $credentials['secret_access_key'] ) ) {
 			return null;
 		}
 
 		// Set the AWS SDK configuration.
 		$aws_sdk_config = [
-			'region'      => $default['aws_region'] ?? 'us-east-1',
+			'region'      => $credentials['aws_region'] ?? 'us-east-1',
 			'version'     => 'latest',
 			'ua_append'   => [ 'request-source/classifai' ],
 			'credentials' => [
-				'key'    => $default['access_key_id'],
-				'secret' => $default['secret_access_key'],
+				'key'    => $credentials['access_key_id'],
+				'secret' => $credentials['secret_access_key'],
 			],
 		];
 
