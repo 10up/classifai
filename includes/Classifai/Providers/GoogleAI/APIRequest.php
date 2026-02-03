@@ -31,9 +31,9 @@ class APIRequest {
 	public Provider $provider;
 
 	/**
-	 * The Feature instance.
+	 * The Feature ID.
 	 *
-	 * @var Feature
+	 * @var string
 	 */
 	public $feature;
 
