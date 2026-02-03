@@ -255,11 +255,6 @@ class Grok extends Provider {
 	 * @return array|WP_Error
 	 */
 	public function authenticate_credentials( array $settings = [] ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your xAI API key.', 'classifai' ) );
-		}
-
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( $this, $this->feature_instance, $settings );
 		$response = $request->get( $this->models_url, [ 'use_vip' => true ] );

@@ -284,7 +284,7 @@ class OpenAI extends Provider {
 	/**
 	 * Authenticates our credentials.
 	 *
-	 * array $settings Settings being saved.
+	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
 	protected function authenticate_credentials( array $settings = [] ) {

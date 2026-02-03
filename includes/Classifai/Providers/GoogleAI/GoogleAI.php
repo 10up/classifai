@@ -42,7 +42,6 @@ trait GoogleAI {
 			);
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
-			$new_settings[ static::ID ]['models']        = $models;
 		}
 
 		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
