@@ -7,6 +7,7 @@ use Classifai\Features\RecommendedContent;
 use Classifai\Services\ServicesManager;
 use Classifai\Taxonomy\TaxonomyFactory;
 use Classifai\Helpers\CredentialReuse;
+use Classifai\Providers\CredentialObfuscator;
 
 use function Classifai\get_asset_info;
 use function Classifai\get_plugin;
@@ -226,14 +227,18 @@ class Settings {
 	/**
 	 * Get the settings.
 	 *
-	 * @return array The settings.
+	 * Obfuscates sensitive credentials before returning to prevent
+	 * exposure of API keys in the frontend.
+	 *
+	 * @return array The settings with credentials obfuscated.
 	 */
 	public function get_settings(): array {
 		$features = $this->get_features( true );
 		$settings = [];
 
 		foreach ( $features as $feature ) {
-			$settings[ $feature::ID ] = $feature->get_settings();
+			$feature_settings         = $feature->get_settings();
+			$settings[ $feature::ID ] = CredentialObfuscator::obfuscate_feature_settings( $feature_settings );
 		}
 
 		return $settings;
