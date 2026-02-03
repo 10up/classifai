@@ -5,6 +5,8 @@
 
 namespace Classifai\Providers;
 
+use Classifai\Providers\CredentialResolver;
+
 abstract class Provider {
 
 	/**
@@ -166,5 +168,61 @@ abstract class Provider {
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
+	}
+
+	/**
+	 * Get the credentials for the Provider.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param array $settings Feature settings. Optional, will default to using saved settings.
+	 * @return array
+	 */
+	public function get_credentials( array $settings = [] ): array {
+		// Get our Provider-specific settings.
+		if (
+			! empty( $settings ) &&
+			array_key_exists( static::ID, $settings ) &&
+			! empty( $settings[ static::ID ] )
+		) {
+			$feature_provider_settings = $settings[ static::ID ];
+		} else {
+			$feature_provider_settings = $this->feature_instance->get_settings( static::ID ) ?? [];
+		}
+
+		/**
+		 * Filter the credentials for the Provider.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_provider_credentials
+		 *
+		 * @param array $credentials The credentials for the Provider.
+		 * @param string $provider_id The ID of the Provider.
+		 * @param string|null $feature_id The ID of the Feature, or null if not set.
+		 * @param array $feature_provider_settings The Provider specific Feature settings.
+		 * @return array The filtered credentials.
+		 */
+		return apply_filters(
+			'classifai_provider_credentials',
+			CredentialResolver::resolve(
+				static::ID,
+				$feature_provider_settings
+			),
+			static::ID,
+			$this->feature_instance ? $this->feature_instance::ID : null,
+			$feature_provider_settings
+		);
+	}
+
+	/**
+	 * Get a credential field value for the Provider.
+	 *
+	 * @param string $credential_key The credential field name.
+	 * @param array  $settings       Feature settings. Optional, will default to using saved settings.
+	 * @return mixed The credential value, or null if not set.
+	 */
+	public function get_credential( string $credential_key, array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
+		return $credentials[ $credential_key ] ?? null;
 	}
 }
