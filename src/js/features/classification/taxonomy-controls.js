@@ -746,6 +746,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 									value={ getExistingTaxQueryValue( slug ) }
 									suggestions={ terms.names }
 									onChange={ onTermsChange( slug ) }
+									__next40pxDefaultSize
 								/>
 							</div>
 							{ ! hasAI && (

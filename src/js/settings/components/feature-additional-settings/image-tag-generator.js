@@ -50,6 +50,7 @@ export const ImageTagGeneratorSettings = () => {
 					}
 					options={ options }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow

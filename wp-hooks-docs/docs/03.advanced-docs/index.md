@@ -19,6 +19,7 @@ Welcome to the ClassifAI Advanced Documentation. This section provides in-depth 
 - [Migration Guide (v2 to v3)](./04.migration-guide-v2-to-v3.md) - Step-by-step guide for upgrading from ClassifAI v2 to v3
 - [Chrome Built-in AI](./05.chrome-built-in-ai.md) - Documentation for Chrome's built-in AI integration
 - [Run Locally Hosted LLMs](./06.run-locally-hosted-llms.md) - Guide for setting up and using local language models
+- [Extending ClassifAI](./09.extending-classifai.md) - Step-by-step tutorials to extend ClassifAI, like creating custom Features and extensions
 
 ## Architecture & Integration
 
