@@ -32,9 +32,9 @@ class APIRequest {
 	/**
 	 * The Provider instance.
 	 *
-	 * @var Provider
+	 * @var Provider|null
 	 */
-	public Provider $provider;
+	public ?Provider $provider = null;
 
 	/**
 	 * The Feature name.

@@ -189,7 +189,7 @@ abstract class Provider {
 		) {
 			$feature_provider_settings = $settings[ $provider_id ];
 		} else {
-			$feature_provider_settings = $this->feature_instance->get_settings( $provider_id ) ?? [];
+			$feature_provider_settings = $this->feature_instance ? $this->feature_instance->get_settings( $provider_id ) : [];
 		}
 
 		// Get our credentials.
