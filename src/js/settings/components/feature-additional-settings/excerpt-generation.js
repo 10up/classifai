@@ -92,6 +92,7 @@ export const ExcerptGenerationSettings = () => {
 					onChange={ ( value ) =>
 						setFeatureSettings( { length: value } )
 					}
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>
