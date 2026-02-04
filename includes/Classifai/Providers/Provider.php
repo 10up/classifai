@@ -223,9 +223,9 @@ abstract class Provider {
 		 * @since x.x.x
 		 * @hook classifai_provider_credentials_{$provider_id}
 		 *
-		 * @param array $credentials The credentials for the Provider.
-		 * @param string|null $feature_id The ID of the Feature, or null if not set.
-		 * @param array $feature_provider_settings The Provider specific Feature settings.
+		 * @param array       $credentials               The credentials for the Provider.
+		 * @param string|null $feature_id                The ID of the Feature, or null if not set.
+		 * @param array       $feature_provider_settings The Provider specific Feature settings.
 		 * @return array The filtered credentials.
 		 */
 		$credentials = apply_filters(
@@ -241,10 +241,10 @@ abstract class Provider {
 		 * @since x.x.x
 		 * @hook classifai_provider_credentials
 		 *
-		 * @param array $credentials The credentials for the Provider.
-		 * @param string $provider_id The ID of the Provider.
-		 * @param string|null $feature_id The ID of the Feature, or null if not set.
-		 * @param array $feature_provider_settings The Provider specific Feature settings.
+		 * @param array       $credentials               The credentials for the Provider.
+		 * @param string      $provider_id               The ID of the Provider.
+		 * @param string|null $feature_id                The ID of the Feature, or null if not set.
+		 * @param array       $feature_provider_settings The Provider specific Feature settings.
 		 * @return array The filtered credentials.
 		 */
 		return apply_filters(
