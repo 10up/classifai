@@ -1469,7 +1469,7 @@ class Embeddings extends Provider {
 		$backup_feature_instance = $this->feature_instance;
 		$this->feature_instance  = $feature;
 
-		$request = new APIRequest( $this, $this->feature_instance );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the request body before sending to OpenAI.
@@ -1550,7 +1550,7 @@ class Embeddings extends Provider {
 		$backup_feature_instance = $this->feature_instance;
 		$this->feature_instance  = $feature;
 
-		$request = new APIRequest( $this, $this->feature_instance );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the request body before sending to OpenAI.

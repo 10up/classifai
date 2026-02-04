@@ -212,7 +212,7 @@ class GeminiAPI extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $this, $this->feature_instance );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
@@ -333,7 +333,7 @@ class GeminiAPI extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or Google AI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $this, $this->feature_instance );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
@@ -449,7 +449,7 @@ class GeminiAPI extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $this, $this->feature_instance );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
