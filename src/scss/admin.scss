@@ -883,6 +883,61 @@ input.classifai-button {
 	}
 }
 
+// Editable AI Token Styles
+.classifai-taxonomy-field-wrapper {
+	.classifai-ai-token--editable {
+		.components-form-token-field__token-text {
+			cursor: pointer;
+			position: relative;
+			border-bottom: 1px dashed var(--classifai-admin-theme-color, #007cba);
+			transition: all 0.15s ease;
+
+			&:hover {
+				background-color: rgba(var(--classifai-admin-theme-color--rgb, 0, 124, 186), 0.1);
+				border-bottom-style: solid;
+			}
+
+			&::before {
+				content: "\270E";
+				font-size: 10px;
+				margin-right: 3px;
+				opacity: 0;
+				transition: opacity 0.15s ease;
+			}
+
+			&:hover::before {
+				opacity: 0.7;
+			}
+		}
+
+		// Make token invisible (but keep space) while editing
+		&.classifai-ai-token--editing {
+			visibility: hidden;
+		}
+	}
+
+	// Inline edit input - overlay positioned on top of token
+	.classifai-inline-edit-input {
+		display: flex;
+		align-items: center;
+		padding: 0 8px;
+		font-size: 13px;
+		line-height: 1;
+		background: #fff;
+		border: 2px solid var(--classifai-admin-theme-color, #007cba);
+		border-radius: 2px;
+		outline: none;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+		font-family: inherit;
+		box-sizing: border-box;
+
+		&:focus {
+			border-color: var(--classifai-admin-theme-color, #007cba);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
+	}
+}
+
 .classifai-modal__notes {
     max-width: 350px;
     float: left;
