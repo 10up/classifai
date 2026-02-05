@@ -747,6 +747,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 									suggestions={ terms.names }
 									onChange={ onTermsChange( slug ) }
 									__next40pxDefaultSize
+									__nextHasNoMarginBottom
 								/>
 							</div>
 							{ ! hasAI && (
