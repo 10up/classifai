@@ -132,54 +132,75 @@ class Speech extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( array $new_settings ): array {
-		$settings               = $this->feature_instance->get_settings();
-		$is_credentials_changed = false;
+		$settings      = $this->feature_instance->get_settings();
+		$authenticated = $this->authenticate_credentials( $new_settings );
 
-		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
-		$new_settings[ static::ID ]['voices']        = $settings[ static::ID ]['voices'];
-
-		if ( ! empty( $new_settings[ static::ID ]['endpoint_url'] ) && ! empty( $new_settings[ static::ID ]['api_key'] ) ) {
-			$new_url = trailingslashit( esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ) );
-			$new_key = sanitize_text_field( $new_settings[ static::ID ]['api_key'] );
-
-			if ( $new_url !== $settings[ static::ID ]['endpoint_url'] || $new_key !== $settings[ static::ID ]['api_key'] ) {
-				$is_credentials_changed = true;
-			}
-
-			if ( $is_credentials_changed ) {
-				$new_settings[ static::ID ]['endpoint_url'] = $new_url;
-				$new_settings[ static::ID ]['api_key']      = $new_key;
-
-				// Connect to the service and get voices.
-				$new_settings[ static::ID ]['voices'] = $this->connect_to_service(
-					array(
-						'endpoint_url' => $new_url,
-						'api_key'      => $new_key,
-					)
-				);
-
-				if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
-					$new_settings[ static::ID ]['authenticated'] = true;
-				} else {
-					$new_settings[ static::ID ]['voices']        = [];
-					$new_settings[ static::ID ]['authenticated'] = false;
-				}
-			}
-		} else {
-			$new_settings[ static::ID ]['endpoint_url'] = $settings[ static::ID ]['endpoint_url'];
-			$new_settings[ static::ID ]['api_key']      = $settings[ static::ID ]['api_key'];
+		if ( is_wp_error( $authenticated ) ) {
+			$new_settings[ static::ID ]['authenticated'] = false;
 
 			add_settings_error(
-				$this->feature_instance->get_option_name(),
-				'classifai-azure-text-to-speech-auth-empty',
-				esc_html__( 'One or more credentials required to connect to the Azure Text to Speech service is empty.', 'classifai' ),
+				'api_key',
+				'classifai-auth',
+				$authenticated->get_error_message(),
 				'error'
 			);
+		} else {
+			$new_settings[ static::ID ]['authenticated'] = true;
+		}
+
+		$new_settings[ static::ID ]['voices'] = $settings[ static::ID ]['voices'];
+
+		$new_settings[ static::ID ]['endpoint_url'] = trailingslashit( esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] ) );
+		$new_settings[ static::ID ]['api_key']      = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
+
+		// Connect to the service and get voices.
+		$new_settings[ static::ID ]['voices'] = $this->connect_to_service(
+			array(
+				'endpoint_url' => $new_settings[ static::ID ]['endpoint_url'],
+				'api_key'      => $new_settings[ static::ID ]['api_key'],
+			)
+		);
+
+		if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
+			$new_settings[ static::ID ]['authenticated'] = true;
+		} else {
+			$new_settings[ static::ID ]['voices']        = [];
+			$new_settings[ static::ID ]['authenticated'] = false;
 		}
 
 		$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] ?? $settings[ static::ID ]['voice'] );
 
 		return $new_settings;
+	}
+
+	/**
+	 * Authenticates our credentials.
+	 *
+	 * @param array $settings Settings being saved.
+	 * @return bool|WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
+
+		// Create request arguments.
+		$request_params = array(
+			'headers' => array(
+				'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
+				'Content-Type'              => 'application/json',
+			),
+			'timeout' => 20, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			'use_vip' => true,
+		);
+
+		// Create request URL.
+		$request_url = sprintf(
+			'%1$scognitiveservices/voices/list',
+			trailingslashit( $credentials['endpoint_url'] ?? '' )
+		);
+
+		$response = safe_wp_remote_get( $request_url, $request_params );
+
+		return ! is_wp_error( $response ) ? true : $response;
 	}
 
 	/**
@@ -216,7 +237,7 @@ class Speech extends Provider {
 		// Create request URL.
 		$request_url = sprintf(
 			'%1$scognitiveservices/voices/list',
-			$credentials['endpoint_url'] ?? ''
+			trailingslashit( $credentials['endpoint_url'] ?? '' )
 		);
 
 		$response = safe_wp_remote_get( $request_url, $request_params );
