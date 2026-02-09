@@ -201,9 +201,6 @@ class AmazonPolly extends Provider {
 		$settings      = $this->feature_instance->get_settings();
 		$authenticated = $this->authenticate_credentials( $new_settings );
 
-		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
-		$new_settings[ static::ID ]['voices']        = $settings[ static::ID ]['voices'];
-
 		if ( is_wp_error( $authenticated ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
 
@@ -217,9 +214,9 @@ class AmazonPolly extends Provider {
 			$new_settings[ static::ID ]['authenticated'] = true;
 		}
 
-		$new_access_key_id     = sanitize_text_field( $new_settings[ static::ID ]['access_key_id'] );
-		$new_secret_access_key = sanitize_text_field( $new_settings[ static::ID ]['secret_access_key'] );
-		$new_aws_region        = sanitize_text_field( $new_settings[ static::ID ]['aws_region'] );
+		$new_access_key_id     = sanitize_text_field( $new_settings[ static::ID ]['access_key_id'] ?? $settings[ static::ID ]['access_key_id'] );
+		$new_secret_access_key = sanitize_text_field( $new_settings[ static::ID ]['secret_access_key'] ?? $settings[ static::ID ]['secret_access_key'] );
+		$new_aws_region        = sanitize_text_field( $new_settings[ static::ID ]['aws_region'] ?? $settings[ static::ID ]['aws_region'] );
 
 		$new_settings[ static::ID ]['access_key_id']     = $new_access_key_id;
 		$new_settings[ static::ID ]['secret_access_key'] = $new_secret_access_key;
