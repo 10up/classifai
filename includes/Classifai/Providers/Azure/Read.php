@@ -9,6 +9,7 @@
 namespace Classifai\Providers\Azure;
 
 use WP_Error;
+
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\safe_wp_remote_post;
 use function Classifai\safe_wp_remote_get;

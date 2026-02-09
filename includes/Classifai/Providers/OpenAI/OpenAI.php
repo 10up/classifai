@@ -63,7 +63,7 @@ trait OpenAI {
 	 */
 	public function authenticate_credentials( array $settings = [] ) {
 		// Make request to ensure credentials work.
-		$request  = new APIRequest( $this, $this->feature_instance, $settings );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
 		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {

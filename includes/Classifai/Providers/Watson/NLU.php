@@ -377,9 +377,9 @@ class NLU extends Provider {
 
 		$credentials       = $this->get_credentials( $settings );
 		$request           = new APIRequest();
-		$request->username = $credentials['username'];
-		$request->password = $credentials['password'];
-		$base_url          = trailingslashit( $credentials['endpoint_url'] ) . 'v1/analyze';
+		$request->username = $credentials['username'] ?? '';
+		$request->password = $credentials['password'] ?? '';
+		$base_url          = trailingslashit( $credentials['endpoint_url'] ?? '' ) . 'v1/analyze';
 		$url               = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
 		$options           = [
 			'body'    => wp_json_encode(

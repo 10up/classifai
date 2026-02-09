@@ -249,14 +249,14 @@ class Grok extends Provider {
 	}
 
 	/**
-	 * Authenticate our credentials.
+	 * Authenticate our credentials and get the models.
 	 *
 	 * @param array $settings Settings being saved.
 	 * @return array|WP_Error
 	 */
 	public function authenticate_credentials( array $settings = [] ) {
 		// Make request to ensure credentials work.
-		$request  = new APIRequest( $this, $this->feature_instance, $settings );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
 		$response = $request->get( $this->models_url, [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {
@@ -362,7 +362,7 @@ class Grok extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Descriptive text generation is disabled or xAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $this, $this->feature_instance );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the prompt we will send to xAI Grok.
@@ -468,7 +468,7 @@ class Grok extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $this, $this->feature_instance );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
@@ -577,7 +577,7 @@ class Grok extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or xAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $this, $this->feature_instance );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
@@ -682,7 +682,7 @@ class Grok extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $this, $this->feature_instance );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );

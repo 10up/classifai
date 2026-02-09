@@ -1000,14 +1000,12 @@ class Embeddings extends OpenAI {
 			$text
 		);
 
-		$api_key = $this->get_credential( 'api_key' );
-
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $api_key ?? '',
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -1086,14 +1084,12 @@ class Embeddings extends OpenAI {
 			$strings
 		);
 
-		$api_key = $this->get_credential( 'api_key' );
-
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $api_key ?? '',
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),

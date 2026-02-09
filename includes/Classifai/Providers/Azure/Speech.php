@@ -236,7 +236,7 @@ class Speech extends Provider {
 		// Create request arguments.
 		$request_params = array(
 			'headers' => array(
-				'Ocp-Apim-Subscription-Key' => $credentials['api_key'],
+				'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 				'Content-Type'              => 'application/json',
 			),
 			'timeout' => 20, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
@@ -246,7 +246,7 @@ class Speech extends Provider {
 		// Create request URL.
 		$request_url = sprintf(
 			'%1$scognitiveservices/voices/list',
-			trailingslashit( $credentials['endpoint_url'] )
+			trailingslashit( $credentials['endpoint_url'] ?? '' )
 		);
 
 		$response = safe_wp_remote_get( $request_url, $request_params );
