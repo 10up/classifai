@@ -67,6 +67,7 @@ export const AzureTextToSpeechSettings = ( { isConfigured = false } ) => {
 							onChange={ ( value ) =>
 								onChange( { endpoint_url: value } )
 							}
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 					<SettingsRow label={ __( 'API Key', 'classifai' ) }>
@@ -77,6 +78,7 @@ export const AzureTextToSpeechSettings = ( { isConfigured = false } ) => {
 							onChange={ ( value ) =>
 								onChange( { api_key: value } )
 							}
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 				</>
@@ -94,6 +96,7 @@ export const AzureTextToSpeechSettings = ( { isConfigured = false } ) => {
 							} )
 						) }
 						__nextHasNoMarginBottom
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }

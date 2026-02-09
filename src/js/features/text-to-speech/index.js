@@ -172,6 +172,7 @@ const TextToSpeechPlugin = () => {
 				} }
 				disabled={ isProcessingAudio }
 				isBusy={ isProcessingAudio }
+				__nextHasNoMarginBottom
 			/>
 			{ sourceUrl && (
 				<>
@@ -189,6 +190,7 @@ const TextToSpeechPlugin = () => {
 						} }
 						disabled={ isProcessingAudio }
 						isBusy={ isProcessingAudio }
+						__nextHasNoMarginBottom
 					/>
 					<BaseControl
 						id="classifai-audio-preview-controls"

@@ -366,7 +366,7 @@ class NLU extends Provider {
 	 * @param array $settings The list of settings to be saved
 	 * @return bool|WP_Error
 	 */
-	public function authenticate_credentials( array $settings ) {
+	protected function authenticate_credentials( array $settings ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $settings[ static::ID ]['username'] )
 			|| empty( $settings[ static::ID ]['password'] )

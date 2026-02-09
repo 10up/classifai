@@ -2,7 +2,6 @@
 
 namespace Classifai\Providers\GoogleAI;
 
-use Classifai\Features\Feature;
 use Classifai\Providers\Provider;
 use WP_Error;
 
@@ -24,14 +23,21 @@ use function Classifai\safe_wp_remote_post;
 class APIRequest {
 
 	/**
-	 * The Provider instance.
+	 * The Google AI API key.
 	 *
-	 * @var Provider
+	 * @var string
 	 */
-	public Provider $provider;
+	public $api_key;
 
 	/**
-	 * The Feature ID.
+	 * The Provider instance.
+	 *
+	 * @var Provider|null
+	 */
+	public ?Provider $provider = null;
+
+	/**
+	 * The Feature name.
 	 *
 	 * @var string
 	 */
@@ -47,13 +53,15 @@ class APIRequest {
 	/**
 	 * Google AI APIRequest constructor.
 	 *
-	 * @param Provider     $provider Provider instance.
-	 * @param Feature|null $feature Feature instance.
-	 * @param array        $settings Feature settings. Optional, useful when settings aren't saved yet.
+	 * @param string        $api_key Google AI API key.
+	 * @param string        $feature Feature name.
+	 * @param Provider|null $provider Provider instance.
+	 * @param array         $settings Feature settings. Optional, useful when settings aren't saved yet.
 	 */
-	public function __construct( Provider $provider, ?Feature $feature, array $settings = [] ) {
+	public function __construct( string $api_key = '', string $feature = '', ?Provider $provider = null, array $settings = [] ) {
+		$this->api_key  = $api_key;
+		$this->feature  = $feature;
 		$this->provider = $provider;
-		$this->feature  = $feature ? $feature::ID : '';
 		$this->settings = $settings;
 	}
 
@@ -247,6 +255,10 @@ class APIRequest {
 	 * @return string
 	 */
 	public function get_api_key() {
-		return $this->provider->get_credential( 'api_key', $this->settings ) ?? '';
+		if ( $this->provider ) {
+			return $this->provider->get_credential( 'api_key', $this->settings ) ?? '';
+		}
+
+		return $this->api_key ?? '';
 	}
 }
