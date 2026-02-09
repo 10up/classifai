@@ -25,5 +25,6 @@ Welcome to the ClassifAI Advanced Documentation. This section provides in-depth 
 
 - [Feature Provider Support](./07.feature-provider-support.md) - Overview of supported AI providers for each feature
 - [Data Flow](./08.data-flow.md) - Detailed explanation of ClassifAI's data architecture and processing flow
+- [Programmatic Credentials](./10.programmatic-credentials.md) - Guide to setting up programmatic credential management
 
 Each section provides detailed technical information to help you make the most of ClassifAI's capabilities. Whether you're extending the plugin, customizing its behavior, or integrating it with other systems, you'll find comprehensive guidance here.

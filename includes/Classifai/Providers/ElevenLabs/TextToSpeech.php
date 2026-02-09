@@ -156,8 +156,7 @@ class TextToSpeech extends Provider {
 		}
 
 		$feature              = new FeatureTextToSpeech();
-		$settings             = $feature->get_settings();
-		$settings             = $settings[ static::ID ];
+		$settings             = $feature->get_settings( static::ID );
 		$post_content         = $feature->normalize_post_content( $post_id );
 		$content_hash         = get_post_meta( $post_id, FeatureTextToSpeech::AUDIO_HASH_KEY, true );
 		$saved_attachment_id  = (int) get_post_meta( $post_id, $feature::AUDIO_ID_KEY, true );

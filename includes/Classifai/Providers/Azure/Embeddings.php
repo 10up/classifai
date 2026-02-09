@@ -12,6 +12,7 @@ use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use Classifai\EmbeddingsScheduler;
 use WP_Error;
+
 use function Classifai\safe_wp_remote_post;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -251,9 +252,9 @@ class Embeddings extends OpenAI {
 	 * @return string
 	 */
 	protected function prep_api_url( ?Feature $feature = null ): string {
-		$settings   = $feature->get_settings( static::ID );
-		$endpoint   = $settings['endpoint_url'] ?? '';
-		$deployment = $settings['deployment'] ?? '';
+		$credentials = $this->get_credentials( $feature->get_settings() ?? [] );
+		$endpoint    = $credentials['endpoint_url'] ?? '';
+		$deployment  = $credentials['deployment'] ?? '';
 
 		if ( ! $endpoint ) {
 			return '';
@@ -270,24 +271,23 @@ class Embeddings extends OpenAI {
 	/**
 	 * Authenticates our credentials.
 	 *
-	 * @param string $url Endpoint URL.
-	 * @param string $api_key Api Key.
-	 * @param string $deployment Deployment name.
+	 * @param array $settings Settings being saved
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( string $url, string $api_key, string $deployment ) {
-		$rtn = false;
+	protected function authenticate_credentials( array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
+		$rtn         = false;
 
 		// This does basically the same thing that prep_api_url does but when running authentication,
 		// we don't have settings saved yet, which prep_api_url needs.
-		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->embeddings_url );
+		$endpoint = trailingslashit( $credentials['endpoint_url'] ?? '' ) . str_replace( '{deployment-id}', $credentials['deployment'] ?? '', $this->embeddings_url );
 		$endpoint = add_query_arg( 'api-version', $this->api_version, $endpoint );
 
 		$request = safe_wp_remote_post(
 			$endpoint,
 			[
 				'headers' => [
-					'api-key'      => $api_key,
+					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode(
@@ -307,11 +307,12 @@ class Embeddings extends OpenAI {
 			} else {
 				$rtn = true;
 			}
+		} else {
+			$rtn = $request;
 		}
 
 		return $rtn;
 	}
-
 
 	/**
 	 * Get the threshold for the similarity calculation.
@@ -970,12 +971,14 @@ class Embeddings extends OpenAI {
 			$feature = new Classification();
 		}
 
-		$settings = $feature->get_settings();
-
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
+
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
 
 		/**
 		 * Filter the request body before sending to OpenAI.
@@ -1002,7 +1005,7 @@ class Embeddings extends OpenAI {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -1012,6 +1015,9 @@ class Embeddings extends OpenAI {
 		$response = $this->get_result( $response );
 
 		set_transient( 'classifai_azure_openai_embeddings_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -1049,12 +1055,14 @@ class Embeddings extends OpenAI {
 			$feature = new Classification();
 		}
 
-		$settings = $feature->get_settings();
-
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
+
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
 
 		/**
 		 * Filter the request body before sending to OpenAI.
@@ -1081,7 +1089,7 @@ class Embeddings extends OpenAI {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -1089,6 +1097,9 @@ class Embeddings extends OpenAI {
 			]
 		);
 		$response = $this->get_result( $response );
+
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
