@@ -29,8 +29,6 @@ trait OpenAI {
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
 		$authenticated = $this->authenticate_credentials( $new_settings );
 
-		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
-
 		if ( is_wp_error( $authenticated ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
 			$error_message                               = $authenticated->get_error_message();
