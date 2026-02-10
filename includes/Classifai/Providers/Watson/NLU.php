@@ -250,7 +250,10 @@ class NLU extends Provider {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
-		$post_id    = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
+		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
+		if ( ! current_user_can( 'read_post', $post_id ) ) {
+			wp_send_json_error( esc_html__( 'You do not have permission to preview this post.', 'classifai' ) );
+		}
 		$classifier = new Classifier();
 		$normalizer = new \Classifai\Normalizer();
 
