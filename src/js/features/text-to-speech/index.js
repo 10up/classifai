@@ -7,6 +7,7 @@ import {
 	BaseControl,
 	Button,
 	Icon,
+	Spinner,
 } from '@wordpress/components';
 import { useSelect, subscribe } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
@@ -200,7 +201,8 @@ const TextToSpeechPlugin = () => {
 	if ( isTextToSpeechScheduled ) {
 		return (
 			<ClassifaiEditorSettingPanel>
-				<p>{ __( 'Audio generation is in progress.', 'classifai' ) }</p>
+				<p>{ __( 'Audio generation is in progress…', 'classifai' ) }</p>
+				<Spinner />
 			</ClassifaiEditorSettingPanel>
 		);
 	}
