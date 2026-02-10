@@ -77,6 +77,11 @@ class CredentialObfuscator {
 		$prefix    = substr( $value, 0, self::VISIBLE_PREFIX_LENGTH );
 		$asterisks = str_repeat( '*', $length - self::VISIBLE_PREFIX_LENGTH );
 
+		// If we don't have enough asterisks, add more.
+		if ( strlen( $asterisks ) < self::MIN_ASTERISKS_TO_DETECT ) {
+			$asterisks = str_repeat( '*', self::MIN_ASTERISKS_TO_DETECT );
+		}
+
 		return $prefix . $asterisks;
 	}
 
