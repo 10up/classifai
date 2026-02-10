@@ -89,6 +89,7 @@ export const GoogleAIGeminiSettings = ( { isConfigured = false } ) => {
 					options={ models }
 					disabled={ models.length <= 1 }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>

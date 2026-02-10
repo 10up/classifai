@@ -81,6 +81,7 @@ export const ElevenLabsTextToSpeechSettings = ( { isConfigured = false } ) => {
 					} ) ) }
 					disabled={ ! providerSettings.voices?.length }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>

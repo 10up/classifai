@@ -6,6 +6,7 @@ use Classifai\Features\Classification;
 use Classifai\Features\RecommendedContent;
 use Classifai\Services\ServicesManager;
 use Classifai\Taxonomy\TaxonomyFactory;
+use Classifai\Providers\CredentialObfuscator;
 
 use function Classifai\get_asset_info;
 use function Classifai\get_plugin;
@@ -225,14 +226,18 @@ class Settings {
 	/**
 	 * Get the settings.
 	 *
-	 * @return array The settings.
+	 * Obfuscates sensitive credentials before returning to prevent
+	 * exposure of API keys in the frontend.
+	 *
+	 * @return array The settings with credentials obfuscated.
 	 */
 	public function get_settings(): array {
 		$features = $this->get_features( true );
 		$settings = [];
 
 		foreach ( $features as $feature ) {
-			$settings[ $feature::ID ] = $feature->get_settings();
+			$feature_settings         = $feature->get_settings();
+			$settings[ $feature::ID ] = CredentialObfuscator::obfuscate_feature_settings( $feature_settings );
 		}
 
 		return $settings;
@@ -415,6 +420,12 @@ class Settings {
 	public function get_registration_settings_callback(): \WP_REST_Response {
 		$service_manager = new ServicesManager();
 		$settings        = $service_manager->get_settings();
+
+		// Obfuscate the license key before returning.
+		if ( isset( $settings['license_key'] ) ) {
+			$settings['license_key'] = CredentialObfuscator::obfuscate( $settings['license_key'] );
+		}
+
 		return rest_ensure_response( $settings );
 	}
 
@@ -430,12 +441,19 @@ class Settings {
 			require_once ABSPATH . 'wp-admin/includes/template.php';
 		}
 
-		$service_manager = new ServicesManager();
-		$settings        = $service_manager->get_settings();
-		$new_settings    = $service_manager->sanitize_settings( $request->get_json_params() );
+		$service_manager  = new ServicesManager();
+		$current_settings = $service_manager->get_settings();
+		$new_settings     = $request->get_json_params();
+
+		// If the license key is obfuscated, use the current value.
+		if ( isset( $new_settings['license_key'] ) && CredentialObfuscator::is_obfuscated( $new_settings['license_key'] ) ) {
+			$new_settings['license_key'] = $current_settings['license_key'] ?? '';
+		}
+
+		$new_settings = $service_manager->sanitize_settings( $new_settings );
 
 		// Update the settings with the new values.
-		$new_settings = array_merge( $settings, $new_settings );
+		$new_settings = array_merge( $current_settings, $new_settings );
 		update_option( 'classifai_settings', $new_settings );
 
 		$setting_errors = get_settings_errors();

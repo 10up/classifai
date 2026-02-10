@@ -214,6 +214,7 @@ export const ProviderSettings = () => {
 							value={ provider }
 							options={ providers }
 							__nextHasNoMarginBottom
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 				) }

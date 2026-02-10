@@ -207,7 +207,7 @@ class Images extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_togetherai_image_prompt', $prompt );
 
-		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$dimensions = $this->get_dimensions_from_size( $args['size'] );
 		$body       = [

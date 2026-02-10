@@ -148,6 +148,7 @@ export const NLUFeatureSettings = () => {
 							min="0"
 							max="100"
 							step="0.01"
+							__next40pxDefaultSize
 						/>
 
 						{ 'ibm_watson_nlu' === featureSettings.provider && (
@@ -175,6 +176,7 @@ export const NLUFeatureSettings = () => {
 									} );
 								} }
 								__nextHasNoMarginBottom
+								__next40pxDefaultSize
 							/>
 						) }
 					</SettingsRow>
