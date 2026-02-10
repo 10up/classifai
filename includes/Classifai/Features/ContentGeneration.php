@@ -6,6 +6,7 @@ use Classifai\Providers\Azure\OpenAI;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\Localhost\Ollama;
 use Classifai\Services\LanguageProcessing;
+use Classifai\Features\QuickDraftIntegration;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -113,6 +114,9 @@ INSTRUCTION;
 	 */
 	public function feature_setup() {
 		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
+
+		$quick_draft = new QuickDraftIntegration();
+		$quick_draft->init();
 	}
 
 	/**
@@ -316,7 +320,7 @@ INSTRUCTION;
 			}
 		}
 
-		// Sanitize Quick Draft setting
+		// Sanitize Quick Draft setting.
 		$new_settings['enable_quick_draft'] = isset( $new_settings['enable_quick_draft'] ) ? (bool) $new_settings['enable_quick_draft'] : false;
 
 		return $new_settings;

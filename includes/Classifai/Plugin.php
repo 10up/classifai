@@ -46,7 +46,6 @@ class Plugin {
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, [ $this, 'filter_plugin_action_links' ] );
 		add_filter( 'robots_txt', [ $this, 'maybe_block_ai_crawlers' ] );
 		add_action( 'after_classifai_init', [ $this, 'load_action_scheduler' ] );
-		add_action( 'after_classifai_init', [ $this, 'init_quick_draft_integration' ] );
 	}
 
 	/**
@@ -305,14 +304,6 @@ Disallow: /
 ';
 
 		return $robots_txt;
-	}
-
-	/**
-	 * Initialize Quick Draft integration.
-	 */
-	public function init_quick_draft_integration() {
-		$quick_draft = new \Classifai\Features\QuickDraftIntegration();
-		$quick_draft->init();
 	}
 
 	/**

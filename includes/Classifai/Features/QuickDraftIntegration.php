@@ -12,6 +12,8 @@ use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
 
+use function Classifai\get_asset_info;
+
 /**
  * Quick Draft Integration Feature.
  *
@@ -20,7 +22,7 @@ use WP_Error;
 class QuickDraftIntegration {
 
 	/**
-	 * Content Generation feature instance.
+	 * Content Generation Feature instance.
 	 *
 	 * @var ContentGeneration
 	 */
@@ -37,18 +39,12 @@ class QuickDraftIntegration {
 	 * Initialize the Quick Draft integration.
 	 */
 	public function init() {
-		// Only initialize if Content Generation is enabled.
-		if ( ! $this->content_generation->is_feature_enabled() ) {
-			return;
-		}
-
 		// Check if Quick Draft integration is enabled.
 		if ( ! $this->is_quick_draft_enabled() ) {
 			return;
 		}
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'wp_dashboard_setup', [ $this, 'modify_quick_draft_widget' ] );
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
@@ -80,9 +76,9 @@ class QuickDraftIntegration {
 
 		wp_enqueue_script(
 			'classifai-quick-draft-js',
-			plugin_dir_url( dirname( __DIR__, 2 ) ) . 'dist/classifai-quick-draft.js',
-			[ 'jquery', 'wp-api-fetch' ],
-			'3.8.0',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-quick-draft.js',
+			array_merge( get_asset_info( 'classifai-quick-draft', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
+			get_asset_info( 'classifai-quick-draft', 'version' ),
 			true
 		);
 
@@ -92,7 +88,7 @@ class QuickDraftIntegration {
 			[
 				'nonce'         => wp_create_nonce( 'classifai_quick_draft' ),
 				'restUrl'       => rest_url( 'classifai/v1/' ),
-				'createContent' => __( 'Create Draft from Prompt Content', 'classifai' ),
+				'createContent' => __( 'Create Draft from Prompt', 'classifai' ),
 				'generating'    => __( 'Generating...', 'classifai' ),
 				'error'         => __( 'Error generating content. Please try again.', 'classifai' ),
 				'currentUserId' => get_current_user_id(),
@@ -101,49 +97,10 @@ class QuickDraftIntegration {
 
 		wp_enqueue_style(
 			'classifai-quick-draft-css',
-			plugin_dir_url( dirname( __DIR__, 2 ) ) . 'dist/classifai-quick-draft.css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-quick-draft.css',
 			[],
-			'3.8.0'
+			get_asset_info( 'classifai-quick-draft', 'version' ),
 		);
-	}
-
-	/**
-	 * Modify the Quick Draft widget to add our button.
-	 */
-	public function modify_quick_draft_widget() {
-		// Only modify if user can create posts
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			return;
-		}
-
-		// Use a different approach - add the button via JavaScript
-		add_action( 'admin_footer', [ $this, 'add_quick_draft_button_script' ] );
-	}
-
-	/**
-	 * Add the button via JavaScript in the admin footer.
-	 */
-	public function add_quick_draft_button_script() {
-		$screen = get_current_screen();
-
-		// Only add on dashboard
-		if ( ! $screen || 'dashboard' !== $screen->id ) {
-			return;
-		}
-		?>
-		<script type="text/javascript">
-		jQuery(document).ready(function($) {
-			// Wait for the Quick Draft widget to be loaded
-			setTimeout(function() {
-				var saveButton = $('#save-post');
-				if (saveButton.length && !$('#classifai-generate-content').length) {
-					var generateButton = $('<input type="button" id="classifai-generate-content" class="button" value="<?php echo esc_js( __( 'Create Draft from Prompt Content', 'classifai' ) ); ?>" style="margin-left: 10px;" />');
-					saveButton.after(generateButton);
-				}
-			}, 1000);
-		});
-		</script>
-		<?php
 	}
 
 	/**
