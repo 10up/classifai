@@ -14,6 +14,10 @@ use WP_Error;
 
 use function Classifai\get_asset_info;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Quick Draft Integration Feature.
  *
