@@ -80,18 +80,32 @@ domReady( () => {
 	} );
 
 	/**
+	 * Remove any existing notices.
+	 */
+	function removeExistingNotices() {
+		const notices = quickPressForm.parentElement.querySelectorAll( '.notice' );
+		if ( notices.length > 0 ) {
+			notices.forEach( function ( notice ) {
+				notice.remove();
+			} );
+		}
+	}
+
+	/**
 	 * Show a temporary error message to the user.
 	 *
 	 * @param {string} message The error message to display.
 	 */
 	function showErrorMessage( message ) {
+		removeExistingNotices();
+
 		const errorNotice = document.createElement( 'div' );
 		errorNotice.className = 'notice notice-error is-dismissible';
 		errorNotice.innerHTML = `
 			<p>${ message }</p>
 			<button type="button" class="notice-dismiss">
 				<span class="screen-reader-text">
-					{ __( 'Dismiss this notice.', 'classifai' ) }
+					${ __( 'Dismiss this notice.', 'classifai' ) }
 				</span>
 			</button>
 		`;
@@ -104,18 +118,14 @@ domReady( () => {
 				errorNotice.remove();
 			} );
 		}
-
-		setTimeout( function () {
-			if ( errorNotice.parentNode ) {
-				errorNotice.remove();
-			}
-		}, 5000 );
 	}
 
 	/**
 	 * Handle the content generation.
 	 */
 	function handleGenerateContent() {
+		removeExistingNotices();
+
 		const content = contentField.value.trim();
 
 		// Validate that content is provided.
@@ -156,12 +166,6 @@ domReady( () => {
 
 					// Show success message.
 					showSuccessMessage( response );
-
-					// Reload the page to show the new draft.
-					// This is more reliable than trying to refresh just the widget.
-					setTimeout( function () {
-						window.location.reload();
-					}, 1000 );
 				} else {
 					throw new Error(
 						response.message || window.classifaiQuickDraft.error
@@ -186,18 +190,20 @@ domReady( () => {
 	 * @param {Object} response API response.
 	 */
 	function showSuccessMessage( response ) {
+		removeExistingNotices();
+
 		const message = document.createElement( 'div' );
 		message.className = 'notice notice-success is-dismissible';
 		message.innerHTML = `
 			<p>
-				{ __( 'Draft created successfully!', 'classifai' ) }
+				${ __( 'Draft created successfully!', 'classifai' ) }
 				<a href="${ response.edit_url }" target="_blank" rel="noopener noreferrer">
-					{ __( 'Edit draft', 'classifai' ) }
+					${ __( 'Edit draft', 'classifai' ) }
 				</a>
 			</p>
 			<button type="button" class="notice-dismiss">
 				<span class="screen-reader-text">
-					{ __( 'Dismiss this notice.', 'classifai' ) }
+					${ __( 'Dismiss this notice.', 'classifai' ) }
 				</span>
 			</button>
 		`;
@@ -212,12 +218,5 @@ domReady( () => {
 				message.remove();
 			} );
 		}
-
-		// Auto-dismiss after 5 seconds.
-		setTimeout( function () {
-			if ( message.parentNode ) {
-				message.remove();
-			}
-		}, 5000 );
 	}
 } );
