@@ -86,12 +86,9 @@ class QuickDraftIntegration {
 			'classifai-quick-draft-js',
 			'classifaiQuickDraft',
 			[
-				'nonce'         => wp_create_nonce( 'classifai_quick_draft' ),
-				'restUrl'       => rest_url( 'classifai/v1/' ),
 				'createContent' => __( 'Create Draft from Prompt', 'classifai' ),
 				'generating'    => __( 'Generating...', 'classifai' ),
 				'error'         => __( 'Error generating content. Please try again.', 'classifai' ),
-				'currentUserId' => get_current_user_id(),
 			]
 		);
 
@@ -116,17 +113,18 @@ class QuickDraftIntegration {
 				'permission_callback' => [ $this, 'permissions_check' ],
 				'args'                => [
 					'title'   => [
+						'required'          => true,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'The title of the article.', 'classifai' ),
+						'description'       => esc_html__( 'The title of the post.', 'classifai' ),
 					],
 					'content' => [
 						'required'          => true,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_textarea_field',
 						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'The prompt content for generation.', 'classifai' ),
+						'description'       => esc_html__( 'The prompt to use for content generation.', 'classifai' ),
 					],
 				],
 			]
@@ -139,12 +137,19 @@ class QuickDraftIntegration {
 	 * @return WP_Error|bool
 	 */
 	public function permissions_check() {
-		// Ensure user can create posts
+		// Ensure user can create posts.
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			return false;
 		}
 
-		// Ensure the feature is enabled
+		$post_type_obj = get_post_type_object( 'post' );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure the Feature is enabled.
 		if ( ! $this->content_generation->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Content Generation is not currently enabled.', 'classifai' ) );
 		}
@@ -162,22 +167,26 @@ class QuickDraftIntegration {
 		$title   = $request->get_param( 'title' );
 		$content = $request->get_param( 'content' );
 
-		// Create a new auto-draft post
+		if ( empty( $title ) || empty( $content ) ) {
+			return new WP_Error( 'missing_required_parameters', esc_html__( 'Title and content are required.', 'classifai' ) );
+		}
+
+		// Create a new auto-draft post.
 		$post_data = [
-			'post_title'   => $title ? $title : '',
+			'post_title'   => $title,
 			'post_content' => '',
 			'post_status'  => 'auto-draft',
 			'post_type'    => 'post',
 			'post_author'  => get_current_user_id(),
 		];
 
-		$post_id = wp_insert_post( $post_data );
+		$post_id = wp_insert_post( $post_data, true );
 
 		if ( is_wp_error( $post_id ) ) {
 			return new WP_Error( 'post_creation_failed', esc_html__( 'Failed to create draft post.', 'classifai' ) );
 		}
 
-		// Generate content using the existing content generation logic
+		// Generate content using the existing content generation logic.
 		$result = $this->content_generation->run(
 			$post_id,
 			'create_content',
@@ -188,12 +197,12 @@ class QuickDraftIntegration {
 		);
 
 		if ( is_wp_error( $result ) ) {
-			// Clean up the post if generation failed
+			// Clean up the post if generation failed.
 			wp_delete_post( $post_id, true );
 			return $result;
 		}
 
-		// Update the post with generated content
+		// Update the post with generated content.
 		$updated_post = [
 			'ID'           => $post_id,
 			'post_content' => $result,
