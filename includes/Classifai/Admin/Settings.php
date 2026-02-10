@@ -479,7 +479,9 @@ class Settings {
 		$settings        = $service_manager->get_settings();
 
 		// Obfuscate the license key before returning.
-		$settings['license_key'] = CredentialObfuscator::obfuscate( $settings['license_key'] );
+		if ( isset( $settings['license_key'] ) ) {
+			$settings['license_key'] = CredentialObfuscator::obfuscate( $settings['license_key'] );
+		}
 
 		return rest_ensure_response( $settings );
 	}
