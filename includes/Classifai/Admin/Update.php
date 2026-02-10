@@ -9,6 +9,10 @@ namespace Classifai\Admin;
 
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Plugin update class.
  */

@@ -14,6 +14,10 @@ use Classifai\Features\Moderation;
 
 use function Classifai\attachment_is_pdf;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Handle bulk actions.
  */

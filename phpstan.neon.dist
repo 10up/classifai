@@ -20,7 +20,5 @@ parameters:
 		# These constants are defined but we'd need to stub them for PHPStan to know.
 		- '#Constant CLASSIFAI_.+ not found#'
 		- '#Constant WATSON_.+ not found#'
-		# Flags these require statements even though they are fine.
-		- '#Path in require_once\(\) "\.\/wp-admin\/includes\/.+\.php" is not a file or it does not exist#'
 	WPCompat:
-		requiresAtLeast: '6.7'
+		requiresAtLeast: '6.8'

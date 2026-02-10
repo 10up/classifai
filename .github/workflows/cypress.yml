@@ -14,10 +14,11 @@ jobs:
     name: ${{ matrix.core.name }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         core:
           - {name: 'WP latest', version: 'latest'}
-          - {name: 'WP minimum', version: 'WordPress/WordPress#6.7'}
+          - {name: 'WP minimum', version: 'WordPress/WordPress#6.8'}
           - {name: 'WP trunk', version: 'WordPress/WordPress#master'}
 
     steps:
@@ -56,7 +57,7 @@ jobs:
       uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
       if: failure()
       with:
-        name: cypress-artifact-classifai
+        name: cypress-artifact-classifai-wp-${{ matrix.core.name }}
         retention-days: 7
         path: |
           ${{ github.workspace }}/tests/cypress/screenshots/

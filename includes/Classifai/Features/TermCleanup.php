@@ -13,6 +13,10 @@ use WP_Error;
 
 use function Classifai\is_elasticpress_installed;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class TermCleanup
  */

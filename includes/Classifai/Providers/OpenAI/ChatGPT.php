@@ -279,7 +279,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Descriptive text generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -380,7 +380,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image Text Extraction is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -491,7 +491,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image tag generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -607,7 +607,7 @@ class ChatGPT extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
@@ -716,7 +716,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
@@ -821,7 +821,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
@@ -962,7 +962,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then click the "Generate results" button.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$prompt = esc_textarea( get_default_prompt( $settings['key_takeaways_prompt'] ) ?? $feature->prompt );
 
@@ -1103,7 +1103,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Content generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.

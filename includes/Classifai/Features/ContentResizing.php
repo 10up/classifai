@@ -16,6 +16,10 @@ use WP_Error;
 use function Classifai\sanitize_prompts;
 use function Classifai\get_asset_info;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ContentResizing
  */

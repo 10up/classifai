@@ -7,6 +7,10 @@ use Classifai\Services\Service;
 
 use function Classifai\get_plugin;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * The UserProfile class provides opt-out settings for ClassifAI feature on user profile page.
  *

@@ -15,6 +15,10 @@ use WP_CLI;
 
 use function ElasticPress\Utils\is_indexing_wpcli;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * ElasticPress Integration class.
  */

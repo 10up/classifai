@@ -12,8 +12,15 @@
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
-const { loadConfig } = require( '@wordpress/env/lib/config' );
-const getCacheDirectory = require( '@wordpress/env/lib/config/get-cache-directory' );
+const path = require( 'path' );
+
+// Resolve the package directory
+const wpEnvPackagePath = require.resolve( '@wordpress/env/package.json' );
+const wpEnvLibPath = path.join( path.dirname( wpEnvPackagePath ), 'lib' );
+
+// Directly require the files using their resolved paths
+const { loadConfig } = require( path.join( wpEnvLibPath, 'config', 'index.js' ) );
+const getCacheDirectory = require( path.join( wpEnvLibPath, 'config', 'get-cache-directory.js' ) );
 
 /**
  * Start Cypress.

@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+### Deprecated
+
+- The legacy settings screen (enabled via the `classifai_use_legacy_settings_panel` filter) is now formally deprecated and scheduled for removal in a future release. An admin notice will be displayed when this filter is active. Please migrate to the new React-based settings experience (props [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul) via [#1036](https://github.com/10up/classifai/pull/1036)).
+
+## [3.7.1] - 2026-01-12
+
+**Note that this release bumps the WordPress minimum from 6.7 to 6.8.**
+
+### Added
+
+- Support for OpenAI text-to-speech instructions parameter to control voice characteristics (props [@swissky](https://github.com/swissky), [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#1011](https://github.com/10up/classifai/pull/1011)).
+
+### Changed
+
+- For any HTTP requests that need extra time to run, ensure those don't utilize the WP VIP functions (props [@jhudson-ent](https://github.com/jhudson-ent), [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1022](https://github.com/10up/classifai/pull/1022)).
+- Bump WordPress minimum from 6.7 to 6.8 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1024](https://github.com/10up/classifai/pull/1024)).
+- Bump WordPress "tested up to" version to 6.9 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1024](https://github.com/10up/classifai/pull/1024)).
+
+### Fixed
+
+- Prevent duplicate "Disable this ClassifAI feature" links in Classic Editor Title Generation popup (props [@faisal-alvi](https://github.com/faisal-alvi), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#1009](https://github.com/10up/classifai/pull/1009)).
+- Removed redundant nesting of translation functions (props [@DAnn2012](https://github.com/DAnn2012), [@dkotter](https://github.com/dkotter) via [#1017](https://github.com/10up/classifai/pull/1017)).
+- Resolved all new Plugin Check errors (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1023](https://github.com/10up/classifai/pull/1023)).
+
+### Security
+
+- Bump `tar-fs` from 3.1.0 to 3.1.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1013](https://github.com/10up/classifai/pull/1013)).
+- Bump `react-router-dom` and `react-router` from 7.11.0 to 7.12.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1027](https://github.com/10up/classifai/pull/1027)).
+
+### Developer
+
+- Update outdated composer and node dependencies (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1024](https://github.com/10up/classifai/pull/1024)).
+
 ## [3.7.0] - 2025-09-15
 
 ### Added
@@ -857,6 +890,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.7.1]: https://github.com/10up/classifai/compare/3.7.0...3.7.1
 [3.7.0]: https://github.com/10up/classifai/compare/3.6.0...3.7.0
 [3.6.0]: https://github.com/10up/classifai/compare/3.5.0...3.6.0
 [3.5.0]: https://github.com/10up/classifai/compare/3.4.0...3.5.0

@@ -127,6 +127,17 @@
 		.classifai-panel-header-close {
 			margin-right: -10px;
 		}
+
+		.display-container-wrapper {
+			background-color: #f0f0f1;
+			margin-top: 8px;
+			margin-bottom: 8px;
+
+			.helper-text-content {
+				max-width: 600px;
+				padding: 4px 20px;
+			}
+		}
 	}
 
 	.classifai-settings-wrapper {

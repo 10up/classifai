@@ -14,6 +14,10 @@ use DOMDocument;
 use function Classifai\get_asset_info;
 use function Classifai\clean_input;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ImageTextExtraction
  */

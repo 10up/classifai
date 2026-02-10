@@ -13,6 +13,10 @@ use WP_Error;
 use function Classifai\clean_input;
 use function Classifai\check_term_permissions;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ImageTagsGenerator
  */
@@ -24,19 +28,19 @@ class ImageTagsGenerator extends Feature {
 	 */
 	const ID = 'feature_image_tags_generator';
 
-	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed
+	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed, PluginCheck.CodeAnalysis.Heredoc.NotAllowed
 	/**
 	 * Prompt for generating tags.
 	 *
 	 * @var string
 	 */
-	public $prompt = <<<EOD
+	public $prompt = <<<'INSTRUCTION'
 You are an assistant that generates image tags. You will be provided with an image and will generate a list of tags that best represent the image. Ensure the tags are short. Return at most the best 5 tags and return these in the following format:
 - Tag
 - Another tag
 - ...
-EOD;
-	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
+INSTRUCTION;
+	// phpcs:enable
 
 	/**
 	 * Constructor.

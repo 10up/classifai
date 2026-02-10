@@ -55,6 +55,7 @@ export const GoogleAIImagesSettings = ( { isConfigured = false } ) => {
 						value: i + 1,
 					} ) ) }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -93,6 +94,7 @@ export const GoogleAIImagesSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -108,6 +110,7 @@ export const GoogleAIImagesSettings = ( { isConfigured = false } ) => {
 						onChange( { per_image_settings: value } )
 					}
 					checked={ providerSettings.per_image_settings || false }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</>

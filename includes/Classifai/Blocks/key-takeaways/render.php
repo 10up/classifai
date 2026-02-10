@@ -7,6 +7,10 @@
  * @var WP_Block $block      Block instance.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $block_title = $attributes['title'] ?? '';
 $layout      = $attributes['render'] ?? 'list';
 $takeaways   = $attributes['takeaways'] ?? [];

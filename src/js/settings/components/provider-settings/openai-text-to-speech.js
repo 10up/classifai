@@ -4,6 +4,7 @@
 import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 	SelectControl,
+	TextareaControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -84,6 +85,7 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -145,6 +147,36 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+				/>
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Voice instructions', 'classifai' ) }
+				description={
+					<>
+						{ __(
+							'Optional instructions to control the voice characteristics of the generated audio.',
+							'classifai'
+						) }{ ' ' }
+						{ __(
+							'For example: "Speak in a calm, professional tone" or "Use a more energetic delivery".',
+							'classifai'
+						) }
+					</>
+				}
+			>
+				<TextareaControl
+					id={ `${ providerName }_instructions` }
+					onChange={ ( value ) =>
+						onChange( { instructions: value } )
+					}
+					value={ providerSettings.instructions || '' }
+					rows={ 3 }
+					placeholder={ __(
+						'Enter instructions to control voice characteristics…',
+						'classifai'
+					) }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -169,6 +201,7 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -186,6 +219,7 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 					step="0.25"
 					min="0.25"
 					max="4"
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>

@@ -200,50 +200,25 @@ class OpenAI extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( array $new_settings ): array {
-		$settings = $this->feature_instance->get_settings();
+		$settings      = $this->feature_instance->get_settings();
+		$authenticated = $this->authenticate_credentials( $new_settings );
 
-		if (
-			! empty( $new_settings[ static::ID ]['endpoint_url'] ) &&
-			! empty( $new_settings[ static::ID ]['api_key'] ) &&
-			! empty( $new_settings[ static::ID ]['deployment'] )
-		) {
-			$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
-			$new_settings[ static::ID ]['endpoint_url']  = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
-			$new_settings[ static::ID ]['api_key']       = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
-			$new_settings[ static::ID ]['deployment']    = sanitize_text_field( $new_settings[ static::ID ]['deployment'] ?? $settings[ static::ID ]['deployment'] );
+		if ( is_wp_error( $authenticated ) ) {
+			$new_settings[ static::ID ]['authenticated'] = false;
 
-			$is_authenticated   = $new_settings[ static::ID ]['authenticated'];
-			$is_endpoint_same   = $new_settings[ static::ID ]['endpoint_url'] === $settings[ static::ID ]['endpoint_url'];
-			$is_api_key_same    = $new_settings[ static::ID ]['api_key'] === $settings[ static::ID ]['api_key'];
-			$is_deployment_same = $new_settings[ static::ID ]['deployment'] === $settings[ static::ID ]['deployment'];
-
-			if ( ! ( $is_authenticated && $is_endpoint_same && $is_api_key_same && $is_deployment_same ) ) {
-				$auth_check = $this->authenticate_credentials(
-					$new_settings[ static::ID ]['endpoint_url'],
-					$new_settings[ static::ID ]['api_key'],
-					$new_settings[ static::ID ]['deployment']
-				);
-
-				if ( is_wp_error( $auth_check ) ) {
-					$new_settings[ static::ID ]['authenticated'] = false;
-					$error_message                               = $auth_check->get_error_message();
-
-					// Add an error message.
-					add_settings_error(
-						'api_key',
-						'classifai-auth',
-						$error_message,
-						'error'
-					);
-				} else {
-					$new_settings[ static::ID ]['authenticated'] = true;
-				}
-			}
+			add_settings_error(
+				'api_key',
+				'classifai-auth',
+				$authenticated->get_error_message(),
+				'error'
+			);
 		} else {
-			$new_settings[ static::ID ]['endpoint_url'] = $settings[ static::ID ]['endpoint_url'];
-			$new_settings[ static::ID ]['api_key']      = $settings[ static::ID ]['api_key'];
-			$new_settings[ static::ID ]['deployment']   = $settings[ static::ID ]['deployment'];
+			$new_settings[ static::ID ]['authenticated'] = true;
 		}
+
+		$new_settings[ static::ID ]['endpoint_url'] = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
+		$new_settings[ static::ID ]['api_key']      = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
+		$new_settings[ static::ID ]['deployment']   = sanitize_text_field( $new_settings[ static::ID ]['deployment'] ?? $settings[ static::ID ]['deployment'] );
 
 		switch ( $this->feature_instance::ID ) {
 			case ContentResizing::ID:
@@ -262,9 +237,9 @@ class OpenAI extends Provider {
 	 * @return string
 	 */
 	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
-		$settings   = $feature->get_settings( static::ID );
-		$endpoint   = $settings['endpoint_url'] ?? '';
-		$deployment = $settings['deployment'] ?? '';
+		$credentials = $this->get_credentials( $feature->get_settings() ?? [] );
+		$endpoint    = $credentials['endpoint_url'] ?? '';
+		$deployment  = $credentials['deployment'] ?? '';
 
 		if ( ! $endpoint ) {
 			return '';
@@ -288,24 +263,23 @@ class OpenAI extends Provider {
 	/**
 	 * Authenticates our credentials.
 	 *
-	 * @param string $url Endpoint URL.
-	 * @param string $api_key Api Key.
-	 * @param string $deployment Deployment name.
+	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( string $url, string $api_key, string $deployment ) {
-		$rtn = false;
+	protected function authenticate_credentials( array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
+		$rtn         = false;
 
 		// This does basically the same thing that prep_api_url does but when running authentication,
 		// we don't have settings saved yet, which prep_api_url needs.
-		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
+		$endpoint = trailingslashit( $credentials['endpoint_url'] ?? '' ) . str_replace( '{deployment-id}', $credentials['deployment'] ?? '', $this->chat_completion_url );
 		$endpoint = add_query_arg( 'api-version', $this->completion_api_version, $endpoint );
 
 		$request = safe_wp_remote_post(
 			$endpoint,
 			[
 				'headers' => [
-					'api-key'      => $api_key,
+					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode(
@@ -314,6 +288,7 @@ class OpenAI extends Provider {
 						'max_tokens' => 5,
 					]
 				),
+				'use_vip' => true,
 			]
 		);
 
@@ -324,6 +299,8 @@ class OpenAI extends Provider {
 			} else {
 				$rtn = true;
 			}
+		} else {
+			$rtn = $request;
 		}
 
 		return $rtn;
@@ -458,7 +435,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -565,7 +542,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -672,7 +649,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -833,7 +810,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
@@ -986,7 +963,7 @@ class OpenAI extends Provider {
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
-					'api-key'      => $settings[ static::ID ]['api_key'],
+					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),

@@ -19,6 +19,10 @@ use function Classifai\get_classification_feature_taxonomy;
 use function Classifai\get_asset_info;
 use function Classifai\get_classification_mode;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class Classification
  */

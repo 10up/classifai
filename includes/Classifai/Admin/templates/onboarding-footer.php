@@ -5,6 +5,10 @@
  * @package ClassifAI
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /** @var array $args Arguments coming from the included file. */
 ?>
 				<div class="classifai-setup-footer">

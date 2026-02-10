@@ -10,6 +10,10 @@ use Classifai\Taxonomy\ImageTagTaxonomy;
 
 use function Classifai\get_asset_info;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class ImageProcessing extends Service {
 
 	/**

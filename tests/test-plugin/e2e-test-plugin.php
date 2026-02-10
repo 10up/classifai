@@ -10,6 +10,9 @@ add_filter( 'pre_http_request', 'classifai_test_mock_http_requests', 10, 3 );
 add_filter( 'classifai_aws_polly_pre_connect_to_service', 'classifai_mock_aws_polly_connect_to_service' );
 add_filter( 'classifai_aws_polly_pre_synthesize_speech', 'classifai_mock_aws_polly_pre_synthesize_speech' );
 
+// Disable ElasticPress admin bar.
+add_filter( 'ep_admin_bar_should_display', '__return_false' );
+
 /**
  * Mock ClassifAI's HTTP requests.
  *

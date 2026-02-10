@@ -19,6 +19,10 @@ use WP_Query;
 
 use function Classifai\should_use_legacy_settings_panel;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Embeddings extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
@@ -1455,14 +1459,17 @@ class Embeddings extends Provider {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
-		$settings = $feature->get_settings();
 
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Embedding generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
+
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the request body before sending to OpenAI.
@@ -1494,6 +1501,9 @@ class Embeddings extends Provider {
 		);
 
 		set_transient( 'classifai_openai_embeddings_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -1531,14 +1541,16 @@ class Embeddings extends Provider {
 			$feature = new Classification();
 		}
 
-		$settings = $feature->get_settings();
-
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Embedding generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		// Ensure we have a valid Feature instance.
+		$backup_feature_instance = $this->feature_instance;
+		$this->feature_instance  = $feature;
+
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the request body before sending to OpenAI.
@@ -1568,6 +1580,9 @@ class Embeddings extends Provider {
 				'body' => wp_json_encode( $body ),
 			]
 		);
+
+		// Restore the existing Feature instance.
+		$this->feature_instance = $backup_feature_instance;
 
 		if ( is_wp_error( $response ) ) {
 			return $response;

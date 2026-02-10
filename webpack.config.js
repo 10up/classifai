@@ -42,19 +42,6 @@ module.exports = {
 		'classifai-plugin-recommended-content-feature-fields': './src/js/features/recommended-content/feature-fields-plugin.js',
 		settings: './src/js/settings/index.js',
 	},
-	module: {
-		rules: [
-			...defaultConfig.module.rules,
-			{
-				test: /\.svg$/,
-				use: [
-					{
-						loader: 'svg-react-loader',
-					},
-				],
-			},
-		],
-	},
 	externals: {
 		react: 'React',
 	},

@@ -14,6 +14,10 @@ use WP_Error;
 
 use function Classifai\get_classification_feature_taxonomy;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class NLU extends Provider {
 
 	const ID = 'ibm_watson_nlu';
@@ -357,27 +361,20 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Helper to ensure the authentication works.
+	 * Authenticate our credentials.
 	 *
 	 * @param array $settings The list of settings to be saved
 	 * @return bool|WP_Error
 	 */
-	protected function nlu_authentication_check( array $settings ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $settings[ static::ID ]['username'] )
-			|| empty( $settings[ static::ID ]['password'] )
-			|| empty( $settings[ static::ID ]['endpoint_url'] )
-		) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your credentials.', 'classifai' ) );
-		}
-
+	protected function authenticate_credentials( array $settings = [] ) {
+		$credentials       = $this->get_credentials( $settings );
 		$request           = new APIRequest();
-		$request->username = $settings[ static::ID ]['username'];
-		$request->password = $settings[ static::ID ]['password'];
-		$base_url          = trailingslashit( $settings[ static::ID ]['endpoint_url'] ) . 'v1/analyze';
+		$request->username = $credentials['username'] ?? '';
+		$request->password = $credentials['password'] ?? '';
+		$base_url          = trailingslashit( $credentials['endpoint_url'] ?? '' ) . 'v1/analyze';
 		$url               = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
 		$options           = [
-			'body' => wp_json_encode(
+			'body'    => wp_json_encode(
 				[
 					'text'     => 'Lorem ipsum dolor sit amet.',
 					'language' => 'en',
@@ -389,6 +386,7 @@ class NLU extends Provider {
 					],
 				]
 			),
+			'use_vip' => true,
 		];
 
 		$response = $request->post( $url, $options );
@@ -410,7 +408,7 @@ class NLU extends Provider {
 	 */
 	public function sanitize_settings( array $new_settings ): array {
 		$settings      = $this->feature_instance->get_settings();
-		$authenticated = $this->nlu_authentication_check( $new_settings );
+		$authenticated = $this->authenticate_credentials( $new_settings );
 
 		if ( is_wp_error( $authenticated ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;

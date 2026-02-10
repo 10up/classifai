@@ -1,5 +1,5 @@
 import { useCommandLoader } from '@wordpress/commands';
-import { edit, image, settings } from '@wordpress/icons';
+import { pencil, image, settings } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 
@@ -28,7 +28,7 @@ const Commands = () => {
 			commands.push( {
 				name: 'classifai/generate-excerpt',
 				label: __( 'ClassifAI: Generate excerpt', 'classifai' ),
-				icon: edit,
+				icon: pencil,
 				callback: ( { close } ) => {
 					close();
 
@@ -45,7 +45,7 @@ const Commands = () => {
 			commands.push( {
 				name: 'classifai/generate-titles',
 				label: __( 'ClassifAI: Generate titles', 'classifai' ),
-				icon: edit,
+				icon: pencil,
 				callback: ( { close } ) => {
 					close();
 

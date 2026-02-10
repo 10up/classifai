@@ -10,6 +10,10 @@ use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use WP_Error;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Images extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
@@ -347,7 +351,7 @@ class Images extends Provider {
 			return new WP_Error( 'invalid_param', sprintf( esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed %d characters.', 'classifai' ), $max_prompt_chars ) );
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$model = $this->get_model();
 		$body  = [

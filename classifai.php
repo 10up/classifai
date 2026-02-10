@@ -5,7 +5,7 @@
  * Update URI:        https://classifaiplugin.com
  * Description:       Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
  * Version:           3.8.0-dev
- * Requires at least: 6.7
+ * Requires at least: 6.8
  * Requires PHP:      7.4
  * Author:            10up
  * Author URI:        https://10up.com
@@ -14,6 +14,10 @@
  * Text Domain:       classifai
  * Domain Path:       /languages
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Get the minimum version of PHP required by this plugin.
