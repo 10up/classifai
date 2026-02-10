@@ -75,6 +75,7 @@ abstract class Feature {
 		}
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'register_plugin_area_script' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'register_chat_ui_script' ], 99 );
 
 		if ( $this->is_feature_enabled() ) {
 			$this->feature_setup();
@@ -158,6 +159,19 @@ abstract class Feature {
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-fill.js',
 			get_asset_info( 'classifai-plugin-fill', 'dependencies' ),
 			get_asset_info( 'classifai-plugin-fill', 'version' ),
+			true
+		);
+	}
+
+	/**
+	 * Enqueues the JS asset required for the ChatUI plugin.
+	 */
+	public function register_chat_ui_script() {
+		wp_register_script(
+			'classifai-chat-ui-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-chat-ui.js',
+			get_asset_info( 'classifai-plugin-chat-ui', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-chat-ui', 'version' ),
 			true
 		);
 	}

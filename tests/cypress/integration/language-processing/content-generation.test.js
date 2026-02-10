@@ -111,7 +111,7 @@ describe( '[Language processing] Content Generation Tests', () => {
 			.find( 'button.is-tertiary' )
 			.last()
 			.click();
-		cy.get( '.classifai-chat-ui' ).should( 'not.exist' );
+		cy.get( '.classifai-chat-ui' ).should( 'exist' );
 	} );
 
 	it( 'Can set multiple custom prompts, select one as the default and delete one.', () => {

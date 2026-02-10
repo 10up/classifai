@@ -1,79 +1,21 @@
-import React, {
-	useEffect,
-	useState,
-	useRef,
-	useLayoutEffect,
-	CSSProperties,
-} from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { select, dispatch } from '@wordpress/data';
 import { pasteHandler, parse } from '@wordpress/blocks';
 import { store as editorStore } from '@wordpress/editor';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
+import { Fill } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
+import { addFilter } from '@wordpress/hooks';
 
 // Import our custom components
-import { SparkleIcon } from './sparkle-icon';
 import { ChatHistory } from './chat-history';
 import { ErrorMessage } from './error-message';
 import { ChatInput } from './chat-input';
 import { ConversationEntry } from './types';
 
-// Define style objects outside of JSX
-const chatContainerStyles: CSSProperties = {
-	position: 'absolute',
-	bottom: '20px',
-	right: '20px',
-	zIndex: '1000',
-};
-
-const chatUIStyles: CSSProperties = {
-	width: '500px',
-	maxHeight: '700px',
-	backgroundColor: 'white',
-	padding: '14px',
-	boxShadow:
-		'0px 2px 3px 0px rgba(0, 0, 0, 0.05), 0px 4px 5px 0px rgba(0, 0, 0, 0.04), 0px 4px 5px 0px rgba(0, 0, 0, 0.03), 0px 16px 16px 0px rgba(0, 0, 0, 0.02)',
-	borderRadius: '8px',
-	border: '1px solid #e0e0e0',
-	display: 'flex',
-	flexDirection: 'column',
-};
-
-const chatContentStyles: CSSProperties = {
-	display: 'flex',
-	flexDirection: 'column',
-	height: '100%',
-	maxHeight: '700px',
-	overflow: 'clip',
-	padding: '2px',
-};
-
-const chatTitleStyles: CSSProperties = {
-	marginBottom: '12px',
-	fontWeight: 'bold',
-	fontSize: '16px',
-};
-
-const chatButtonStyles: CSSProperties = {
-	display: 'flex',
-	justifyContent: 'center',
-	alignItems: 'center',
-	boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-	padding: '0',
-	width: '48px',
-	height: '48px',
-	borderRadius: '999px',
-	minWidth: 'unset',
-	minHeight: 'unset',
-	color: 'white',
-	border: 'none',
-	cursor: 'pointer',
-	backgroundColor:
-		'var(--wp-components-color-accent-darker-10,var(--wp-admin-theme-color-darker-10,#2145e6))',
-};
+const chatTabSlug = 'classifai-content-generation';
 
 /**
  * ChatUI component
@@ -321,10 +263,6 @@ export const ChatUI: React.FC = () => {
 		// Shift+Enter will add a new line by default (no action needed)
 	};
 
-	const toggleChatUI = (): void => {
-		setIsExpanded( ! isExpanded );
-	};
-
 	const startOver = (): void => {
 		setConversation( [] );
 		setError( false );
@@ -383,77 +321,33 @@ export const ChatUI: React.FC = () => {
 	};
 
 	return (
-		<div
-			className="classifai-chat-container"
-			style={ chatContainerStyles }
-			ref={ chatContainerRef }
-		>
-			<AnimatePresence>
-				{ isExpanded ? (
-					<motion.div
-						layoutId="chat-container"
-						initial={ { opacity: 0.9 } }
-						animate={ { opacity: 1 } }
-						exit={ { opacity: 0 } }
-						transition={ { duration: 0.3, type: 'spring' } }
-						className="classifai-chat-ui"
-						style={ chatUIStyles }
-					>
-						<motion.div
-							initial={ { opacity: 0, y: 10 } }
-							animate={ { opacity: 1, y: 0 } }
-							transition={ { delay: 0.1 } }
-							style={ chatContentStyles }
-						>
-							<div style={ chatTitleStyles }>
-								{ __( 'Generate content', 'classifai' ) }
-							</div>
-							<form onSubmit={ handleSubmit }>
-								{ ! error && (
-									<ChatHistory
-										conversation={ conversation }
-										onStartOver={ startOver }
-										onInsertContent={ insertContent }
-									/>
-								) }
-								<ErrorMessage error={ error } />
-								<ChatInput
-									textareaRef={ textareaRef }
-									value={ inputValue }
-									onChange={ ( value ) =>
-										setInputValue( value )
-									}
-									onKeyDown={ handleKeyDown }
-									isLoading={ isLoading }
-									placeholderText={ getPlaceholderText() }
-								/>
-							</form>
-						</motion.div>
-					</motion.div>
-				) : (
-					<motion.button
-						onClick={ toggleChatUI }
-						layoutId="chat-container"
-						className="classifai-chat-button"
-						initial={ { opacity: 0.9 } }
-						animate={ { opacity: 1 } }
-						exit={ { opacity: 0.0 } }
-						transition={ { type: 'spring', duration: 0.3 } }
-						style={ chatButtonStyles }
-						aria-label={ __(
-							'Open content generation assistant',
-							'classifai'
-						) }
-						whileHover={ {
-							backgroundColor:
-								'var(--wp-components-color-accent-darker-10,var(--wp-admin-theme-color-darker-10,#2145e6))',
-							scale: 1.05,
-						} }
-					>
-						<SparkleIcon />
-					</motion.button>
+		<Fill name={ chatTabSlug }>
+			<form onSubmit={ handleSubmit }>
+				{ ! error && (
+					<ChatHistory
+						conversation={ conversation }
+						onStartOver={ startOver }
+						onInsertContent={ insertContent }
+					/>
 				) }
-			</AnimatePresence>
-		</div>
+				<ErrorMessage error={ error } />
+				<ChatInput
+					textareaRef={ textareaRef }
+					value={ inputValue }
+					onChange={ ( value ) => setInputValue( value ) }
+					onKeyDown={ handleKeyDown }
+					isLoading={ isLoading }
+					placeholderText={ getPlaceholderText() }
+				/>
+			</form>
+		</Fill>
 	);
 };
+
+addFilter( 'classifai.chatUI', 'classifai', ( args ) => {
+	args.push( {
+		name: chatTabSlug,
+		title: __( 'Generate Content', 'classifai' ),
+	} );
+	return args;
+} );

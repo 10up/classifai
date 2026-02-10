@@ -24,7 +24,10 @@
 		"Block": "readonly",
 		"classifai_term_cleanup_params": "readonly",
 		"classifAISettings": "readonly",
-		"classifaiRecommendedContentSettings": "readonly"
+		"DOMParser": "readonly",
+		"MutationObserver": "readonly",
+		"classifaiRecommendedContentSettings": "readonly",
+		"classifaiRewriteToneTones": "readonly"
 	},
 	"rules": {
 		"react/jsx-no-undef": "off"
