@@ -56,7 +56,9 @@ class CredentialObfuscator {
 		$length = strlen( $value );
 
 		// If the value is too short, just return asterisks.
-		if ( $length <= self::VISIBLE_PREFIX_LENGTH ) {
+		if ( $length <= self::VISIBLE_PREFIX_LENGTH && $length <= self::MIN_ASTERISKS_TO_DETECT ) {
+			return str_repeat( '*', self::MIN_ASTERISKS_TO_DETECT );
+		} elseif ( $length <= self::VISIBLE_PREFIX_LENGTH ) {
 			return str_repeat( '*', $length );
 		}
 
