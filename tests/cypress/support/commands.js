@@ -478,6 +478,13 @@ Cypress.Commands.add( 'verifyContentGenerationEnabled', ( enabled = true ) => {
 	} else {
 		cy.get( '.classifai-chat-button' ).should( 'not.exist' );
 	}
+
+	cy.visit( '/wp-admin/index.php' );
+	if ( enabled ) {
+		cy.get( '#classifai-generate-content' ).should( 'exist' );
+	} else {
+		cy.get( '#classifai-generate-content' ).should( 'not.exist' );
+	}
 } );
 
 /**

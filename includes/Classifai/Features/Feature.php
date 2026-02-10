@@ -5,6 +5,7 @@ namespace Classifai\Features;
 use Classifai\Providers\CredentialResolver;
 use WP_REST_Request;
 use WP_Error;
+use Classifai\Providers\CredentialObfuscator;
 
 use function Classifai\find_provider_class;
 use function Classifai\should_use_legacy_settings_panel;
@@ -307,6 +308,13 @@ abstract class Feature {
 		if ( '' !== $provider_id && array_key_exists( 'override', $new_settings[ $provider_id ] ?? [] ) ) {
 			$new_settings[ $provider_id ]['override'] = ! empty( $new_settings[ $provider_id ]['override'] );
 		}
+
+		// Preserve obfuscated credentials for all Providers.
+		// This ensures switching Providers doesn't save obfuscated values for inactive Providers.
+		$new_settings = CredentialObfuscator::merge_all_provider_credentials(
+			$new_settings,
+			$current_settings
+		);
 
 		// Sanitize the provider specific settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
