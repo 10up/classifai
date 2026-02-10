@@ -103,7 +103,7 @@ trait ElevenLabs {
 		}
 
 		if ( ! isset( $options['headers']['xi-api-key'] ) ) {
-			$options['headers']['xi-api-key'] = $api_key;
+			$options['headers']['xi-api-key'] = $this->get_credential( 'api_key', [ static::ID => [ 'api_key' => $api_key ] ] ) ?? '';
 		}
 
 		if ( ! isset( $options['headers']['Content-Type'] ) ) {
@@ -163,22 +163,28 @@ trait ElevenLabs {
 	 * @return array
 	 */
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
-		$models = $this->get_models( $new_settings[ static::ID ]['api_key'] ?? '' );
+		$authenticated = $this->authenticate_credentials( $new_settings );
 
-		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
-		$new_settings[ static::ID ]['models']        = $settings[ static::ID ]['models'];
-
-		if ( is_wp_error( $models ) ) {
+		if ( is_wp_error( $authenticated ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
-			$new_settings[ static::ID ]['models']        = [];
-			$error_message                               = $models->get_error_message();
 
 			add_settings_error(
 				'api_key',
 				'classifai-auth',
-				$error_message,
+				$authenticated->get_error_message(),
 				'error'
 			);
+		} else {
+			$new_settings[ static::ID ]['authenticated'] = true;
+		}
+
+		$models = $this->get_models( $new_settings[ static::ID ]['api_key'] ?? '' );
+
+		$new_settings[ static::ID ]['models'] = $settings[ static::ID ]['models'];
+
+		if ( is_wp_error( $models ) ) {
+			$new_settings[ static::ID ]['authenticated'] = false;
+			$new_settings[ static::ID ]['models']        = [];
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
 			$new_settings[ static::ID ]['models']        = $models;
@@ -208,17 +214,27 @@ trait ElevenLabs {
 	}
 
 	/**
+	 * Authenticate our credentials.
+	 *
+	 * @param array $settings The settings.
+	 * @return bool|WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		$api_key = $settings[ static::ID ]['api_key'] ?? '';
+
+		// Make request to ensure credentials work.
+		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get', [ 'use_vip' => true ] );
+
+		return ! is_wp_error( $response ) ? true : $response;
+	}
+
+	/**
 	 * Get the available models.
 	 *
 	 * @param string $api_key The API key.
 	 * @return array|WP_Error
 	 */
 	protected function get_models( string $api_key = '' ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your ElevenLabs API key.', 'classifai' ) );
-		}
-
 		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get', [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {
@@ -255,11 +271,6 @@ trait ElevenLabs {
 	 * @return array|WP_Error
 	 */
 	protected function get_voices( string $api_key = '' ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your ElevenLabs API key.', 'classifai' ) );
-		}
-
 		$response = $this->request( $this->get_api_url( 'voices?per_page=100' ), $api_key, 'get', [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {

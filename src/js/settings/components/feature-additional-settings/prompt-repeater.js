@@ -110,6 +110,7 @@ export const PromptRepeater = ( props ) => {
 									'classifai'
 								) }
 								className="classifai-prompt-title"
+								__next40pxDefaultSize
 							/>
 							<TextareaControl
 								value={ prompt.prompt }

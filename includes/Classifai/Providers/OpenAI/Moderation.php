@@ -191,8 +191,7 @@ class Moderation extends Provider {
 			return new WP_Error( 'permission_denied', esc_html__( 'You do not have permission to moderate comments.', 'classifai' ) );
 		}
 
-		$feature  = new ModerationFeature();
-		$settings = $feature->get_settings();
+		$feature = new ModerationFeature();
 
 		// Ensure the feature is enabled and the user has access.
 		if (
@@ -202,7 +201,7 @@ class Moderation extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Moderation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 		$comment = get_comment( $comment_id );
 
 		/**

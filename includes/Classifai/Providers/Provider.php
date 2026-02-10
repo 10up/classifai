@@ -5,6 +5,8 @@
 
 namespace Classifai\Providers;
 
+use Classifai\Providers\CredentialResolver;
+
 abstract class Provider {
 
 	/**
@@ -166,5 +168,106 @@ abstract class Provider {
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
+	}
+
+	/**
+	 * Get the credentials for the Provider.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param array $settings Feature settings. Optional, will default to using saved settings.
+	 * @return array
+	 */
+	public function get_credentials( array $settings = [] ): array {
+		$provider_id = static::ID;
+
+		// Get our Provider-specific settings.
+		if (
+			! empty( $settings ) &&
+			array_key_exists( $provider_id, $settings ) &&
+			! empty( $settings[ $provider_id ] )
+		) {
+			$feature_provider_settings = $settings[ $provider_id ];
+		} else {
+			$feature_provider_settings = $this->feature_instance ? $this->feature_instance->get_settings( $provider_id ) : [];
+		}
+
+		// Get our credentials.
+		$credentials = CredentialResolver::resolve( $provider_id, $feature_provider_settings );
+
+		/**
+		 * Filter the credentials for the Provider.
+		 *
+		 * Possible hook names include:
+		 *  - `classifai_provider_credentials_azure_openai`
+		 *  - `classifai_provider_credentials_azure_openai_embeddings`
+		 *  - `classifai_provider_credentials_openai_chatgpt`
+		 *  - `classifai_provider_credentials_openai_embeddings`
+		 *  - `classifai_provider_credentials_openai_moderation`
+		 *  - `classifai_provider_credentials_openai_dalle`
+		 *  - `classifai_provider_credentials_openai_whisper`
+		 *  - `classifai_provider_credentials_openai_text_to_speech`
+		 *  - `classifai_provider_credentials_googleai_gemini_api`
+		 *  - `classifai_provider_credentials_googleai_images`
+		 *  - `classifai_provider_credentials_ibm_watson_nlu`
+		 *  - `classifai_provider_credentials_aws_polly`
+		 *  - `classifai_provider_credentials_ms_computer_vision`
+		 *  - `classifai_provider_credentials_ms_azure_text_to_speech`
+		 *  - `classifai_provider_credentials_elevenlabs_speech_to_text`
+		 *  - `classifai_provider_credentials_elevenlabs_text_to_speech`
+		 *  - `classifai_provider_credentials_xai_grok`
+		 *  - `classifai_provider_credentials_stable_diffusion`
+		 *  - `classifai_provider_credentials_ollama`
+		 *  - `classifai_provider_credentials_ollama_embeddings`
+		 *  - `classifai_provider_credentials_ollama_multimodal`
+		 *  - `classifai_provider_credentials_chrome_ai`
+		 *  - `classifai_provider_credentials_togetherai_image`
+		 *
+		 * @since x.x.x
+		 * @hook classifai_provider_credentials_{$provider_id}
+		 *
+		 * @param array       $credentials               The credentials for the Provider.
+		 * @param string|null $feature_id                The ID of the Feature, or null if not set.
+		 * @param array       $feature_provider_settings The Provider specific Feature settings.
+		 * @return array The filtered credentials.
+		 */
+		$credentials = apply_filters(
+			"classifai_provider_credentials_{$provider_id}",
+			$credentials,
+			$this->feature_instance ? $this->feature_instance::ID : null,
+			$feature_provider_settings
+		);
+
+		/**
+		 * Filter the credentials for the Provider.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_provider_credentials
+		 *
+		 * @param array       $credentials               The credentials for the Provider.
+		 * @param string      $provider_id               The ID of the Provider.
+		 * @param string|null $feature_id                The ID of the Feature, or null if not set.
+		 * @param array       $feature_provider_settings The Provider specific Feature settings.
+		 * @return array The filtered credentials.
+		 */
+		return apply_filters(
+			'classifai_provider_credentials',
+			$credentials,
+			$provider_id,
+			$this->feature_instance ? $this->feature_instance::ID : null,
+			$feature_provider_settings
+		);
+	}
+
+	/**
+	 * Get a credential field value for the Provider.
+	 *
+	 * @param string $credential_key The credential field name.
+	 * @param array  $settings       Feature settings. Optional, will default to using saved settings.
+	 * @return mixed The credential value, or null if not set.
+	 */
+	public function get_credential( string $credential_key, array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
+		return $credentials[ $credential_key ] ?? null;
 	}
 }
