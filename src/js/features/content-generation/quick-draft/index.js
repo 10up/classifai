@@ -2,21 +2,74 @@
  * Quick Draft Content Generation Integration.
  */
 
-import './index.scss';
+/**
+ * External dependencies.
+ */
 import apiFetch from '@wordpress/api-fetch';
+import domReady from '@wordpress/dom-ready';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies.
+ */
+import './index.scss';
 
 /**
  * Initialize Quick Draft content generation.
  */
-document.addEventListener( 'DOMContentLoaded', function () {
+domReady( () => {
 	const titleField = document.getElementById( 'title' );
 	const contentField = document.getElementById( 'content' );
 	const quickPressForm = document.getElementById( 'quick-press' );
 
+	// Required elements not found, abort initialization.
 	if ( ! titleField || ! contentField || ! quickPressForm ) {
-		// Required elements not found, abort initialization.
 		return;
 	}
+
+	/**
+	 * Add the generate button to the save button.
+	 *
+	 * @return {boolean} True if the button was added, false otherwise.
+	 */
+	function addGenerateButtonWhenReady() {
+		const saveButton = document.getElementById( 'save-post' );
+		if ( ! saveButton ) {
+			return false;
+		}
+
+		const generateButton = document.createElement( 'input' );
+		generateButton.type = 'button';
+		generateButton.id = 'classifai-generate-content';
+		generateButton.className = 'button';
+		generateButton.value = __( 'Create Draft from Prompt', 'classifai' );
+
+		saveButton.parentNode.insertBefore(
+			generateButton,
+			saveButton.nextSibling
+		);
+		return true;
+	}
+
+	const maxAttempts = 20;
+	const retryDelayMs = 100;
+	let attempts = 0;
+
+	/**
+	 * Try to add the generate button to the save button.
+	 */
+	function tryAddGenerateButton() {
+		if ( addGenerateButtonWhenReady() ) {
+			return;
+		}
+
+		attempts += 1;
+		if ( attempts < maxAttempts ) {
+			setTimeout( tryAddGenerateButton, retryDelayMs );
+		}
+	}
+
+	tryAddGenerateButton();
 
 	// Use event delegation to handle dynamically added button.
 	document.addEventListener( 'click', function ( e ) {
@@ -37,7 +90,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		errorNotice.innerHTML = `
 			<p>${ message }</p>
 			<button type="button" class="notice-dismiss">
-				<span class="screen-reader-text">Dismiss this notice.</span>
+				<span class="screen-reader-text">
+					{ __( 'Dismiss this notice.', 'classifai' ) }
+				</span>
 			</button>
 		`;
 
@@ -61,13 +116,15 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 * Handle the content generation.
 	 */
 	function handleGenerateContent() {
-		// Only assign variables after validation.
 		const content = contentField.value.trim();
 
 		// Validate that content is provided.
 		if ( ! content ) {
 			showErrorMessage(
-				'Please enter some content to generate a draft from.'
+				__(
+					'Please enter some content to generate a draft from.',
+					'classifai'
+				)
 			);
 			contentField.focus();
 			return;
@@ -133,11 +190,15 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		message.className = 'notice notice-success is-dismissible';
 		message.innerHTML = `
 			<p>
-				Draft created successfully! 
-				<a href="${ response.edit_url }" target="_blank">Edit draft</a>
+				{ __( 'Draft created successfully!', 'classifai' ) }
+				<a href="${ response.edit_url }" target="_blank" rel="noopener noreferrer">
+					{ __( 'Edit draft', 'classifai' ) }
+				</a>
 			</p>
 			<button type="button" class="notice-dismiss">
-				<span class="screen-reader-text">Dismiss this notice.</span>
+				<span class="screen-reader-text">
+					{ __( 'Dismiss this notice.', 'classifai' ) }
+				</span>
 			</button>
 		`;
 

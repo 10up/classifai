@@ -32,7 +32,7 @@ module.exports = {
 		'classifai-plugin-excerpt-generation': './src/js/features/excerpt-generation/index.js',
 		'classifai-plugin-classic-excerpt-generation': './src/js/features/excerpt-generation/classic/index.js',
 		'classifai-plugin-content-generation': './src/js/features/content-generation/index.js',
-		'classifai-quick-draft': './src/js/features/quick-draft/index.js',
+		'classifai-quick-draft': './src/js/features/content-generation/quick-draft/index.js',
 		'classifai-plugin-inserter-media-category': './src/js/features/image-generation/inserter-media-category.js',
 		'classifai-plugin-image-generation-media-modal': [
 			'./src/js/features/image-generation/media-modal/index.js',

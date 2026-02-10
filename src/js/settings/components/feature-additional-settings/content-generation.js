@@ -71,9 +71,9 @@ export const ContentGenerationSettings = () => {
 				} ) }
 			</SettingsRow>
 			<SettingsRow
-				label={ __( 'Quick Draft Integration', 'classifai' ) }
+				label={ __( 'Quick draft integration', 'classifai' ) }
 				description={ __(
-					'Add a "Create Draft from Prompt Content" button to the Quick Draft widget on the admin dashboard.',
+					'Adds a "Create Draft from Prompt" button to the Quick Draft widget on the admin dashboard.',
 					'classifai'
 				) }
 			>
