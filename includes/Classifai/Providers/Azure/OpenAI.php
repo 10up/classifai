@@ -200,46 +200,25 @@ class OpenAI extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( array $new_settings ): array {
-		$settings = $this->feature_instance->get_settings();
+		$settings      = $this->feature_instance->get_settings();
+		$authenticated = $this->authenticate_credentials( $new_settings );
 
-		if (
-			! empty( $new_settings[ static::ID ]['endpoint_url'] ) &&
-			! empty( $new_settings[ static::ID ]['api_key'] ) &&
-			! empty( $new_settings[ static::ID ]['deployment'] )
-		) {
-			$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
-			$new_settings[ static::ID ]['endpoint_url']  = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
-			$new_settings[ static::ID ]['api_key']       = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
-			$new_settings[ static::ID ]['deployment']    = sanitize_text_field( $new_settings[ static::ID ]['deployment'] ?? $settings[ static::ID ]['deployment'] );
+		if ( is_wp_error( $authenticated ) ) {
+			$new_settings[ static::ID ]['authenticated'] = false;
 
-			$is_authenticated   = $new_settings[ static::ID ]['authenticated'];
-			$is_endpoint_same   = $new_settings[ static::ID ]['endpoint_url'] === $settings[ static::ID ]['endpoint_url'];
-			$is_api_key_same    = $new_settings[ static::ID ]['api_key'] === $settings[ static::ID ]['api_key'];
-			$is_deployment_same = $new_settings[ static::ID ]['deployment'] === $settings[ static::ID ]['deployment'];
-
-			if ( ! ( $is_authenticated && $is_endpoint_same && $is_api_key_same && $is_deployment_same ) ) {
-				$auth_check = $this->authenticate_credentials( $new_settings );
-
-				if ( is_wp_error( $auth_check ) ) {
-					$new_settings[ static::ID ]['authenticated'] = false;
-					$error_message                               = $auth_check->get_error_message();
-
-					// Add an error message.
-					add_settings_error(
-						'api_key',
-						'classifai-auth',
-						$error_message,
-						'error'
-					);
-				} else {
-					$new_settings[ static::ID ]['authenticated'] = true;
-				}
-			}
+			add_settings_error(
+				'api_key',
+				'classifai-auth',
+				$authenticated->get_error_message(),
+				'error'
+			);
 		} else {
-			$new_settings[ static::ID ]['endpoint_url'] = $settings[ static::ID ]['endpoint_url'];
-			$new_settings[ static::ID ]['api_key']      = $settings[ static::ID ]['api_key'];
-			$new_settings[ static::ID ]['deployment']   = $settings[ static::ID ]['deployment'];
+			$new_settings[ static::ID ]['authenticated'] = true;
 		}
+
+		$new_settings[ static::ID ]['endpoint_url'] = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
+		$new_settings[ static::ID ]['api_key']      = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
+		$new_settings[ static::ID ]['deployment']   = sanitize_text_field( $new_settings[ static::ID ]['deployment'] ?? $settings[ static::ID ]['deployment'] );
 
 		switch ( $this->feature_instance::ID ) {
 			case ContentResizing::ID:

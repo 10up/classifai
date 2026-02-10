@@ -203,6 +203,7 @@ abstract class Provider {
 		 *
 		 * Possible hook names include:
 		 *  - `classifai_provider_credentials_azure_openai`
+		 *  - `classifai_provider_credentials_azure_openai_embeddings`
 		 *  - `classifai_provider_credentials_openai_chatgpt`
 		 *  - `classifai_provider_credentials_openai_embeddings`
 		 *  - `classifai_provider_credentials_openai_moderation`
