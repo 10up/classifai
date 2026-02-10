@@ -361,20 +361,12 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Helper to ensure the authentication works.
+	 * Authenticate our credentials.
 	 *
 	 * @param array $settings The list of settings to be saved
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $settings[ static::ID ]['username'] )
-			|| empty( $settings[ static::ID ]['password'] )
-			|| empty( $settings[ static::ID ]['endpoint_url'] )
-		) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your credentials.', 'classifai' ) );
-		}
-
+	protected function authenticate_credentials( array $settings = [] ) {
 		$credentials       = $this->get_credentials( $settings );
 		$request           = new APIRequest();
 		$request->username = $credentials['username'] ?? '';

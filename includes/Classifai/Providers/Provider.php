@@ -200,6 +200,7 @@ abstract class Provider {
 		 *
 		 * Possible hook names include:
 		 *  - `classifai_provider_credentials_azure_openai`
+		 *  - `classifai_provider_credentials_azure_openai_embeddings`
 		 *  - `classifai_provider_credentials_openai_chatgpt`
 		 *  - `classifai_provider_credentials_openai_embeddings`
 		 *  - `classifai_provider_credentials_openai_moderation`
@@ -217,6 +218,8 @@ abstract class Provider {
 		 *  - `classifai_provider_credentials_xai_grok`
 		 *  - `classifai_provider_credentials_stable_diffusion`
 		 *  - `classifai_provider_credentials_ollama`
+		 *  - `classifai_provider_credentials_ollama_embeddings`
+		 *  - `classifai_provider_credentials_ollama_multimodal`
 		 *  - `classifai_provider_credentials_chrome_ai`
 		 *  - `classifai_provider_credentials_togetherai_image`
 		 *
