@@ -38,7 +38,7 @@ describe( '[Language Processing] Text to Speech (ElevenLabs) Tests', () => {
 		cy.get( '.classifai-panel' ).click();
 		cy.get( '.classifai-panel' ).should(
 			'contain',
-			'Audio generation is in progress.'
+			'Audio generation is in progress…'
 		);
 		cy.exec(
 			'npx wp-env run tests-cli wp action-scheduler run --hooks=classifai_schedule_text_to_speech_job',
@@ -50,7 +50,7 @@ describe( '[Language Processing] Text to Speech (ElevenLabs) Tests', () => {
 		cy.reload();
 		cy.get( '.classifai-panel' ).should(
 			'not.contain',
-			'Audio generation is in progress.'
+			'Audio generation is in progress…'
 		);
 		cy.get( '#classifai-audio-controls__preview-btn' ).should( 'exist' );
 	} );
@@ -121,7 +121,7 @@ describe( '[Language Processing] Text to Speech (ElevenLabs) Tests', () => {
 
 		cy.get( '#classifai-text-to-speech-meta-box' ).should(
 			'contain',
-			'Audio generation is in progress.'
+			'Audio generation is in progress…'
 		);
 		cy.exec(
 			'npx wp-env run tests-cli wp action-scheduler run --hooks=classifai_schedule_text_to_speech_job',
@@ -133,7 +133,7 @@ describe( '[Language Processing] Text to Speech (ElevenLabs) Tests', () => {
 		cy.reload();
 		cy.get( '#classifai-text-to-speech-meta-box' ).should(
 			'not.contain',
-			'Audio generation is in progress.'
+			'Audio generation is in progress…'
 		);
 
 		cy.get( '#classifai-text-to-speech-meta-box' ).should( 'exist' );

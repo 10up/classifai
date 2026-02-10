@@ -452,7 +452,7 @@ class TextToSpeech extends Feature {
 
 		if ( $is_as_scheduled_job ) : ?>
 		<p>
-			<?php esc_html_e( 'Audio generation is in progress.', 'classifai' ); ?>
+			<?php esc_html_e( 'Audio generation is in progress…', 'classifai' ); ?>
 		</p>
 		<?php else : ?>
 
