@@ -78,6 +78,7 @@ export const ContentGenerationSettings = () => {
 				) }
 			>
 				<ToggleControl
+					className="settings-enable-quick-draft"
 					checked={ featureSettings.enable_quick_draft !== false }
 					onChange={ ( value ) => {
 						setFeatureSettings( {

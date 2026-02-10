@@ -275,7 +275,7 @@ INSTRUCTION;
 				'post' => 'post',
 			],
 			'provider'           => ChatGPT::ID,
-			'enable_quick_draft' => true,
+			'enable_quick_draft' => false,
 		];
 	}
 

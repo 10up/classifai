@@ -114,6 +114,37 @@ describe( '[Language processing] Content Generation Tests', () => {
 		cy.get( '.classifai-chat-ui' ).should( 'not.exist' );
 	} );
 
+	it( 'Can save Quick Draft integration settings', () => {
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_generation'
+		);
+		cy.get( '.settings-enable-quick-draft input' ).check();
+		cy.saveFeatureSettings();
+	} );
+
+	it( 'Can see the generate content button in the Quick Draft widget', () => {
+		cy.visit( '/wp-admin/index.php' );
+		cy.get( '#dashboard_quick_press' ).should( 'exist' );
+		cy.get( '#classifai-generate-content' ).click();
+
+		// Should show error message.
+		cy.get( '#dashboard_quick_press .notice' ).should( 'contain.text', 'Please enter some content to generate a draft from.' );
+
+		// Add title and content.
+		cy.get( '#dashboard_quick_press #title' ).clear().type( 'Test Content Generation post' );
+		cy.get( '#dashboard_quick_press #content' ).clear().type( '5 tips for using WordPress' );
+
+		// Click the generate button.
+		cy.get( '#classifai-generate-content' ).click();
+
+		// Should show success message.
+		cy.get( '#dashboard_quick_press .notice' ).should( 'contain.text', 'Draft created successfully!' );
+
+		// Refresh the page and verify the draft is created.
+		cy.reload();
+		cy.get( '#dashboard_quick_press .drafts li:first-child .draft-title' ).should( 'contain.text', 'Test Content Generation post' );
+	} );
+
 	it( 'Can set multiple custom prompts, select one as the default and delete one.', () => {
 		cy.disableClassicEditor();
 

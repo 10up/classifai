@@ -83,7 +83,8 @@ domReady( () => {
 	 * Remove any existing notices.
 	 */
 	function removeExistingNotices() {
-		const notices = quickPressForm.parentElement.querySelectorAll( '.notice' );
+		const notices =
+			quickPressForm.parentElement.querySelectorAll( '.notice' );
 		if ( notices.length > 0 ) {
 			notices.forEach( function ( notice ) {
 				notice.remove();
