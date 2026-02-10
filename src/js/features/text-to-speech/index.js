@@ -146,6 +146,46 @@ const TextToSpeechPlugin = () => {
 		}
 	}, [ isSavingPost, isAutosavingPost, isSynthesizeSpeech ] );
 
+	// Refresh post data periodically while a background TTS job is running.
+	// Once the job completes, the meta updates are picked up by existing
+	// useSelect hooks, automatically updating the UI.
+	useEffect( () => {
+		if ( ! isTextToSpeechScheduled ) {
+			return;
+		}
+
+		let isRefreshing = false;
+		const intervalId = setInterval( async () => {
+			if ( isRefreshing ) {
+				return;
+			}
+
+			isRefreshing = true;
+
+			try {
+				const postId = wp.data
+					.select( 'core/editor' )
+					.getCurrentPostId();
+				const postType = wp.data
+					.select( 'core/editor' )
+					.getCurrentPostType();
+				wp.data
+					.dispatch( 'core' )
+					.invalidateResolution( 'getEntityRecord', [
+						'postType',
+						postType,
+						postId,
+					] );
+			} catch ( e ) {
+				// Silently handle refresh errors.
+			}
+
+			isRefreshing = false;
+		}, 5000 );
+
+		return () => clearInterval( intervalId );
+	}, [ isTextToSpeechScheduled ] );
+
 	// Fetches the latest audio file to avoid disk cache.
 	const cacheBustingUrl = `${ sourceUrl }?ver=${ timestamp }`;
 
@@ -185,7 +225,6 @@ const TextToSpeechPlugin = () => {
 				} }
 				disabled={ isProcessingAudio }
 				isBusy={ isProcessingAudio }
-				__nextHasNoMarginBottom
 			/>
 			{ sourceUrl && (
 				<>
@@ -203,7 +242,6 @@ const TextToSpeechPlugin = () => {
 						} }
 						disabled={ isProcessingAudio }
 						isBusy={ isProcessingAudio }
-						__nextHasNoMarginBottom
 					/>
 					<BaseControl
 						id="classifai-audio-preview-controls"
@@ -215,6 +253,7 @@ const TextToSpeechPlugin = () => {
 										'classifai'
 								  )
 						}
+						__nextHasNoMarginBottom
 					>
 						<Button
 							id="classifai-audio-controls__preview-btn"
