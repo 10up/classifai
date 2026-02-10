@@ -38,20 +38,6 @@ class CredentialObfuscator {
 	const MIN_ASTERISKS_TO_DETECT = 3;
 
 	/**
-	 * Fields that should NOT be obfuscated (non-sensitive).
-	 *
-	 * @var array
-	 */
-	private static $non_sensitive_fields = [
-		'authenticated',
-		'endpoint_url',
-		'aws_region',
-		'deployment',
-		'username',
-		'access_key_id',
-	];
-
-	/**
 	 * Obfuscate a credential value.
 	 *
 	 * Returns first N characters followed by asterisks.
@@ -112,10 +98,12 @@ class CredentialObfuscator {
 	 * @since x.x.x
 	 *
 	 * @param string $field The field name to check.
+	 * @param string $profile_id The profile ID.
 	 * @return bool True if the field should be obfuscated.
 	 */
-	public static function should_obfuscate_field( string $field ): bool {
-		return ! in_array( $field, self::$non_sensitive_fields, true );
+	public static function should_obfuscate_field( string $field, string $profile_id ): bool {
+		$sensitive_fields = ProviderProfiles::get_sensitive_fields( $profile_id );
+		return in_array( $field, $sensitive_fields, true );
 	}
 
 	/**
@@ -142,7 +130,7 @@ class CredentialObfuscator {
 			if (
 				isset( $settings[ $field ] ) &&
 				is_string( $settings[ $field ] ) &&
-				self::should_obfuscate_field( $field )
+				self::should_obfuscate_field( $field, $profile_id )
 			) {
 				$settings[ $field ] = self::obfuscate( $settings[ $field ] );
 			}
@@ -205,7 +193,7 @@ class CredentialObfuscator {
 
 		foreach ( $credential_fields as $field ) {
 			// Skip non-sensitive fields.
-			if ( ! self::should_obfuscate_field( $field ) ) {
+			if ( ! self::should_obfuscate_field( $field, $profile_id ) ) {
 				continue;
 			}
 
