@@ -218,12 +218,19 @@ class TextToSpeech extends Feature {
 	 * @param WP_REST_Request $request  Request object.
 	 */
 	public function rest_handle_audio( \WP_Post $post, WP_REST_Request $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+
 		if ( ! $this->is_feature_enabled() ) {
 			return;
 		}
 
+		// Ensure we have a logged in user that can edit the item.
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
 		$job_args = [
-			'post_id'         => (int) $request->get_param( 'id' ),
+			'post_id'         => $post_id,
 			'calling_user_id' => get_current_user_id(),
 		];
 
@@ -232,7 +239,7 @@ class TextToSpeech extends Feature {
 			return;
 		}
 
-		$audio_id = get_post_meta( $request->get_param( 'id' ), self::AUDIO_ID_KEY, true );
+		$audio_id = get_post_meta( $post_id, self::AUDIO_ID_KEY, true );
 
 		// Since we have dynamic generation option agnostic to meta saves we need a flag to differentiate audio generation accurately
 		$process_content = false;
@@ -250,9 +257,9 @@ class TextToSpeech extends Feature {
 		) {
 			if ( function_exists( 'as_enqueue_async_action' ) ) {
 				\as_enqueue_async_action( 'classifai_schedule_text_to_speech_job', $job_args, 'classifai' );
-				update_post_meta( $request->get_param( 'id' ), '_classifai_text_to_speech_scheduled', true );
+				update_post_meta( $post_id, '_classifai_text_to_speech_scheduled', true );
 			} else {
-				$this->generate_text_to_speech_audio( $request->get_param( 'id' ) );
+				$this->generate_text_to_speech_audio( $post_id );
 			}
 		}
 	}
