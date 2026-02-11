@@ -38,7 +38,7 @@ const TextToSpeechPlugin = () => {
 
 	const isTextToSpeechScheduled = useSelect( ( select ) => {
 		const meta = select( 'core/editor' ).getCurrentPostAttribute( 'meta' );
-		return ( meta && meta._classifai_text_to_speech_scheduled ) ?? false;
+		return meta?._classifai_text_to_speech_scheduled ?? false;
 	} );
 
 	// Indicates whether generated audio should be displayed on the frontend.
