@@ -281,7 +281,7 @@ class Notifications {
 	/**
 	 * Render a deprecation notice when the legacy settings filter is active.
 	 *
-	 * @since x.x.x
+	 * @since 3.8.0
 	 */
 	public function render_legacy_settings_deprecation_notice() {
 		// Only show if the legacy settings filter is active.

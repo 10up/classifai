@@ -173,7 +173,7 @@ abstract class Provider {
 	/**
 	 * Get the credentials for the Provider.
 	 *
-	 * @since x.x.x
+	 * @since 3.8.0
 	 *
 	 * @param array $settings Feature settings. Optional, will default to using saved settings.
 	 * @return array
@@ -223,7 +223,7 @@ abstract class Provider {
 		 *  - `classifai_provider_credentials_chrome_ai`
 		 *  - `classifai_provider_credentials_togetherai_image`
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 * @hook classifai_provider_credentials_{$provider_id}
 		 *
 		 * @param array       $credentials               The credentials for the Provider.
@@ -241,7 +241,7 @@ abstract class Provider {
 		/**
 		 * Filter the credentials for the Provider.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 * @hook classifai_provider_credentials
 		 *
 		 * @param array       $credentials               The credentials for the Provider.
