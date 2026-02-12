@@ -31,9 +31,11 @@
     "phpcompatibility/php-compatibility": "10.0.0-alpha2 as 9.99.99",
     "phpstan/extension-installer": "1.4.x-dev",
     "phpstan/phpstan-deprecation-rules": "2.0.3",
+    "phpunit/phpunit": "^8.5|^9.6",
     "sirbrillig/phpcs-changed": "^2.12.0",
     "szepeviktor/phpstan-wordpress": "^2.0.3",
-    "yoast/phpunit-polyfills": "^1.0.0"
+    "wp-phpunit/wp-phpunit": "^6.9",
+    "yoast/phpunit-polyfills": "^4.0"
   },
   "scripts": {
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",
