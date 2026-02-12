@@ -31,6 +31,8 @@ Session.vim
 *.swp
 .~lock*
 .vscode
+.cursor
+.claude
 
 # Mac OSX
 .DS_Store
