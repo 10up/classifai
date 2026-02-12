@@ -102,7 +102,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/computervision/imageanalysis:analyze?api-version=2024-02-01' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/generateThumbnail' ) !== false ) {
-		$response = file_get_contents( __DIR__ . '../classifai/assets/img/icon256x256.png' );
+		$response = file_get_contents( '/var/www/html/wp-content/plugins/classifai/assets/img/icon-256x256.png' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/pdf-read-result' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/pdf.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/read' ) !== false ) {
@@ -195,8 +195,8 @@ add_action(
 			'classifai/v1',
 			'clean/taxonomy-terms',
 			array(
-				'methods'  => 'GET',
-				'callback' => function() {
+				'methods'             => 'GET',
+				'callback'            => function() {
 					$taxonomies = ['watson-category', 'watson-concept', 'watson-entity', 'watson-keyword'];
 
 					foreach ( $taxonomies as $taxonomy ) {
@@ -214,6 +214,7 @@ add_action(
 
 					return true;
 				},
+				'permission_callback' => '__return_true',
 			)
 		);
 	}
