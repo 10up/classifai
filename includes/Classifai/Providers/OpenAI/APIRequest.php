@@ -412,6 +412,6 @@ class APIRequest {
 			return false;
 		}
 
-		return (bool) get_option( OpenAIPricingController::HARD_LIMIT_OPTION, false );
+		return (bool) get_option( OpenAIPricingController::HARD_LIMIT_OPTION, true );
 	}
 }
