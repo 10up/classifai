@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "696168be6db00853435d52e72bfdaf4e",
+    "content-hash": "de9f6ea169a460d4101e3e7e68db2ce1",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -2150,11 +2150,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.x-dev",
+            "version": "2.2.x-dev",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1470227517e6613d654bd624e70df7963e8377ed",
-                "reference": "1470227517e6613d654bd624e70df7963e8377ed",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e4e435b9fc41c83aaa27e7f5ecde781cd72e1356",
+                "reference": "e4e435b9fc41c83aaa27e7f5ecde781cd72e1356",
                 "shasum": ""
             },
             "require": {
@@ -2200,7 +2200,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-12T20:04:08+00:00"
+            "time": "2026-02-13T14:05:55+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
