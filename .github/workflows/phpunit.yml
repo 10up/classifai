@@ -23,10 +23,6 @@ jobs:
             php: [ '8.4', '8.3', '8.2', '8.1', '8.0', '7.4' ]
             wp: [ latest, trunk ]
             coverage: [ false ]
-            include:
-                - php: '8.4'
-                  wp: latest
-                  coverage: false
     env:
         WP_ENV_PHP_VERSION: ${{ matrix.php }}
         WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
@@ -74,11 +70,7 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           command: |
-            if [ "${{ matrix.coverage }}" == "true" ]; then
-              npm run env start -- --xdebug=coverage
-            else
-              npm run env start
-            fi
+            npm run env start
 
       - name: Log versions
         run: |
