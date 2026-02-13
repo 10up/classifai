@@ -18,14 +18,13 @@ jobs:
     name: Test PHP ${{ matrix.php }} WP ${{ matrix.wp }}
     runs-on: ubuntu-24.04
     strategy:
-        fail-fast: false
-        matrix:
-            php: [ '8.4', '8.3', '8.2', '8.1', '8.0', '7.4' ]
-            wp: [ latest, trunk ]
-            coverage: [ false ]
+      fail-fast: false
+      matrix:
+        php: [ '8.4', '8.3', '8.2', '8.1', '8.0', '7.4' ]
+        wp: [ latest, trunk ]
     env:
-        WP_ENV_PHP_VERSION: ${{ matrix.php }}
-        WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
+      WP_ENV_PHP_VERSION: ${{ matrix.php }}
+      WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
 
     steps:
       - name: Configure environment variables
@@ -74,10 +73,10 @@ jobs:
 
       - name: Log versions
         run: |
-            npm run env -- run cli php -- -v
-            npm run env -- run cli wp core version
+          npm run env -- run cli php -- -v
+          npm run env -- run cli wp core version
 
       - name: Run PHPUnit tests
         id: phpunit
         run: |
-            npm run test:php
+          npm run test:php
