@@ -2,6 +2,7 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Admin\OpenAIPricingController;
 use Classifai\Providers\Provider;
 use WP_Error;
 
@@ -73,6 +74,13 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function get( string $url, array $options = [] ) {
+		if ( ! $this->openai_request_allowed() ) {
+			return new WP_Error(
+				'classifai_openai_hard_limit',
+				__( 'OpenAI usage has reached the configured hard limit. Re-enable in ClassifAI → Pricing / OpenAI usage settings.', 'classifai' )
+			);
+		}
+
 		/**
 		 * Filter the URL for the get request.
 		 *
@@ -133,6 +141,13 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function post( string $url = '', array $options = [] ) {
+		if ( ! $this->openai_request_allowed() ) {
+			return new WP_Error(
+				'classifai_openai_hard_limit',
+				__( 'OpenAI usage has reached the configured hard limit. Re-enable in ClassifAI → Pricing / OpenAI usage settings.', 'classifai' )
+			);
+		}
+
 		$options = wp_parse_args(
 			$options,
 			[
@@ -200,6 +215,13 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function post_form( string $url = '', array $body = [] ) {
+		if ( ! $this->openai_request_allowed() ) {
+			return new WP_Error(
+				'classifai_openai_hard_limit',
+				__( 'OpenAI usage has reached the configured hard limit. Re-enable in ClassifAI → Pricing / OpenAI usage settings.', 'classifai' )
+			);
+		}
+
 		/**
 		 * Filter the URL for the post form request.
 		 *
@@ -367,5 +389,29 @@ class APIRequest {
 		}
 
 		return $this->api_key ?? '';
+	}
+
+	/**
+	 * Whether OpenAI API requests are allowed (not blocked by hard usage limit).
+	 *
+	 * @return bool
+	 */
+	private function openai_request_allowed(): bool {
+		/**
+		 * Filter whether OpenAI API requests are allowed.
+		 * When the hard usage limit is reached and not overridden, this is set to false.
+		 *
+		 * @since 3.x.x
+		 * @hook classifai_openai_can_make_request
+		 * @param bool $allowed Whether the request is allowed. Default true.
+		 * @return bool
+		 */
+		$allowed = (bool) apply_filters( 'classifai_openai_can_make_request', true );
+
+		if ( ! $allowed ) {
+			return false;
+		}
+
+		return (bool) get_option( OpenAIPricingController::HARD_LIMIT_OPTION, false );
 	}
 }

@@ -136,10 +136,11 @@ class Plugin {
 		}
 
 		$this->admin_helpers = [
-			'notifications' => new Admin\Notifications(),
-			'debug_info'    => new Admin\DebugInfo(),
-			'bulk_actions'  => new Admin\BulkActions(),
-			'updater'       => new Admin\Update(),
+			'notifications'             => new Admin\Notifications(),
+			'debug_info'                => new Admin\DebugInfo(),
+			'bulk_actions'              => new Admin\BulkActions(),
+			'updater'                   => new Admin\Update(),
+			'openai_pricing_controller' => new Admin\OpenAIPricingController(),
 		];
 
 		foreach ( $this->admin_helpers as $instance ) {

@@ -5,3 +5,4 @@ export * from './feature-settings';
 export * from './user-permissions';
 export * from './allowed-roles';
 export * from './settings-row';
+export * from './openai-pricing-settings';

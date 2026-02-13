@@ -51,6 +51,7 @@ class Notifications {
 		$this->v3_migration_completed_notice();
 		$this->render_embeddings_notice();
 		$this->render_legacy_settings_deprecation_notice();
+		$this->render_openai_threshold_notice();
 		$this->render_notices();
 	}
 
@@ -275,6 +276,81 @@ class Notifications {
 			</p>
 		</div>
 
+		<?php
+	}
+
+	/**
+	 * Renders a dismissible warning when OpenAI usage exceeds the soft/hard threshold limit.
+	 */
+	public function render_openai_threshold_notice() {
+		if ( ! class_exists( 'Classifai\Admin\OpenAIPricingController' ) ) {
+			return;
+		}
+
+		$controller = new \Classifai\Admin\OpenAIPricingController();
+		$pricing    = $controller->get_pricing_option();
+
+		if (
+			empty( $pricing['soft_threshold_enabled'] )
+			|| empty( $pricing['soft_threshold_amount'] )
+			|| empty( $pricing['hard_threshold_enabled'] )
+			|| empty( $pricing['hard_threshold_amount'] )
+		) {
+			return;
+		}
+
+		$hard_threshold_reached = get_option( OpenAIPricingController::HARD_LIMIT_OPTION, false );
+
+		$usage = $controller->get_cached_usage();
+
+		if ( $hard_threshold_reached ) {
+			$scope = isset( $pricing['hard_threshold_scope'] ) ? $pricing['hard_threshold_scope'] : 'current_month';
+		} else {
+			$scope = isset( $pricing['soft_threshold_scope'] ) ? $pricing['soft_threshold_scope'] : 'current_month';
+		}
+
+		$amount    = $controller->get_amount_for_scope( $pricing, $scope );
+		$threshold = $hard_threshold_reached ? (float) $pricing['hard_threshold_amount'] : (float) $pricing['soft_threshold_amount'];
+
+		if ( $amount < $threshold ) {
+			return;
+		}
+
+		$key = 'openai_threshold_reached';
+		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
+			return;
+		}
+		$settings_url = admin_url( 'tools.php?page=classifai#/pricing' );
+
+		$classes = [
+			'notice',
+			'is-dismissible',
+			'classifai-dismissible-notice',
+		];
+
+		if ( $hard_threshold_reached ) {
+			$classes[] = 'notice-error';
+			$message   = sprintf(
+				/* translators: 1: amount with currency, 2: link to settings */
+				__( 'OpenAI features are currently disabled due to exceeded your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage['currency'] ?? 'USD' ) ),
+				esc_url( $settings_url )
+			);
+		} else {
+			$classes[] = 'notice-warning';
+			$message   = sprintf(
+				/* translators: 1: amount with currency, 2: link to settings */
+				__( 'OpenAI usage has exceeded your soft limit of %1$s for this period. <a href="%2$s">Configure alerts</a>.', 'classifai' ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage['currency'] ?? 'USD' ) ),
+				esc_url( $settings_url )
+			);
+		}
+		?>
+		<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-notice="<?php echo esc_attr( $key ); ?>">
+			<p>
+				<?php echo wp_kses_post( $message ); ?>
+			</p>
+		</div>
 		<?php
 	}
 

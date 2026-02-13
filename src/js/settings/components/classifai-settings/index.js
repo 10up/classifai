@@ -24,7 +24,12 @@ import { store as noticeStore } from '@wordpress/notices';
 /**
  * Internal dependencies
  */
-import { FeatureSettings, Header, ServiceSettings } from '..';
+import {
+	FeatureSettings,
+	Header,
+	ServiceSettings,
+	OpenAIPricingSettings,
+} from '..';
 import { STORE_NAME } from '../../data/store';
 import { FeatureContext } from '../feature-settings/context';
 import { ClassifAIRegistration } from '../classifai-registration';
@@ -107,6 +112,17 @@ export const ServiceNavigation = () => {
 						{ services[ service ] }
 					</NavLink>
 				) ) }
+				<NavLink
+					to="pricing"
+					key="pricing"
+					className={ ( { isActive } ) =>
+						isActive
+							? 'active-tab classifai-tabs-item'
+							: 'classifai-tabs-item'
+					}
+				>
+					{ __( 'Pricing', 'classifai' ) }
+				</NavLink>
 				<NavLink
 					to="settings"
 					key="settings"
@@ -237,6 +253,10 @@ export const ClassifAISettings = () => {
 						<Route
 							path=":service/:feature"
 							element={ <FeatureSettingsWrapper /> }
+						/>
+						<Route
+							path="pricing"
+							element={ <OpenAIPricingSettings /> }
 						/>
 						<Route
 							path="settings"
