@@ -179,7 +179,7 @@ class UsageCosts {
 			$url  = add_query_arg( $args, self::COSTS_API_URL );
 
 			if ( ! empty( $this->project_id ) ) {
-				$url = add_query_arg( 'project_ids[]', $this->project_id, $url );
+				$url = add_query_arg( 'project_ids', $this->project_id, $url );
 			}
 
 			$options = [
