@@ -50,7 +50,11 @@ class OpenAIPricingController {
 	 */
 	public function schedule_cron_if_needed(): void {
 		// We return early if action scheduler is not active.
-		if ( ! function_exists( 'as_schedule_recurring_action' ) ) {
+		if (
+			! function_exists( 'as_schedule_recurring_action' )
+			|| ! function_exists( 'as_unschedule_all_actions' )
+			|| ! function_exists( 'as_has_scheduled_action' )
+		) {
 			return;
 		}
 

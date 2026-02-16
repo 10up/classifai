@@ -183,7 +183,7 @@ class UsageCosts {
 			}
 
 			$options = [
-				'timeout' => 90,
+				'timeout' => 90, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				'headers' => [
 					'Authorization' => 'Bearer ' . trim( $this->admin_api_key ),
 					'Content-Type'  => 'application/json',
