@@ -699,6 +699,11 @@ class Settings {
 		$controller = new OpenAIPricingController();
 		$current    = $controller->get_pricing_option();
 
+		if ( isset( $params['force_refresh'] ) && true === $params['force_refresh'] ) {
+			$controller->run_usage_refresh( true );
+			return rest_ensure_response( [ 'success' => true ] );
+		}
+
 		$pricing = $params['pricing'] ?? [];
 		if ( ! is_array( $pricing ) ) {
 			return new \WP_Error(
@@ -742,9 +747,6 @@ class Settings {
 
 		update_option( OpenAIPricingController::OPTION_NAME, $new );
 		$controller->schedule_cron_if_needed();
-		if ( ! empty( $new['enabled'] ) && ! empty( $new['admin_api_key'] ) ) {
-			$controller->run_usage_refresh();
-		}
 
 		return rest_ensure_response( [ 'success' => true ] );
 	}

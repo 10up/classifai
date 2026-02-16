@@ -30,7 +30,6 @@ export const OpenAIPricingSettings = () => {
 		useDispatch( noticesStore );
 	const [ loading, setLoading ] = useState( true );
 	const [ saving, setSaving ] = useState( false );
-	const [ usage, setUsage ] = useState( null );
 	const [ data, setData ] = useState( {
 		pricing: null,
 		hard_limit_reached: false,
@@ -41,11 +40,9 @@ export const OpenAIPricingSettings = () => {
 	const load = useCallback( async () => {
 		setLoading( true );
 		try {
-			const [ usageRes, settingsRes ] = await Promise.all( [
-				apiFetch( { path: '/classifai/v1/openai-usage' } ),
+			const [ settingsRes ] = await Promise.all( [
 				apiFetch( { path: '/classifai/v1/openai-pricing-settings' } ),
 			] );
-			setUsage( usageRes );
 			setData( settingsRes );
 			const p = settingsRes.pricing || {};
 			setForm( {
@@ -114,6 +111,29 @@ export const OpenAIPricingSettings = () => {
 			createErrorNotice(
 				err.message ||
 					__( 'Failed to save pricing settings.', 'classifai' )
+			);
+		} finally {
+			setSaving( false );
+		}
+	};
+
+	const forceRefreshData = async () => {
+		setSaving( true );
+		try {
+			await apiFetch( {
+				path: '/classifai/v1/openai-pricing-settings',
+				method: 'POST',
+				data: {
+					force_refresh: true,
+				},
+			} );
+			createSuccessNotice( __( 'Data refreshed.', 'classifai' ), {
+				type: 'snackbar',
+			} );
+			load();
+		} catch ( err ) {
+			createErrorNotice(
+				err.message || __( 'Failed to refresh data.', 'classifai' )
 			);
 		} finally {
 			setSaving( false );
@@ -475,6 +495,15 @@ export const OpenAIPricingSettings = () => {
 						disabled={ saving }
 					>
 						{ __( 'Save pricing settings', 'classifai' ) }
+					</Button>
+					<Button
+						variant="secondary"
+						onClick={ forceRefreshData }
+						isBusy={ saving }
+						disabled={ saving || ! form.enabled }
+						style={ { marginLeft: 10 } }
+					>
+						{ __( 'Force refresh data', 'classifai' ) }
 					</Button>
 				</PanelBody>
 			</Panel>

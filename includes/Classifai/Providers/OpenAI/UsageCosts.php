@@ -68,11 +68,12 @@ class UsageCosts {
 	 *
 	 * @see https://en.wikipedia.org/wiki/Products_and_applications_of_OpenAI#cite_note-gpt3-whynotfullmodel-30
 	 *
-	 * @param bool $refresh_cache Whether to refresh the cached costs.
+	 * @param bool       $refresh_cache Whether to refresh the cached costs.
+	 * @param array|null $ytd Current Year to date costs.
 	 *
 	 * @return float All time costs.
 	 */
-	public function fetch_all_time_costs( $refresh_cache = false ) {
+	public function fetch_all_time_costs( $refresh_cache = false, $ytd = null ) {
 		$cached = get_option( OpenAIPricingController::OPTION_NAME, [] );
 
 		if (
@@ -96,9 +97,15 @@ class UsageCosts {
 		$start_year       = isset( $cached['api_start_year'] ) ? (int) $cached['api_start_year'] : 2020;
 
 		for ( $year = $start_year; $year <= $current_year; $year++ ) {
-			// If the year is already in the cached array, skip the API call. Since it won't change for the same year.
-			if ( isset( $cached['all_year_pricing'][ $year ] ) ) {
+			// If the year is already in the cached array and it's not the current year, skip the API call. Since it won't change for the current year.
+			if ( isset( $cached['all_year_pricing'][ $year ] ) && $year !== $current_year ) {
 				$all_year_pricing[ $year ] = $cached['all_year_pricing'][ $year ];
+				continue;
+			}
+
+			// If the ytd is set and the year is the same as the ytd year, use the ytd amount.
+			if ( ! empty( $ytd ) && $year === $ytd['year'] ) {
+				$all_year_pricing[ $year ] = $ytd['amount'];
 				continue;
 			}
 

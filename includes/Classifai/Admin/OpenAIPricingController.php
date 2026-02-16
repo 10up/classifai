@@ -91,8 +91,12 @@ class OpenAIPricingController {
 
 	/**
 	 * Runs the usage refresh: fetch costs, cache, check thresholds.
+	 *
+	 * @param bool $force Whether to force refresh the data.
+	 *
+	 * @return void
 	 */
-	public function run_usage_refresh(): void {
+	public function run_usage_refresh( bool $force = false ): void {
 		$pricing = $this->get_pricing_option();
 		if ( empty( $pricing['enabled'] ) || empty( $pricing['admin_api_key'] ) ) {
 			return;
@@ -110,7 +114,7 @@ class OpenAIPricingController {
 
 		$this_month = $usage->fetch_costs( $month_start->getTimestamp(), $now->getTimestamp() );
 		$ytd        = $usage->fetch_costs( $year_start->getTimestamp(), $now->getTimestamp() );
-		$all_time   = $usage->fetch_all_time_costs();
+		$all_time   = $usage->fetch_all_time_costs( $force, is_wp_error( $ytd ) ? null : $ytd );
 
 		$currency       = 'USD';
 		$this_month_val = 0.0;
@@ -190,6 +194,13 @@ class OpenAIPricingController {
 			'usage_last_updated'       => 0,
 		];
 		$option   = get_option( self::OPTION_NAME, [] );
+
+		$admin_api_key = apply_filters( 'classifai_openai_admin_api_key', $option['admin_api_key'] ?? '', $option );
+
+		if ( ! empty( $admin_api_key ) ) {
+			$option['admin_api_key'] = $admin_api_key;
+		}
+
 		return wp_parse_args( is_array( $option ) ? $option : [], $defaults );
 	}
 
