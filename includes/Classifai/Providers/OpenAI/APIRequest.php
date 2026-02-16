@@ -401,7 +401,7 @@ class APIRequest {
 		 * Filter whether OpenAI API requests are allowed.
 		 * When the hard usage limit is reached and not overridden, this is set to false.
 		 *
-		 * @since 3.x.x
+		 * @since 3.8.0
 		 * @hook classifai_openai_can_make_request
 		 * @param bool $allowed Whether the request is allowed. Default true.
 		 * @return bool

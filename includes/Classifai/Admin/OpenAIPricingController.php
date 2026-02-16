@@ -85,7 +85,7 @@ class OpenAIPricingController {
 		/**
 		 * Filter the OpenAI usage refresh interval in minutes.
 		 *
-		 * @since 3.x.x
+		 * @since 3.8.0
 		 * @hook classifai_openai_usage_refresh_interval_minutes
 		 * @param int $interval_minutes Interval in minutes (default 15).
 		 * @return int
@@ -159,7 +159,7 @@ class OpenAIPricingController {
 		/**
 		 * Fires after OpenAI usage has been updated from the API.
 		 *
-		 * @since 3.x.x
+		 * @since 3.8.0
 		 * @hook classifai_openai_usage_updated
 		 * @param array    $usage Cached usage (this_month_total, ytd_total, all_time_total, currency, last_updated).
 		 * @param array    $raw   Summary of raw API responses (optional).
@@ -226,7 +226,7 @@ class OpenAIPricingController {
 		/**
 		 * Filter cached OpenAI usage before display.
 		 *
-		 * @since 3.x.x
+		 * @since 3.8.0
 		 * @hook classifai_openai_cached_usage
 		 * @param array $usage Cached usage array.
 		 * @return array
@@ -275,6 +275,20 @@ class OpenAIPricingController {
 			update_option( self::OPTION_NAME, $pricing );
 			return;
 		}
+
+		/**
+		 * Fires when the soft threshold is exceeded.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @hook classifai_openai_soft_threshold_exceeded
+		 *
+		 * @param array $pricing Updated pricing option.
+		 * @param float $amount Amount of usage.
+		 * @param float $threshold Threshold amount.
+		 * @param string $scope Scope of the threshold.
+		 */
+		do_action( 'classifai_openai_soft_threshold_exceeded', $pricing, $amount, $threshold, $scope );
 
 		$period_key = '';
 
@@ -356,6 +370,20 @@ class OpenAIPricingController {
 		}
 
 		update_option( self::HARD_LIMIT_OPTION, true );
+
+		/**
+		 * Fires when the hard threshold is exceeded.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @hook classifai_openai_hard_threshold_exceeded
+		 *
+		 * @param array $pricing Updated pricing option.
+		 * @param float $amount Amount of usage.
+		 * @param float $threshold Threshold amount.
+		 * @param string $scope Scope of the threshold.
+		 */
+		do_action( 'classifai_openai_hard_threshold_exceeded', $pricing, $amount, $threshold, $scope );
 
 		$period_key = '';
 		// Period key is used to track the last sent alert for a period. Sent only once a month.
