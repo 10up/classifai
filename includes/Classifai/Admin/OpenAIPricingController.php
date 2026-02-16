@@ -260,14 +260,18 @@ class OpenAIPricingController {
 	 * @param array $pricing Updated pricing option.
 	 */
 	private function check_soft_threshold( array $pricing ): void {
+		$sent_key = 'last_soft_alert_sent_for_period';
+
 		if ( empty( $pricing['soft_threshold_enabled'] ) || empty( $pricing['soft_threshold_amount'] ) ) {
+			// Remove the sent key from the pricing option if already set.
+			unset( $pricing[ $sent_key ] );
+			update_option( self::OPTION_NAME, $pricing );
 			return;
 		}
 
 		$scope     = isset( $pricing['soft_threshold_scope'] ) ? $pricing['soft_threshold_scope'] : 'current_month';
 		$amount    = $this->get_amount_for_scope( $pricing, $scope );
 		$threshold = (float) $pricing['soft_threshold_amount'];
-		$sent_key  = 'last_soft_alert_sent_for_period';
 
 		if ( $amount < $threshold ) {
 			// Remove the sent key from the pricing option if already set.
@@ -351,14 +355,20 @@ class OpenAIPricingController {
 	 * @param array $pricing Updated pricing option.
 	 */
 	private function check_hard_threshold( array $pricing ): void {
+		$sent_key = 'hard_alert_sent_for_period';
+
 		if ( empty( $pricing['hard_threshold_enabled'] ) || empty( $pricing['hard_threshold_amount'] ) ) {
+			delete_option( self::HARD_LIMIT_OPTION );
+
+			// Remove the sent key from the pricing option.
+			unset( $pricing[ $sent_key ] );
+			update_option( self::OPTION_NAME, $pricing );
 			return;
 		}
 
 		$scope     = isset( $pricing['hard_threshold_scope'] ) ? $pricing['hard_threshold_scope'] : 'current_month';
 		$amount    = $this->get_amount_for_scope( $pricing, $scope );
 		$threshold = (float) $pricing['hard_threshold_amount'];
-		$sent_key  = 'hard_alert_sent_for_period';
 
 		if ( $amount < $threshold ) {
 			delete_option( self::HARD_LIMIT_OPTION );
