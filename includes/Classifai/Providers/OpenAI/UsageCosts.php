@@ -220,16 +220,6 @@ class UsageCosts {
 				}
 				$costs_obj = $bucket['results'];
 				foreach ( $costs_obj as $cost_obj ) {
-					// If the project ID is set and the project ID is not the same as in the cost object, skip the cost object.
-					// This is to ensure that we only fetch the costs for the project ID that is set.
-					if (
-						! empty( $this->project_id )
-						&& ! empty( $cost_obj['project_id'] )
-						&& $this->project_id !== $cost_obj['project_id']
-					) {
-						continue;
-					}
-
 					if ( isset( $cost_obj['amount']['value'] ) && is_numeric( $cost_obj['amount']['value'] ) ) {
 						$total_amount += (float) $cost_obj['amount']['value'];
 					}
