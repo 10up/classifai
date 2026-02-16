@@ -290,12 +290,7 @@ class Notifications {
 		$controller = new \Classifai\Admin\OpenAIPricingController();
 		$pricing    = $controller->get_pricing_option();
 
-		if (
-			empty( $pricing['soft_threshold_enabled'] )
-			|| empty( $pricing['soft_threshold_amount'] )
-			|| empty( $pricing['hard_threshold_enabled'] )
-			|| empty( $pricing['hard_threshold_amount'] )
-		) {
+		if ( empty( $pricing['soft_threshold_enabled'] ) && empty( $pricing['hard_threshold_enabled'] ) ) {
 			return;
 		}
 

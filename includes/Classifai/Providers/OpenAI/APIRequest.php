@@ -77,7 +77,7 @@ class APIRequest {
 		if ( ! $this->openai_request_allowed() ) {
 			return new WP_Error(
 				'classifai_openai_hard_limit',
-				__( 'OpenAI usage has reached the configured hard limit. Re-enable in ClassifAI → Pricing / OpenAI usage settings.', 'classifai' )
+				__( 'OpenAI usage has reached the configured hard limit. Re-enable in ClassifAI / Pricing / OpenAI usage settings.', 'classifai' )
 			);
 		}
 
@@ -144,7 +144,7 @@ class APIRequest {
 		if ( ! $this->openai_request_allowed() ) {
 			return new WP_Error(
 				'classifai_openai_hard_limit',
-				__( 'OpenAI usage has reached the configured hard limit. Re-enable in ClassifAI → Pricing / OpenAI usage settings.', 'classifai' )
+				__( 'OpenAI usage has reached the configured hard limit. Re-enable in ClassifAI / Pricing / OpenAI usage settings.', 'classifai' )
 			);
 		}
 
@@ -218,7 +218,7 @@ class APIRequest {
 		if ( ! $this->openai_request_allowed() ) {
 			return new WP_Error(
 				'classifai_openai_hard_limit',
-				__( 'OpenAI usage has reached the configured hard limit. Re-enable in ClassifAI → Pricing / OpenAI usage settings.', 'classifai' )
+				__( 'OpenAI usage has reached the configured hard limit. Re-enable in ClassifAI / Pricing / OpenAI usage settings.', 'classifai' )
 			);
 		}
 
@@ -412,6 +412,6 @@ class APIRequest {
 			return false;
 		}
 
-		return (bool) get_option( OpenAIPricingController::HARD_LIMIT_OPTION, true );
+		return ! (bool) get_option( OpenAIPricingController::HARD_LIMIT_OPTION, false );
 	}
 }
