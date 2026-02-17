@@ -673,7 +673,7 @@ class Settings {
 	 */
 	public function get_openai_pricing_settings_callback(): \WP_REST_Response {
 		$controller         = new OpenAIPricingController();
-		$pricing            = $controller->get_pricing_option();
+		$pricing            = $controller->get_pricing_option( true );
 		$hard_limit_reached = (bool) get_option( OpenAIPricingController::HARD_LIMIT_OPTION, false );
 		if ( ! empty( $pricing['admin_api_key'] ) ) {
 			$pricing['admin_api_key'] = CredentialObfuscator::obfuscate( $pricing['admin_api_key'] );

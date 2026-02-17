@@ -173,9 +173,11 @@ class OpenAIPricingController {
 	/**
 	 * Gets the full pricing option (settings + cached usage).
 	 *
+	 * @param bool $suppress_filter Whether to suppress the filter.
+	 *
 	 * @return array
 	 */
-	public function get_pricing_option(): array {
+	public function get_pricing_option( bool $suppress_filter = false ): array {
 		$defaults = [
 			'enabled'                  => false,
 			'admin_api_key'            => '',
@@ -199,10 +201,8 @@ class OpenAIPricingController {
 		];
 		$option   = get_option( self::OPTION_NAME, [] );
 
-		$admin_api_key = apply_filters( 'classifai_openai_admin_api_key', $option['admin_api_key'] ?? '', $option );
-
-		if ( ! empty( $admin_api_key ) ) {
-			$option['admin_api_key'] = $admin_api_key;
+		if ( empty( $suppress_filter ) ) {
+			$option['admin_api_key'] = apply_filters( 'classifai_openai_admin_api_key', $option['admin_api_key'] ?? '', $option );
 		}
 
 		return wp_parse_args( is_array( $option ) ? $option : [], $defaults );
