@@ -261,7 +261,7 @@ class OpenAIPricingController {
 	 * Returns the amount to compare for threshold based on scope.
 	 *
 	 * @param array  $pricing Full pricing option.
-	 * @param string $scope   'current_month' or 'last_n_days'.
+	 * @param string $scope   'current_month', 'year_to_date', 'all_time'.
 	 * @return float
 	 */
 	public function get_amount_for_scope( array $pricing, string $scope ): float {

@@ -720,9 +720,10 @@ class Settings {
 			$pricing['admin_api_key'] = sanitize_text_field( $pricing['admin_api_key'] );
 		}
 
-		$soft_scope = isset( $pricing['soft_threshold_scope'] ) && 'last_n_days' === $pricing['soft_threshold_scope'] ? 'last_n_days' : 'current_month';
-		$hard_scope = isset( $pricing['hard_threshold_scope'] ) && 'last_n_days' === $pricing['hard_threshold_scope'] ? 'last_n_days' : 'current_month';
-		$new        = array_merge(
+		$soft_scope = isset( $pricing['soft_threshold_scope'] ) ? sanitize_text_field( $pricing['soft_threshold_scope'] ) : 'current_month';
+		$hard_scope = isset( $pricing['hard_threshold_scope'] ) ? sanitize_text_field( $pricing['hard_threshold_scope'] ) : 'current_month';
+
+		$new = array_merge(
 			$current,
 			[
 				'admin_api_authenticated'  => true,
