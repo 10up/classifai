@@ -42,7 +42,7 @@ export const OpenAIPricingSettings = () => {
 		setLoading( true );
 		try {
 			const [ settingsRes ] = await Promise.all( [
-				apiFetch( { path: '/classifai/v1/openai-pricing-settings' } ),
+				apiFetch( { path: '/classifai/v1/usage/openai/settings' } ),
 			] );
 			setData( settingsRes );
 			const p = settingsRes.pricing || {};
@@ -82,7 +82,7 @@ export const OpenAIPricingSettings = () => {
 		setSaving( true );
 		try {
 			await apiFetch( {
-				path: '/classifai/v1/openai-pricing-settings',
+				path: '/classifai/v1/usage/openai/settings',
 				method: 'POST',
 				data: {
 					pricing: {
@@ -123,7 +123,7 @@ export const OpenAIPricingSettings = () => {
 		setSaving( true );
 		try {
 			await apiFetch( {
-				path: '/classifai/v1/openai-pricing-settings',
+				path: '/classifai/v1/usage/openai/settings',
 				method: 'POST',
 				data: {
 					force_refresh: true,
