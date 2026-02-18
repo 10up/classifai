@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Extends UsageTracker with OpenAI credential handling, the Admin API key,
  * project ID filtering, and all-time year-by-year cost accumulation.
  *
- * @since 3.9.0
+ * @since 3.8.0
  */
 class OpenAIUsageTracker extends UsageTracker {
 

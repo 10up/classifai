@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * To add usage tracking for a new provider, extend this class and implement
  * the abstract methods. Then register an instance in Plugin::init_admin_helpers().
  *
- * @since 3.9.0
+ * @since 3.8.0
  */
 abstract class UsageTracker {
 
@@ -254,7 +254,7 @@ abstract class UsageTracker {
 		 * The dynamic portion of the hook name, `{provider_id}`, refers to the
 		 * value returned by get_provider_id() (e.g. 'openai').
 		 *
-		 * @since 3.9.0
+		 * @since 3.8.0
 		 * @hook classifai_{provider_id}_usage_refresh_interval_minutes
 		 * @param int $seconds Interval in seconds.
 		 * @return int
@@ -346,7 +346,7 @@ abstract class UsageTracker {
 		 * The dynamic portion of the hook name, `{provider_id}`, refers to the
 		 * value returned by get_provider_id() (e.g. 'openai').
 		 *
-		 * @since 3.9.0
+		 * @since 3.8.0
 		 * @hook classifai_{provider_id}_usage_updated
 		 * @param array $usage Cached usage totals.
 		 * @param array $raw   Reserved for future use.
@@ -432,7 +432,7 @@ abstract class UsageTracker {
 		 * The dynamic portion of the hook name, `{provider_id}`, refers to
 		 * get_provider_id() (e.g. 'openai').
 		 *
-		 * @since 3.9.0
+		 * @since 3.8.0
 		 * @hook classifai_{provider_id}_soft_threshold_exceeded
 		 * @param array  $settings  Full settings.
 		 * @param float  $amount    Current usage amount.
@@ -514,7 +514,7 @@ abstract class UsageTracker {
 		 * The dynamic portion of the hook name, `{provider_id}`, refers to
 		 * get_provider_id() (e.g. 'openai').
 		 *
-		 * @since 3.9.0
+		 * @since 3.8.0
 		 * @hook classifai_{provider_id}_hard_threshold_exceeded
 		 * @param array  $settings  Full settings.
 		 * @param float  $amount    Current usage amount.

@@ -293,7 +293,7 @@ class Notifications {
 		 * Usage trackers register themselves with this filter inside their
 		 * register() method.
 		 *
-		 * @since 3.9.0
+		 * @since 3.8.0
 		 * @hook classifai_registered_usage_trackers
 		 * @param array $trackers Map of provider_id => UsageTracker instance.
 		 * @return array
