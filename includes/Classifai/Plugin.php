@@ -67,6 +67,11 @@ class Plugin {
 			// Initialize the ClassifAI Settings.
 			$settings = new Admin\Settings();
 			$settings->init();
+
+			// Register usage tracker REST routes on every request (including REST API calls).
+			// This must happen from init context — not admin_init — so that the routes are
+			// registered before rest_api_init fires (triggered via parse_request, after init).
+			add_action( 'rest_api_init', [ $this, 'register_usage_tracker_rest_routes' ] );
 		} else {
 			// Initialize the ClassifAI Onboarding. This is only used for the legacy settings panel.
 			$onboarding = new Admin\Onboarding();
@@ -165,6 +170,29 @@ class Plugin {
 		foreach ( $this->admin_helpers as $instance ) {
 			if ( $instance->can_register() ) {
 				$instance->register();
+			}
+		}
+	}
+
+	/**
+	 * Registers REST routes for all usage tracker instances.
+	 *
+	 * Called on rest_api_init (hooked during Plugin::init() so it fires on every
+	 * request type, including REST API calls that never trigger admin_init).
+	 * Each tracker's register() method is intentionally NOT used here — that method
+	 * is admin_init-only and handles dashboard widgets, cron, and other admin hooks.
+	 */
+	public function register_usage_tracker_rest_routes(): void {
+		$helpers = apply_filters(
+			'classifai_admin_helpers',
+			[
+				'openai_usage_tracker' => new Admin\OpenAIUsageTracker(),
+			]
+		);
+
+		foreach ( $helpers as $helper ) {
+			if ( $helper instanceof Admin\UsageTracker ) {
+				$helper->register_routes();
 			}
 		}
 	}

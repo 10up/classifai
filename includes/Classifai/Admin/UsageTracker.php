@@ -130,7 +130,11 @@ abstract class UsageTracker {
 	}
 
 	/**
-	 * Registers hooks, cron, widget, and REST routes.
+	 * Registers admin hooks: cron, dashboard widget, and styles.
+	 *
+	 * REST routes are registered separately via Plugin::register_usage_tracker_rest_routes()
+	 * (hooked to rest_api_init from Plugin::init()) so they are available on all requests,
+	 * not just admin page loads where this method runs.
 	 */
 	public function register(): void {
 		$cron_hook = $this->get_cron_hook();
@@ -139,7 +143,6 @@ abstract class UsageTracker {
 		add_action( $cron_hook, [ $this, 'run_usage_refresh' ] );
 		add_action( 'wp_dashboard_setup', [ $this, 'register_dashboard_widget' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'maybe_enqueue_dashboard_styles' ] );
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 
 		// Register with the usage tracker registry so Notifications and other
 		// consumers can iterate over all active trackers generically.
