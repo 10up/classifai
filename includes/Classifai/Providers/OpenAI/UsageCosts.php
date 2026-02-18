@@ -2,7 +2,7 @@
 
 namespace Classifai\Providers\OpenAI;
 
-use Classifai\Admin\OpenAIPricingController;
+use Classifai\Providers\UsageFetcherInterface;
 use WP_Error;
 
 use function Classifai\safe_wp_remote_get;
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @see https://developers.openai.com/api/reference/resources/organization/subresources/audit_logs/methods/get_costs
  */
-class UsageCosts {
+class UsageCosts implements UsageFetcherInterface {
 
 	/**
 	 * Base URL for the OpenAI API.
@@ -61,30 +61,35 @@ class UsageCosts {
 	}
 
 	/**
-	 * Fetches all time costs from the OpenAI Costs API.
+	 * Fetches all-time costs from the OpenAI Costs API.
 	 *
 	 * OpenAI API released first on June 11, 2020. ref: https://openai.com/index/openai-api/
 	 * So, we can fetch the costs for each year from 2020 onwards for all time costs.
 	 *
 	 * @see https://en.wikipedia.org/wiki/Products_and_applications_of_OpenAI#cite_note-gpt3-whynotfullmodel-30
 	 *
-	 * @param bool       $refresh_cache Whether to refresh the cached costs.
-	 * @param array|null $ytd Current Year to date costs.
-	 *
-	 * @return float All time costs.
+	 * @param bool       $force_refresh Whether to refresh the cached costs.
+	 * @param array|null $ytd           Current year-to-date costs (avoids redundant API call).
+	 * @param array|null $cached_data   Full cached settings/data; if provided, option reads
+	 *                                  are skipped. The caller is responsible for persisting
+	 *                                  the returned year-pricing data.
+	 * @return array|WP_Error Array with 'amount', 'currency', 'all_year_pricing', and
+	 *                        'api_start_year' keys, or WP_Error on failure.
 	 */
-	public function fetch_all_time_costs( $refresh_cache = false, $ytd = null ) {
-		$cached = get_option( OpenAIPricingController::OPTION_NAME, [] );
+	public function fetch_all_time( bool $force_refresh = false, $ytd = null, $cached_data = null ) {
+		$cached = is_array( $cached_data ) ? $cached_data : [];
 
 		if (
-			! $refresh_cache
+			! $force_refresh
 			&& ! empty( $cached['all_time_total'] )
 			&& ! empty( $cached['usage_currency'] )
 			&& ! empty( $cached['all_year_pricing'] )
 		) {
 			return [
-				'amount'   => $cached['all_time_total'],
-				'currency' => $cached['usage_currency'],
+				'amount'           => $cached['all_time_total'],
+				'currency'         => $cached['usage_currency'],
+				'all_year_pricing' => $cached['all_year_pricing'],
+				'api_start_year'   => isset( $cached['api_start_year'] ) ? (int) $cached['api_start_year'] : 2020,
 			];
 		}
 
@@ -97,15 +102,19 @@ class UsageCosts {
 		$start_year       = isset( $cached['api_start_year'] ) ? (int) $cached['api_start_year'] : 2020;
 
 		for ( $year = $start_year; $year <= $current_year; $year++ ) {
-			// If the year is already in the cached array and it's not the current year, skip the API call. Since it won't change for the current year.
+			// If the year is already cached and it's not the current year, skip the API call.
 			if ( isset( $cached['all_year_pricing'][ $year ] ) && $year !== $current_year ) {
 				$all_year_pricing[ $year ] = $cached['all_year_pricing'][ $year ];
 				continue;
 			}
 
-			// If the ytd is set and the year is the same as the ytd year, use the ytd amount.
-			if ( ! empty( $ytd ) && $year === $ytd['year'] ) {
+			// If ytd is set and this is the current year, reuse the ytd amount to avoid
+			// a redundant API call. (ytd covers Jan 1 through now, same range we'd fetch.)
+			if ( ! empty( $ytd ) && $year === $current_year && isset( $ytd['amount'] ) ) {
 				$all_year_pricing[ $year ] = $ytd['amount'];
+				if ( ! empty( $ytd['currency'] ) ) {
+					$usage_currency = $ytd['currency'];
+				}
 				continue;
 			}
 
@@ -116,7 +125,7 @@ class UsageCosts {
 				$end_date = $now;
 			}
 
-			$pricing = $this->fetch_costs( $start_date->getTimestamp(), $end_date->getTimestamp() );
+			$pricing = $this->fetch_period( $start_date->getTimestamp(), $end_date->getTimestamp() );
 
 			if ( is_wp_error( $pricing ) ) {
 				continue;
@@ -128,24 +137,18 @@ class UsageCosts {
 				$usage_currency            = $pricing['currency'];
 			}
 
-			// If the all_year_pricing array is empty and the pricing is for a null range, set the start year to the current year.
-			// Since current api is generated or used after this year only.
+			// If all_year_pricing is empty and the range is null, advance the start year.
+			// This means the API key was not created or used before this year.
 			if ( empty( $all_year_pricing ) && $pricing['is_null_range'] ) {
 				$start_year = $year;
 			}
 		}
 
-		$cached['api_start_year']     = (int) $start_year;
-		$cached['all_year_pricing']   = $all_year_pricing;
-		$cached['all_time_total']     = array_sum( $all_year_pricing );
-		$cached['usage_currency']     = $usage_currency;
-		$cached['usage_last_updated'] = time();
-
-		update_option( OpenAIPricingController::OPTION_NAME, $cached );
-
 		return [
-			'amount'   => $cached['all_time_total'],
-			'currency' => $usage_currency,
+			'amount'           => array_sum( $all_year_pricing ),
+			'currency'         => $usage_currency,
+			'all_year_pricing' => $all_year_pricing,
+			'api_start_year'   => (int) $start_year,
 		];
 	}
 
@@ -154,9 +157,9 @@ class UsageCosts {
 	 *
 	 * @param int $start_ts Unix timestamp for range start (inclusive).
 	 * @param int $end_ts   Unix timestamp for range end (inclusive).
-	 * @return array{ amount: float, currency: string }|WP_Error Summed amount and currency, or error.
+	 * @return array|WP_Error Array with 'amount', 'currency', 'is_null_range' keys, or WP_Error.
 	 */
-	public function fetch_costs( int $start_ts, int $end_ts ) {
+	public function fetch_period( int $start_ts, int $end_ts ) {
 		if ( empty( $this->admin_api_key ) ) {
 			return new WP_Error( 'missing_admin_key', __( 'OpenAI Admin API key is required to fetch costs.', 'classifai' ) );
 		}
@@ -236,8 +239,7 @@ class UsageCosts {
 				$has_more = false;
 			}
 
-			// If the data is null, set the is_null_data flag to true.
-			// This means this api was not generated or used for the given time range.
+			// If the data array is empty, this API key had no activity for this range.
 			$is_null_data = ( isset( $data['data'] ) && empty( $data['data'] ) );
 
 			if ( empty( $buckets ) && ! $has_more && ! $is_null_data ) {
