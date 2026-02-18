@@ -2,7 +2,7 @@
 
 namespace Classifai\Providers\OpenAI;
 
-use Classifai\Admin\OpenAIPricingController;
+use Classifai\Admin\OpenAIUsageTracker;
 use Classifai\Providers\Provider;
 use WP_Error;
 
@@ -412,6 +412,6 @@ class APIRequest {
 			return false;
 		}
 
-		return ! (bool) get_option( OpenAIPricingController::HARD_LIMIT_OPTION, false );
+		return ! (bool) get_option( OpenAIUsageTracker::HARD_LIMIT_OPTION, false );
 	}
 }
