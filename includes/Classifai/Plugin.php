@@ -135,13 +135,32 @@ class Plugin {
 			return;
 		}
 
-		$this->admin_helpers = [
-			'notifications'             => new Admin\Notifications(),
-			'debug_info'                => new Admin\DebugInfo(),
-			'bulk_actions'              => new Admin\BulkActions(),
-			'updater'                   => new Admin\Update(),
-			'openai_pricing_controller' => new Admin\OpenAIPricingController(),
-		];
+		/**
+		 * Filter the list of admin helper instances.
+		 *
+		 * Add a UsageTracker subclass here to register usage tracking for an
+		 * additional provider without modifying this file:
+		 *
+		 *   add_filter( 'classifai_admin_helpers', function( $helpers ) {
+		 *       $helpers['azure_usage_tracker'] = new \Classifai\Admin\AzureUsageTracker();
+		 *       return $helpers;
+		 *   } );
+		 *
+		 * @since 3.9.0
+		 * @hook classifai_admin_helpers
+		 * @param array $helpers Map of key => admin helper instance.
+		 * @return array
+		 */
+		$this->admin_helpers = apply_filters(
+			'classifai_admin_helpers',
+			[
+				'notifications'        => new Admin\Notifications(),
+				'debug_info'           => new Admin\DebugInfo(),
+				'bulk_actions'         => new Admin\BulkActions(),
+				'updater'              => new Admin\Update(),
+				'openai_usage_tracker' => new Admin\OpenAIUsageTracker(),
+			]
+		);
 
 		foreach ( $this->admin_helpers as $instance ) {
 			if ( $instance->can_register() ) {
