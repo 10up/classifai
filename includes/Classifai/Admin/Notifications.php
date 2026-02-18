@@ -51,7 +51,7 @@ class Notifications {
 		$this->v3_migration_completed_notice();
 		$this->render_embeddings_notice();
 		$this->render_legacy_settings_deprecation_notice();
-		$this->render_openai_threshold_notice();
+		$this->render_usage_threshold_notices();
 		$this->render_notices();
 	}
 
@@ -280,63 +280,90 @@ class Notifications {
 	}
 
 	/**
-	 * Renders a dismissible warning when OpenAI usage exceeds the soft/hard threshold limit.
+	 * Renders dismissible threshold notices for all registered usage trackers.
+	 *
+	 * Loops over every tracker registered via the classifai_registered_usage_trackers
+	 * filter so new providers get notices automatically without touching this class.
 	 */
-	public function render_openai_threshold_notice() {
-		if ( ! class_exists( 'Classifai\Admin\OpenAIPricingController' ) ) {
+	public function render_usage_threshold_notices() {
+		/**
+		 * Filter the list of active usage trackers.
+		 *
+		 * Each tracker is a UsageTracker instance keyed by its provider ID.
+		 * Usage trackers register themselves with this filter inside their
+		 * register() method.
+		 *
+		 * @since 3.9.0
+		 * @hook classifai_registered_usage_trackers
+		 * @param array $trackers Map of provider_id => UsageTracker instance.
+		 * @return array
+		 */
+		$trackers = apply_filters( 'classifai_registered_usage_trackers', [] );
+
+		foreach ( $trackers as $tracker ) {
+			$this->render_tracker_threshold_notice( $tracker );
+		}
+	}
+
+	/**
+	 * Renders a single dismissible notice for a tracker whose threshold is exceeded.
+	 *
+	 * @param \Classifai\Admin\UsageTracker $tracker The usage tracker instance.
+	 */
+	private function render_tracker_threshold_notice( $tracker ) {
+		$settings = $tracker->get_settings();
+
+		if ( empty( $settings['soft_threshold_enabled'] ) && empty( $settings['hard_threshold_enabled'] ) ) {
 			return;
 		}
 
-		$controller = new \Classifai\Admin\OpenAIPricingController();
-		$pricing    = $controller->get_pricing_option();
-
-		if ( empty( $pricing['soft_threshold_enabled'] ) && empty( $pricing['hard_threshold_enabled'] ) ) {
-			return;
-		}
-
-		$hard_threshold_reached = get_option( OpenAIPricingController::HARD_LIMIT_OPTION, false );
-
-		$usage = $controller->get_cached_usage();
+		$hard_threshold_reached = (bool) get_option( $tracker->get_hard_limit_option(), false );
+		$usage                  = $tracker->get_cached_usage();
 
 		if ( $hard_threshold_reached ) {
-			$scope = isset( $pricing['hard_threshold_scope'] ) ? $pricing['hard_threshold_scope'] : 'current_month';
+			$scope     = $settings['hard_threshold_scope'] ?? 'current_month';
+			$threshold = (float) ( $settings['hard_threshold_amount'] ?? 0 );
 		} else {
-			$scope = isset( $pricing['soft_threshold_scope'] ) ? $pricing['soft_threshold_scope'] : 'current_month';
+			$scope     = $settings['soft_threshold_scope'] ?? 'current_month';
+			$threshold = (float) ( $settings['soft_threshold_amount'] ?? 0 );
 		}
 
-		$amount    = $controller->get_amount_for_scope( $pricing, $scope );
-		$threshold = $hard_threshold_reached ? (float) $pricing['hard_threshold_amount'] : (float) $pricing['soft_threshold_amount'];
+		$amount = $tracker->get_amount_for_scope( $settings, $scope );
 
 		if ( $amount < $threshold ) {
 			return;
 		}
 
-		$key = 'openai_threshold_reached';
+		// Notice key mirrors the provider id so dismissals are per-provider and
+		// backward-compatible (openai => 'openai_threshold_reached').
+		$key = $tracker->get_provider_id() . '_threshold_reached';
 		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
 			return;
 		}
-		$settings_url = admin_url( 'tools.php?page=classifai#/pricing' );
 
-		$classes = [
-			'notice',
-			'is-dismissible',
-			'classifai-dismissible-notice',
-		];
+		$provider_label = $tracker->get_provider_label();
+		$currency       = $usage['currency'] ?? 'USD';
+		$amount_str     = number_format_i18n( $threshold, 2 ) . ' ' . $currency;
+		$settings_url   = admin_url( 'tools.php?page=classifai#/pricing' );
+
+		$classes = [ 'notice', 'is-dismissible', 'classifai-dismissible-notice' ];
 
 		if ( $hard_threshold_reached ) {
 			$classes[] = 'notice-error';
 			$message   = sprintf(
-				/* translators: 1: amount with currency, 2: link to settings */
-				__( 'OpenAI features are currently disabled due to exceeded your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
-				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage['currency'] ?? 'USD' ) ),
+				/* translators: 1: provider label, 2: amount with currency, 3: settings URL */
+				__( '%1$s features are currently disabled due to exceeded your hard limit of %2$s for this period. <a href="%3$s">Re-enable it from the pricing page</a>.', 'classifai' ),
+				esc_html( $provider_label ),
+				esc_html( $amount_str ),
 				esc_url( $settings_url )
 			);
 		} else {
 			$classes[] = 'notice-warning';
 			$message   = sprintf(
-				/* translators: 1: amount with currency, 2: link to settings */
-				__( 'OpenAI usage has exceeded your soft limit of %1$s for this period. <a href="%2$s">Configure alerts</a>.', 'classifai' ),
-				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage['currency'] ?? 'USD' ) ),
+				/* translators: 1: provider label, 2: amount with currency, 3: settings URL */
+				__( '%1$s usage has exceeded your soft limit of %2$s for this period. <a href="%3$s">Configure alerts</a>.', 'classifai' ),
+				esc_html( $provider_label ),
+				esc_html( $amount_str ),
 				esc_url( $settings_url )
 			);
 		}
