@@ -147,7 +147,7 @@ class OpenAIPricingController {
 		];
 
 		// Update the cached pricing option.
-		$pricing = $this->get_pricing_option();
+		$pricing = $this->get_pricing_option( true );
 
 		$pricing['this_month_total']   = $this_month_val;
 		$pricing['ytd_total']          = $ytd_val;

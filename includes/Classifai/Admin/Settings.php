@@ -697,7 +697,7 @@ class Settings {
 	public function update_openai_pricing_settings_callback( \WP_REST_Request $request ) {
 		$params     = $request->get_json_params();
 		$controller = new OpenAIPricingController();
-		$current    = $controller->get_pricing_option();
+		$current    = $controller->get_pricing_option( true );
 
 		if ( isset( $params['force_refresh'] ) && true === $params['force_refresh'] ) {
 			$controller->run_usage_refresh( true );
