@@ -2,6 +2,7 @@
 
 namespace Classifai\Admin;
 
+use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\UsageCosts;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,6 +44,28 @@ class OpenAIPricingController {
 		add_action( self::CRON_HOOK, [ $this, 'run_usage_refresh' ] );
 		add_action( 'wp_dashboard_setup', [ $this, 'register_dashboard_widget' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'maybe_enqueue_dashboard_styles' ] );
+	}
+
+	/**
+	 * Authenticates the credentials.
+	 *
+	 * @param array $settings Settings.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		$pricing  = $this->get_pricing_option();
+		$settings = wp_parse_args( array_filter( $settings ), $pricing );
+
+		if ( empty( $settings['admin_api_key'] ) ) {
+			return new \WP_Error( 'empty_admin_api_key', __( 'Admin API key is empty. Please enter a valid API key.', 'classifai' ) );
+		}
+
+		$url      = add_query_arg( 'limit', 1, 'https://api.openai.com/v1/organization/admin_api_keys' );
+		$request  = new APIRequest( trim( $settings['admin_api_key'] ) );
+		$response = $request->get( $url, [ 'use_vip' => true ] );
+
+		return ! is_wp_error( $response ) ? true : $response;
 	}
 
 	/**

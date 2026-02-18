@@ -36,6 +36,7 @@ export const OpenAIPricingSettings = () => {
 		hard_limit_override: false,
 	} );
 	const [ form, setForm ] = useState( {} );
+	const [ error, setError ] = useState( null );
 
 	const load = useCallback( async () => {
 		setLoading( true );
@@ -106,9 +107,10 @@ export const OpenAIPricingSettings = () => {
 			createSuccessNotice( __( 'Pricing settings saved.', 'classifai' ), {
 				type: 'snackbar',
 			} );
+			setError( null );
 			load();
 		} catch ( err ) {
-			createErrorNotice(
+			setError(
 				err.message ||
 					__( 'Failed to save pricing settings.', 'classifai' )
 			);
@@ -130,9 +132,10 @@ export const OpenAIPricingSettings = () => {
 			createSuccessNotice( __( 'Data refreshed.', 'classifai' ), {
 				type: 'snackbar',
 			} );
+			setError( null );
 			load();
 		} catch ( err ) {
-			createErrorNotice(
+			setError(
 				err.message || __( 'Failed to refresh data.', 'classifai' )
 			);
 		} finally {
@@ -151,6 +154,13 @@ export const OpenAIPricingSettings = () => {
 	return (
 		<div className="classifai-openai-pricing-settings">
 			<Panel>
+				{ error && (
+					<Notice
+						status="error"
+						isDismissible={ false }
+						children={ error }
+					/>
+				) }
 				<PanelBody title={ __( 'OpenAI usage & costs', 'classifai' ) }>
 					<p className="classifai-pricing-description">
 						{ __(

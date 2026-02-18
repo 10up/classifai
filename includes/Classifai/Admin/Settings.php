@@ -725,6 +725,7 @@ class Settings {
 		$new        = array_merge(
 			$current,
 			[
+				'admin_api_authenticated'  => true,
 				'enabled'                  => ! empty( $pricing['enabled'] ),
 				'project_id'               => isset( $pricing['project_id'] ) ? sanitize_text_field( $pricing['project_id'] ) : ( $current['project_id'] ?? '' ),
 				'refresh_interval_minutes' => isset( $pricing['refresh_interval_minutes'] ) ? absint( $pricing['refresh_interval_minutes'] ) : OpenAIPricingController::DEFAULT_REFRESH_INTERVAL,
@@ -743,6 +744,28 @@ class Settings {
 		}
 		if ( $new['refresh_interval_minutes'] < 1 ) {
 			$new['refresh_interval_minutes'] = OpenAIPricingController::DEFAULT_REFRESH_INTERVAL;
+		}
+
+		$authenticated = $controller->authenticate_credentials( $new );
+
+		if ( is_wp_error( $authenticated ) && 429 !== (int) $authenticated->get_error_code() ) {
+			$error_message = $authenticated->get_error_message();
+
+			// For incorrect API key, the error message is in the body of the error response.
+			if ( is_array( $error_message ) && ! empty( $error_message['body'] ) ) {
+				$error_message = json_decode( $error_message['body'], true );
+				$error_message = empty( $error_message['error']['message'] ) ? '' : $error_message['error']['message'];
+			}
+
+			delete_option( OpenAIPricingController::OPTION_NAME );
+
+			return rest_ensure_response(
+				new \WP_Error(
+					'authentication_failed',
+					$error_message,
+					[ 'status' => 400 ]
+				)
+			);
 		}
 
 		update_option( OpenAIPricingController::OPTION_NAME, $new );
