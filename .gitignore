@@ -46,11 +46,13 @@ Desktop.ini
 
 config.local.php
 
-# cypress.
+# Tests.
 tests/cypress/downloads
 tests/cypress/screenshots
 tests/cypress/videos
 tests/cypress/reports
+/tests/_output/*
+!/tests/_output/.gitkeep
 .wp-env.override.json
 
 # docs
