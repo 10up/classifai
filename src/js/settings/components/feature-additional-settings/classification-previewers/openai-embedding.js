@@ -93,7 +93,7 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 			const scoreClass =
 				score >= threshold
 					? 'classifai__classification-previewer-result-tag--exceeds-threshold'
-					: '';
+					: 'classifai__classification-previewer-result-tag--below-threshold';
 
 			return (
 				<div
