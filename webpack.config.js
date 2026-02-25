@@ -40,6 +40,7 @@ module.exports = {
 		],
 		'classifai-plugin-image-generation-generate-image-media-upload': './src/js/features/image-generation/media-modal/views/generate-image-media-upload.js',
 		'classifai-plugin-recommended-content-feature-fields': './src/js/features/recommended-content/feature-fields-plugin.js',
+		'classifai-plugin-openai-usage': './src/js/features/openai-usage/index.js',
 		settings: './src/js/settings/index.js',
 	},
 	externals: {

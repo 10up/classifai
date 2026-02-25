@@ -5,6 +5,8 @@ namespace Classifai\Admin;
 
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\Classification;
+use Classifai\Features\OpenAIUsage;
+use Classifai\Providers\OpenAI\UsageTracking as OpenAIUsageTracking;
 use function Classifai\should_use_legacy_settings_panel;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -51,6 +53,7 @@ class Notifications {
 		$this->v3_migration_completed_notice();
 		$this->render_embeddings_notice();
 		$this->render_legacy_settings_deprecation_notice();
+		$this->render_openai_threshold_notice();
 		$this->render_notices();
 	}
 
@@ -388,6 +391,98 @@ EOD;
 		$notice_id = sanitize_text_field( wp_unslash( $_POST['notice_id'] ) );
 
 		update_user_meta( get_current_user_id(), "classifai_dismissed_{$notice_id}", true );
+	}
+
+	/**
+	 * Renders a dismissible warning when OpenAI usage exceeds the hard threshold limit.
+	 */
+	public function render_openai_threshold_notice() {
+
+		// Ensure the feature exists.
+		if ( ! class_exists( 'Classifai\Features\OpenAIUsage' ) ) {
+			return;
+		}
+
+		$feature_instance = new OpenAIUsage();
+
+		// Don't show the notice if the feature is not enabled.
+		if ( ! $feature_instance->is_feature_enabled() ) {
+			return;
+		}
+
+		// Don't show the notice if the provider is not OpenAI Usage Tracking.
+		$provider = $feature_instance->get_settings( 'provider' );
+		if ( OpenAIUsageTracking::ID !== $provider ) {
+			return;
+		}
+
+		$key = 'openai_threshold_reached';
+
+		// Don't show the notice if the user has already dismissed it.
+		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
+			return;
+		}
+
+		$settings = $feature_instance->get_settings( OpenAIUsageTracking::ID );
+
+		if ( empty( $settings['soft_threshold_enabled'] ) && empty( $settings['hard_threshold_enabled'] ) ) {
+			return;
+		}
+
+		$hard_threshold_reached = get_option( $feature_instance::HARD_LIMIT_REACHED_KEY, false );
+
+		if ( $hard_threshold_reached ) {
+			$scope = isset( $settings['hard_threshold_scope'] ) ? $settings['hard_threshold_scope'] : 'current_month';
+		} else {
+			$scope = isset( $settings['soft_threshold_scope'] ) ? $settings['soft_threshold_scope'] : 'current_month';
+		}
+
+		$usage_data = $feature_instance->get_usage_data();
+		$amount     = $feature_instance->get_amount_for_scope( $usage_data, $scope );
+		$threshold  = $hard_threshold_reached ? (float) $settings['hard_threshold_amount'] : (float) $settings['soft_threshold_amount'];
+
+		if ( $amount < $threshold ) {
+			return;
+		}
+
+		$key = 'openai_threshold_reached';
+
+		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
+			return;
+		}
+
+		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/feature_openai_usage' );
+
+		$classes = [
+			'notice',
+			'is-dismissible',
+			'classifai-dismissible-notice',
+		];
+
+		if ( $hard_threshold_reached ) {
+			$classes[] = 'notice-error';
+			$message   = sprintf(
+				/* translators: 1: amount with currency, 2: link to settings */
+				__( 'OpenAI features are currently disabled due to exceeded your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage['currency'] ?? 'USD' ) ),
+				esc_url( $settings_url )
+			);
+		} else {
+			$classes[] = 'notice-warning';
+			$message   = sprintf(
+				/* translators: 1: amount with currency, 2: link to settings */
+				__( 'OpenAI usage has exceeded your soft limit of %1$s for this period. <a href="%2$s">Configure alerts</a>.', 'classifai' ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage['currency'] ?? 'USD' ) ),
+				esc_url( $settings_url )
+			);
+		}
+		?>
+		<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-notice="<?php echo esc_attr( $key ); ?>">
+			<p>
+				<?php echo wp_kses_post( $message ); ?>
+			</p>
+		</div>
+		<?php
 	}
 
 	/**
