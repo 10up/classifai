@@ -463,7 +463,7 @@ EOD;
 			$message   = sprintf(
 				/* translators: 1: amount with currency, 2: link to settings */
 				__( 'OpenAI Features are currently disabled due to exceeded your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
-				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage['currency'] ?? 'USD' ) ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage_data['currency'] ?? 'USD' ) ),
 				esc_url( $settings_url )
 			);
 		} else {
@@ -473,7 +473,7 @@ EOD;
 			$message   = sprintf(
 				/* translators: 1: amount with currency, 2: link to settings */
 				__( 'OpenAI usage has exceeded your soft limit of %1$s for this period. <a href="%2$s">Configure alerts</a>.', 'classifai' ),
-				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage['currency'] ?? 'USD' ) ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage_data['currency'] ?? 'USD' ) ),
 				esc_url( $settings_url )
 			);
 		}
