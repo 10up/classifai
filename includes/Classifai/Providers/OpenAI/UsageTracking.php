@@ -291,7 +291,7 @@ class UsageTracking extends Provider {
 
 		$this->feature_instance->set_usage_data( $cached_data );
 
-		return $cached_data['years_total'];
+		return $cached_data['years_total'] ?? 0;
 	}
 
 	/**
@@ -354,7 +354,7 @@ class UsageTracking extends Provider {
 
 		$this->feature_instance->set_usage_data( $cached_data );
 
-		return $cached_data['years_total'];
+		return $cached_data['years_total'] ?? 0;
 	}
 
 	/**
@@ -402,7 +402,6 @@ class UsageTracking extends Provider {
 			}
 
 			$options = [
-				'use_vip' => true,
 				'timeout' => 90, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			];
 
