@@ -260,6 +260,8 @@ class OpenAIUsage extends Feature {
 			$interval = self::DEFAULT_REFRESH_INTERVAL;
 		}
 
+		$interval = apply_filters( 'classifai_openai_usage_refresh_interval', $interval );
+
 		if ( ! \as_has_scheduled_action( self::CRON_HOOK ) ) {
 			\as_schedule_recurring_action( time(), $interval, self::CRON_HOOK, [], 'classifai' );
 		}

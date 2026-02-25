@@ -162,7 +162,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 				description={ sprintf(
 					/* translators: %d: default minutes */
 					__(
-						'How often to fetch usage (default %d). Filter: classifai_openai_usage_refresh_interval_minutes',
+						'How often to fetch usage (default %d). Filter: classifai_openai_usage_refresh_interval',
 						'classifai'
 					),
 					15
