@@ -56,6 +56,7 @@ const OpenaiUsageForceRefreshData = () => {
 				method: 'POST',
 			} );
 		} catch ( err ) {
+			// eslint-disable-next-line no-console
 			console.error( err );
 		} finally {
 			invalidateResolution( 'getEntityRecord', [ 'root', 'site' ] );
