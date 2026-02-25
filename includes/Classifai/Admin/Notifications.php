@@ -447,7 +447,8 @@ EOD;
 
 		$key = 'openai_threshold_reached';
 
-		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
+		// Don't show the notice if the user has already dismissed it for soft threshold. Always show for hard threshold.
+		if ( ! $hard_threshold_reached && get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
 			return;
 		}
 
@@ -455,19 +456,19 @@ EOD;
 
 		$classes = [
 			'notice',
-			'is-dismissible',
-			'classifai-dismissible-notice',
 		];
 
 		if ( $hard_threshold_reached ) {
 			$classes[] = 'notice-error';
 			$message   = sprintf(
 				/* translators: 1: amount with currency, 2: link to settings */
-				__( 'OpenAI features are currently disabled due to exceeded your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
+				__( 'OpenAI Features are currently disabled due to exceeded your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
 				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage['currency'] ?? 'USD' ) ),
 				esc_url( $settings_url )
 			);
 		} else {
+			$classes[] = 'is-dismissible';
+			$classes[] = 'classifai-dismissible-notice';
 			$classes[] = 'notice-warning';
 			$message   = sprintf(
 				/* translators: 1: amount with currency, 2: link to settings */
