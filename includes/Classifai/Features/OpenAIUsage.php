@@ -2,6 +2,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\OpenAI as OpenAIProvider;
 use Classifai\Providers\OpenAI\UsageTracking as OpenAIUsageTracking;
 use Classifai\Services\UsageTracking as UsageTrackingService;
 use WP_Error;
@@ -140,6 +141,24 @@ class OpenAIUsage extends Feature {
 			'provider'       => OpenAIUsageTracking::ID,
 			'api_start_year' => 2020,
 			'usage_data'     => [],
+		];
+	}
+
+	/**
+	 * Get the OpenAI provider IDs.
+	 *
+	 * This is used to check if the API request is allowed for the OpenAI providers.
+	 *
+	 * @return array
+	 */
+	public static function get_openai_provider_ids(): array {
+		return [
+			OpenAIProvider\ChatGPT::ID,
+			OpenAIProvider\Embeddings::ID,
+			OpenAIProvider\Images::ID,
+			OpenAIProvider\Moderation::ID,
+			OpenAIProvider\SpeechToText::ID,
+			OpenAIProvider\TextToSpeech::ID,
 		];
 	}
 
