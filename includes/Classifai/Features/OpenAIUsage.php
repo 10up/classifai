@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class TextToSpeech
+ * Class OpenAIUsage
  */
 class OpenAIUsage extends Feature {
 
@@ -279,6 +279,15 @@ class OpenAIUsage extends Feature {
 			$interval = self::DEFAULT_REFRESH_INTERVAL;
 		}
 
+		/**
+		 * Filter the refresh interval for the OpenAI usage tracking.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_usage_refresh_interval
+		 *
+		 * @param int $interval The refresh interval in seconds.
+		 * @return int The filtered refresh interval.
+		 */
 		$interval = apply_filters( 'classifai_openai_usage_refresh_interval', $interval );
 
 		if ( ! \as_has_scheduled_action( self::CRON_HOOK ) ) {
@@ -330,11 +339,12 @@ class OpenAIUsage extends Feature {
 	 */
 	public function render_dashboard_widget(): void {
 		$usage    = $this->get_usage_data();
-		$currency = $usage['currency'];
+		$currency = $usage['currency'] ?? 'USD';
 		$fmt      = function ( $val ) use ( $currency ) {
 			return number_format_i18n( $val, 2 ) . ' ' . $currency;
 		};
 
+		// TODO: Update markup to bit cleaner.
 		echo '<p class="classifai-openai-usage-disclaimer">';
 		esc_html_e( 'Usage and costs shown here are from the OpenAI API for this project/site. If you use the same API key or project elsewhere, this data does not represent only ClassifAI.', 'classifai' );
 		echo '</p>';
@@ -553,8 +563,12 @@ class OpenAIUsage extends Feature {
 			$period_label
 		);
 
-		$bcc = 'Bcc: ' . implode( ', ', array_slice( $emails, 1 ) );
-		wp_mail( $emails[0], $subject, $message, [ $bcc ] );
+		$headers    = [];
+		$bcc_emails = array_slice( $emails, 1 );
+		if ( ! empty( $bcc_emails ) ) {
+			$headers[] = 'Bcc: ' . implode( ', ', $bcc_emails );
+		}
+		wp_mail( $emails[0], $subject, $message, $headers );
 
 		$settings[ $sent_key ] = $period_key;
 		$this->update_settings( [ OpenAIUsageTracking::ID => $settings ] );
@@ -648,8 +662,12 @@ class OpenAIUsage extends Feature {
 			$period_label
 		);
 
-		$bcc = 'Bcc: ' . implode( ', ', array_slice( $emails, 1 ) );
-		wp_mail( $emails[0], $subject, $message, [ $bcc ] );
+		$headers    = [];
+		$bcc_emails = array_slice( $emails, 1 );
+		if ( ! empty( $bcc_emails ) ) {
+			$headers[] = 'Bcc: ' . implode( ', ', $bcc_emails );
+		}
+		wp_mail( $emails[0], $subject, $message, $headers );
 
 		$settings[ $sent_key ] = $period_key;
 		$this->update_settings( [ OpenAIUsageTracking::ID => $settings ] );

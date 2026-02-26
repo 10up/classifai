@@ -37,7 +37,7 @@ class UsageTracking extends Provider {
 	const COSTS_API_URL = 'https://api.openai.com/v1/organization/costs';
 
 	/**
-	 * OpenAI TextToSpeech constructor.
+	 * OpenAI UsageTracking constructor.
 	 *
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
@@ -114,11 +114,11 @@ class UsageTracking extends Provider {
 				$new_settings[ static::ID ]['soft_threshold_enabled'] = $soft_threshold_enabled;
 				$new_settings[ static::ID ]['soft_threshold_amount']  = filter_var(
 					$new_settings[ static::ID ]['soft_threshold_amount'] ?? false,
-					FILTER_VALIDATE_INT,
+					FILTER_VALIDATE_FLOAT,
 					[
 						'options' => [
-							'min_range' => 1,
-							'default'   => 1,
+							'min_range' => 1.00,
+							'default'   => 1.00,
 						],
 					]
 				);
@@ -148,11 +148,11 @@ class UsageTracking extends Provider {
 				$new_settings[ static::ID ]['hard_threshold_enabled'] = $hard_threshold_enabled;
 				$new_settings[ static::ID ]['hard_threshold_amount']  = filter_var(
 					$new_settings[ static::ID ]['hard_threshold_amount'] ?? false,
-					FILTER_VALIDATE_INT,
+					FILTER_VALIDATE_FLOAT,
 					[
 						'options' => [
-							'min_range' => 1,
-							'default'   => 1,
+							'min_range' => 1.00,
+							'default'   => 1.00,
 						],
 					]
 				);
@@ -214,7 +214,7 @@ class UsageTracking extends Provider {
 	 *
 	 * @param bool $force Whether to force the fetch.
 	 *
-	 * @return int
+	 * @return float
 	 */
 	public function fetch_current_month_to_date_costs( bool $force = false ): float {
 		$cached_data = $this->feature_instance->get_usage_data();
@@ -244,7 +244,7 @@ class UsageTracking extends Provider {
 	 *
 	 * @param bool $force Whether to force the fetch.
 	 *
-	 * @return int
+	 * @return float
 	 */
 	public function fetch_past_months_costs( bool $force = false ): float {
 
@@ -291,7 +291,7 @@ class UsageTracking extends Provider {
 
 		$this->feature_instance->set_usage_data( $cached_data );
 
-		return $cached_data['years_total'] ?? 0;
+		return $cached_data['months_total'] ?? 0;
 	}
 
 	/**
@@ -299,7 +299,7 @@ class UsageTracking extends Provider {
 	 *
 	 * @param bool $force Whether to force the fetch.
 	 *
-	 * @return int
+	 * @return float
 	 */
 	public function fetch_past_years_costs( bool $force = false ): float {
 

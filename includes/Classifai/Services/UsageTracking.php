@@ -1,6 +1,6 @@
 <?php
 /**
- * Service definition for Recommended Content
+ * Service definition for Usage Tracking
  */
 
 namespace Classifai\Services;
@@ -19,7 +19,7 @@ class UsageTracking extends Service {
 	}
 
 	/**
-	 * Get service providers for Content Recommendation service.
+	 * Get service providers for Usage Tracking service.
 	 *
 	 * @return array
 	 */
@@ -27,8 +27,8 @@ class UsageTracking extends Service {
 		/**
 		 * Filter the service providers for Recommendation service.
 		 *
-		 * @since 3.0.0
-		 * @hook classifai_recommendation_service_providers
+		 * @since x.x.x
+		 * @hook classifai_usage_tracking_service_providers
 		 *
 		 * @param array $providers Array of available providers for the service.
 		 *

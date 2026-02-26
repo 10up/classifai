@@ -397,7 +397,7 @@ class APIRequest {
 	 * @return bool
 	 */
 	private function is_request_allowed(): bool {
-		if ( ! in_array( $this->provider::ID, OpenAIUsage::get_openai_provider_ids(), true ) ) {
+		if ( empty( $this->provider::ID ) || ! in_array( $this->provider::ID, OpenAIUsage::get_openai_provider_ids(), true ) ) {
 			return true;
 		}
 

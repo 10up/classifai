@@ -21,9 +21,9 @@ import { STORE_NAME } from '../../data/store';
 import { SettingsRow } from '../settings-row';
 
 /**
- * Component for OpenAI ChatGPT Provider settings.
+ * Component for OpenAI Usage Tracking Provider settings.
  *
- * This component is used within the ProviderSettings component to allow users to configure the OpenAI ChatGPT Provider settings.
+ * This component is used within the ProviderSettings component to allow users to configure the OpenAI Usage Tracking Provider settings.
  *
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.
@@ -225,8 +225,8 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 							>
 								<TextControl
 									type="number"
-									min={ 1 }
-									step={ 1 }
+									min={ 1.0 }
+									step={ 1.0 }
 									value={ String(
 										providerSettings.soft_threshold_amount
 									) }
@@ -296,7 +296,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 					{ providerSettings.hard_threshold_enabled && (
 						<>
 							<SettingsRow
-								label={ __( 'Amount', 'classifai' ) }
+								label={ __( 'Amount (USD)', 'classifai' ) }
 								description={ __(
 									'When exceeded, optionally disable all OpenAI Features.',
 									'classifai'
@@ -304,8 +304,8 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 							>
 								<TextControl
 									type="number"
-									min={ 0 }
-									step={ 0.01 }
+									min={ 1.0 }
+									step={ 1.0 }
 									value={ String(
 										providerSettings.hard_threshold_amount
 									) }

@@ -394,7 +394,7 @@ EOD;
 	}
 
 	/**
-	 * Renders a dismissible warning when OpenAI usage exceeds the hard threshold limit.
+	 * Render a notice when OpenAI usage exceeds the soft or hard threshold limit.
 	 */
 	public function render_openai_threshold_notice() {
 
@@ -413,13 +413,6 @@ EOD;
 		// Don't show the notice if the provider is not OpenAI Usage Tracking.
 		$provider = $feature_instance->get_settings( 'provider' );
 		if ( OpenAIUsageTracking::ID !== $provider ) {
-			return;
-		}
-
-		$key = 'openai_threshold_reached';
-
-		// Don't show the notice if the user has already dismissed it.
-		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
 			return;
 		}
 
