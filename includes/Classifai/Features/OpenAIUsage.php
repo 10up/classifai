@@ -338,42 +338,38 @@ class OpenAIUsage extends Feature {
 	 * Renders the dashboard widget content.
 	 */
 	public function render_dashboard_widget(): void {
-		$usage    = $this->get_usage_data();
-		$currency = $usage['currency'] ?? 'USD';
-		$fmt      = function ( $val ) use ( $currency ) {
+		$date_format  = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+		$usage        = $this->get_usage_data();
+		$currency     = $usage['currency'] ?? 'USD';
+		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/feature_openai_usage' );
+		$fmt          = function ( $val ) use ( $currency ) {
 			return number_format_i18n( $val, 2 ) . ' ' . $currency;
 		};
 
-		// TODO: Update markup to bit cleaner.
-		echo '<p class="classifai-openai-usage-disclaimer">';
-		esc_html_e( 'Usage and costs shown here are from the OpenAI API for this project/site. If you use the same API key or project elsewhere, this data does not represent only ClassifAI.', 'classifai' );
-		echo '</p>';
-		echo '<ul class="classifai-openai-usage-list">';
-		echo '<li><strong>' . esc_html__( 'This month', 'classifai' ) . ':</strong> ' . esc_html( $fmt( $usage['mtd'] ) ) . '</li>';
-		echo '<li><strong>' . esc_html__( 'Year to date', 'classifai' ) . ':</strong> ' . esc_html( $fmt( $usage['ytd'] ) ) . '</li>';
-		echo '<li><strong>' . esc_html__( 'All time', 'classifai' ) . ':</strong> ' . esc_html( $fmt( $usage['all_time'] ) ) . '</li>';
-		echo '</ul>';
+		?>
+		<div class="classifai-openai-usage-widget">
+			<p class="classifai-openai-usage-disclaimer">
+				<?php esc_html_e( 'Usage and costs shown here are from the OpenAI API for this project/site. If you use the same API key or project elsewhere, this data does not represent only ClassifAI.', 'classifai' ); ?>
+			</p>
+			<ul class="classifai-openai-usage-list">
+				<li><strong><?php esc_html_e( 'This month', 'classifai' ); ?>:</strong> <?php echo esc_html( $fmt( $usage['mtd'] ) ); ?></li>
+				<li><strong><?php esc_html_e( 'Year to date', 'classifai' ); ?>:</strong> <?php echo esc_html( $fmt( $usage['ytd'] ) ); ?></li>
+				<li><strong><?php esc_html_e( 'All time', 'classifai' ); ?>:</strong> <?php echo esc_html( $fmt( $usage['all_time'] ) ); ?></li>
+			</ul>
+			<?php if ( 0 < $usage['last_updated'] ) { ?>
+				<p class="classifai-openai-usage-updated">
+					<?php echo esc_html( sprintf( __( 'Last updated: %s', 'classifai' ), wp_date( $date_format, $usage['last_updated'] ) ) ); ?>
+				</p>
+			<?php } else { ?>
+				<p class="classifai-openai-usage-updated"><?php esc_html_e( 'Updating…', 'classifai' ); ?></p>
+			<?php } ?>
 
-		if ( 0 < $usage['last_updated'] ) {
-			echo '<p class="classifai-openai-usage-updated">';
-			$date_format      = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
-			$last_updated_str = wp_date( $date_format, $usage['last_updated'] );
-			echo esc_html(
-				sprintf(
-					/* translators: %s: human-readable time */
-					__( 'Last updated: %s', 'classifai' ),
-					$last_updated_str
-				)
-			);
-			echo '</p>';
-		} else {
-			echo '<p class="classifai-openai-usage-updated">' . esc_html__( 'Updating…', 'classifai' ) . '</p>';
-		}
-		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/feature_openai_usage' );
-		echo '<p>';
-		echo '<a href="' . esc_url( $settings_url ) . '" class="components-button is-primary">' . esc_html__( 'Configure alerts', 'classifai' ) . '</a>';
-		echo '<button type="button" id="openai_usage_tracking_force_refresh_data" class="components-button is-secondary" style="margin-left: 10px;">' . esc_html__( 'Force refresh usage', 'classifai' ) . '</button>';
-		echo '</p>';
+			<p>
+				<a href="<?php echo esc_url( $settings_url ); ?>" class="components-button is-primary"><?php esc_html_e( 'Configure alerts', 'classifai' ); ?></a>
+				<button type="button" id="openai_usage_tracking_force_refresh_data" class="components-button is-secondary" style="margin-left: 10px;"><?php esc_html_e( 'Force refresh usage', 'classifai' ); ?></button>
+			</p>
+		</div>
+		<?php
 	}
 
 	/**
