@@ -108,7 +108,7 @@ class OpenAIUsage extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Monitor OpenAI usage and set levels for alerting and deactivating features.', 'classifai' );
+		return esc_html__( 'Monitor OpenAI usage and set levels for alerting and deactivating Features.', 'classifai' );
 	}
 
 	/**
