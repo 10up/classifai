@@ -96,7 +96,7 @@ class OpenAIUsage extends Feature {
 		// Contains all Providers that are registered to the service.
 		$this->provider_instances = $this->get_provider_instances( UsageTrackingService::get_service_providers() );
 
-		// // Contains just the providers this feature supports.
+		// Contains just the Providers this Feature supports.
 		$this->supported_providers = [
 			OpenAIUsageTracking::ID => __( 'OpenAI Usage Tracking', 'classifai' ),
 		];
