@@ -358,7 +358,10 @@ class OpenAIUsage extends Feature {
 			</ul>
 			<?php if ( 0 < $usage['last_updated'] ) { ?>
 				<p class="classifai-openai-usage-updated">
-					<?php echo esc_html( sprintf( __( 'Last updated: %s', 'classifai' ), wp_date( $date_format, $usage['last_updated'] ) ) ); ?>
+					<?php
+					/* translators: %s: human-readable time */
+					echo esc_html( sprintf( __( 'Last updated: %s', 'classifai' ), wp_date( $date_format, $usage['last_updated'] ?? 0 ) ) );
+					?>
 				</p>
 			<?php } else { ?>
 				<p class="classifai-openai-usage-updated"><?php esc_html_e( 'Updating…', 'classifai' ); ?></p>
