@@ -132,7 +132,7 @@ class OpenAIUsage extends Feature {
 	}
 
 	/**
-	 * Returns the default settings for the feature.
+	 * Returns the default settings for the Feature.
 	 *
 	 * @return array
 	 */
