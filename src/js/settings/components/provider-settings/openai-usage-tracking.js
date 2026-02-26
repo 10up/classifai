@@ -276,7 +276,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 			<Panel
 				className="settings-panel"
 				header={ __(
-					'Hard threshold (disable features)',
+					'Hard threshold (disable Features)',
 					'classifai'
 				) }
 			>
@@ -284,7 +284,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 					<ToggleControl
 						label={ __( 'Enable hard threshold', 'classifai' ) }
 						help={ __(
-							'Disable all OpenAI features when hard limit is reached',
+							'Disable all OpenAI Features when hard limit is reached',
 							'classifai'
 						) }
 						checked={ providerSettings.hard_threshold_enabled }
@@ -298,7 +298,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 							<SettingsRow
 								label={ __( 'Amount', 'classifai' ) }
 								description={ __(
-									'When exceeded, optionally disable all OpenAI features.',
+									'When exceeded, optionally disable all OpenAI Features.',
 									'classifai'
 								) }
 							>

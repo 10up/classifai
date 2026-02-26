@@ -16,7 +16,7 @@ class UsageTracking extends Provider {
 
 	/**
 	 * OpenAI organization admin API key endpoint.
-	 * Used for authenticate the organization admin API key.
+	 * Used to authenticate the organization admin API key.
 	 *
 	 * @var string
 	 */

@@ -145,9 +145,9 @@ class OpenAIUsage extends Feature {
 	}
 
 	/**
-	 * Get the OpenAI provider IDs.
+	 * Get the OpenAI Provider IDs.
 	 *
-	 * This is used to check if the API request is allowed for the OpenAI providers.
+	 * This is used to check if the API request is allowed for the OpenAI Providers.
 	 *
 	 * @return array
 	 */
@@ -249,7 +249,7 @@ class OpenAIUsage extends Feature {
 	 */
 	public function rest_endpoint_permissions_check() {
 
-		// Ensure the feature is enabled. Also runs a user check.
+		// Ensure the Feature is enabled. Also runs a user check.
 		if ( ! $this->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'OpenAI usage tracking is not currently enabled.', 'classifai' ) );
 		}
@@ -262,7 +262,7 @@ class OpenAIUsage extends Feature {
 	 */
 	public function maybe_schedule_cron(): void {
 
-		// We return early if feature is not enabled or action scheduler is not active.
+		// We return early if Feature is not enabled or action scheduler is not active.
 		if (
 			! $this->is_enabled()
 			|| ! function_exists( 'as_schedule_recurring_action' )
@@ -408,7 +408,7 @@ class OpenAIUsage extends Feature {
 		/**
 		 * Fires after OpenAI usage has been updated from the API.
 		 *
-		 * @since 3.8.0
+		 * @since x.x.x
 		 *
 		 * @hook classifai_openai_usage_updated
 		 *
@@ -501,7 +501,7 @@ class OpenAIUsage extends Feature {
 		/**
 		 * Fires when the soft threshold is exceeded.
 		 *
-		 * @since 3.8.0
+		 * @since x.x.x
 		 *
 		 * @hook classifai_openai_soft_threshold_exceeded
 		 *
@@ -561,7 +561,7 @@ class OpenAIUsage extends Feature {
 	}
 
 	/**
-	 * Checks hard threshold, sets option to disable features, sends email.
+	 * Checks hard threshold, sets option to disable Features, sends email.
 	 *
 	 * @param array $usage_data Usage data.
 	 * @param array $settings Settings.
@@ -596,7 +596,7 @@ class OpenAIUsage extends Feature {
 		/**
 		 * Fires when the hard threshold is exceeded.
 		 *
-		 * @since 3.8.0
+		 * @since x.x.x
 		 *
 		 * @hook classifai_openai_hard_threshold_exceeded
 		 *
