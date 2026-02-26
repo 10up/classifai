@@ -93,7 +93,7 @@ class OpenAIUsage extends Feature {
 	public function __construct() {
 		$this->label = __( 'OpenAI usage tracking', 'classifai' );
 
-		// Contains all providers that are registered to the service.
+		// Contains all Providers that are registered to the service.
 		$this->provider_instances = $this->get_provider_instances( UsageTrackingService::get_service_providers() );
 
 		// // Contains just the providers this feature supports.
