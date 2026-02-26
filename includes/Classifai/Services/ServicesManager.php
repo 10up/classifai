@@ -143,7 +143,7 @@ class ServicesManager {
 	/**
 	 * Registers Features under the Usage Tracking Service.
 	 *
-	 * @param array $features The list of features to be registered.
+	 * @param array $features The list of Features to be registered.
 	 * @return array
 	 */
 	public function register_usage_tracking_features( array $features ): array {
