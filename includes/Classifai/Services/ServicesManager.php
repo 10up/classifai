@@ -141,7 +141,7 @@ class ServicesManager {
 	}
 
 	/**
-	 * Registers features under the Usage Tracking Service.
+	 * Registers Features under the Usage Tracking Service.
 	 *
 	 * @param array $features The list of features to be registered.
 	 * @return array
