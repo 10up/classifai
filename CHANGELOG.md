@@ -41,6 +41,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Bump `lodash-es` from 4.17.22 to 4.17.23 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1035](https://github.com/10up/classifai/pull/1035)).
 - Bump `systeminformation` from 5.30.0 to 5.31.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1057](https://github.com/10up/classifai/pull/1057)).
 - Bump `basic-ftp` from 5.1.0 to 5.2.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1061](https://github.com/10up/classifai/pull/1061)).
+- Bump `immutable` from 5.1.4 to 5.1.5 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1063](https://github.com/10up/classifai/pull/1063)).
 
 ### Developer
 
