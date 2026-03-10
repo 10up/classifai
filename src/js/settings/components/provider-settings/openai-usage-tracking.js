@@ -43,7 +43,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 
 	const isForceRefreshScheduled = useSelect( ( select ) => {
 		const site = select( 'core' ).getEntityRecord( 'root', 'site' );
-		return site?.classifai_openai_usage_force_refresh || false;
+		return site?.classifai_api_usage_force_refresh || false;
 	} );
 
 	const Description = () => (
@@ -111,7 +111,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 		setSaving( true );
 		try {
 			await apiFetch( {
-				path: '/classifai/v1/openai-usage/force-refresh',
+				path: '/classifai/v1/api-usage-tracking/force-refresh',
 				method: 'POST',
 			} );
 		} catch ( err ) {
@@ -143,7 +143,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 			) }
 
 			<SettingsRow
-				label={ __( 'OpenAI Project ID', 'classifai' ) }
+				label={ __( 'Project ID', 'classifai' ) }
 				description={ __(
 					'Optional. Restrict usage/costs to this project.',
 					'classifai'

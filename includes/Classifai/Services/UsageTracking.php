@@ -24,8 +24,9 @@ class UsageTracking extends Service {
 	 * @return array
 	 */
 	public static function get_service_providers(): array {
+
 		/**
-		 * Filter the service providers for Recommendation service.
+		 * Filter the service providers for Usage Tracking service.
 		 *
 		 * @since x.x.x
 		 * @hook classifai_usage_tracking_service_providers

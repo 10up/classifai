@@ -2,7 +2,8 @@
 
 namespace Classifai\Providers\OpenAI;
 
-use Classifai\Features\OpenAIUsage;
+use Classifai\Features\APIUsageTracking;
+use Classifai\Providers\OpenAI\UsageTracking;
 use Classifai\Providers\Provider;
 use WP_Error;
 
@@ -397,16 +398,16 @@ class APIRequest {
 	 * @return bool
 	 */
 	private function is_request_allowed(): bool {
-		if ( empty( $this->provider::ID ) || ! in_array( $this->provider::ID, OpenAIUsage::get_openai_provider_ids(), true ) ) {
+		if ( empty( $this->provider::ID ) || ! in_array( $this->provider::ID, UsageTracking::get_provider_ids(), true ) ) {
 			return true;
 		}
 
 		/**
-		 * Filter whether OpenAI API requests are allowed.
+		 * Filter whether API requests are allowed.
 		 * When the hard usage limit is reached and not overridden, this is set to false.
 		 *
 		 * @since x.x.x
-		 * @hook classifai_openai_can_make_request
+		 * @hook classifai_can_make_request
 		 * @param bool $allowed Whether the request is allowed. Default true.
 		 * @param string $feature The feature name.
 		 * @param Provider $provider The provider instance.
@@ -419,6 +420,6 @@ class APIRequest {
 			return false;
 		}
 
-		return ! (bool) get_option( OpenAIUsage::HARD_LIMIT_REACHED_KEY, false );
+		return ! (bool) get_option( APIUsageTracking::HARD_LIMIT_REACHED_KEY, false );
 	}
 }

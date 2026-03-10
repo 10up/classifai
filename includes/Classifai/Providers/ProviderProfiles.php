@@ -120,7 +120,7 @@ class ProviderProfiles {
 			'sensitive_fields'  => [],
 			'label'             => 'Chrome AI',
 		],
-		'openai_usage_tracking'   => [
+		'api_usage_tracking'      => [
 			'provider_ids'      => [ 'openai_usage_tracking' ],
 			'credential_fields' => [ 'api_key', 'authenticated' ],
 			'sensitive_fields'  => [ 'api_key' ],

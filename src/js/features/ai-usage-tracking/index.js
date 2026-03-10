@@ -9,14 +9,14 @@ import {
 	useCallback,
 } from '@wordpress/element';
 
-const BUTTON_ID = 'openai_usage_tracking_force_refresh_data';
+const BUTTON_ID = 'api_usage_tracking_force_refresh_data';
 
-const OpenaiUsageForceRefreshData = () => {
+const APIUsageTrackingForceRefreshData = () => {
 	const [ saving, setSaving ] = useState( false );
 	const { invalidateResolution } = useDispatch( 'core' );
 	const isForceRefreshScheduled = useSelect( ( select ) => {
 		const site = select( 'core' ).getEntityRecord( 'root', 'site' );
-		return site?.classifai_openai_usage_force_refresh || false;
+		return site?.classifai_api_usage_force_refresh || false;
 	} );
 
 	// Refresh site data periodically while a background force refresh is scheduled.
@@ -52,7 +52,7 @@ const OpenaiUsageForceRefreshData = () => {
 		setSaving( true );
 		try {
 			await apiFetch( {
-				path: '/classifai/v1/openai-usage/force-refresh',
+				path: '/classifai/v1/api-usage-tracking/force-refresh',
 				method: 'POST',
 			} );
 		} catch ( err ) {
@@ -94,9 +94,9 @@ const OpenaiUsageForceRefreshData = () => {
 
 domReady( () => {
 	const container = document.createElement( 'div' );
-	container.id = 'openai-usage-force-refresh-root';
+	container.id = 'api-usage-tracking-force-refresh-root';
 	document.body.appendChild( container );
 
 	const root = createRoot( container );
-	root.render( createElement( OpenaiUsageForceRefreshData ) );
+	root.render( createElement( APIUsageTrackingForceRefreshData ) );
 } );

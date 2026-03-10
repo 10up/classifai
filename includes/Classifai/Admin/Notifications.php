@@ -5,7 +5,8 @@ namespace Classifai\Admin;
 
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\Classification;
-use Classifai\Features\OpenAIUsage;
+use Classifai\Features\APIUsageTracking;
+use Classifai\Providers\UsageTrackingProvider;
 use Classifai\Providers\OpenAI\UsageTracking as OpenAIUsageTracking;
 use function Classifai\should_use_legacy_settings_panel;
 
@@ -53,7 +54,7 @@ class Notifications {
 		$this->v3_migration_completed_notice();
 		$this->render_embeddings_notice();
 		$this->render_legacy_settings_deprecation_notice();
-		$this->render_openai_threshold_notice();
+		$this->render_api_threshold_notice();
 		$this->render_notices();
 	}
 
@@ -394,16 +395,16 @@ EOD;
 	}
 
 	/**
-	 * Render a notice when OpenAI usage exceeds the soft or hard threshold limit.
+	 * Render a notice when AI usage exceeds the soft or hard threshold limit.
 	 */
-	public function render_openai_threshold_notice() {
+	public function render_api_threshold_notice() {
 
 		// Ensure the feature exists.
-		if ( ! class_exists( 'Classifai\Features\OpenAIUsage' ) ) {
+		if ( ! class_exists( 'Classifai\Features\APIUsageTracking' ) ) {
 			return;
 		}
 
-		$feature_instance = new OpenAIUsage();
+		$feature_instance = new APIUsageTracking();
 
 		// Don't show the notice if the feature is not enabled.
 		if ( ! $feature_instance->is_feature_enabled() ) {
@@ -412,11 +413,11 @@ EOD;
 
 		// Don't show the notice if the provider is not OpenAI Usage Tracking.
 		$provider = $feature_instance->get_settings( 'provider' );
-		if ( OpenAIUsageTracking::ID !== $provider ) {
+		if ( ! $provider instanceof UsageTrackingProvider ) {
 			return;
 		}
 
-		$settings = $feature_instance->get_settings( OpenAIUsageTracking::ID );
+		$settings = $feature_instance->get_settings( $provider::ID );
 
 		if ( empty( $settings['soft_threshold_enabled'] ) && empty( $settings['hard_threshold_enabled'] ) ) {
 			return;
@@ -438,14 +439,14 @@ EOD;
 			return;
 		}
 
-		$key = 'openai_threshold_reached';
+		$key = 'api_threshold_reached';
 
 		// Don't show the notice if the user has already dismissed it for soft threshold. Always show for hard threshold.
 		if ( ! $hard_threshold_reached && get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
 			return;
 		}
 
-		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/feature_openai_usage' );
+		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/api_usage_tracking' );
 
 		$classes = [
 			'notice',
@@ -455,7 +456,7 @@ EOD;
 			$classes[] = 'notice-error';
 			$message   = sprintf(
 				/* translators: 1: amount with currency, 2: link to settings */
-				__( 'OpenAI Features are currently disabled due to exceeded your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
+				__( 'AI Features are currently disabled due to exceeded your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
 				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage_data['currency'] ?? 'USD' ) ),
 				esc_url( $settings_url )
 			);
@@ -465,7 +466,7 @@ EOD;
 			$classes[] = 'notice-warning';
 			$message   = sprintf(
 				/* translators: 1: amount with currency, 2: link to settings */
-				__( 'OpenAI usage has exceeded your soft limit of %1$s for this period. <a href="%2$s">Configure alerts</a>.', 'classifai' ),
+				__( 'AI usage has exceeded your soft limit of %1$s for this period. <a href="%2$s">Configure alerts</a>.', 'classifai' ),
 				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage_data['currency'] ?? 'USD' ) ),
 				esc_url( $settings_url )
 			);

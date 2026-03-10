@@ -2,7 +2,7 @@
 
 namespace Classifai\Features;
 
-use Classifai\Providers\OpenAI as OpenAIProvider;
+use Classifai\Providers\UsageTrackingProvider;
 use Classifai\Providers\OpenAI\UsageTracking as OpenAIUsageTracking;
 use Classifai\Services\UsageTracking as UsageTrackingService;
 use WP_Error;
@@ -16,30 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class OpenAIUsage
+ * Class APIUsageTracking
  */
-class OpenAIUsage extends Feature {
-
-	/**
-	 * ID of the current feature.
-	 *
-	 * @var string
-	 */
-	const ID = 'feature_openai_usage';
-
-	/**
-	 * Cron hook for the usage refresh.
-	 *
-	 * @var string
-	 */
-	const CRON_HOOK = 'classifai_openai_usage_refresh';
-
-	/**
-	 * Cron hook for the usage refresh.
-	 *
-	 * @var string
-	 */
-	const FORCE_CRON_HOOK = 'classifai_openai_usage_refresh_force';
+class APIUsageTracking extends Feature {
 
 	/**
 	 * Default refresh interval in minutes.
@@ -49,25 +28,46 @@ class OpenAIUsage extends Feature {
 	const DEFAULT_REFRESH_INTERVAL = ( 15 * MINUTE_IN_SECONDS );
 
 	/**
+	 * ID of the current feature.
+	 *
+	 * @var string
+	 */
+	const ID = 'api_usage_tracking';
+
+	/**
+	 * Cron hook for the usage refresh.
+	 *
+	 * @var string
+	 */
+	const CRON_HOOK = 'classifai_api_usage_refresh';
+
+	/**
+	 * Cron hook for forcing the usage refresh.
+	 *
+	 * @var string
+	 */
+	const FORCE_CRON_HOOK = 'classifai_api_usage_force_refresh';
+
+	/**
 	 * Key for the usage data in the options.
 	 *
 	 * @var string
 	 */
-	const USAGE_DATA_KEY = 'classifai_openai_usage_data';
+	const USAGE_DATA_KEY = 'classifai_api_usage_data';
 
 	/**
 	 * Key for the hard limit option in the options.
 	 *
 	 * @var string
 	 */
-	const HARD_LIMIT_REACHED_KEY = 'classifai_openai_usage_hard_limit_reached';
+	const HARD_LIMIT_REACHED_KEY = 'classifai_api_usage_hard_limit_reached';
 
 	/**
 	 * Key for the force refresh option in the options.
 	 *
 	 * @var string
 	 */
-	const FORCE_REFRESH_KEY = 'classifai_openai_usage_force_refresh';
+	const FORCE_REFRESH_KEY = 'classifai_api_usage_force_refresh';
 
 	/**
 	 * Usage data.
@@ -91,7 +91,7 @@ class OpenAIUsage extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->label = __( 'OpenAI usage tracking', 'classifai' );
+		$this->label = __( 'AI usage tracking', 'classifai' );
 
 		// Contains all Providers that are registered to the service.
 		$this->provider_instances = $this->get_provider_instances( UsageTrackingService::get_service_providers() );
@@ -108,7 +108,7 @@ class OpenAIUsage extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Monitor OpenAI usage and set levels for alerting and deactivating Features.', 'classifai' );
+		return esc_html__( 'Monitor AI API usage and set levels for alerting and deactivating Features.', 'classifai' );
 	}
 
 	/**
@@ -145,24 +145,6 @@ class OpenAIUsage extends Feature {
 	}
 
 	/**
-	 * Get the OpenAI Provider IDs.
-	 *
-	 * This is used to check if the API request is allowed for the OpenAI Providers.
-	 *
-	 * @return array
-	 */
-	public static function get_openai_provider_ids(): array {
-		return [
-			OpenAIProvider\ChatGPT::ID,
-			OpenAIProvider\Embeddings::ID,
-			OpenAIProvider\Images::ID,
-			OpenAIProvider\Moderation::ID,
-			OpenAIProvider\SpeechToText::ID,
-			OpenAIProvider\TextToSpeech::ID,
-		];
-	}
-
-	/**
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
@@ -175,6 +157,7 @@ class OpenAIUsage extends Feature {
 		add_action( self::FORCE_CRON_HOOK, [ $this, 'run_usage_force_refresh' ] );
 		add_action( self::CRON_HOOK, [ $this, 'run_usage_refresh' ] );
 	}
+
 
 	/**
 	 * Register any needed endpoints.
@@ -194,7 +177,7 @@ class OpenAIUsage extends Feature {
 
 		register_rest_route(
 			'classifai/v1',
-			'/openai-usage/force-refresh',
+			'/api-usage-tracking/force-refresh',
 			[
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => [ $this, 'rest_endpoint_callback' ],
@@ -214,15 +197,20 @@ class OpenAIUsage extends Feature {
 
 		$route = $request->get_route();
 
-		if (
-			strpos( $route, '/classifai/v1/openai-usage/force-refresh' ) !== 0
-			|| ! function_exists( 'as_enqueue_async_action' )
-			|| (
-				function_exists( 'as_has_scheduled_action' )
-				&& \as_has_scheduled_action( self::FORCE_CRON_HOOK, [], 'classifai' )
-			)
-		) {
+		if ( strpos( $route, '/classifai/v1/api-usage-tracking/force-refresh' ) !== 0 ) {
 			return parent::rest_endpoint_callback( $request );
+		}
+
+		if ( ! function_exists( 'as_enqueue_async_action' ) ) {
+			return rest_ensure_response(
+				new WP_Error( 'action_scheduler_not_active', __( 'Action Scheduler is not active.', 'classifai' ) )
+			);
+		}
+
+		if ( function_exists( 'as_has_scheduled_action' ) && \as_has_scheduled_action( self::FORCE_CRON_HOOK, [], 'classifai' ) ) {
+			return rest_ensure_response(
+				new WP_Error( 'cron_already_scheduled', __( 'Cron job already scheduled.', 'classifai' ) )
+			);
 		}
 
 		$cron_scheduled = \as_enqueue_async_action( self::FORCE_CRON_HOOK, [], 'classifai' );
@@ -251,7 +239,7 @@ class OpenAIUsage extends Feature {
 
 		// Ensure the Feature is enabled. Also runs a user check.
 		if ( ! $this->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'OpenAI usage tracking is not currently enabled.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'AI API usage tracking is not currently enabled.', 'classifai' ) );
 		}
 
 		return true;
@@ -271,7 +259,13 @@ class OpenAIUsage extends Feature {
 			return;
 		}
 
-		$settings = $this->get_settings( OpenAIUsageTracking::ID );
+		$provider = $this->get_feature_provider_instance();
+
+		if ( empty( $provider ) || ! $provider instanceof UsageTrackingProvider ) {
+			return;
+		}
+
+		$settings = $this->get_settings( $provider::ID );
 
 		if ( ! empty( $settings['refresh_interval_minutes'] ) ) {
 			$interval = $settings['refresh_interval_minutes'] * MINUTE_IN_SECONDS;
@@ -280,15 +274,16 @@ class OpenAIUsage extends Feature {
 		}
 
 		/**
-		 * Filter the refresh interval for the OpenAI usage tracking.
+		 * Filter the refresh interval for the AI API usage tracking.
 		 *
 		 * @since x.x.x
-		 * @hook classifai_openai_usage_refresh_interval
+		 * @hook classifai_api_usage_tracking_refresh_interval
 		 *
 		 * @param int $interval The refresh interval in seconds.
+		 *
 		 * @return int The filtered refresh interval.
 		 */
-		$interval = apply_filters( 'classifai_openai_usage_refresh_interval', $interval );
+		$interval = apply_filters( 'classifai_api_usage_refresh_interval', $interval );
 
 		if ( ! \as_has_scheduled_action( self::CRON_HOOK ) ) {
 			\as_schedule_recurring_action( time(), $interval, self::CRON_HOOK, [], 'classifai' );
@@ -308,10 +303,10 @@ class OpenAIUsage extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-plugin-openai-usage-js',
-			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-openai-usage.js',
-			get_asset_info( 'classifai-plugin-openai-usage', 'dependencies' ),
-			get_asset_info( 'classifai-plugin-openai-usage', 'version' ),
+			'classifai-plugin-api-usage-tracking-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-api-usage-tracking.js',
+			get_asset_info( 'classifai-plugin-api-usage-tracking', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-api-usage-tracking', 'version' ),
 			true
 		);
 	}
@@ -325,8 +320,8 @@ class OpenAIUsage extends Feature {
 		}
 
 		wp_add_dashboard_widget(
-			'classifai_openai_usage',
-			__( 'OpenAI usage (ClassifAI)', 'classifai' ),
+			'classifai_api_usage',
+			__( 'AI usage (ClassifAI)', 'classifai' ),
 			[ $this, 'render_dashboard_widget' ],
 			null,
 			null,
@@ -341,35 +336,35 @@ class OpenAIUsage extends Feature {
 		$date_format  = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 		$usage        = $this->get_usage_data();
 		$currency     = $usage['currency'] ?? 'USD';
-		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/feature_openai_usage' );
+		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/api_usage_tracking' );
 		$fmt          = function ( $val ) use ( $currency ) {
 			return number_format_i18n( $val, 2 ) . ' ' . $currency;
 		};
 
 		?>
-		<div class="classifai-openai-usage-widget">
-			<p class="classifai-openai-usage-disclaimer">
-				<?php esc_html_e( 'Usage and costs shown here are from the OpenAI API for this project/site. If you use the same API key or project elsewhere, this data does not represent only ClassifAI.', 'classifai' ); ?>
+		<div class="classifai-api-usage-widget">
+			<p class="classifai-api-usage-disclaimer">
+				<?php esc_html_e( 'Usage and costs shown here are from the AI API for this project/site. If you use the same API key or project elsewhere, this data does not represent only ClassifAI.', 'classifai' ); ?>
 			</p>
-			<ul class="classifai-openai-usage-list">
+			<ul class="classifai-api-usage-list">
 				<li><strong><?php esc_html_e( 'This month', 'classifai' ); ?>:</strong> <?php echo esc_html( $fmt( $usage['mtd'] ) ); ?></li>
 				<li><strong><?php esc_html_e( 'Year to date', 'classifai' ); ?>:</strong> <?php echo esc_html( $fmt( $usage['ytd'] ) ); ?></li>
 				<li><strong><?php esc_html_e( 'All time', 'classifai' ); ?>:</strong> <?php echo esc_html( $fmt( $usage['all_time'] ) ); ?></li>
 			</ul>
 			<?php if ( 0 < $usage['last_updated'] ) { ?>
-				<p class="classifai-openai-usage-updated">
+				<p class="classifai-api-usage-updated">
 					<?php
 					/* translators: %s: human-readable time */
 					echo esc_html( sprintf( __( 'Last updated: %s', 'classifai' ), wp_date( $date_format, $usage['last_updated'] ?? 0 ) ) );
 					?>
 				</p>
 			<?php } else { ?>
-				<p class="classifai-openai-usage-updated"><?php esc_html_e( 'Updating…', 'classifai' ); ?></p>
+				<p class="classifai-api-usage-updated"><?php esc_html_e( 'Updating…', 'classifai' ); ?></p>
 			<?php } ?>
 
 			<p>
 				<a href="<?php echo esc_url( $settings_url ); ?>" class="components-button is-primary"><?php esc_html_e( 'Configure alerts', 'classifai' ); ?></a>
-				<button type="button" id="openai_usage_tracking_force_refresh_data" class="components-button is-secondary" style="margin-left: 10px;"><?php esc_html_e( 'Force refresh usage', 'classifai' ); ?></button>
+				<button type="button" id="api_usage_tracking_force_refresh_data" class="components-button is-secondary" style="margin-left: 10px;"><?php esc_html_e( 'Force refresh usage', 'classifai' ); ?></button>
 			</p>
 		</div>
 		<?php
@@ -399,7 +394,7 @@ class OpenAIUsage extends Feature {
 
 		$provider = $this->get_feature_provider_instance();
 
-		if ( empty( $provider ) || ! $provider instanceof OpenAIUsageTracking ) {
+		if ( empty( $provider ) || ! $provider instanceof UsageTrackingProvider ) {
 			return;
 		}
 
@@ -412,23 +407,23 @@ class OpenAIUsage extends Feature {
 		$usage_data = wp_parse_args( $usage_data, $this->get_usage_data() );
 		$this->set_usage_data( $usage_data );
 
-		$settings = $this->get_settings( OpenAIUsageTracking::ID );
+		$settings = $this->get_settings( $provider::ID );
 
 		/**
-		 * Fires after OpenAI usage has been updated from the API.
+		 * Fires after AI usage has been updated from the API.
 		 *
 		 * @since x.x.x
 		 *
-		 * @hook classifai_openai_usage_updated
+		 * @hook classifai_api_usage_updated
 		 *
-		 * @param array    $usage_data Usage data.
-		 * @param array    $settings Settings.
-		 * @param bool     $force_refresh Whether to force the refresh of the usage data.
+		 * @param array $usage_data Usage data.
+		 * @param array $settings Settings.
+		 * @param bool  $force_refresh Whether to force the refresh of the usage data.
 		 */
-		do_action( 'classifai_openai_usage_updated', $usage_data, $settings ?? [], $force_refresh );
+		do_action( 'classifai_api_usage_updated', $usage_data, $settings ?? [], $force_refresh );
 
-		$this->check_hard_threshold( $usage_data, $settings );
-		$this->check_soft_threshold( $usage_data, $settings );
+		$this->check_hard_threshold( $usage_data, $settings, $provider );
+		$this->check_soft_threshold( $usage_data, $settings, $provider );
 
 		if ( $force_refresh ) {
 			// Reset the force refresh option.
@@ -446,11 +441,11 @@ class OpenAIUsage extends Feature {
 	public function get_amount_for_scope( array $usage_data, string $scope ): float {
 		switch ( $scope ) {
 			case 'current_month':
-				return $usage_data['mtd'];
+				return $usage_data['mtd'] ?? 0;
 			case 'year_to_date':
-				return $usage_data['ytd'];
+				return $usage_data['ytd'] ?? 0;
 			case 'all_time':
-				return $usage_data['all_time'];
+				return $usage_data['all_time'] ?? 0;
 			default:
 				return 0;
 		}
@@ -476,10 +471,11 @@ class OpenAIUsage extends Feature {
 	/**
 	 * Checks soft threshold and sends email once per period.
 	 *
-	 * @param array $usage_data Usage data.
-	 * @param array $settings Settings.
+	 * @param array                 $usage_data Usage data.
+	 * @param array                 $settings Settings.
+	 * @param UsageTrackingProvider $provider Provider instance.
 	 */
-	private function check_soft_threshold( array $usage_data, array $settings ): void {
+	private function check_soft_threshold( array $usage_data, array $settings, UsageTrackingProvider $provider ): void {
 		$is_hard_limit_reached = get_option( self::HARD_LIMIT_REACHED_KEY, false );
 
 		// If the hard limit is reached, and the hard threshold is enabled, return early.
@@ -492,7 +488,7 @@ class OpenAIUsage extends Feature {
 		if ( empty( $settings['soft_threshold_enabled'] ) || empty( $settings['soft_threshold_amount'] ) ) {
 			// Remove the sent key from the pricing option if already set.
 			unset( $settings[ $sent_key ] );
-			$this->update_settings( [ OpenAIUsageTracking::ID => $settings ] );
+			$this->update_settings( [ $provider::ID => $settings ] );
 			return;
 		}
 
@@ -503,7 +499,7 @@ class OpenAIUsage extends Feature {
 		if ( $amount < $threshold ) {
 			// Remove the sent key from the pricing option if already set.
 			unset( $settings[ $sent_key ] );
-			$this->update_settings( [ OpenAIUsageTracking::ID => $settings ] );
+			$this->update_settings( [ $provider::ID => $settings ] );
 			return;
 		}
 
@@ -512,15 +508,14 @@ class OpenAIUsage extends Feature {
 		 *
 		 * @since x.x.x
 		 *
-		 * @hook classifai_openai_soft_threshold_exceeded
+		 * @hook classifai_api_soft_threshold_exceeded
 		 *
-		 * @param array $settings Updated pricing option.
-		 * @param array $usage_data Usage data.
-		 * @param float $amount Amount of usage.
-		 * @param float $threshold Threshold amount.
-		 * @param string $scope Scope of the threshold.
+		 * @param UsageTrackingProvider $provider Provider instance.
+		 * @param array                 $settings Updated pricing option.
+		 * @param array                 $usage_data Usage data.
+		 * @param float                 $amount Amount of usage for the scope.
 		 */
-		do_action( 'classifai_openai_soft_threshold_exceeded', $settings, $usage_data, $amount, $threshold, $scope );
+		do_action( 'classifai_api_soft_threshold_exceeded', $provider, $settings, $usage_data, $amount, $scope );
 
 		$emails = $this->get_email_list( $settings['soft_threshold_emails'] ?? '' );
 
@@ -553,10 +548,10 @@ class OpenAIUsage extends Feature {
 			return;
 		}
 
-		$subject = __( 'ClassifAI: OpenAI usage exceeded soft limit', 'classifai' );
+		$subject = __( 'ClassifAI: AI usage exceeded soft limit', 'classifai' );
 		$message = sprintf(
 			/* translators: 1: amount, 2: currency, 3: period */
-			__( 'OpenAI usage has exceeded your soft limit of %1$s %2$s for this period (%3$s).', 'classifai' ),
+			__( 'AI usage has exceeded your soft limit of %1$s %2$s for this period (%3$s).', 'classifai' ),
 			number_format_i18n( $threshold, 2 ),
 			$usage_data['currency'],
 			$period_label
@@ -570,16 +565,17 @@ class OpenAIUsage extends Feature {
 		wp_mail( $emails[0], $subject, $message, $headers );
 
 		$settings[ $sent_key ] = $period_key;
-		$this->update_settings( [ OpenAIUsageTracking::ID => $settings ] );
+		$this->update_settings( [ $provider::ID => $settings ] );
 	}
 
 	/**
 	 * Checks hard threshold, sets option to disable Features, sends email.
 	 *
-	 * @param array $usage_data Usage data.
-	 * @param array $settings Settings.
+	 * @param array                 $usage_data Usage data.
+	 * @param array                 $settings Settings.
+	 * @param UsageTrackingProvider $provider Provider instance.
 	 */
-	private function check_hard_threshold( array $usage_data, array $settings ): void {
+	private function check_hard_threshold( array $usage_data, array $settings, UsageTrackingProvider $provider ): void {
 		$sent_key = 'hard_alert_sent_for_period';
 
 		if ( empty( $settings['hard_threshold_enabled'] ) || empty( $settings['hard_threshold_amount'] ) ) {
@@ -587,7 +583,7 @@ class OpenAIUsage extends Feature {
 
 			// Remove the sent key from the pricing option.
 			unset( $settings[ $sent_key ] );
-			$this->update_settings( [ OpenAIUsageTracking::ID => $settings ] );
+			$this->update_settings( [ $provider::ID => $settings ] );
 			return;
 		}
 
@@ -600,7 +596,7 @@ class OpenAIUsage extends Feature {
 
 			// Remove the sent key from the pricing option.
 			unset( $settings[ $sent_key ] );
-			$this->update_settings( [ OpenAIUsageTracking::ID => $settings ] );
+			$this->update_settings( [ $provider::ID => $settings ] );
 			return;
 		}
 
@@ -611,15 +607,14 @@ class OpenAIUsage extends Feature {
 		 *
 		 * @since x.x.x
 		 *
-		 * @hook classifai_openai_hard_threshold_exceeded
+		 * @hook classifai_api_hard_threshold_exceeded
 		 *
+		 * @param UsageTrackingProvider $provider Provider instance.
 		 * @param array $settings Updated pricing option.
 		 * @param array $usage_data Usage data.
-		 * @param float $amount Amount of usage.
-		 * @param float $threshold Threshold amount.
-		 * @param string $scope Scope of the threshold.
+		 * @param float $amount Amount of usage for the scope.
 		 */
-		do_action( 'classifai_openai_hard_threshold_exceeded', $settings, $usage_data, $amount, $threshold, $scope );
+		do_action( 'classifai_api_hard_threshold_exceeded', $provider, $settings, $usage_data, $amount );
 
 		$emails = $this->get_email_list( $settings['hard_threshold_emails'] ?? '' );
 
@@ -652,10 +647,10 @@ class OpenAIUsage extends Feature {
 			return;
 		}
 
-		$subject = __( 'ClassifAI: OpenAI usage exceeded hard limit', 'classifai' );
+		$subject = __( 'ClassifAI: AI usage exceeded hard limit', 'classifai' );
 		$message = sprintf(
 			/* translators: 1: amount, 2: currency, 3: period */
-			__( 'OpenAI usage has exceeded your hard limit of %1$s %2$s for this period (%3$s). OpenAI features have been disabled. Re-enable in ClassifAI → Pricing.', 'classifai' ),
+			__( 'AI usage has exceeded your hard limit of %1$s %2$s for this period (%3$s). AI features have been disabled. Re-enable in ClassifAI → Pricing.', 'classifai' ),
 			number_format_i18n( $threshold, 2 ),
 			$usage_data['currency'],
 			$period_label
@@ -669,6 +664,6 @@ class OpenAIUsage extends Feature {
 		wp_mail( $emails[0], $subject, $message, $headers );
 
 		$settings[ $sent_key ] = $period_key;
-		$this->update_settings( [ OpenAIUsageTracking::ID => $settings ] );
+		$this->update_settings( [ $provider::ID => $settings ] );
 	}
 }

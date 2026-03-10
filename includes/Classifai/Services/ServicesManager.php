@@ -148,7 +148,7 @@ class ServicesManager {
 	 */
 	public function register_usage_tracking_features( array $features ): array {
 		$core_features = [
-			'\Classifai\Features\OpenAIUsage',
+			'\Classifai\Features\APIUsageTracking',
 		];
 
 		foreach ( $core_features as $feature ) {

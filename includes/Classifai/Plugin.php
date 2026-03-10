@@ -316,7 +316,7 @@ Disallow: /
 			new \Classifai\Features\TermCleanup(),
 			new \Classifai\Features\RecommendedContent(),
 			new \Classifai\Features\TextToSpeech(),
-			new \Classifai\Features\OpenAIUsage(),
+			new \Classifai\Features\APIUsageTracking(),
 		];
 		$is_feature_being_enabled = false;
 
