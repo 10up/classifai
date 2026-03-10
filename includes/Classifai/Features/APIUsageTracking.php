@@ -555,7 +555,7 @@ class APIUsageTracking extends Feature {
 		 * @param array                 $usage_data Usage data.
 		 * @param float                 $amount Amount of usage for the scope.
 		 */
-		do_action( 'classifai_api_soft_threshold_exceeded', $provider, $settings, $usage_data, $amount, $scope );
+		do_action( 'classifai_api_soft_threshold_exceeded', $provider, $settings, $usage_data, $amount );
 
 		$emails = $this->get_email_list( $settings['soft_threshold_emails'] ?? '' );
 
