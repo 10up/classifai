@@ -217,28 +217,45 @@ abstract class UsageTrackingProvider extends Provider {
 	 */
 	public function fetch_past_months_costs( bool $force = false ): float {
 
-		$cached_data = $this->feature_instance->get_usage_data();
-
-		if ( ! empty( $cached_data['months_total'] ) && ! $force ) {
-			return $cached_data['months_total'];
-		}
-
+		$cached_data       = $this->feature_instance->get_usage_data();
 		$tz                = wp_timezone();
 		$now               = new \DateTimeImmutable( 'now', $tz );
 		$current_year      = (int) $now->format( 'Y' );
-		$current_month     = (int) $now->format( 'm' );
+		$last_month_date   = $now->modify( '-1 month' );
+		$last_month        = (int) $last_month_date->format( 'm' );
+		$last_month_year   = (int) $last_month_date->format( 'Y' );
 		$all_month_pricing = [];
 		$usage_currency    = 'USD';
 
-		for ( $month = 1; $month < $current_month; $month++ ) {
+		// Year changed and current month is January, so no past months to fetch. It's will be handled by the past years costs fetch.
+		if ( $current_year !== $last_month_year ) {
+			$cached_data['months']       = [];
+			$cached_data['months_total'] = 0.0;
+			$cached_data['currency']     = $usage_currency;
+			$cached_data['last_updated'] = time();
+
+			$this->feature_instance->set_usage_data( $cached_data );
+
+			return $cached_data['months_total'];
+		}
+
+		if (
+			! empty( $cached_data['months'][ $last_month ] )
+			&& ! empty( $cached_data['months_total'] )
+			&& ! $force
+		) {
+			return $cached_data['months_total'];
+		}
+
+		for ( $month = 1; $month <= $last_month; $month++ ) {
 			// If the month is already in the cached array, skip the API call.
 			if ( isset( $cached_data['months'][ $month ] ) && ! $force ) {
 				$all_month_pricing[ $month ] = $cached_data['months'][ $month ];
 				continue;
 			}
 
-			$start_date = new \DateTimeImmutable( $current_year . '-' . $month . '-01', $tz );
-			$end_date   = new \DateTimeImmutable( "$current_year-$month-01 last day of this month", $tz );
+			$start_date = new \DateTimeImmutable( $last_month_year . '-' . $month . '-01', $tz );
+			$end_date   = new \DateTimeImmutable( "$last_month_year-$month-01 last day of this month", $tz );
 
 			$pricing = $this->fetch_period( $start_date->getTimestamp(), $end_date->getTimestamp() );
 
