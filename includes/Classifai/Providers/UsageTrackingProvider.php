@@ -153,20 +153,20 @@ abstract class UsageTrackingProvider extends Provider {
 				break;
 			}
 
-			$procceed_data = [
+			$proceed_data = [
 				'total_amount' => $total_amount,
 				'currency'     => $currency,
 				'has_more'     => false,
 				'next_page'    => null,
 			];
 
-			$procceed_data = $this->process_api_response_data( $data );
+			$proceed_data = $this->process_api_response_data( $data );
 
-			$total_amount += $procceed_data['total_amount'] ?? 0.0;
-			$currency      = $procceed_data['currency'] ?? $currency;
-			$has_more      = $procceed_data['has_more'] ?? false;
-			$page          = $procceed_data['next_page'] ?? null;
-			$is_null_data  = $procceed_data['is_null_range'] ?? false;
+			$total_amount += $proceed_data['total_amount'] ?? 0.0;
+			$currency      = $proceed_data['currency'] ?? $currency;
+			$has_more      = $proceed_data['has_more'] ?? false;
+			$page          = $proceed_data['next_page'] ?? null;
+			$is_null_data  = $proceed_data['is_null_range'] ?? false;
 		}
 
 		return [
