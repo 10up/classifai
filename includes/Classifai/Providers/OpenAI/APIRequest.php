@@ -2,8 +2,6 @@
 
 namespace Classifai\Providers\OpenAI;
 
-use Classifai\Features\APIUsageTracking;
-use Classifai\Providers\OpenAI\UsageTracking;
 use Classifai\Providers\Provider;
 use WP_Error;
 
@@ -75,13 +73,6 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function get( string $url, array $options = [] ) {
-		if ( ! $this->is_request_allowed() ) {
-			return new WP_Error(
-				'classifai_hard_limit',
-				__( 'Usage has reached the configured hard limit. Re-enable in ClassifAI / Pricing / Usage settings.', 'classifai' )
-			);
-		}
-
 		/**
 		 * Filter the URL for the get request.
 		 *
@@ -142,13 +133,6 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function post( string $url = '', array $options = [] ) {
-		if ( ! $this->is_request_allowed() ) {
-			return new WP_Error(
-				'classifai_hard_limit',
-				__( 'Usage has reached the configured hard limit. Re-enable in ClassifAI / Pricing / Usage settings.', 'classifai' )
-			);
-		}
-
 		$options = wp_parse_args(
 			$options,
 			[
@@ -216,13 +200,6 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function post_form( string $url = '', array $body = [] ) {
-		if ( ! $this->is_request_allowed() ) {
-			return new WP_Error(
-				'classifai_hard_limit',
-				__( 'Usage has reached the configured hard limit. Re-enable in ClassifAI / Pricing / Usage settings.', 'classifai' )
-			);
-		}
-
 		/**
 		 * Filter the URL for the post form request.
 		 *
@@ -390,36 +367,5 @@ class APIRequest {
 		}
 
 		return $this->api_key ?? '';
-	}
-
-	/**
-	 * Whether API requests are allowed (not blocked by hard usage limit).
-	 *
-	 * @return bool
-	 */
-	private function is_request_allowed(): bool {
-		if ( empty( $this->provider::ID ) || ! in_array( $this->provider::ID, UsageTracking::get_provider_ids(), true ) ) {
-			return true;
-		}
-
-		/**
-		 * Filter whether API requests are allowed.
-		 * When the hard usage limit is reached and not overridden, this is set to false.
-		 *
-		 * @since x.x.x
-		 * @hook classifai_can_make_request
-		 * @param bool $allowed Whether the request is allowed. Default true.
-		 * @param string $feature The feature name.
-		 * @param Provider $provider The provider instance.
-		 *
-		 * @return bool
-		 */
-		$allowed = (bool) apply_filters( 'classifai_can_make_request', true, $this->feature, $this->provider );
-
-		if ( ! $allowed ) {
-			return false;
-		}
-
-		return ! (bool) get_option( APIUsageTracking::HARD_LIMIT_REACHED_KEY, false );
 	}
 }

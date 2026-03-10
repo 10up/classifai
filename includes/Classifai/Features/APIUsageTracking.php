@@ -156,8 +156,48 @@ class APIUsageTracking extends Feature {
 
 		add_action( self::FORCE_CRON_HOOK, [ $this, 'run_usage_force_refresh' ] );
 		add_action( self::CRON_HOOK, [ $this, 'run_usage_refresh' ] );
+
+		add_filter( 'classifai_pre_fetch_feature_response', [ $this, 'pre_fetch_feature_response' ], 10, 2 );
 	}
 
+	/**
+	 * Pre-fetch the feature response to check if the feature is allowed to run based on the usage tracking data.
+	 *
+	 * @param mixed                         $response Response to return.
+	 * @param \Classifai\Providers\Provider $provider_instance provider used.
+	 *
+	 * @return mixed Response to return.
+	 */
+	public function pre_fetch_feature_response( $response, $provider_instance ) {
+		$usage_tracking_provider = $this->get_feature_provider_instance();
+		$provider_ids            = [];
+
+		if ( ! empty( $usage_tracking_provider ) && $usage_tracking_provider instanceof UsageTrackingProvider ) {
+			$provider_ids = $usage_tracking_provider->get_provider_ids();
+		}
+
+		if (
+			empty( $provider_ids )
+			|| empty( $provider_instance::ID )
+			|| ! in_array( $provider_instance::ID, $provider_ids, true )
+		) {
+			return $response;
+		}
+
+		$limit_reached = get_option( self::HARD_LIMIT_REACHED_KEY, false );
+
+		if ( $limit_reached ) {
+			return new WP_Error(
+				'classifai_hard_limit_reached',
+				__( 'Usage has reached the configured hard limit. Re-enable in ClassifAI / Pricing / Usage settings.', 'classifai' ),
+				[
+					'status' => 403,
+				]
+			);
+		}
+
+		return $response;
+	}
 
 	/**
 	 * Register any needed endpoints.
