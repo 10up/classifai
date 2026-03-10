@@ -6,6 +6,7 @@
 namespace Classifai\Providers;
 
 use Classifai\Providers\OpenAI\APIRequest;
+use Classifai\Features\Feature;
 use WP_Error;
 
 abstract class UsageTrackingProvider extends Provider {
@@ -113,6 +114,10 @@ abstract class UsageTrackingProvider extends Provider {
 	 * @return array|WP_Error Array with 'amount', 'currency', 'is_null_range' keys, or WP_Error.
 	 */
 	public function fetch_period( int $start_ts, int $end_ts ) {
+
+		if ( empty( $this->feature_instance ) || ! $this->feature_instance instanceof Feature ) {
+			return new WP_Error( 'feature_not_set', __( 'Feature is not set or is not an instance of Feature.', 'classifai' ) );
+		}
 
 		if ( ! $this->feature_instance->is_enabled() ) {
 			return new WP_Error( 'feature_not_enabled', __( 'Feature is not enabled.', 'classifai' ) );
@@ -227,7 +232,7 @@ abstract class UsageTrackingProvider extends Provider {
 		$all_month_pricing = [];
 		$usage_currency    = 'USD';
 
-		// Year changed and current month is January, so no past months to fetch. It's will be handled by the past years costs fetch.
+		// Year changed and current month is January, so no past months to fetch. It will be handled by the past years costs fetch.
 		if ( $current_year !== $last_month_year ) {
 			$cached_data['months']       = [];
 			$cached_data['months_total'] = 0.0;

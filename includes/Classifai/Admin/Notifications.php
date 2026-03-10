@@ -7,7 +7,6 @@ use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\Classification;
 use Classifai\Features\APIUsageTracking;
 use Classifai\Providers\UsageTrackingProvider;
-use Classifai\Providers\OpenAI\UsageTracking as OpenAIUsageTracking;
 use function Classifai\should_use_legacy_settings_panel;
 
 if ( ! defined( 'ABSPATH' ) ) {

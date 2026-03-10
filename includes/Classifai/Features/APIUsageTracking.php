@@ -325,7 +325,7 @@ class APIUsageTracking extends Feature {
 		 */
 		$interval = apply_filters( 'classifai_api_usage_refresh_interval', $interval );
 
-		if ( ! \as_has_scheduled_action( self::CRON_HOOK ) ) {
+		if ( ! \as_has_scheduled_action( self::CRON_HOOK, [], 'classifai' ) ) {
 			\as_schedule_recurring_action( time(), $interval, self::CRON_HOOK, [], 'classifai' );
 		}
 	}
