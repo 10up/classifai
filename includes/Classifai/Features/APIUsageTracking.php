@@ -91,7 +91,7 @@ class APIUsageTracking extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->label = __( 'AI usage tracking', 'classifai' );
+		$this->label = __( 'AI Usage Tracking', 'classifai' );
 
 		// Contains all Providers that are registered to the service.
 		$this->provider_instances = $this->get_provider_instances( UsageTrackingService::get_service_providers() );
@@ -650,7 +650,7 @@ class APIUsageTracking extends Feature {
 		$subject = __( 'ClassifAI: AI usage exceeded hard limit', 'classifai' );
 		$message = sprintf(
 			/* translators: 1: amount, 2: currency, 3: period */
-			__( 'AI usage has exceeded your hard limit of %1$s %2$s for this period (%3$s). AI features have been disabled. Re-enable in ClassifAI → Pricing.', 'classifai' ),
+			__( 'AI usage has exceeded your hard limit of %1$s %2$s for this period (%3$s). AI features have been disabled. Re-enable in ClassifAI → Usage Tracking → AI usage tracking.', 'classifai' ),
 			number_format_i18n( $threshold, 2 ),
 			$usage_data['currency'],
 			$period_label
