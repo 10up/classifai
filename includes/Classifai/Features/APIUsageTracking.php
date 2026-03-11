@@ -149,6 +149,8 @@ class APIUsageTracking extends Feature {
 	 */
 	public function feature_setup() {
 
+		add_filter( 'classifai_pre_fetch_feature_response', [ $this, 'pre_fetch_feature_response' ], 10, 2 );
+
 		add_action( 'rest_api_init', [ $this, 'rest_api_init' ] );
 		add_action( 'admin_init', [ $this, 'maybe_schedule_cron' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
@@ -156,8 +158,6 @@ class APIUsageTracking extends Feature {
 
 		add_action( self::FORCE_CRON_HOOK, [ $this, 'run_usage_force_refresh' ] );
 		add_action( self::CRON_HOOK, [ $this, 'run_usage_refresh' ] );
-
-		add_filter( 'classifai_pre_fetch_feature_response', [ $this, 'pre_fetch_feature_response' ], 10, 2 );
 	}
 
 	/**
@@ -189,7 +189,7 @@ class APIUsageTracking extends Feature {
 		if ( $limit_reached ) {
 			return new WP_Error(
 				'classifai_hard_limit_reached',
-				__( 'Usage has reached the configured hard limit. Re-enable in ClassifAI / Pricing / Usage settings.', 'classifai' ),
+				__( 'Usage has reached the configured hard limit. Re-enable in ClassifAI -> Usage Tracking -> AI usage tracking.', 'classifai' ),
 				[
 					'status' => 403,
 				]

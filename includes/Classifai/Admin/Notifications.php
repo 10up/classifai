@@ -410,7 +410,7 @@ EOD;
 			return;
 		}
 
-		// Don't show the notice if the provider is not OpenAI Usage Tracking.
+		// Don't show the notice if the provider is not UsageTrackingProvider.
 		$provider = $feature_instance->get_feature_provider_instance();
 
 		if ( ! $provider instanceof UsageTrackingProvider ) {
