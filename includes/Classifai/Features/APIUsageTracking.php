@@ -103,6 +103,25 @@ class APIUsageTracking extends Feature {
 	}
 
 	/**
+	 * Returns the default settings for the feature.
+	 *
+	 * @return array
+	 */
+	protected function get_default_settings(): array {
+		$settings = parent::get_default_settings();
+
+		if ( empty( $settings['roles'] ) ) {
+			$settings['roles'] = [];
+		}
+
+		$settings['roles'] = [
+			'administrator' => 'administrator',
+		];
+
+		return $settings;
+	}
+
+	/**
 	 * Get the description for the enable field.
 	 *
 	 * @return string
