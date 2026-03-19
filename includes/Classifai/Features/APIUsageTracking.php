@@ -277,9 +277,9 @@ class APIUsageTracking extends Feature {
 	 */
 	public function rest_endpoint_permissions_check() {
 
-		// Ensure the Feature is enabled. Also runs a user check.
-		if ( ! $this->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'AI API usage tracking is not currently enabled.', 'classifai' ) );
+		// Ensure the Feature is enabled only current user is admin.
+		if ( ! $this->is_feature_enabled() || ! current_user_can( 'manage_options' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'AI Usage Tracking is not currently enabled or you are not authorized to access this endpoint.', 'classifai' ) );
 		}
 
 		return true;
