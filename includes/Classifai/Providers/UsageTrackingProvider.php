@@ -134,7 +134,7 @@ abstract class UsageTrackingProvider extends Provider {
 
 		$total_amount = 0.0;
 		$currency     = 'USD';
-		$page         = 1;
+		$page         = '1';
 		$has_more     = true;
 		$is_null_data = false;
 
