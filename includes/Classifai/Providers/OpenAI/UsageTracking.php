@@ -71,6 +71,19 @@ class UsageTracking extends UsageTrackingProvider {
 		if ( $this->feature_instance instanceof APIUsageTracking ) {
 			$threshold_scope = [ 'current_month', 'year_to_date', 'all_time' ];
 
+			$new_settings[ static::ID ]['project_id'] = sanitize_text_field( $new_settings[ static::ID ]['project_id'] ?? '' );
+
+			$new_settings[ static::ID ]['refresh_interval_minutes'] = filter_var(
+				$new_settings[ static::ID ]['refresh_interval_minutes'] ?? false,
+				FILTER_VALIDATE_INT,
+				[
+					'options' => [
+						'min_range' => 5,
+						'default'   => 15,
+					],
+				]
+			);
+
 			$soft_threshold_enabled = filter_var( $new_settings[ static::ID ]['soft_threshold_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN );
 			$hard_threshold_enabled = filter_var( $new_settings[ static::ID ]['hard_threshold_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN );
 

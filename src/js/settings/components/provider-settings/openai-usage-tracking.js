@@ -161,8 +161,12 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 			<SettingsRow
 				label={ __( 'Refresh interval (minutes)', 'classifai' ) }
 				description={ sprintf(
-					/* translators: %d: default minutes */
-					__( 'How often to fetch usage (default %d).', 'classifai' ),
+					/* translators: 1: minimum minutes, 2: default minutes */
+					__(
+						'How often to fetch usage (minimum %1$d minutes, default %2$d).',
+						'classifai'
+					),
+					5,
 					15
 				) }
 			>
