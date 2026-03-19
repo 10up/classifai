@@ -456,7 +456,7 @@ EOD;
 			$classes[] = 'notice-error';
 			$message   = sprintf(
 				/* translators: 1: amount with currency, 2: link to settings */
-				__( 'AI Features are currently disabled due to exceeded your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
+				__( 'AI Features are currently disabled due to exceeding your hard limit of %1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
 				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . ( $usage_data['currency'] ?? 'USD' ) ),
 				esc_url( $settings_url )
 			);

@@ -317,7 +317,7 @@ class APIUsageTracking extends Feature {
 		 * Filter the refresh interval for the AI API usage tracking.
 		 *
 		 * @since x.x.x
-		 * @hook classifai_api_usage_tracking_refresh_interval
+		 * @hook classifai_api_usage_refresh_interval
 		 *
 		 * @param int $interval The refresh interval in seconds.
 		 *
