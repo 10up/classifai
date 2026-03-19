@@ -377,7 +377,7 @@ class APIUsageTracking extends Feature {
 
 		wp_add_dashboard_widget(
 			'classifai_api_usage',
-			__( 'AI usage (ClassifAI)', 'classifai' ),
+			__( 'AI Usage Tracking', 'classifai' ),
 			[ $this, 'render_dashboard_widget' ],
 			null,
 			null,
@@ -394,7 +394,7 @@ class APIUsageTracking extends Feature {
 		$currency     = $usage['currency'] ?? 'USD';
 		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/api_usage_tracking' );
 		$fmt          = function ( $val ) use ( $currency ) {
-			return number_format_i18n( $val, 2 ) . ' ' . $currency;
+			return '$' . number_format_i18n( $val, 2 ) . ' ' . $currency;
 		};
 
 		?>
@@ -419,8 +419,8 @@ class APIUsageTracking extends Feature {
 			<?php } ?>
 
 			<p>
-				<a href="<?php echo esc_url( $settings_url ); ?>" class="components-button is-primary"><?php esc_html_e( 'Configure alerts', 'classifai' ); ?></a>
-				<button type="button" id="api_usage_tracking_force_refresh_data" class="components-button is-secondary" style="margin-left: 10px;"><?php esc_html_e( 'Force refresh usage', 'classifai' ); ?></button>
+				<a href="<?php echo esc_url( $settings_url ); ?>" class="components-button is-primary"><?php esc_html_e( 'Configure Alerts', 'classifai' ); ?></a>
+				<button type="button" id="api_usage_tracking_force_refresh_data" class="components-button is-secondary" style="margin-left: 10px;"><?php esc_html_e( 'Refresh Usage Data', 'classifai' ); ?></button>
 			</p>
 		</div>
 		<?php

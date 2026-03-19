@@ -198,7 +198,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 						saving || ! isConfigured || isForceRefreshScheduled
 					}
 				>
-					{ __( 'Force refresh data', 'classifai' ) }
+					{ __( 'Refresh Usage Data', 'classifai' ) }
 				</Button>
 			</SettingsRow>
 
