@@ -1139,6 +1139,11 @@ table.similar_terms.widefat thead th {
 	font-weight: bold;
 }
 
+.classifai-api-usage-list li {
+	display: grid;
+	grid-template-columns: 220px 1fr;
+}
+
 #wpbody {
 
 	tr[data-slug="classifai"] {
