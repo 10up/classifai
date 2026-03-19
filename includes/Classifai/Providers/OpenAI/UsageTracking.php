@@ -144,6 +144,11 @@ class UsageTracking extends UsageTrackingProvider {
 				// Delete the hard limit reached option if the hard threshold is disabled.
 				delete_option( APIUsageTracking::HARD_LIMIT_REACHED_KEY );
 			}
+
+			// Unschedule the cron job if the refresh interval is changed.
+			if ( $settings[ static::ID ]['refresh_interval_minutes'] !== $new_settings[ static::ID ]['refresh_interval_minutes'] ) {
+				as_unschedule_action( APIUsageTracking::CRON_HOOK, [], 'classifai' );
+			}
 		}
 
 		return $new_settings;
