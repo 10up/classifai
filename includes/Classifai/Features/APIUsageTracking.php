@@ -98,7 +98,7 @@ class APIUsageTracking extends Feature {
 
 		// Contains just the Providers this Feature supports.
 		$this->supported_providers = [
-			OpenAIUsageTracking::ID => __( 'OpenAI Usage Tracking', 'classifai' ),
+			OpenAIUsageTracking::ID => __( 'OpenAI', 'classifai' ),
 		];
 	}
 
