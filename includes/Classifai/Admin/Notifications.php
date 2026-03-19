@@ -439,16 +439,9 @@ EOD;
 			return;
 		}
 
-		$key = 'api_threshold_reached';
-
-		// Don't show the notice if the user has already dismissed it for soft threshold. Always show for hard threshold.
-		if ( ! $hard_threshold_reached && get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
-			return;
-		}
-
+		$key          = 'api_threshold_reached';
 		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/api_usage_tracking' );
-
-		$classes = [
+		$classes      = [
 			'notice',
 		];
 
@@ -461,8 +454,6 @@ EOD;
 				esc_url( $settings_url )
 			);
 		} else {
-			$classes[] = 'is-dismissible';
-			$classes[] = 'classifai-dismissible-notice';
 			$classes[] = 'notice-warning';
 			$message   = sprintf(
 				/* translators: 1: amount with currency, 2: link to settings */
