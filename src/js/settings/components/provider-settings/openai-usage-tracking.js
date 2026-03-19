@@ -298,13 +298,16 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 							<SettingsRow
 								label={ __( 'Amount (USD)', 'classifai' ) }
 								description={ __(
-									'When exceeded, optionally disable all OpenAI Features.',
+									'When exceeded, optionally disable all OpenAI Features. (This amount must be greater than the soft threshold amount.)',
 									'classifai'
 								) }
 							>
 								<TextControl
 									type="number"
-									min={ 1.0 }
+									min={
+										providerSettings?.soft_threshold_amount ??
+										1.0
+									}
 									step={ 1.0 }
 									value={ String(
 										providerSettings.hard_threshold_amount

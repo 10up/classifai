@@ -135,6 +135,16 @@ class UsageTracking extends UsageTrackingProvider {
 				);
 				$new_settings[ static::ID ]['hard_threshold_scope']   = $hard_threshold_scope;
 				$new_settings[ static::ID ]['hard_threshold_emails']  = $hard_threshold_emails;
+
+				$soft_threshold_amount = empty( $new_settings[ static::ID ]['soft_threshold_amount'] ) ? 1.00 : $new_settings[ static::ID ]['soft_threshold_amount'];
+
+				if (
+					! empty( $new_settings[ static::ID ]['hard_threshold_amount'] )
+					&& (float) $new_settings[ static::ID ]['hard_threshold_amount'] <= $soft_threshold_amount
+				) {
+					// Keep hard threshold amount greater than soft threshold amount.
+					$new_settings[ static::ID ]['hard_threshold_amount'] = (string) ( $soft_threshold_amount + 1.00 );
+				}
 			} else {
 				unset( $new_settings[ static::ID ]['hard_threshold_enabled'] );
 				unset( $new_settings[ static::ID ]['hard_threshold_amount'] );
