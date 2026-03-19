@@ -169,8 +169,8 @@ class UsageTracking extends UsageTrackingProvider {
 			}
 
 			// Unschedule the cron job if the refresh interval is changed.
-			if ( $settings[ static::ID ]['refresh_interval_minutes'] !== $new_settings[ static::ID ]['refresh_interval_minutes'] ) {
-				as_unschedule_action( APIUsageTracking::CRON_HOOK, [], 'classifai' );
+			if ( $settings[ static::ID ]['refresh_interval_minutes'] !== $new_settings[ static::ID ]['refresh_interval_minutes'] && function_exists( 'as_unschedule_action' ) ) {
+				\as_unschedule_action( APIUsageTracking::CRON_HOOK, [], 'classifai' );
 			}
 		}
 

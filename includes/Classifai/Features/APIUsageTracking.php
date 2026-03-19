@@ -697,6 +697,9 @@ class APIUsageTracking extends Feature {
 	 * @return array The period data.
 	 */
 	public function get_scope_period_data( string $scope ): array {
+		$period_key   = '';
+		$period_label = '';
+
 		// Period key is used to track the last sent alert for a period. Sent only once a month.
 		switch ( $scope ) {
 			case 'current_month':
