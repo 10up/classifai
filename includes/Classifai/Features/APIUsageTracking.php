@@ -355,9 +355,6 @@ class APIUsageTracking extends Feature {
 	 * Registers the dashboard widget when configured.
 	 */
 	public function register_dashboard_widget(): void {
-		if ( ! $this->is_feature_enabled() ) {
-			return;
-		}
 
 		wp_add_dashboard_widget(
 			'classifai_api_usage',
