@@ -560,26 +560,9 @@ class APIUsageTracking extends Feature {
 			return;
 		}
 
-		$period_key   = '';
-		$period_label = '';
-
-		// Period key is used to track the last sent alert for a period. Sent only once a month.
-		switch ( $scope ) {
-			case 'current_month':
-				$period_key   = gmdate( 'Y-m' );
-				$period_label = __( 'current month', 'classifai' );
-				break;
-			case 'year_to_date':
-				// i.e 2026-01-2026-02 for feb month.
-				$period_key   = gmdate( 'Y' ) . '-01-' . gmdate( 'Y-m' );
-				$period_label = __( 'year to date', 'classifai' );
-				break;
-			case 'all_time':
-				// i.e all-2026-02 for current year feb month.
-				$period_key   = 'all-' . gmdate( 'Y-m' );
-				$period_label = __( 'all time', 'classifai' );
-				break;
-		}
+		$period_data  = $this->get_scope_period_data( $scope );
+		$period_key   = $period_data['period_key'] ?? '';
+		$period_label = $period_data['period_label'] ?? '';
 
 		if ( isset( $settings[ $sent_key ] ) && $period_key === $settings[ $sent_key ] ) {
 			return;
@@ -659,26 +642,9 @@ class APIUsageTracking extends Feature {
 			return;
 		}
 
-		$period_key   = '';
-		$period_label = '';
-
-		// Period key is used to track the last sent alert for a period. Sent only once a month.
-		switch ( $scope ) {
-			case 'current_month':
-				$period_key   = gmdate( 'Y-m' );
-				$period_label = __( 'current month', 'classifai' );
-				break;
-			case 'year_to_date':
-				// i.e 2026-01-2026-02 for feb month.
-				$period_key   = gmdate( 'Y' ) . '-01-' . gmdate( 'Y-m' );
-				$period_label = __( 'year to date', 'classifai' );
-				break;
-			case 'all_time':
-				// i.e all-2026-02 for current year feb month.
-				$period_key   = 'all-' . gmdate( 'Y-m' );
-				$period_label = __( 'all time', 'classifai' );
-				break;
-		}
+		$period_data  = $this->get_scope_period_data( $scope );
+		$period_key   = $period_data['period_key'] ?? '';
+		$period_label = $period_data['period_label'] ?? '';
 
 		if ( isset( $settings[ $sent_key ] ) && $period_key === $settings[ $sent_key ] ) {
 			return;
@@ -702,5 +668,37 @@ class APIUsageTracking extends Feature {
 
 		$settings[ $sent_key ] = $period_key;
 		$this->update_settings( [ $provider::ID => $settings ] );
+	}
+
+	/**
+	 * Returns the period data for a given scope.
+	 *
+	 * @param string $scope The scope to get the period data for.
+	 *
+	 * @return array The period data.
+	 */
+	public function get_scope_period_data( string $scope ): array {
+		// Period key is used to track the last sent alert for a period. Sent only once a month.
+		switch ( $scope ) {
+			case 'current_month':
+				$period_key   = gmdate( 'Y-m' );
+				$period_label = __( 'current month', 'classifai' );
+				break;
+			case 'year_to_date':
+				// i.e 2026-01-2026-02 for feb month.
+				$period_key   = gmdate( 'Y' ) . '-01-' . gmdate( 'Y-m' );
+				$period_label = __( 'year to date', 'classifai' );
+				break;
+			case 'all_time':
+				// i.e all-2026-02 for current year feb month.
+				$period_key   = 'all-' . gmdate( 'Y-m' );
+				$period_label = __( 'all time', 'classifai' );
+				break;
+		}
+
+		return [
+			'period_key'   => $period_key,
+			'period_label' => $period_label,
+		];
 	}
 }
