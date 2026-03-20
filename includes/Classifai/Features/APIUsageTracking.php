@@ -396,6 +396,7 @@ class APIUsageTracking extends Feature {
 		$fmt          = function ( $val ) use ( $currency ) {
 			return '$' . number_format_i18n( $val, 2 ) . ' ' . $currency;
 		};
+		$is_updating  = empty( $usage['last_updated'] ) || ( 0 > $usage['last_updated'] );
 
 		?>
 		<div class="classifai-api-usage-widget">
@@ -403,9 +404,36 @@ class APIUsageTracking extends Feature {
 				<?php esc_html_e( 'Usage and costs shown here are from the AI API for this project/site. If you use the same API key or project elsewhere, this data does not represent only ClassifAI.', 'classifai' ); ?>
 			</p>
 			<ul class="classifai-api-usage-list">
-				<li><strong><?php esc_html_e( 'This month', 'classifai' ); ?>:</strong> <?php echo esc_html( $fmt( $usage['mtd'] ) ); ?></li>
-				<li><strong><?php esc_html_e( 'Year to date', 'classifai' ); ?>:</strong> <?php echo esc_html( $fmt( $usage['ytd'] ) ); ?></li>
-				<li><strong><?php esc_html_e( 'All time', 'classifai' ); ?>:</strong> <?php echo esc_html( $fmt( $usage['all_time'] ) ); ?></li>
+				<li>
+					<strong><?php esc_html_e( 'This month', 'classifai' ); ?>:</strong>
+					<?php
+					if ( $is_updating && empty( $usage['mtd'] ) ) {
+						esc_html_e( 'Updating…', 'classifai' );
+					} else {
+						echo esc_html( $fmt( $usage['mtd'] ) );
+					}
+					?>
+				</li>
+				<li>
+					<strong><?php esc_html_e( 'Year to date', 'classifai' ); ?>:</strong>
+					<?php
+					if ( $is_updating && empty( $usage['ytd'] ) ) {
+						esc_html_e( 'Updating…', 'classifai' );
+					} else {
+						echo esc_html( $fmt( $usage['ytd'] ) );
+					}
+					?>
+				</li>
+				<li>
+					<strong><?php esc_html_e( 'All time', 'classifai' ); ?>:</strong>
+					<?php
+					if ( $is_updating && empty( $usage['all_time'] ) ) {
+						esc_html_e( 'Updating…', 'classifai' );
+					} else {
+						echo esc_html( $fmt( $usage['all_time'] ) );
+					}
+					?>
+				</li>
 			</ul>
 			<?php if ( 0 < $usage['last_updated'] ) { ?>
 				<p class="classifai-api-usage-updated">
@@ -414,8 +442,6 @@ class APIUsageTracking extends Feature {
 					echo esc_html( sprintf( __( 'Last updated: %s', 'classifai' ), wp_date( $date_format, $usage['last_updated'] ?? 0 ) ) );
 					?>
 				</p>
-			<?php } else { ?>
-				<p class="classifai-api-usage-updated"><?php esc_html_e( 'Updating…', 'classifai' ); ?></p>
 			<?php } ?>
 
 			<p>
