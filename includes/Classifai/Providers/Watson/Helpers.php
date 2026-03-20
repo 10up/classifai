@@ -7,6 +7,11 @@ namespace Classifai\Providers\Watson;
 
 use Classifai\Features\Classification;
 
+// Using return instead of exit to prevent errors running PHPCS.
+if ( ! defined( 'ABSPATH' ) ) {
+	return;
+}
+
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
  *
@@ -16,11 +21,12 @@ use Classifai\Features\Classification;
  * @return string
  */
 function get_api_url(): string {
-	$settings = ( new Classification() )->get_settings();
-	$creds    = ! empty( $settings[ NLU::ID ] ) ? $settings[ NLU::ID ] : [];
+	$feature      = new Classification();
+	$provider     = $feature->get_feature_provider_instance( NLU::ID );
+	$endpoint_url = $provider->get_credential( 'endpoint_url', $feature->get_settings() );
 
-	if ( ! empty( $creds['endpoint_url'] ) ) {
-		return $creds['endpoint_url'];
+	if ( ! empty( $endpoint_url ) ) {
+		return $endpoint_url;
 	} elseif ( defined( 'WATSON_URL' ) ) {
 		return WATSON_URL;
 	} else {
@@ -37,8 +43,9 @@ function get_api_url(): string {
  * @return string
  */
 function get_username(): string {
-	$settings = ( new Classification() )->get_settings( NLU::ID );
-	$username = ! empty( $settings['username'] ) ? $settings['username'] : '';
+	$feature  = new Classification();
+	$provider = $feature->get_feature_provider_instance( NLU::ID );
+	$username = $provider->get_credential( 'username', $feature->get_settings() );
 
 	if ( ! empty( $username ) ) {
 		return $username;
@@ -58,8 +65,9 @@ function get_username(): string {
  * @return string
  */
 function get_password(): string {
-	$settings = ( new Classification() )->get_settings( NLU::ID );
-	$password = ! empty( $settings['password'] ) ? $settings['password'] : '';
+	$feature  = new Classification();
+	$provider = $feature->get_feature_provider_instance( NLU::ID );
+	$password = $provider->get_credential( 'password', $feature->get_settings() );
 
 	if ( ! empty( $password ) ) {
 		return $password;

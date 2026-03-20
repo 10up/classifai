@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit6169bb87673f25ee33f59094c2c17502
+class ComposerStaticInitde9f6ea169a460d4101e3e7e68db2ce1
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -428,6 +428,7 @@ class ComposerStaticInit6169bb87673f25ee33f59094c2c17502
         'Classifai\\Admin\\UserProfile' => __DIR__ . '/../..' . '/includes/Classifai/Admin/UserProfile.php',
         'Classifai\\Command\\ClassifaiCommand' => __DIR__ . '/../..' . '/includes/Classifai/Command/ClassifaiCommand.php',
         'Classifai\\EmbeddingsScheduler' => __DIR__ . '/../..' . '/includes/Classifai/EmbeddingsScheduler.php',
+        'Classifai\\Features\\APIUsageTracking' => __DIR__ . '/../..' . '/includes/Classifai/Features/APIUsageTracking.php',
         'Classifai\\Features\\AudioTranscriptsGeneration' => __DIR__ . '/../..' . '/includes/Classifai/Features/AudioTranscriptsGeneration.php',
         'Classifai\\Features\\Classification' => __DIR__ . '/../..' . '/includes/Classifai/Features/Classification.php',
         'Classifai\\Features\\ContentGeneration' => __DIR__ . '/../..' . '/includes/Classifai/Features/ContentGeneration.php',
@@ -442,6 +443,7 @@ class ComposerStaticInit6169bb87673f25ee33f59094c2c17502
         'Classifai\\Features\\KeyTakeaways' => __DIR__ . '/../..' . '/includes/Classifai/Features/KeyTakeaways.php',
         'Classifai\\Features\\Moderation' => __DIR__ . '/../..' . '/includes/Classifai/Features/Moderation.php',
         'Classifai\\Features\\PDFTextExtraction' => __DIR__ . '/../..' . '/includes/Classifai/Features/PDFTextExtraction.php',
+        'Classifai\\Features\\QuickDraftIntegration' => __DIR__ . '/../..' . '/includes/Classifai/Features/QuickDraftIntegration.php',
         'Classifai\\Features\\RecommendedContent' => __DIR__ . '/../..' . '/includes/Classifai/Features/RecommendedContent.php',
         'Classifai\\Features\\Smart404' => __DIR__ . '/../..' . '/includes/Classifai/Features/Smart404.php',
         'Classifai\\Features\\Smart404EPIntegration' => __DIR__ . '/../..' . '/includes/Classifai/Features/Smart404EPIntegration.php',
@@ -460,6 +462,8 @@ class ComposerStaticInit6169bb87673f25ee33f59094c2c17502
         'Classifai\\Providers\\Azure\\SmartCropping' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Azure/SmartCropping.php',
         'Classifai\\Providers\\Azure\\Speech' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Azure/Speech.php',
         'Classifai\\Providers\\Browser\\ChromeAI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Browser/ChromeAI.php',
+        'Classifai\\Providers\\CredentialObfuscator' => __DIR__ . '/../..' . '/includes/Classifai/Providers/CredentialObfuscator.php',
+        'Classifai\\Providers\\CredentialResolver' => __DIR__ . '/../..' . '/includes/Classifai/Providers/CredentialResolver.php',
         'Classifai\\Providers\\ElevenLabs\\ElevenLabs' => __DIR__ . '/../..' . '/includes/Classifai/Providers/ElevenLabs/ElevenLabs.php',
         'Classifai\\Providers\\ElevenLabs\\SpeechToText' => __DIR__ . '/../..' . '/includes/Classifai/Providers/ElevenLabs/SpeechToText.php',
         'Classifai\\Providers\\ElevenLabs\\TextToSpeech' => __DIR__ . '/../..' . '/includes/Classifai/Providers/ElevenLabs/TextToSpeech.php',
@@ -481,9 +485,12 @@ class ComposerStaticInit6169bb87673f25ee33f59094c2c17502
         'Classifai\\Providers\\OpenAI\\SpeechToText' => __DIR__ . '/../..' . '/includes/Classifai/Providers/OpenAI/SpeechToText.php',
         'Classifai\\Providers\\OpenAI\\TextToSpeech' => __DIR__ . '/../..' . '/includes/Classifai/Providers/OpenAI/TextToSpeech.php',
         'Classifai\\Providers\\OpenAI\\Tokenizer' => __DIR__ . '/../..' . '/includes/Classifai/Providers/OpenAI/Tokenizer.php',
+        'Classifai\\Providers\\OpenAI\\UsageTracking' => __DIR__ . '/../..' . '/includes/Classifai/Providers/OpenAI/UsageTracking.php',
         'Classifai\\Providers\\Provider' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Provider.php',
+        'Classifai\\Providers\\ProviderProfiles' => __DIR__ . '/../..' . '/includes/Classifai/Providers/ProviderProfiles.php',
         'Classifai\\Providers\\TogetherAI\\Images' => __DIR__ . '/../..' . '/includes/Classifai/Providers/TogetherAI/Images.php',
         'Classifai\\Providers\\TogetherAI\\TogetherAI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/TogetherAI/TogetherAI.php',
+        'Classifai\\Providers\\UsageTrackingProvider' => __DIR__ . '/../..' . '/includes/Classifai/Providers/UsageTrackingProvider.php',
         'Classifai\\Providers\\Watson\\APIRequest' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Watson/APIRequest.php',
         'Classifai\\Providers\\Watson\\Classifier' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Watson/Classifier.php',
         'Classifai\\Providers\\Watson\\Linker' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Watson/Linker.php',
@@ -496,6 +503,7 @@ class ComposerStaticInit6169bb87673f25ee33f59094c2c17502
         'Classifai\\Services\\LanguageProcessing' => __DIR__ . '/../..' . '/includes/Classifai/Services/LanguageProcessing.php',
         'Classifai\\Services\\Service' => __DIR__ . '/../..' . '/includes/Classifai/Services/Service.php',
         'Classifai\\Services\\ServicesManager' => __DIR__ . '/../..' . '/includes/Classifai/Services/ServicesManager.php',
+        'Classifai\\Services\\UsageTracking' => __DIR__ . '/../..' . '/includes/Classifai/Services/UsageTracking.php',
         'Classifai\\Taxonomy\\AbstractTaxonomy' => __DIR__ . '/../..' . '/includes/Classifai/Taxonomy/AbstractTaxonomy.php',
         'Classifai\\Taxonomy\\CategoryTaxonomy' => __DIR__ . '/../..' . '/includes/Classifai/Taxonomy/CategoryTaxonomy.php',
         'Classifai\\Taxonomy\\ConceptTaxonomy' => __DIR__ . '/../..' . '/includes/Classifai/Taxonomy/ConceptTaxonomy.php',
@@ -625,9 +633,9 @@ class ComposerStaticInit6169bb87673f25ee33f59094c2c17502
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit6169bb87673f25ee33f59094c2c17502::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit6169bb87673f25ee33f59094c2c17502::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit6169bb87673f25ee33f59094c2c17502::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitde9f6ea169a460d4101e3e7e68db2ce1::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitde9f6ea169a460d4101e3e7e68db2ce1::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitde9f6ea169a460d4101e3e7e68db2ce1::$classMap;
 
         }, null, ClassLoader::class);
     }

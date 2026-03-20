@@ -6,6 +6,7 @@ use Classifai\Providers\Azure\OpenAI;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\Localhost\Ollama;
 use Classifai\Services\LanguageProcessing;
+use Classifai\Features\QuickDraftIntegration;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -41,7 +42,7 @@ class ContentGeneration extends Feature {
 	 *
 	 * @var string
 	 */
-	public $return_format = <<<EOD
+	public $return_format = <<<'INSTRUCTION'
 The content returned should be valid WordPress block markup as described below, using elements like paragraphs and headings where appropriate. Be selective on the elements you use, defaulting to paragraphs. Please check the content before returning to ensure each element has proper opening and closing block markup and HTML tags and any required block attributes. Ensure elements don't nest inside each other, i.e. don't put a paragraph inside another paragraph or a list within a paragraph. Don't start the content with a heading, start with a paragraph.
 
 Markup available to use; don't use any other blocks, even if requested:
@@ -78,8 +79,8 @@ Markup available to use; don't use any other blocks, even if requested:
 <li>CONTENT</li>
 </ol>
 <!-- /wp:list -->
-EOD;
-	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
+INSTRUCTION;
+	// phpcs:enable
 
 	/**
 	 * Constructor.
@@ -113,6 +114,9 @@ EOD;
 	 */
 	public function feature_setup() {
 		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
+
+		$quick_draft = new QuickDraftIntegration();
+		$quick_draft->init();
 	}
 
 	/**
@@ -260,17 +264,18 @@ EOD;
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'prompt'     => [
+			'prompt'             => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->prompt,
 					'original' => 1,
 				],
 			],
-			'post_types' => [
+			'post_types'         => [
 				'post' => 'post',
 			],
-			'provider'   => ChatGPT::ID,
+			'provider'           => ChatGPT::ID,
+			'enable_quick_draft' => false,
 		];
 	}
 
@@ -314,6 +319,9 @@ EOD;
 				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			}
 		}
+
+		// Sanitize Quick Draft setting.
+		$new_settings['enable_quick_draft'] = isset( $new_settings['enable_quick_draft'] ) ? (bool) $new_settings['enable_quick_draft'] : false;
 
 		return $new_settings;
 	}

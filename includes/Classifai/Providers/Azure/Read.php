@@ -9,6 +9,7 @@
 namespace Classifai\Providers\Azure;
 
 use WP_Error;
+
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\safe_wp_remote_post;
 use function Classifai\safe_wp_remote_get;
@@ -70,7 +71,7 @@ class Read {
 	 * @return string
 	 */
 	public function get_api_url( string $path = '' ): string {
-		return sprintf( '%s%s%s', trailingslashit( $this->settings['endpoint_url'] ), static::API_PATH, $path );
+		return sprintf( '%s%s%s', trailingslashit( $this->settings['endpoint_url'] ?? '' ), static::API_PATH, $path );
 	}
 
 	/**
@@ -173,7 +174,7 @@ class Read {
 				),
 				'headers' => [
 					'Content-Type'              => 'application/json',
-					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
+					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'] ?? '',
 				],
 			]
 		);
@@ -225,7 +226,7 @@ class Read {
 			$operation_url,
 			[
 				'headers' => [
-					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
+					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'] ?? '',
 				],
 			]
 		);
