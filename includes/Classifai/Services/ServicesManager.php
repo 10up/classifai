@@ -52,6 +52,7 @@ class ServicesManager {
 		add_filter( 'language_processing_features', [ $this, 'register_language_processing_features' ] );
 		add_filter( 'image_processing_features', [ $this, 'register_image_processing_features' ] );
 		add_filter( 'content_recommendation_features', [ $this, 'register_recommendation_service_features' ] );
+		add_filter( 'usage_tracking_features', [ $this, 'register_usage_tracking_features' ] );
 
 		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
@@ -130,6 +131,24 @@ class ServicesManager {
 	public function register_recommendation_service_features( array $features ): array {
 		$core_features = [
 			'\Classifai\Features\RecommendedContent',
+		];
+
+		foreach ( $core_features as $feature ) {
+			$features[] = $feature;
+		}
+
+		return $features;
+	}
+
+	/**
+	 * Registers Features under the Usage Tracking Service.
+	 *
+	 * @param array $features The list of Features to be registered.
+	 * @return array
+	 */
+	public function register_usage_tracking_features( array $features ): array {
+		$core_features = [
+			'\Classifai\Features\APIUsageTracking',
 		];
 
 		foreach ( $core_features as $feature ) {
