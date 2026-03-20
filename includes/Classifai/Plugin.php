@@ -113,6 +113,7 @@ class Plugin {
 				'language_processing'    => 'Classifai\Services\LanguageProcessing',
 				'image_processing'       => 'Classifai\Services\ImageProcessing',
 				'content_recommendation' => 'Classifai\Services\ContentRecommendation',
+				'usage_tracking'         => 'Classifai\Services\UsageTracking',
 			]
 		);
 
@@ -315,6 +316,7 @@ Disallow: /
 			new \Classifai\Features\TermCleanup(),
 			new \Classifai\Features\RecommendedContent(),
 			new \Classifai\Features\TextToSpeech(),
+			new \Classifai\Features\APIUsageTracking(),
 		];
 		$is_feature_being_enabled = false;
 
@@ -333,6 +335,7 @@ Disallow: /
 				case 'ms_azure_text_to_speech':
 				case 'openai_text_to_speech':
 				case 'elevenlabs_text_to_speech':
+				case 'openai_usage_tracking':
 					break;
 				default:
 					continue 2;

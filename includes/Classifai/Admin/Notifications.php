@@ -5,6 +5,8 @@ namespace Classifai\Admin;
 
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\Classification;
+use Classifai\Features\APIUsageTracking;
+use Classifai\Providers\UsageTrackingProvider;
 use function Classifai\should_use_legacy_settings_panel;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -51,6 +53,7 @@ class Notifications {
 		$this->v3_migration_completed_notice();
 		$this->render_embeddings_notice();
 		$this->render_legacy_settings_deprecation_notice();
+		$this->render_api_threshold_notice();
 		$this->render_notices();
 	}
 
@@ -388,6 +391,84 @@ EOD;
 		$notice_id = sanitize_text_field( wp_unslash( $_POST['notice_id'] ) );
 
 		update_user_meta( get_current_user_id(), "classifai_dismissed_{$notice_id}", true );
+	}
+
+	/**
+	 * Render a notice when AI usage exceeds the soft or hard threshold limit.
+	 */
+	public function render_api_threshold_notice() {
+
+		// Ensure the feature exists.
+		if ( ! class_exists( 'Classifai\Features\APIUsageTracking' ) ) {
+			return;
+		}
+
+		$feature_instance = new APIUsageTracking();
+
+		// Don't show the notice if the feature is not enabled.
+		if ( ! $feature_instance->is_feature_enabled() ) {
+			return;
+		}
+
+		// Don't show the notice if the provider is not UsageTrackingProvider.
+		$provider = $feature_instance->get_feature_provider_instance();
+
+		if ( ! $provider instanceof UsageTrackingProvider ) {
+			return;
+		}
+
+		$settings = $feature_instance->get_settings( $provider::ID );
+
+		if ( empty( $settings['soft_threshold_enabled'] ) && empty( $settings['hard_threshold_enabled'] ) ) {
+			return;
+		}
+
+		$hard_threshold_reached = get_option( $feature_instance::HARD_LIMIT_REACHED_KEY, false );
+
+		if ( $hard_threshold_reached ) {
+			$scope = isset( $settings['hard_threshold_scope'] ) ? $settings['hard_threshold_scope'] : 'current_month';
+		} else {
+			$scope = isset( $settings['soft_threshold_scope'] ) ? $settings['soft_threshold_scope'] : 'current_month';
+		}
+
+		$usage_data = $feature_instance->get_usage_data();
+		$amount     = $feature_instance->get_amount_for_scope( $usage_data, $scope );
+		$threshold  = $hard_threshold_reached ? (float) $settings['hard_threshold_amount'] : (float) $settings['soft_threshold_amount'];
+
+		if ( $amount < $threshold ) {
+			return;
+		}
+
+		$key          = 'api_threshold_reached';
+		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/api_usage_tracking' );
+		$classes      = [
+			'notice',
+		];
+
+		if ( $hard_threshold_reached ) {
+			$classes[] = 'notice-error';
+			$message   = sprintf(
+				/* translators: 1: amount with currency, 2: link to settings */
+				__( 'AI Features are currently disabled due to exceeding your hard threshold of $%1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . strtoupper( $usage_data['currency'] ?? 'USD' ) ),
+				esc_url( $settings_url )
+			);
+		} else {
+			$classes[] = 'notice-warning';
+			$message   = sprintf(
+				/* translators: 1: amount with currency, 2: link to settings */
+				__( 'AI usage has exceeded your soft threshold of $%1$s for this period. <a href="%2$s">Configure alerts</a>.', 'classifai' ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . strtoupper( $usage_data['currency'] ?? 'USD' ) ),
+				esc_url( $settings_url )
+			);
+		}
+		?>
+		<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-notice="<?php echo esc_attr( $key ); ?>">
+			<p>
+				<?php echo wp_kses_post( $message ); ?>
+			</p>
+		</div>
+		<?php
 	}
 
 	/**
