@@ -1400,9 +1400,9 @@ abstract class Feature {
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
 
 		/**
-		 * Filter the response before the feature api endpoint is called.
+		 * Filter the response before the Feature API endpoint is called.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 *
 		 * @hook classifai_pre_fetch_feature_response
 		 *

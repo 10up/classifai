@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [3.8.0] - 2026-02-XX
+## [3.8.0] - 2026-03-20
 
 ### Added
 
 - New filters, `classifai_provider_credentials_{$provider_id}` and `classifai_provider_credentials`, that allows developers the ability to override AI credentials prior to those being used. This allows you to manage credentials outside of the database, like as environment variables or other secret management services (props [@fabiankaegy](https://github.com/fabiankaegy), [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1043](https://github.com/10up/classifai/pull/1043)).
+- New Feature that allows you to track your OpenAI API usage and set both soft (admin notice only) and hard (admin notice and Feature disablement) thresholds, helping you from exceeding your API usage limits (props [@rahulsprajapati](https://github.com/rahulsprajapati), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#1065](https://github.com/10up/classifai/pull/1065)).
 - Content Generation integration with the WordPress Quick Draft widget for quick AI-powered draft content creation (props [@faisal-alvi](https://github.com/faisal-alvi), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#1012](https://github.com/10up/classifai/pull/1012)).
 - New methods on the Provider class that allow you to get all credentials or a specific credential, pulling the credentials from the larger Feature settings (props [@fabiankaegy](https://github.com/fabiankaegy), [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1043](https://github.com/10up/classifai/pull/1043)).
 - Ability to change any AI suggested terms when using the Classification Feature in manual mode (props [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#1039](https://github.com/10up/classifai/pull/1039)).
@@ -36,13 +37,6 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Add a `CredentialObfuscator` class that will obfuscate any private credentials before rendering those in the settings screen (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1047](https://github.com/10up/classifai/pull/1047)).
 - Hardening: add read post check for Watson NLU classification previewer (props [@peterwilsoncc](https://github.com/peterwilsoncc) [@dkotter](https://github.com/dkotter) via [#1049](https://github.com/10up/classifai/pull/1049)).
 - Ensure our helper files don't allow direct file access (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1028](https://github.com/10up/classifai/pull/1028)).
-- Update dependencies via npm audit fix (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1033](https://github.com/10up/classifai/pull/1033)).
-- Bump `lodash` from 4.17.21 to 4.17.23 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1034](https://github.com/10up/classifai/pull/1034)).
-- Bump `lodash-es` from 4.17.22 to 4.17.23 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1035](https://github.com/10up/classifai/pull/1035)).
-- Bump `systeminformation` from 5.30.0 to 5.31.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1057](https://github.com/10up/classifai/pull/1057)).
-- Bump `basic-ftp` from 5.1.0 to 5.2.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1061](https://github.com/10up/classifai/pull/1061)).
-- Bump `immutable` from 5.1.4 to 5.1.5 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1063](https://github.com/10up/classifai/pull/1063)).
-- Bump `svgo` from 3.3.2 to 3.3.3 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1064](https://github.com/10up/classifai/pull/1064)).
 
 ### Developer
 
@@ -53,6 +47,13 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Update `@wordpress/scripts` to 31.3.0 and `@wordpress/env` to 10.38.0 (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1033](https://github.com/10up/classifai/pull/1033)).
 - Move WP bundled dependencies to eslint config (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1033](https://github.com/10up/classifai/pull/1033)).
 - Update readmes to be more streamlined and link to our documentation site for those that want more information (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1041](https://github.com/10up/classifai/pull/1041)).
+- Update dependencies via npm audit fix (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1033](https://github.com/10up/classifai/pull/1033)).
+- Bump `lodash` from 4.17.21 to 4.17.23 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1034](https://github.com/10up/classifai/pull/1034)).
+- Bump `lodash-es` from 4.17.22 to 4.17.23 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1035](https://github.com/10up/classifai/pull/1035)).
+- Bump `systeminformation` from 5.30.0 to 5.31.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1057](https://github.com/10up/classifai/pull/1057)).
+- Bump `basic-ftp` from 5.1.0 to 5.2.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1061](https://github.com/10up/classifai/pull/1061)).
+- Bump `immutable` from 5.1.4 to 5.1.5 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1063](https://github.com/10up/classifai/pull/1063)).
+- Bump `svgo` from 3.3.2 to 3.3.3 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1064](https://github.com/10up/classifai/pull/1064)).
 
 ## [3.7.1] - 2026-01-12
 
