@@ -435,7 +435,7 @@ class APIUsageTracking extends Feature {
 					?>
 				</li>
 			</ul>
-			<?php if ( 0 < $usage['last_updated'] ) { ?>
+			<?php if ( ! empty( $usage['last_updated'] ) && 0 < $usage['last_updated'] ) { ?>
 				<p class="classifai-api-usage-updated">
 					<?php
 					/* translators: %s: human-readable time */
