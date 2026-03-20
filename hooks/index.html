@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">ClassifAI Developer Documentation</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://classifaiplugin.com/classifai/hooks/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="ClassifAI Developer Documentation"><meta data-rh="true" name="description" content="Documentation for actions, filters, and WP-CLI commands found in the ClassifAI plugin"><meta data-rh="true" property="og:description" content="Documentation for actions, filters, and WP-CLI commands found in the ClassifAI plugin"><link data-rh="true" rel="icon" href="/classifai/img/favicon.png"><link data-rh="true" rel="canonical" href="https://classifaiplugin.com/classifai/hooks/"><link data-rh="true" rel="alternate" href="https://classifaiplugin.com/classifai/hooks/" hreflang="en"><link data-rh="true" rel="alternate" href="https://classifaiplugin.com/classifai/hooks/" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Hooks","item":"https://classifaiplugin.com/classifai/hooks/"}]}</script><link rel="stylesheet" href="/classifai/assets/css/styles.2744fbb9.css">
-<script src="/classifai/assets/js/runtime~main.deff4536.js" defer="defer"></script>
-<script src="/classifai/assets/js/main.91ae88e5.js" defer="defer"></script>
+<script src="/classifai/assets/js/runtime~main.e96c2df7.js" defer="defer"></script>
+<script src="/classifai/assets/js/main.b631836c.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -22,6 +22,9 @@
 <li class=""><a class="" href="/classifai/hooks/Actions/classifai_.staticID._render_provider_fields">classifai_ . static::ID . _render_provider_fields</a> - Allows more Provider specific settings to be rendered.</li>
 <li class=""><a class="" href="/classifai/hooks/Actions/classifai_after_feature_settings_form">classifai_after_feature_settings_form</a> - Fires after the settings form for a feature.</li>
 <li class=""><a class="" href="/classifai/hooks/Actions/classifai_after_onboarding_feature_settings_form">classifai_after_onboarding_feature_settings_form</a> - Fires after the settings form for a feature.</li>
+<li class=""><a class="" href="/classifai/hooks/Actions/classifai_api_hard_threshold_exceeded">classifai_api_hard_threshold_exceeded</a> - Fires when the hard threshold is exceeded.</li>
+<li class=""><a class="" href="/classifai/hooks/Actions/classifai_api_soft_threshold_exceeded">classifai_api_soft_threshold_exceeded</a> - Fires when the soft threshold is exceeded.</li>
+<li class=""><a class="" href="/classifai/hooks/Actions/classifai_api_usage_updated">classifai_api_usage_updated</a> - Fires after AI usage has been updated from the API.</li>
 <li class=""><a class="" href="/classifai/hooks/Actions/classifai_azure_openai_embeddings_post_sort_embeddings_similarity">classifai_azure_openai_embeddings_post_sort_embeddings_similarity</a> - Fires after the embeddings similarity has been run and sorted.</li>
 <li class=""><a class="" href="/classifai/hooks/Actions/classifai_azure_openai_embeddings_pre_sort_embeddings_similarity">classifai_azure_openai_embeddings_pre_sort_embeddings_similarity</a> - Fires after the embeddings similarity has been run but before results are sorted.</li>
 <li class=""><a class="" href="/classifai/hooks/Actions/classifai_azure_openai_embeddings_single_embedding_similarity">classifai_azure_openai_embeddings_single_embedding_similarity</a> - Fires after the embeddings similarity has been run for a single chunk.</li>
@@ -73,6 +76,7 @@
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_.staticID._sanitize_settings">classifai_ . static::ID . _sanitize_settings</a> - Filter to change settings before they&#x27;re saved.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_.staticID._setting_taxonomies">classifai_ . static::ID . _setting_taxonomies</a> - Filter taxonomies shown in settings.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_all_post_statuses">classifai_all_post_statuses</a> - Hook to filter post statuses.</li>
+<li class=""><a class="" href="/classifai/hooks/Filters/classifai_api_usage_refresh_interval">classifai_api_usage_refresh_interval</a> - Filter the refresh interval for the AI API usage tracking.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_audio_generation_initial_state">classifai_audio_generation_initial_state</a> - Initial state of the audio generation toggle when no audio already exists for the post.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_audio_generation_subsequent_state">classifai_audio_generation_subsequent_state</a> - Subsequent state of the audio generation toggle when audio exists for the post.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_azure_openai_.argsresize_type._content_prompt">classifai_azure_openai_ . $args[resize_type] . _content_prompt</a> - Filter the resize prompt we will send to Azure OpenAI.</li>
@@ -237,8 +241,12 @@
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_openai_text_to_speech_model">classifai_openai_text_to_speech_model</a> - Filter the model name.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_openai_text_to_speech_request_body">classifai_openai_text_to_speech_request_body</a> - Filter the request body before sending to OpenAI.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_openai_tokens_per_word">classifai_openai_tokens_per_word</a> - How many tokens a word will take (roughly)</li>
+<li class=""><a class="" href="/classifai/hooks/Filters/classifai_pre_fetch_feature_response">classifai_pre_fetch_feature_response</a> - Filter the response before the Feature API endpoint is called.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_pre_normalize">classifai_pre_normalize</a> - Hook to filter post content before stripping HTML tags.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_pre_render_post_audio_controls">classifai_pre_render_post_audio_controls</a> - Filters the audio player markup before display.</li>
+<li class=""><a class="" href="/classifai/hooks/Filters/classifai_provider_credentials">classifai_provider_credentials</a> - Filter the credentials for the Provider.</li>
+<li class=""><a class="" href="/classifai/hooks/Filters/classifai_provider_credentials_provider_id">classifai_provider_credentials_{$provider_id}</a> - Filter the credentials for the Provider.</li>
+<li class=""><a class="" href="/classifai/hooks/Filters/classifai_provider_profiles">classifai_provider_profiles</a> - Filter the Provider profiles registry.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_recommendation_service_providers">classifai_recommendation_service_providers</a> - Filter the service providers for Recommendation service.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_reusable_credentials">classifai_reusable_credentials</a> - Filter the reusable credentials for a feature.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_services">classifai_services</a> - Filter available Services.</li>
@@ -260,6 +268,7 @@
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_togetherai_image_prompt">classifai_togetherai_image_prompt</a> - Filter the prompt we will send to Together AI.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_togetherai_image_request_body">classifai_togetherai_image_request_body</a> - Filter the request body before sending to Together AI.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_togetherai_image_size_options">classifai_togetherai_image_size_options</a> - Filter the image size options that are available.</li>
+<li class=""><a class="" href="/classifai/hooks/Filters/classifai_usage_tracking_service_providers">classifai_usage_tracking_service_providers</a> - Filter the service providers for Usage Tracking service.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_use_legacy_settings_panel">classifai_use_legacy_settings_panel</a> - Filter to determine if the legacy settings panel should be used.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_whisper_transcribe_request_body">classifai_whisper_transcribe_request_body</a> - Filter the request body before sending to OpenAI.</li>
 <li class=""><a class="" href="/classifai/hooks/Filters/classifai_whisper_transcribe_result">classifai_whisper_transcribe_result</a> - Filter the text result returned from OpenAI Audio API.</li>
