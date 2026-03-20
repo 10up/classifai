@@ -4,6 +4,7 @@ namespace Classifai\Features;
 
 use WP_REST_Request;
 use WP_Error;
+use Classifai\Providers\CredentialObfuscator;
 
 use function Classifai\find_provider_class;
 use function Classifai\should_use_legacy_settings_panel;
@@ -300,6 +301,13 @@ abstract class Feature {
 
 		// Sanitize the feature specific settings.
 		$new_settings = $this->sanitize_default_feature_settings( $new_settings );
+
+		// Preserve obfuscated credentials for all Providers.
+		// This ensures switching Providers doesn't save obfuscated values for inactive Providers.
+		$new_settings = CredentialObfuscator::merge_all_provider_credentials(
+			$new_settings,
+			$current_settings
+		);
 
 		// Sanitize the provider specific settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
@@ -1390,6 +1398,26 @@ abstract class Feature {
 		$settings          = $this->get_settings();
 		$provider_id       = $settings['provider'];
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+
+		/**
+		 * Filter the response before the Feature API endpoint is called.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @hook classifai_pre_fetch_feature_response
+		 *
+		 * @param mixed                         $response Response to return.
+		 * @param \Classifai\Providers\Provider $provider_instance provider used.
+		 * @param mixed                         $args Arguments used by the feature.
+		 * @param \Classifai\Features\Feature   $this Current feature class.
+		 *
+		 * @return mixed Response to return.
+		 */
+		$pre_fetch_response = apply_filters( 'classifai_pre_fetch_feature_response', null, $provider_instance, $args, $this );
+
+		if ( ! is_null( $pre_fetch_response ) ) {
+			return $pre_fetch_response;
+		}
 
 		if ( ! is_callable( [ $provider_instance, 'rest_endpoint_callback' ] ) ) {
 			return new WP_Error( 'invalid_route', esc_html__( 'The selected provider does not have a valid callback in place.', 'classifai' ) );

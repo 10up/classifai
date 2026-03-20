@@ -6,6 +6,7 @@ import {
 	CheckboxControl,
 	SelectControl,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	__experimentalInputControlSuffixWrapper as InputControlSuffixWrapper, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -14,7 +15,8 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { getFeature } from '../../utils/utils';
+import { getFeature, TooltipPopover } from '../../utils/utils';
+import { thresholdInfo, nluHelperText } from '../../utils/helper-text';
 
 /**
  * Component for render settings fields when IBM Watson NLU is selected as the provider.
@@ -36,18 +38,22 @@ export const NLUFeatureSettings = () => {
 		category: {
 			label: __( 'Category', 'classifai' ),
 			defaultThreshold: 70,
+			helperText: nluHelperText.category,
 		},
 		keyword: {
 			label: __( 'Keyword', 'classifai' ),
 			defaultThreshold: 70,
+			helperText: nluHelperText.keyword,
 		},
 		entity: {
 			label: __( 'Entity', 'classifai' ),
 			defaultThreshold: 70,
+			helperText: nluHelperText.entity,
 		},
 		concept: {
 			label: __( 'Concept', 'classifai' ),
 			defaultThreshold: 70,
+			helperText: nluHelperText.concept,
 		},
 	};
 
@@ -94,12 +100,14 @@ export const NLUFeatureSettings = () => {
 	return (
 		<>
 			{ Object.keys( features ).map( ( feature ) => {
-				const { defaultThreshold, label } = features[ feature ];
+				const { defaultThreshold, label, helperText } =
+					features[ feature ];
 				return (
 					<SettingsRow
 						key={ feature }
 						label={ label }
 						className={ 'nlu-features' }
+						helperText={ helperText }
 					>
 						<CheckboxControl
 							id={ `${ feature }-enabled` }
@@ -115,7 +123,10 @@ export const NLUFeatureSettings = () => {
 						/>
 						<InputControl
 							id={ `${ feature }-threshold` }
-							label={ __( 'Threshold (%)', 'classifai' ) }
+							label={ __(
+								'Confidence Threshold (%)',
+								'classifai'
+							) }
 							type="number"
 							value={
 								featureSettings[ `${ feature }_threshold` ] ||
@@ -126,10 +137,20 @@ export const NLUFeatureSettings = () => {
 									[ `${ feature }_threshold` ]: value,
 								} );
 							} }
+							__unstableInputWidth="8em"
+							suffix={
+								<InputControlSuffixWrapper variant="control">
+									<TooltipPopover
+										tooltipContent={ thresholdInfo.helper }
+									/>
+								</InputControlSuffixWrapper>
+							}
 							min="0"
 							max="100"
 							step="0.01"
+							__next40pxDefaultSize
 						/>
+
 						{ 'ibm_watson_nlu' === featureSettings.provider && (
 							<SelectControl
 								id={ `${ feature }-taxonomy` }
@@ -155,6 +176,7 @@ export const NLUFeatureSettings = () => {
 									} );
 								} }
 								__nextHasNoMarginBottom
+								__next40pxDefaultSize
 							/>
 						) }
 					</SettingsRow>

@@ -137,12 +137,13 @@ class GeminiAPI extends Provider {
 	public function sanitize_settings( array $new_settings ): array {
 		$settings         = $this->feature_instance->get_settings();
 		$api_key_settings = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$models           = $this->get_models( $new_settings );
 		$model            = ! empty( $new_settings[ static::ID ]['model'] ) ? sanitize_text_field( $new_settings[ static::ID ]['model'] ) : $this->default_model;
 
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 		$new_settings[ static::ID ]['model']         = $model;
-		$new_settings[ static::ID ]['models']        = $api_key_settings[ static::ID ]['models'];
+		$new_settings[ static::ID ]['models']        = is_wp_error( $models ) ? [] : $models;
 
 		return $new_settings;
 	}
@@ -157,7 +158,7 @@ class GeminiAPI extends Provider {
 	 */
 	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate titles.', 'classifai' ) );
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
 
 		$route_to_call = strtolower( $route_to_call );
@@ -211,7 +212,7 @@ class GeminiAPI extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
@@ -332,7 +333,7 @@ class GeminiAPI extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or Google AI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
@@ -448,7 +449,7 @@ class GeminiAPI extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );

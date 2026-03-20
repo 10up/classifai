@@ -123,6 +123,7 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 						type="password"
 						value={ providerSettings.api_key || '' }
 						onChange={ ( value ) => onChange( { api_key: value } ) }
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }
@@ -137,6 +138,7 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 					options={ models }
 					disabled={ models.length <= 1 }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			{ [
@@ -159,6 +161,7 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 						onChange={ ( value ) =>
 							onChange( { number_of_suggestions: value } )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }

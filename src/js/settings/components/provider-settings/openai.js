@@ -40,6 +40,7 @@ export const OpenAISettings = ( { providerSettings, onChange } ) => {
 					type="password"
 					value={ providerSettings.api_key || '' }
 					onChange={ ( value ) => onChange( { api_key: value } ) }
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>

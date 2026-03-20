@@ -1,7 +1,21 @@
 {
+  "$schema": "https://schemas.wp.org/trunk/wp-env.json",
+  "core": null,
   "plugins": [".", "./tests/test-plugin", "https://downloads.wordpress.org/plugin/classic-editor.zip", "https://downloads.wordpress.org/plugin/elasticpress.zip", "https://downloads.wordpress.org/plugin/woocommerce.zip"],
   "env": {
+    "development": {
+      "config": {
+        "WP_DEVELOPMENT_MODE": "plugin",
+        "WP_ENVIRONMENT_TYPE": "development",
+        "WP_DEBUG": true,
+        "WP_DEBUG_LOG": "/var/www/html/wp-content/plugins/classifai/tests/_output/debug.log"
+      }
+    },
     "tests": {
+      "config": {
+        "WP_DEBUG": true,
+        "FS_METHOD": "direct"
+      },
       "mappings": {
         "wp-cli.yml": "./tests/bin/wp-cli.yml"
       }

@@ -9,6 +9,9 @@ class PostClassifierTest extends \WP_UnitTestCase {
 	/* @var PostClassifier $classifier */
 	public $classifier;
 
+	/* @var TaxonomyFactory $taxonomy_factory */
+	public $taxonomy_factory;
+
 	function set_up() {
 		parent::set_up();
 

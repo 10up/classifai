@@ -177,7 +177,7 @@ describe( 'Image processing Tests', () => {
 		);
 		cy.get(
 			'#classifai_image_processing label[for=rescan-smart-crop]'
-		).contains( 'Regenerate smart thumbnail' );
+		).contains( 'Create smart thumbnail' );
 
 		// Verify generated Data.
 		cy.get( '#attachment_alt' ).should( 'have.value', '' );

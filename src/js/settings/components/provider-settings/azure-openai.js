@@ -63,6 +63,7 @@ export const AzureOpenAISettings = ( {
 							onChange={ ( value ) =>
 								onChange( { endpoint_url: value } )
 							}
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 					<SettingsRow label={ __( 'API Key', 'classifai' ) }>
@@ -73,6 +74,7 @@ export const AzureOpenAISettings = ( {
 							onChange={ ( value ) =>
 								onChange( { api_key: value } )
 							}
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 					<SettingsRow
@@ -89,6 +91,7 @@ export const AzureOpenAISettings = ( {
 							onChange={ ( value ) =>
 								onChange( { deployment: value } )
 							}
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 				</>
@@ -113,6 +116,7 @@ export const AzureOpenAISettings = ( {
 						onChange={ ( value ) =>
 							onChange( { number_of_suggestions: value } )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }
