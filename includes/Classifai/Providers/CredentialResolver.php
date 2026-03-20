@@ -6,7 +6,7 @@
  * Feature-level config. Used at runtime when Providers need
  * api_key, endpoint_url, etc.
  *
- * @since x.x.x
+ * @since 3.8.0
  */
 
 namespace Classifai\Providers;

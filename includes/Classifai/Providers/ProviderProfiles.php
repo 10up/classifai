@@ -6,7 +6,7 @@
  * profiles (e.g. openai). Grouped profiles share one credential set across
  * multiple Providers; ungrouped profiles are 1:1 with a Provider.
  *
- * @since x.x.x
+ * @since 3.8.0
  */
 
 namespace Classifai\Providers;
@@ -138,7 +138,7 @@ class ProviderProfiles {
 		/**
 		 * Filter the Provider profiles registry.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 * @hook classifai_provider_profiles
 		 *
 		 * @param array $profiles Profile definitions.

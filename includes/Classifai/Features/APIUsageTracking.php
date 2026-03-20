@@ -335,7 +335,7 @@ class APIUsageTracking extends Feature {
 		/**
 		 * Filter the refresh interval for the AI API usage tracking.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 * @hook classifai_api_usage_refresh_interval
 		 *
 		 * @param int $interval The refresh interval in seconds.
@@ -494,7 +494,7 @@ class APIUsageTracking extends Feature {
 		/**
 		 * Fires after AI usage has been updated from the API.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 *
 		 * @hook classifai_api_usage_updated
 		 *
@@ -588,7 +588,7 @@ class APIUsageTracking extends Feature {
 		/**
 		 * Fires when the soft threshold is exceeded.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 *
 		 * @hook classifai_api_soft_threshold_exceeded
 		 *
@@ -670,7 +670,7 @@ class APIUsageTracking extends Feature {
 		/**
 		 * Fires when the hard threshold is exceeded.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 *
 		 * @hook classifai_api_hard_threshold_exceeded
 		 *
