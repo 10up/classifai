@@ -24,6 +24,9 @@ describe( 'Common Feature Fields', () => {
 		content_recommendation: {
 			feature_recommended_content: 'Recommended Content',
 		},
+		usage_tracking: {
+			api_usage_tracking: 'API Usage Tracking',
+		},
 	};
 
 	const allowedRoles = [ 'administrator', 'editor', 'author', 'contributor' ];
@@ -64,7 +67,15 @@ describe( 'Common Feature Fields', () => {
 						`.settings-allowed-roles input#${ role }`
 					);
 					roleField.should( 'be.visible' );
-					roleField.should( 'have.value', 1 );
+
+					if (
+						'api_usage_tracking' === feature &&
+						'administrator' !== role
+					) {
+						roleField.should( 'not.be.checked' );
+					} else {
+						roleField.should( 'be.checked' );
+					}
 				}
 
 				cy.get( '.classifai-settings__users' ).should( 'be.visible' );

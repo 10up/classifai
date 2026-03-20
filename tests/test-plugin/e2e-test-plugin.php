@@ -154,6 +154,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		$response = file_get_contents( __DIR__ . '/stable-diffusion-models.json' );
 	} elseif ( strpos( $url, 'http://127.0.0.1:7860/sdapi/v1/txt2img' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/stable-diffusion.json' );
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/organization/admin_api_keys' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/mock-data/openai-admin-api-keys.json' );
 	}
 
 	if ( ! empty( $response ) ) {

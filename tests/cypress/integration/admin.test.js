@@ -48,13 +48,20 @@ describe( 'Admin can login and make sure plugin is activated', () => {
 			.contains( 'Image Processing' );
 	} );
 
+	it( 'Can see "Usage Tracking" menu and Can visit "AI Usage Tracking" settings page.', () => {
+		// Check Selected Navigation menu
+		cy.visitFeatureSettings( 'usage_tracking/api_usage_tracking' );
+		cy.get( '.classifai-tabs' ).should( 'exist' );
+		cy.get( '.classifai-tabs a.active-tab' )
+			.first()
+			.contains( 'Usage Tracking' );
+	} );
+
 	it( 'Can visit the general settings page and see all settings.', () => {
 		// Check Selected Navigation menu
 		cy.visitFeatureSettings( 'settings' );
 		cy.get( '.classifai-tabs' ).should( 'exist' );
-		cy.get( '.classifai-tabs a.active-tab' )
-			.first()
-			.contains( 'Settings' );
+		cy.get( '.classifai-tabs a.active-tab' ).first().contains( 'Settings' );
 
 		// Check that all settings are present.
 		cy.get( '.components-input-control input[type="email"]' ).should(
