@@ -461,7 +461,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			return;
 		}
 
-		const POLL_INTERVAL_MS = 5000;
+		const POLL_INTERVAL_MS = 10000;
 
 		const renderComplete = ( { error, html } ) => {
 			if ( error ) {
