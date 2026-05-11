@@ -445,60 +445,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	} );
 } )( jQuery );
 
-// Poll admin-ajax to update the Classic Editor TTS meta box once audio generation completes.
-( function ( $ ) {
-	$( function () {
-		const $status = $( '.classifai-tts-status' );
-
-		if ( ! $status.length ) {
-			return;
-		}
-
-		const postId = parseInt( $status.data( 'post-id' ), 10 );
-		const nonce = $status.data( 'nonce' );
-
-		if ( ! postId || ! nonce ) {
-			return;
-		}
-
-		const POLL_INTERVAL_MS = 10000;
-
-		const renderComplete = ( { error, html } ) => {
-			if ( error ) {
-				$status.text( error );
-				return;
-			}
-
-			if ( html ) {
-				$status.replaceWith( html );
-			}
-		};
-
-		const timer = setInterval( () => {
-			$.ajax( {
-				url: ajaxurl, // eslint-disable-line no-undef
-				type: 'POST',
-				data: {
-					action: 'classifai_get_tts_status',
-					nonce,
-					post_id: postId,
-				},
-			} ).done( ( response ) => {
-				if ( ! response || ! response.success || ! response.data ) {
-					return;
-				}
-
-				if ( response.data.inProgress ) {
-					return;
-				}
-
-				clearInterval( timer );
-				renderComplete( response.data );
-			} );
-		}, POLL_INTERVAL_MS );
-	} );
-} )( jQuery );
-
 // Update the Term Cleanup status.
 ( function ( $ ) {
 	const statusWrapper = $( '.classifai-term-cleanup-process-status' );

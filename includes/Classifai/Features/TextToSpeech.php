@@ -106,6 +106,40 @@ class TextToSpeech extends Feature {
 		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
 		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 		add_action( 'wp_ajax_classifai_get_tts_status', [ $this, 'ajax_get_audio_generation_status' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+	}
+
+	/**
+	 * Enqueue the Classic Editor polling script. Loaded in Classic Editor only when the feature is enabled.
+	 *
+	 * @param string $hook_suffix The current admin page.
+	 */
+	public function enqueue_admin_assets( string $hook_suffix ) {
+		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
+			return;
+		}
+
+		if ( ! $this->is_feature_enabled() ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+
+		if ( ! $screen || $screen->is_block_editor() ) {
+			return;
+		}
+
+		if ( ! in_array( $screen->post_type, $this->get_supported_post_types(), true ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'classifai-plugin-classic-text-to-speech',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-text-to-speech.js',
+			get_asset_info( 'classifai-plugin-classic-text-to-speech', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-classic-text-to-speech', 'version' ),
+			true
+		);
 	}
 
 	/**
@@ -525,7 +559,7 @@ class TextToSpeech extends Feature {
 	public function ajax_get_audio_generation_status() {
 		check_ajax_referer( 'classifai_tts_status', 'nonce' );
 
-		$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
 
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error( [ 'message' => __( 'Invalid post.', 'classifai' ) ], 403 );
