@@ -144,7 +144,7 @@ class Ollama extends Provider {
 		}
 
 		// Make our request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this, [ static::ID => $default ] );
 		$response = $request->get(
 			$this->get_api_model_url( $default['endpoint_url'] ),
 			[
@@ -267,7 +267,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
 			[
@@ -377,7 +377,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API requests.
-		$request = new APIRequest( 'test', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$responses = [];
 		for ( $i = 0; $i < $args['num']; $i++ ) {
@@ -493,7 +493,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API requests.
-		$request = new APIRequest( 'test', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$responses = [];
 		for ( $i = 0; $i < $args['num']; $i++ ) {
@@ -635,7 +635,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
 			[
@@ -778,7 +778,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
 			[

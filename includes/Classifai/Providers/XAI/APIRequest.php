@@ -2,7 +2,9 @@
 
 namespace Classifai\Providers\XAI;
 
+use Classifai\Providers\Provider;
 use WP_Error;
+
 use function Classifai\safe_wp_remote_get;
 use function Classifai\safe_wp_remote_post;
 
@@ -28,21 +30,39 @@ class APIRequest {
 	public $api_key;
 
 	/**
-	 * The feature name.
+	 * The Provider instance.
+	 *
+	 * @var Provider|null
+	 */
+	public ?Provider $provider = null;
+
+	/**
+	 * The Feature name.
 	 *
 	 * @var string
 	 */
 	public $feature;
 
 	/**
+	 * The Feature settings.
+	 *
+	 * @var array
+	 */
+	public $settings;
+
+	/**
 	 * xAI APIRequest constructor.
 	 *
-	 * @param string $api_key xAI API key.
-	 * @param string $feature Feature name.
+	 * @param string        $api_key xAI API key.
+	 * @param string        $feature Feature name.
+	 * @param Provider|null $provider Provider instance.
+	 * @param array         $settings Feature settings. Optional, useful when settings aren't saved yet.
 	 */
-	public function __construct( string $api_key = '', string $feature = '' ) {
-		$this->api_key = $api_key;
-		$this->feature = $feature;
+	public function __construct( string $api_key = '', string $feature = '', ?Provider $provider = null, array $settings = [] ) {
+		$this->api_key  = $api_key;
+		$this->feature  = $feature;
+		$this->provider = $provider;
+		$this->settings = $settings;
 	}
 
 	/**
@@ -236,6 +256,10 @@ class APIRequest {
 	 * @return string
 	 */
 	public function get_api_key() {
-		return $this->api_key;
+		if ( $this->provider ) {
+			return $this->provider->get_credential( 'api_key', $this->settings ) ?? '';
+		}
+
+		return $this->api_key ?? '';
 	}
 }

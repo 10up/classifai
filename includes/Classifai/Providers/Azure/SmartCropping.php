@@ -217,7 +217,7 @@ class SmartCropping {
 	 * @return string
 	 */
 	public function get_api_url(): string {
-		return sprintf( '%s%s', trailingslashit( $this->settings['endpoint_url'] ), static::API_PATH );
+		return sprintf( '%s%s', trailingslashit( $this->settings['endpoint_url'] ?? '' ), static::API_PATH );
 	}
 
 	/**
@@ -248,7 +248,7 @@ class SmartCropping {
 				),
 				'headers' => [
 					'Content-Type'              => 'application/json',
-					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
+					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'] ?? '',
 				],
 			]
 		);

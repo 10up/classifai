@@ -56,6 +56,7 @@ export const OpenAIEmbeddingsSettings = ( { isConfigured = false } ) => {
 						min="1"
 						max="100"
 						step="0.01"
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }

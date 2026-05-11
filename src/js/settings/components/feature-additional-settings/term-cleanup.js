@@ -5,6 +5,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	CheckboxControl,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	__experimentalInputControlSuffixWrapper as InputControlSuffixWrapper, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -14,7 +15,8 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
-import { getFeature } from '../../utils/utils';
+import { getFeature, TooltipPopover } from '../../utils/utils';
+import { thresholdInfo } from '../../utils/helper-text';
 
 /**
  * Component for Term Cleanup feature settings.
@@ -123,7 +125,10 @@ export const TermCleanupSettings = () => {
 							/>
 							<InputControl
 								id={ `${ feature }-threshold` }
-								label={ __( 'Threshold (%)', 'classifai' ) }
+								label={ __(
+									'Confidence Threshold (%)',
+									'classifai'
+								) }
 								type="number"
 								value={
 									featureSettings?.taxonomies?.[
@@ -138,9 +143,20 @@ export const TermCleanupSettings = () => {
 										},
 									} );
 								} }
+								__unstableInputWidth="8em"
+								suffix={
+									<InputControlSuffixWrapper variant="control">
+										<TooltipPopover
+											tooltipContent={
+												thresholdInfo.helper
+											}
+										/>
+									</InputControlSuffixWrapper>
+								}
 								min="0"
 								max="100"
 								step="0.01"
+								__next40pxDefaultSize
 							/>
 						</SettingsRow>
 					);

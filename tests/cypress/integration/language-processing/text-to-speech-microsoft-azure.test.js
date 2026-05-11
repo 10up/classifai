@@ -38,6 +38,22 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.get( 'button[aria-label="Close panel"]' ).click();
 		cy.openDocumentSettingsSidebar();
 		cy.get( '.classifai-panel' ).click();
+		cy.get( '.classifai-panel' ).should(
+			'contain',
+			'Audio generation is in progress…'
+		);
+		cy.exec(
+			'npx wp-env run tests-cli wp action-scheduler run --hooks=classifai_schedule_text_to_speech_job',
+			{
+				timeout: 20000, // 20 seconds
+				failOnNonZeroExit: true,
+			}
+		);
+		cy.reload();
+		cy.get( '.classifai-panel' ).should(
+			'not.contain',
+			'Audio generation is in progress…'
+		);
 		cy.get( '#classifai-audio-controls__preview-btn' ).should( 'exist' );
 	} );
 
@@ -104,6 +120,23 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 				"This feature uses Microsoft's Text to Speech capabilities.",
 			postType: 'post',
 		} );
+
+		cy.get( '#classifai-text-to-speech-meta-box' ).should(
+			'contain',
+			'Audio generation is in progress…'
+		);
+		cy.exec(
+			'npx wp-env run tests-cli wp action-scheduler run --hooks=classifai_schedule_text_to_speech_job',
+			{
+				timeout: 20000, // 20 seconds
+				failOnNonZeroExit: true,
+			}
+		);
+		cy.reload();
+		cy.get( '#classifai-text-to-speech-meta-box' ).should(
+			'not.contain',
+			'Audio generation is in progress…'
+		);
 
 		cy.get( '#classifai-text-to-speech-meta-box' ).should( 'exist' );
 		cy.get( '#classifai_synthesize_speech' ).check();
