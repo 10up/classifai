@@ -1,4 +1,5 @@
-name: 'Repo Automator'
+name: Repo Automator
+
 on:
   issues:
     types:

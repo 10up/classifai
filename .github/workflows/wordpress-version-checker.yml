@@ -1,4 +1,4 @@
-name: "WordPress version checker"
+name: WordPress version checker
 
 on:
   push:
