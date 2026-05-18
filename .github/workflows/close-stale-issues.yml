@@ -1,4 +1,4 @@
-name: 'Close stale issues'
+name: Close stale issues
 
 # **What it does**: Closes issues where the original author doesn't respond to a request for information.
 # **Why we have it**: To remove the need for maintainers to remember to check back on issues periodically to see if contributors have responded.
@@ -15,7 +15,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9.1.0
+      - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
         with:
           days-before-stale: 7
           days-before-close: 7
@@ -33,4 +33,3 @@ jobs:
           close-issue-reason: 'not_planned'
           any-of-labels: 'reporter feedback'
           remove-stale-when-updated: true
-
