@@ -209,7 +209,7 @@ class Notifications {
 		}
 		?>
 
-		<div class="notice notice-info is-dismissible classifai-dismissible-notice classifai-migation-notice" data-notice="<?php echo esc_attr( $key ); ?>">
+		<div class="notice notice-info is-dismissible classifai-dismissible-notice classifai-migration-notice" data-notice="<?php echo esc_attr( $key ); ?>">
 			<p>
 				<?php
 				echo wp_kses_post(
