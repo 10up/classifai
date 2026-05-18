@@ -18,3 +18,10 @@ import 'cypress-plugin-tab';
 
 // Import commands.js using ES2015 syntax:
 import './commands';
+
+Cypress.on( 'uncaught:exception', ( err ) => {
+	// A view transition error in WP 7.0 is throwing on the login screen so ignore it.
+	if ( err.message.includes( 'Transition was skipped' ) ) {
+		return false;
+	}
+} );
