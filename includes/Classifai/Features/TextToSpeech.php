@@ -105,6 +105,41 @@ class TextToSpeech extends Feature {
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
 		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
 		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
+		add_action( 'wp_ajax_classifai_get_tts_status', [ $this, 'ajax_get_audio_generation_status' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+	}
+
+	/**
+	 * Enqueue the Classic Editor polling script. Loaded in Classic Editor only when the feature is enabled.
+	 *
+	 * @param string $hook_suffix The current admin page.
+	 */
+	public function enqueue_admin_assets( string $hook_suffix ) {
+		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
+			return;
+		}
+
+		if ( ! $this->is_feature_enabled() ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+
+		if ( ! $screen || $screen->is_block_editor() ) {
+			return;
+		}
+
+		if ( ! in_array( $screen->post_type, $this->get_supported_post_types(), true ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'classifai-plugin-classic-text-to-speech',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-text-to-speech.js',
+			get_asset_info( 'classifai-plugin-classic-text-to-speech', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-classic-text-to-speech', 'version' ),
+			true
+		);
 	}
 
 	/**
@@ -419,6 +454,36 @@ class TextToSpeech extends Feature {
 	public function render_meta_box( \WP_Post $post ) {
 		wp_nonce_field( 'classifai_text_to_speech_meta_action', 'classifai_text_to_speech_meta' );
 
+		$is_as_scheduled_job =
+			function_exists( 'as_has_scheduled_action' ) &&
+			\as_has_scheduled_action(
+				'classifai_schedule_text_to_speech_job',
+				[
+					'post_id'         => (int) $post->ID,
+					'calling_user_id' => get_current_user_id(),
+				],
+				'classifai'
+			);
+
+		if ( $is_as_scheduled_job ) :
+			?>
+			<p class="classifai-tts-status" data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'classifai_tts_status' ) ); ?>">
+				<?php esc_html_e( 'Audio generation is in progress…', 'classifai' ); ?>
+			</p>
+			<?php
+		else :
+			$this->render_audio_generation_ui( $post );
+		endif;
+	}
+
+	/**
+	 * Render the post-generation UI for the TTS meta box. Used both on initial
+	 * render and via AJAX after a queued job completes so the meta box
+	 * matches a fresh page load.
+	 *
+	 * @param \WP_Post $post WP_Post object.
+	 */
+	public function render_audio_generation_ui( \WP_Post $post ) {
 		$source_url = false;
 		$audio_id   = get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
 
@@ -445,24 +510,7 @@ class TextToSpeech extends Feature {
 		if ( $post_type ) {
 			$post_type_label = $post_type->labels->singular_name;
 		}
-
-		$is_as_scheduled_job =
-			function_exists( 'as_has_scheduled_action' ) &&
-			\as_has_scheduled_action(
-				'classifai_schedule_text_to_speech_job',
-				[
-					'post_id'         => (int) $post->ID,
-					'calling_user_id' => get_current_user_id(),
-				],
-				'classifai'
-			);
-
-		if ( $is_as_scheduled_job ) : ?>
-		<p>
-			<?php esc_html_e( 'Audio generation is in progress…', 'classifai' ); ?>
-		</p>
-		<?php else : ?>
-
+		?>
 		<p>
 			<label for="classifai_synthesize_speech">
 				<input type="checkbox" value="1" id="classifai_synthesize_speech" name="classifai_synthesize_speech" <?php checked( $process_content ); ?> />
@@ -488,8 +536,6 @@ class TextToSpeech extends Feature {
 			</span>
 		</p>
 
-		<?php endif; ?>
-
 		<?php
 		if ( $source_url ) {
 			$cache_busting_url = add_query_arg(
@@ -499,13 +545,64 @@ class TextToSpeech extends Feature {
 				$source_url
 			);
 			?>
-
 			<p>
 				<audio id="classifai-audio-preview" controls controlslist="nodownload" src="<?php echo esc_url( $cache_busting_url ); ?>"></audio>
 			</p>
-
 			<?php
 		}
+	}
+
+	/**
+	 * AJAX handler for the Classic Editor meta box's polling. Returns the
+	 * current audio generation status for the given post id.
+	 */
+	public function ajax_get_audio_generation_status() {
+		check_ajax_referer( 'classifai_tts_status', 'nonce' );
+
+		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
+
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( [ 'message' => __( 'Invalid post.', 'classifai' ) ], 403 );
+		}
+
+		$in_progress =
+			function_exists( 'as_has_scheduled_action' ) &&
+			\as_has_scheduled_action(
+				'classifai_schedule_text_to_speech_job',
+				[
+					'post_id'         => $post_id,
+					'calling_user_id' => get_current_user_id(),
+				],
+				'classifai'
+			);
+
+		$error_message = '';
+		$raw_error     = get_post_meta( $post_id, '_classifai_text_to_speech_error', true );
+
+		if ( ! empty( $raw_error ) ) {
+			$decoded = (array) json_decode( (string) $raw_error );
+			if ( ! empty( $decoded['message'] ) ) {
+				$error_message = (string) $decoded['message'];
+			}
+		}
+
+		$html = '';
+		if ( ! $in_progress && ! $error_message ) {
+			$post = get_post( $post_id );
+			if ( $post ) {
+				ob_start();
+				$this->render_audio_generation_ui( $post );
+				$html = (string) ob_get_clean();
+			}
+		}
+
+		wp_send_json_success(
+			[
+				'inProgress' => (bool) $in_progress,
+				'error'      => $error_message,
+				'html'       => $html,
+			]
+		);
 	}
 
 	/**
