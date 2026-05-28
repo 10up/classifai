@@ -22,7 +22,7 @@ if ( args[ 0 ] === 'latest' ) {
 config.core = args[ 0 ];
 
 // eslint-disable-next-line no-useless-escape
-if ( ! config.core.match( /^WordPress\/WordPress\#/ ) ) {
+if ( ! config.core.match( /^(https?:\/\/|WordPress\/WordPress\#)/ ) ) {
 	config.core = `WordPress/WordPress#${ config.core }`;
 }
 

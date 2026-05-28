@@ -99,8 +99,16 @@ abstract class Feature {
 		}
 
 		$default_settings = $this->get_default_settings();
-		$this->roles      = get_editable_roles() ?? [];
-		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
+		$editable_roles   = get_editable_roles() ?? [];
+		$this->roles      = [];
+
+		foreach ( $editable_roles as $role_key => $role ) {
+			if ( empty( $role['name'] ) ) {
+				continue;
+			}
+
+			$this->roles[ $role_key ] = $role['name'];
+		}
 
 		// Remove subscriber from the list of roles.
 		unset( $this->roles['subscriber'] );
