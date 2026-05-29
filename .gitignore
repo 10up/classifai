@@ -33,6 +33,7 @@ Session.vim
 .vscode
 .cursor
 .claude
+CLAUDE.md
 
 # Mac OSX
 .DS_Store

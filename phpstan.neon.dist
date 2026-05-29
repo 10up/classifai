@@ -21,4 +21,4 @@ parameters:
 		- '#Constant CLASSIFAI_.+ not found#'
 		- '#Constant WATSON_.+ not found#'
 	WPCompat:
-		requiresAtLeast: '6.8'
+		requiresAtLeast: '6.9'
