@@ -14,12 +14,12 @@
  * @package Classifai
  *
  * @var string $words  Provided by extract() of $data; falls back to a token.
- * @var string $title  Provided by extract() of $data; falls back to a token.
+ * @var string $article_title  Provided by extract() of $data; falls back to a token.
  * @var string $author Provided by extract() of $data; falls back to a token.
  */
 
-$words  = $words ?? '{{WORDS}}';
-$title  = $title ?? '{{TITLE}}';
-$author = $author ?? '{{AUTHOR}}';
+$words         = $words ?? '{{WORDS}}';
+$article_title = $article_title ?? '{{TITLE}}';
+$author        = $author ?? '{{AUTHOR}}';
 
-return "Summarize the following message using a maximum of {$words} words. The original message was written by {$author}. Ensure this summary pairs well with the following text: {$title}.";
+return "Summarize the following message using a maximum of {$words} words. The original message was written by {$author}. Ensure this summary pairs well with the following text: {$article_title}.";
