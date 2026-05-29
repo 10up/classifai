@@ -76,7 +76,7 @@ class OllamaMultimodal extends Ollama {
 				$common_settings['prompt'] = [
 					[
 						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-						'prompt'   => $this->feature_instance->prompt,
+						'prompt'   => $this->feature_instance->get_prompt( 'default' ),
 						'original' => 1,
 						'default'  => 1,
 					],
@@ -156,7 +156,7 @@ class OllamaMultimodal extends Ollama {
 		 *
 		 * @return string Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_ollama_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $attachment_id );
+		$prompt = apply_filters( 'classifai_ollama_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->get_prompt( 'default' ), $attachment_id );
 
 		/**
 		 * Filter the request body before sending to Ollama.
@@ -224,7 +224,7 @@ class OllamaMultimodal extends Ollama {
 		 *
 		 * @return string Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_ollama_ocr_processing_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $attachment_id );
+		$prompt = apply_filters( 'classifai_ollama_ocr_processing_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->get_prompt( 'default' ), $attachment_id );
 
 		/**
 		 * Filter the request body before sending to Ollama.
@@ -297,7 +297,7 @@ class OllamaMultimodal extends Ollama {
 		 *
 		 * @return string Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_ollama_image_tag_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $attachment_id );
+		$prompt = apply_filters( 'classifai_ollama_image_tag_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->get_prompt( 'default' ), $attachment_id );
 
 		/**
 		 * Filter the request body before sending to Ollama.

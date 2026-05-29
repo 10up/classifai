@@ -20,5 +20,11 @@ parameters:
 		# These constants are defined but we'd need to stub them for PHPStan to know.
 		- '#Constant CLASSIFAI_.+ not found#'
 		- '#Constant WATSON_.+ not found#'
+		# Prompt files receive runtime variables via extract() in Feature::get_prompt();
+		# the `$var ?? 'fallback'` pattern is intentional so seed-time calls without $data
+		# still produce a usable string.
+		-
+			message: '#Variable \$\w+ on left side of \?\? always exists and is not nullable\.#'
+			path: includes/Classifai/Features/Prompts/*
 	WPCompat:
 		requiresAtLeast: '6.9'
