@@ -41,21 +41,21 @@ class ChatGPT extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $chatgpt_model = 'gpt-4o-mini';
+	protected $chatgpt_model = 'gpt-5.4-mini';
 
 	/**
 	 * OpenAI Vision model
 	 *
 	 * @var string
 	 */
-	protected $vision_model = 'gpt-4.1-mini';
+	protected $vision_model = 'gpt-5.4-mini';
 
 	/**
 	 * Maximum number of tokens our model supports
 	 *
 	 * @var int
 	 */
-	protected $max_tokens = 128000;
+	protected $max_tokens = 400000;
 
 	/**
 	 * Image types to process.
