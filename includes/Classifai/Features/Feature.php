@@ -642,6 +642,62 @@ abstract class Feature {
 	}
 
 	/**
+	 * Load a prompt from a file in the Feature's Prompts/ subdirectory.
+	 *
+	 * Prompt files live alongside the Feature class at
+	 * `Features/Prompts/{ShortClassName}/{name}.php` and must `return` a string.
+	 * Any keys in `$data` are extracted into the file's variable scope so prompts
+	 * can interpolate runtime values, e.g. `"Summarize in {$words} words."`.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $name The prompt file name without extension. Default 'default'.
+	 * @param array  $data Optional. Variables exposed to the prompt file.
+	 * @return string The prompt text, or an empty string if the file is missing.
+	 */
+	public function get_prompt( string $name = 'default', array $data = array() ): string {
+		$reflection = new \ReflectionClass( $this );
+		$file_name  = $reflection->getFileName();
+
+		if ( ! $file_name ) {
+			return '';
+		}
+
+		$file_path = trailingslashit( dirname( $file_name ) )
+			. 'Prompts/'
+			. $reflection->getShortName()
+			. '/'
+			. $name
+			. '.php';
+
+		if ( ! file_exists( $file_path ) || ! is_readable( $file_path ) ) {
+			return '';
+		}
+
+		if ( ! empty( $data ) ) {
+			extract( $data, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+		}
+
+		$content = require $file_path; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable
+		$prompt  = is_string( $content ) ? $content : '';
+
+		/**
+		 * Filter a Feature's default prompt loaded from file.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_feature_prompt
+		 *
+		 * @param string  $prompt  The prompt text.
+		 * @param string  $name    The prompt name (e.g. 'default', 'woocommerce').
+		 * @param array   $data    Data passed to the prompt file.
+		 * @param Feature $feature The feature instance.
+		 *
+		 * @return string The filtered prompt text.
+		 */
+		return apply_filters( 'classifai_feature_prompt', $prompt, $name, $data, $this );
+	}
+
+	/**
 	 * Generic prompt repeater field callback
 	 *
 	 * @since 2.4.0
