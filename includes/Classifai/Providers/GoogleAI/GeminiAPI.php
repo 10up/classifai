@@ -37,7 +37,7 @@ class GeminiAPI extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $default_model = 'models/gemini-2.5-flash-preview-05-20';
+	protected $default_model = 'models/gemini-3.5-flash';
 
 	/**
 	 * GeminiAPI constructor.
