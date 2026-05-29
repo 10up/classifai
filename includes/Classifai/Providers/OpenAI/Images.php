@@ -32,7 +32,7 @@ class Images extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $model = 'gpt-image-1';
+	protected $model = 'gpt-image-2';
 
 	/**
 	 * Maximum number of characters a prompt can have.
@@ -364,8 +364,8 @@ class Images extends Provider {
 			'style'           => sanitize_text_field( $args['style'] ),
 		];
 
-		if ( 'gpt-image-1' === $model ) {
-			// The gpt-image-1 model doesn't support response_format or style.
+		if ( 'gpt-image-1' === $model || 'gpt-image-2' === $model ) {
+			// The gpt-image models don't support response_format or style.
 			unset( $body['response_format'] );
 			unset( $body['style'] );
 		} elseif ( 'dall-e-3' === $model ) {

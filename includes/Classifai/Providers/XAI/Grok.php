@@ -47,21 +47,21 @@ class Grok extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $default_model = 'grok-2-1212';
+	protected $default_model = 'grok-4.3';
 
 	/**
 	 * xAI Grok default vision model
 	 *
 	 * @var string
 	 */
-	protected $default_vision_model = 'grok-2-vision-1212';
+	protected $default_vision_model = 'grok-4.3';
 
 	/**
 	 * Maximum number of tokens our model supports
 	 *
 	 * @var int
 	 */
-	protected $max_tokens = 131072;
+	protected $max_tokens = 1000000;
 
 	/**
 	 * xAI Grok constructor.
