@@ -30,59 +30,6 @@ class ContentGeneration extends Feature {
 	const ID = 'feature_content_generation';
 
 	/**
-	 * Prompt for creating content.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'Act as an experienced SEO copywriter tasked with writing an article based off of a given summary and an optionally provided title. Your goal is to craft a compelling, informative piece that adheres to SEO best practices, is well-researched, engaging to the target audience, and structured in a way that enhances readability. Incorporate relevant keywords naturally throughout the text, without compromising the flow or quality of the content. Ensure that the article provides value to the reader. Only return the contents of the article, not the title or other commentary.';
-
-	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed, PluginCheck.CodeAnalysis.Heredoc.NotAllowed
-	/**
-	 * The format of how we'd like content to be returned.
-	 *
-	 * @var string
-	 */
-	public $return_format = <<<'INSTRUCTION'
-The content returned should be valid WordPress block markup as described below, using elements like paragraphs and headings where appropriate. Be selective on the elements you use, defaulting to paragraphs. Please check the content before returning to ensure each element has proper opening and closing block markup and HTML tags and any required block attributes. Ensure elements don't nest inside each other, i.e. don't put a paragraph inside another paragraph or a list within a paragraph. Don't start the content with a heading, start with a paragraph.
-
-Markup available to use; don't use any other blocks, even if requested:
-<!-- wp:paragraph -->
-<p>CONTENT</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">CONTENT</h2>
-<!-- /wp:heading -->
-
-<!-- wp:table -->
-<figure class="wp-block-table"><table class="has-fixed-layout"><tbody><tr><td>CONTENT</td></tr><tr><td>CONTENT</td></tr></tbody></table></figure>
-<!-- /wp:table -->
-
-<!-- wp:quote -->
-<blockquote class="wp-block-quote">
-<p>CONTENT</p>
-</blockquote>
-<!-- /wp:quote -->
-
-<!-- wp:pullquote -->
-<figure class="wp-block-pullquote"><blockquote><p>QUOTE</p><cite>AUTHOR</cite></blockquote></figure>
-<!-- /wp:pullquote -->
-
-<!-- wp:list -->
-<ul class="wp-block-list">
-<li>CONTENT</li>
-</ul>
-<!-- /wp:list -->
-
-<!-- wp:list {"ordered":true} -->
-<ol class="wp-block-list">
-<li>CONTENT</li>
-</ol>
-<!-- /wp:list -->
-INSTRUCTION;
-	// phpcs:enable
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -267,7 +214,7 @@ INSTRUCTION;
 			'prompt'             => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->prompt,
+					'prompt'   => $this->get_prompt( 'default' ),
 					'original' => 1,
 				],
 			],
@@ -292,7 +239,7 @@ INSTRUCTION;
 		if ( $settings && ! empty( $settings['prompt'] ) ) {
 			foreach ( $settings['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}

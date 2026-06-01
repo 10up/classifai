@@ -30,13 +30,6 @@ class ImageTextExtraction extends Feature {
 	const ID = 'feature_image_to_text_generator';
 
 	/**
-	 * Prompt for extracting text.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'You are an assistant that extracts text from images. You will be provided with an image and will return whatever text is in the image. Return only the text, nothing else. If there is no text present, return the word none.';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -76,7 +69,7 @@ class ImageTextExtraction extends Feature {
 		if ( $settings && ! empty( $settings[ ChatGPT::ID ]['prompt'] ) ) {
 			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}
@@ -85,7 +78,7 @@ class ImageTextExtraction extends Feature {
 		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
 			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}

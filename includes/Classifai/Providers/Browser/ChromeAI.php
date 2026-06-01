@@ -136,9 +136,9 @@ class ChromeAI extends Provider {
 
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
-			$excerpt_prompt = $feature->woo_prompt;
+			$excerpt_prompt = $feature->get_prompt( 'woocommerce' );
 		} else {
-			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->get_prompt( 'default' ) );
 		}
 
 		// Replace our variables in the prompt.
@@ -221,9 +221,9 @@ class ChromeAI extends Provider {
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
-			$prompt = $feature->woo_prompt;
+			$prompt = $feature->get_prompt( 'woocommerce' );
 		} else {
-			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->get_prompt( 'default' ) );
 		}
 
 		/**
@@ -287,9 +287,9 @@ class ChromeAI extends Provider {
 		$settings = $feature->get_settings();
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->get_prompt( 'condense' ) );
 		} else {
-			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->get_prompt( 'expand' ) );
 		}
 
 		/**
