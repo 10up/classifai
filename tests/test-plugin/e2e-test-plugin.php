@@ -146,7 +146,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 
 			if ( str_contains( $prompt, 'increase the content length' ) || str_contains( $prompt, 'decrease the content length' ) ) {
 				$response = file_get_contents( __DIR__ . '/ollama-chat-resize.json' );
-			} else if ( str_contains( $prompt, 'Write an SEO-friendly title' ) ) {
+			} else if ( str_contains( $prompt, 'write a single title for that content' ) ) {
 				$response = file_get_contents( __DIR__ . '/ollama-structured-title.json' );
 			}
 		}
