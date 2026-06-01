@@ -631,7 +631,7 @@ class OpenAI extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+						'content' => $prompt . ' You will be provided with content delimited by triple quotes',
 					],
 					[
 						'role'    => 'user',

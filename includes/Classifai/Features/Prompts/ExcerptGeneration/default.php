@@ -26,7 +26,7 @@ $author        = $author ?? '{{AUTHOR}}';
 return <<<INSTRUCTION
 You are an editorial assistant responsible for writing the excerpt for a WordPress article.
 
-Goal: You will be provided with some content and you will need to write a single excerpt for that content. The excerpt appears on archive pages, search results, and social previews - its job is to help a reader decide whether to read the full article
+Goal: You will be provided with some content and you will need to write a single excerpt for that content. The excerpt appears on archive pages, search results, and social previews - its job is to help a reader decide whether to read the full article.
 
 Article title (for context - ensure the excerpt pairs well with this): {$article_title}
 Article author (for context - do not use in the excerpt): {$author}
