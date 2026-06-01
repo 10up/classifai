@@ -308,8 +308,8 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_descriptive_text_request_body',
 			[
-				'model'       => $this->vision_model,
-				'messages'    => [
+				'model'                 => $this->vision_model,
+				'messages'              => [
 					[
 						'role'    => 'system',
 						'content' => $prompt,
@@ -327,8 +327,8 @@ class ChatGPT extends Provider {
 						],
 					],
 				],
-				'temperature' => 0.2,
-				'max_tokens'  => 300,
+				'temperature'           => 0.2,
+				'max_completion_tokens' => 300,
 			],
 			$post_id
 		);
@@ -409,8 +409,8 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_ocr_request_body',
 			[
-				'model'       => $this->vision_model,
-				'messages'    => [
+				'model'                 => $this->vision_model,
+				'messages'              => [
 					[
 						'role'    => 'system',
 						'content' => $prompt,
@@ -428,8 +428,8 @@ class ChatGPT extends Provider {
 						],
 					],
 				],
-				'temperature' => 0.2,
-				'max_tokens'  => 300,
+				'temperature'           => 0.2,
+				'max_completion_tokens' => 300,
 			],
 			$post_id
 		);
@@ -520,8 +520,8 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_image_tag_request_body',
 			[
-				'model'       => $this->vision_model,
-				'messages'    => [
+				'model'                 => $this->vision_model,
+				'messages'              => [
 					[
 						'role'    => 'system',
 						'content' => $prompt,
@@ -539,8 +539,8 @@ class ChatGPT extends Provider {
 						],
 					],
 				],
-				'temperature' => 0.2,
-				'max_tokens'  => 300,
+				'temperature'           => 0.2,
+				'max_completion_tokens' => 300,
 			],
 			$post_id
 		);
