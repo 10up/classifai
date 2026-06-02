@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 20
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 20
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
@@ -126,7 +126,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 20
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
@@ -157,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 20
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
@@ -298,7 +298,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 20
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository
@@ -338,7 +338,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -410,6 +409,7 @@ jobs:
   spell-checker:
     name: Run spell checking
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
 
@@ -429,6 +429,7 @@ jobs:
   dependency-review:
     name: Run dependency review
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
 
