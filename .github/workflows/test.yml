@@ -116,6 +116,37 @@ jobs:
         id: phpcompat
         run: ./vendor/bin/phpcs --standard=./phpcs-compat.xml.dist -p .
 
+  # Runs the VIP coding standards checks.
+  vipcs:
+    name: Run VIP coding standards checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # v2.37.1
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: cs2pr
+
+      - name: Run VIPCS
+        uses: 10up/wpcs-action@39f1a9eb6139795e6798d11b51eeecf5a9678ccc # v2.1.0
+        with:
+          standard: WordPress-VIP-Go
+          use_local_config: false
+          enable_warnings: false
+          only_changed_lines: false
+          excludes: tests
+
   # Runs PHP static analysis tests.
   phpstan:
     name: Run PHP static analysis
