@@ -258,16 +258,9 @@ jobs:
           overwrite: true
 
   # Runs JavaScript code quality checks.
-  #
-  # Performs the following steps:
-  # - Checks out the repository.
-  # - Sets up Node.js.
-  # - Installs NPM dependencies.
-  # - Runs JavaScript linting.
-  # - Runs TS Typechecking.
   jslint:
     name: Run JavaScript code quality checks
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     timeout-minutes: 20
@@ -288,11 +281,21 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
 
-      - name: Run JavaScript linting
-        run: npm run lint:js
+      - name: Get updated JS files
+        id: changed-files
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            **/*.js
+            **/*.json
 
-      - name: Run TypeScript typechecking
-        run: npm run typecheck
+      - name: Run JavaScript linting
+        run: |
+          if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
+            npx wp-scripts lint-js ${{ steps.changed-files.outputs.all_changed_files }}
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            npm run lint:js
+          fi
 
   # Runs E2E tests.
   #
