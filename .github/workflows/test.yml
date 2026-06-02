@@ -23,7 +23,7 @@ jobs:
   # Runs the PHP coding standards checks.
   phpcs:
     name: Run PHPCS coding standards checks
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     timeout-minutes: 20
@@ -72,6 +72,49 @@ jobs:
           HEAD_REF=$(git rev-parse HEAD)
           git checkout $HEAD_REF
           ./vendor/bin/phpcs-changed -s --git --git-base origin/${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}
+
+  # Runs the PHP compat coding standards checks.
+  phpcompat:
+    name: Run PHP compatibility checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # v2.37.1
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: cs2pr
+
+      # This date is used to ensure that the PHPCS cache is cleared at least once every week.
+      # http://man7.org/linux/man-pages/man1/date.1.html
+      - name: "Get last Monday's date"
+        id: get-date
+        run: echo "date=$(/bin/date -u --date='last Mon' "+%F")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache PHP compatibility scan cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: tests/_output/phpcompat-cache.json
+          key: ${{ runner.os }}-date-${{ steps.get-date.outputs.date }}-phpcompat-cache-${{ hashFiles('**/composer.json', 'phpcs-compat.xml.dist') }}
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # v4.0.0
+        with:
+          composer-options: '--prefer-dist'
+
+      - name: Run PHP compatibility checks
+        id: phpcompat
+        run: ./vendor/bin/phpcs --standard=./phpcs-compat.xml.dist -p .
 
   # Runs PHP static analysis tests.
   phpstan:
@@ -125,3 +168,218 @@ jobs:
         with:
           path: tests/_output
           key: 'phpstan-result-cache-${{ runner.os }}-date-${{ steps.get-date.outputs.date }}'
+
+  # Runs the PHPUnit tests for WordPress.
+  #
+  # Performs the following steps:
+  # - Sets environment variables.
+  # - Checks out the repository.
+  # - Sets up PHP.
+  # - Installs Composer dependencies.
+  # - Sets up Node.js.
+  # - Installs npm dependencies.
+  # - Starts the WordPress Docker testing environment (with or without Xdebug coverage).
+  # - Logs PHP and WordPress versions from the container.
+  # - Runs PHPUnit tests (with coverage if enabled).
+  # - Uploads code coverage report to Codecov.io (if coverage is enabled).
+  # - Uploads HTML coverage report as an artifact (if coverage is enabled).
+  phpunit:
+    name: Test PHP ${{ matrix.php }} WP ${{ matrix.wp }}${{ matrix.coverage && ' with coverage' || '' }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.3', '8.2', '8.1', '8.0', '7.4']
+        wp: [latest, trunk]
+        coverage: [false]
+        include:
+          - php: '8.4'
+            wp: latest
+            coverage: true
+    env:
+      WP_ENV_PHP_VERSION: ${{ matrix.php }}
+      WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
+
+    steps:
+      - name: Configure environment variables
+        run: |
+          echo "PHP_FPM_UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "PHP_FPM_GID=$(id -g)" >> "$GITHUB_ENV"
+
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      ##
+      # This allows Composer dependencies to be installed using a single step.
+      #
+      # Since the tests are currently run within the Docker containers where the PHP version varies,
+      # the same PHP version needs to be configured for the action runner machine so that the correct
+      # dependency versions are installed and cached.
+      ##
+      - name: Set up PHP
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # v2.37.1
+        with:
+          php-version: '${{ matrix.php }}'
+          coverage: none
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # v4.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Start the Docker testing environment
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: |
+            if [ "${{ matrix.coverage }}" == "true" ]; then
+            npm run wp-env:test start -- --xdebug=coverage
+            else
+            npm run wp-env:test start
+            fi
+
+      - name: Log versions
+        run: |
+          npm run wp-env:test -- run cli php -- -v
+          npm run wp-env:test -- run cli wp core version
+
+      - name: Run PHPUnit tests${{ matrix.coverage && ' with coverage report' || '' }}
+        id: phpunit
+        run: |
+          npm run test:php
+
+      - name: Upload code coverage report
+        continue-on-error: true
+        if: ${{ matrix.coverage }}
+        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: tests/_output/php-coverage.xml
+          flags: unit
+          fail_ci_if_error: true
+
+      - name: Upload HTML coverage report as artifact
+        if: ${{ matrix.coverage }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: wp-code-coverage-${{ matrix.php }}-${{ matrix.wp }}
+          path: tests/_output/html
+          overwrite: true
+
+  # Runs JavaScript code quality checks.
+  #
+  # Performs the following steps:
+  # - Checks out the repository.
+  # - Sets up Node.js.
+  # - Installs NPM dependencies.
+  # - Runs JavaScript linting.
+  # - Runs TS Typechecking.
+  jslint:
+    name: Run JavaScript code quality checks
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Run JavaScript linting
+        run: npm run lint:js
+
+      - name: Run TypeScript typechecking
+        run: npm run typecheck
+
+  # Runs E2E tests.
+  #
+  # Performs the following steps:
+  # - Checks out the repository.
+  # - Sets up PHP.
+  # - Installs Composer dependencies.
+  # - Sets up Node.js.
+  # - Installs NPM dependencies.
+  # - Builds assets.
+  # - Starts the Docker testing environment.
+  # - Runs E2E tests.
+  # - Uploads E2E test results as artifact.
+  e2e:
+    name: Run E2E tests
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # v2.37.1
+        with:
+          php-version: 8.3
+          coverage: none
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # v4.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Start the Docker testing environment
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: |
+            npm run wp-env:test start
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload E2E test results as artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: playwright-report
+          path: artifacts/test-results
+          retention-days: 2
+          if-no-files-found: ignore
