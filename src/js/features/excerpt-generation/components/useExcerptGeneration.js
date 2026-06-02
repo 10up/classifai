@@ -149,7 +149,7 @@ export function useExcerptGeneration() {
 				typeof error === 'string'
 					? error
 					: error?.message ??
-					  __( 'Failed to generate excerpt.', 'ai' );
+					  __( 'Failed to generate excerpt.', 'classifai' );
 			dispatch( noticesStore ).createErrorNotice( message, {
 				id: NOTICE_ID,
 				isDismissible: true,
