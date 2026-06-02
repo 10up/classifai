@@ -298,23 +298,19 @@ jobs:
           fi
 
   # Runs E2E tests.
-  #
-  # Performs the following steps:
-  # - Checks out the repository.
-  # - Sets up PHP.
-  # - Installs Composer dependencies.
-  # - Sets up Node.js.
-  # - Installs NPM dependencies.
-  # - Builds assets.
-  # - Starts the Docker testing environment.
-  # - Runs E2E tests.
-  # - Uploads E2E test results as artifact.
   e2e:
-    name: Run E2E tests
-    runs-on: ubuntu-24.04
+    name: Run E2E tests on ${{ matrix.core.name }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        core:
+          - { name: 'WP latest', version: 'latest' }
+          - { name: 'WP minimum', version: 'https://wordpress.org/wordpress-6.9.zip' }
+          - { name: 'WP trunk', version: 'WordPress/WordPress#master' }
 
     steps:
       - name: Checkout repository
@@ -350,16 +346,27 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           command: |
-            npm run wp-env:test start
+            npm run env:start
 
       - name: Run E2E tests
-        run: npm run test:e2e
+        run: npm run cypress:run
 
-      - name: Upload E2E test results as artifact
+      - name: Update summary
+        run: |
+          npx mochawesome-merge ./tests/cypress/reports/*.json -o tests/cypress/reports/mochawesome.json
+          rm -rf ./tests/cypress/reports/mochawesome-*.json
+          npx mochawesome-json-to-md -p ./tests/cypress/reports/mochawesome.json -o ./tests/cypress/reports/mochawesome.md -t ./tests/cypress/template.md
+          npx mochawesome-report-generator tests/cypress/reports/mochawesome.json -o tests/cypress/reports/
+          cat ./tests/cypress/reports/mochawesome.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
+        if: failure()
         with:
-          name: playwright-report
-          path: artifacts/test-results
-          retention-days: 2
-          if-no-files-found: ignore
+          name: cypress-artifact-classifai-wp-${{ matrix.core.name }}
+          retention-days: 7
+          path: |
+            ${{ github.workspace }}/tests/cypress/screenshots/
+            ${{ github.workspace }}/tests/cypress/videos/
+            ${{ github.workspace }}/tests/cypress/logs/
+            ${{ github.workspace }}/tests/cypress/reports/
