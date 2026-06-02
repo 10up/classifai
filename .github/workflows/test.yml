@@ -170,28 +170,15 @@ jobs:
           key: 'phpstan-result-cache-${{ runner.os }}-date-${{ steps.get-date.outputs.date }}'
 
   # Runs the PHPUnit tests for WordPress.
-  #
-  # Performs the following steps:
-  # - Sets environment variables.
-  # - Checks out the repository.
-  # - Sets up PHP.
-  # - Installs Composer dependencies.
-  # - Sets up Node.js.
-  # - Installs npm dependencies.
-  # - Starts the WordPress Docker testing environment (with or without Xdebug coverage).
-  # - Logs PHP and WordPress versions from the container.
-  # - Runs PHPUnit tests (with coverage if enabled).
-  # - Uploads code coverage report to Codecov.io (if coverage is enabled).
-  # - Uploads HTML coverage report as an artifact (if coverage is enabled).
   phpunit:
     name: Test PHP ${{ matrix.php }} WP ${{ matrix.wp }}${{ matrix.coverage && ' with coverage' || '' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.4', '8.3', '8.2', '8.1', '8.0', '7.4']
-        wp: [latest, trunk]
-        coverage: [false]
+        php: [ '8.4', '8.3', '8.2', '8.1', '8.0', '7.4' ]
+        wp: [ latest, trunk ]
+        coverage: [ false ]
         include:
           - php: '8.4'
             wp: latest
@@ -247,9 +234,9 @@ jobs:
           max_attempts: 3
           command: |
             if [ "${{ matrix.coverage }}" == "true" ]; then
-            npm run wp-env:test start -- --xdebug=coverage
+            npm run env start -- --xdebug=coverage
             else
-            npm run wp-env:test start
+            npm run env start
             fi
 
       - name: Log versions
@@ -261,16 +248,6 @@ jobs:
         id: phpunit
         run: |
           npm run test:php
-
-      - name: Upload code coverage report
-        continue-on-error: true
-        if: ${{ matrix.coverage }}
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: tests/_output/php-coverage.xml
-          flags: unit
-          fail_ci_if_error: true
 
       - name: Upload HTML coverage report as artifact
         if: ${{ matrix.coverage }}
