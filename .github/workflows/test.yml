@@ -401,3 +401,43 @@ jobs:
             ${{ github.workspace }}/tests/cypress/videos/
             ${{ github.workspace }}/tests/cypress/logs/
             ${{ github.workspace }}/tests/cypress/reports/
+
+  # Runs spell checking.
+  spell-checker:
+    name: Run spell checking
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Spell Check
+        uses: crate-ci/typos@aca895bf05aec0cb7dffa6f94495e923224d9f17 # v1.46.2
+        with:
+          files: ./
+
+  # Runs dependency review.
+  dependency-review:
+    name: Run dependency review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
+          persist-credentials: false
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          license-check: true
+          vulnerability-check: false
+          config-file: 10up/.github/.github/dependency-review-config.yml@trunk
