@@ -318,48 +318,18 @@ Cypress.Commands.add( 'verifyExcerptGenerationEnabled', ( enabled = true ) => {
 
 	// Find and open the excerpt panel.
 	cy.closeWelcomeGuide();
-	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt"),.editor-sidebar__panel .editor-post-panel__section .editor-post-excerpt__dropdown`;
+
+	// Find and open the excerpt panel.
+	const panelButtonSelector = `.editor-post-excerpt__dropdown button`;
 
 	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+		// Open panel.
+		cy.wrap( $panelButton ).click();
+
 		if ( enabled ) {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
-
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
-
-			// Verify button exists.
-			cy.wrap( $panel )
-				.find( '.editor-post-excerpt button' )
-				.should( shouldExist );
+			cy.get( '.classifai-excerpt-generation button' ).should( shouldExist );
 		} else {
-			// Support pre WP 6.6+.
-			const $newPanel = $panelButton.parents(
-				'.editor-post-panel__section'
-			);
-
-			if ( $newPanel.length === 0 ) {
-				// Find the panel container.
-				const $panel = $panelButton.parents(
-					'.components-panel__body'
-				);
-
-				// Open panel.
-				if ( ! $panel.hasClass( 'is-opened' ) ) {
-					cy.wrap( $panelButton ).click();
-				}
-
-				// Verify button doesn't exist.
-				cy.wrap( $panel )
-					.find( '.editor-post-excerpt button' )
-					.should( shouldExist );
-			} else {
-				cy.wrap( $newPanel )
-					.find( '.editor-post-excerpt button' )
-					.should( shouldExist );
-			}
+			cy.get( '.classifai-excerpt-generation button' ).should( 'not.exist' );
 		}
 	} );
 } );

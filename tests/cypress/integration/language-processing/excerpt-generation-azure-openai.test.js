@@ -60,25 +60,15 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.openDocumentSettingsSidebar();
 
 		// Find and open the excerpt panel.
-		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
+		const panelButtonSelector = `.editor-post-excerpt__dropdown button`;
 
 		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
-
 			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
-
-			// Verify button exists.
-			cy.wrap( $panel )
-				.find( '.editor-post-excerpt button' )
-				.should( 'exist' );
+			cy.wrap( $panelButton ).click();
 
 			// Click on button and verify data loads in.
-			cy.wrap( $panel ).find( '.editor-post-excerpt button' ).click();
-			cy.wrap( $panel ).find( 'textarea' ).should( 'have.value', data );
+			cy.get( '.classifai-excerpt-generation button' ).click();
+			cy.get( '.editor-post-excerpt .editor-post-excerpt__textarea textarea' ).should( 'have.value', data );
 		} );
 	} );
 
