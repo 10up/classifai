@@ -231,11 +231,22 @@ class ExcerptGeneration extends Feature {
 			return;
 		}
 
+		$screen = get_current_screen();
+
+		// Load the assets only if the post type supports excerpts and is not an attachment.
+		if (
+			! $screen ||
+			! post_type_supports( $screen->post_type, 'excerpt' ) ||
+			in_array( $screen->post_type, array( 'attachment' ), true )
+		) {
+			return;
+		}
+
 		// This script removes the core excerpt panel and replaces it with our own.
 		wp_enqueue_script(
 			'classifai-plugin-excerpt-generation-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-excerpt-generation.js',
-			array_merge( get_asset_info( 'classifai-plugin-excerpt-generation', 'dependencies' ), [ 'lodash' ] ),
+			get_asset_info( 'classifai-plugin-excerpt-generation', 'dependencies' ),
 			get_asset_info( 'classifai-plugin-excerpt-generation', 'version' ),
 			true
 		);
