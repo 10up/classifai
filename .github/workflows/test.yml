@@ -276,8 +276,8 @@ jobs:
 
       - name: Log versions
         run: |
-          npm run wp-env:test -- run cli php -- -v
-          npm run wp-env:test -- run cli wp core version
+          npm run env -- run cli php -- -v
+          npm run env -- run cli wp core version
 
       - name: Run PHPUnit tests${{ matrix.coverage && ' with coverage report' || '' }}
         id: phpunit
