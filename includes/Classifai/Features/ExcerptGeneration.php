@@ -246,7 +246,7 @@ class ExcerptGeneration extends Feature {
 		wp_enqueue_script(
 			'classifai-plugin-excerpt-generation-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-excerpt-generation.js',
-			get_asset_info( 'classifai-plugin-excerpt-generation', 'dependencies' ),
+			array_merge( get_asset_info( 'classifai-plugin-excerpt-generation', 'dependencies' ), [ 'lodash' ] ),
 			get_asset_info( 'classifai-plugin-excerpt-generation', 'version' ),
 			true
 		);

@@ -41,6 +41,7 @@
 			"@wordpress/data",
 			"@wordpress/dom-ready",
 			"@wordpress/dom",
+      "@wordpress/edit-post",
 			"@wordpress/editor",
 			"@wordpress/element",
 			"@wordpress/hooks",
