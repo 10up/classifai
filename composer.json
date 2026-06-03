@@ -13,7 +13,7 @@
     "aws/aws-sdk-php": "3.337.3",
     "php": ">=7.4",
     "woocommerce/action-scheduler": "3.8.1",
-    "yahnis-elsts/plugin-update-checker": "5.1"
+    "yahnis-elsts/plugin-update-checker": "5.7"
   },
   "autoload": {
     "psr-4": {
