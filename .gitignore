@@ -55,6 +55,7 @@ tests/cypress/reports
 /tests/_output/*
 !/tests/_output/.gitkeep
 .wp-env.override.json
+/artifacts
 
 # docs
 wp-hooks-docs/docs/01.get-started/05.CHANGELOG.md
