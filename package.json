@@ -44,7 +44,7 @@
     "cypress": "^15.16.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-mochawesome-reporter": "^4.0.2",
-    "cypress-plugin-tab": "^1.0.5",
+    "cypress-plugin-tab": "^2.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "node-wp-i18n": "^1.2.8",
