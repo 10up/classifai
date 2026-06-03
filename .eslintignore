@@ -1,7 +1,0 @@
-dist
-node_modules
-tests/*
-vendor/*
-bin/*
-wp-hooks-docs/*
-docs/*

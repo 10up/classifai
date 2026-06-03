@@ -8,7 +8,7 @@
     "start": "wp-scripts start",
     "build": "wp-scripts build",
     "lint:js": "wp-scripts lint-js ./src ./includes/Classifai/Blocks",
-    "lint:js-fix": "wp-scripts lint-js ./src ./includes/Classifai/Blocks --fix",
+    "lint:js:fix": "wp-scripts lint-js ./src ./includes/Classifai/Blocks --fix",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/classifai vendor/bin/phpunit -c phpunit.xml.dist",
     "test:e2e": "cypress run --browser chrome --config-file tests/cypress/config.config.js",
