@@ -1,5 +1,5 @@
 /**
- * External dependencies.
+ * WordPress dependencies
  */
 import { dispatch, useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
@@ -7,7 +7,7 @@ import { Button, Modal } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import TaxonomyControls from './taxonomy-controls';
 import { DisableFeatureButton } from '../../components';
@@ -228,7 +228,7 @@ export const ClassificationButton = () => {
 					) }
 				</div>
 				<Button
-					variant={ 'secondary' }
+					variant="secondary"
 					onClick={ () => saveTerms( updatedTaxQuery ) }
 				>
 					{ __( 'Save', 'classifai' ) }
@@ -251,7 +251,7 @@ export const ClassificationButton = () => {
 				</Modal>
 			) }
 			<Button
-				variant={ 'secondary' }
+				variant="secondary"
 				data-id={ postId }
 				onClick={ ( e ) => {
 					handleClick( {

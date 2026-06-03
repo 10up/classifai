@@ -24,7 +24,7 @@ import MaybeExcerptPanel from './maybe-excerpt-panel';
 const PostExcerpt = () => {
 	return (
 		<PostExcerptCheck>
-			<PluginDocumentSettingPanel title={ __( 'Excerpt' ) }>
+			<PluginDocumentSettingPanel title={ __( 'Excerpt', 'classifai' ) }>
 				<PostExcerptForm />
 			</PluginDocumentSettingPanel>
 			<MaybeExcerptPanel>

@@ -1,5 +1,5 @@
 /**
- * Internal dependencies.
+ * WordPress dependencies
  */
 import { ToggleControl } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';

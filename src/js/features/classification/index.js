@@ -1,11 +1,11 @@
 /**
- * External dependencies.
+ * WordPress dependencies
  */
 import { useSelect } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { ClassificationToggle } from './classification-toggle';
 import { ClassificationButton } from './classification-button';

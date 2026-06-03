@@ -1,7 +1,10 @@
 /* global lodash */
 /* eslint-disable eqeqeq */
-/* eslint-disable no-use-before-define */
+
 /* eslint-disable @wordpress/no-unused-vars-before-return */
+/**
+ * WordPress dependencies
+ */
 import { select, dispatch, subscribe } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
 import apiFetch from '@wordpress/api-fetch';
@@ -101,7 +104,7 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText ) => {
 const hasOcrBlock = ( imageId, blocks = [] ) => {
 	if ( blocks.length === 0 ) {
 		const { getBlocks } = select( 'core/block-editor' );
-		// eslint-disable-next-line no-param-reassign
+
 		blocks = getBlocks();
 	}
 	return !! find(
@@ -114,7 +117,6 @@ const hasOcrBlock = ( imageId, blocks = [] ) => {
  * Add insert button to toolbar.
  */
 const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => {
-	// eslint-disable-line no-unused-vars
 	return ( props ) => {
 		const [ isModalOpen, setModalOpen ] = useState( false );
 		const { attributes, clientId, isSelected, name, setAttributes } = props;

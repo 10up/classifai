@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { subscribe, select, dispatch } from '@wordpress/data';
 
 let saveHappened = false;

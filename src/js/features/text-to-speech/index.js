@@ -1,5 +1,5 @@
 /**
- * External dependencies.
+ * WordPress dependencies
  */
 import { useState, useEffect, useRef } from '@wordpress/element';
 import {
@@ -14,7 +14,7 @@ import { registerPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { store as postAudioStore } from './store';
 

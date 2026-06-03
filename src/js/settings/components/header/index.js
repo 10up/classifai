@@ -33,16 +33,16 @@ export const Header = () => {
 					<DropdownMenu
 						popoverProps={ { placement: 'bottom-end' } }
 						toggleProps={ { size: 'compact' } }
-						menuProps={ { 'aria-label': __( 'Help options' ) } }
+						menuProps={ {
+							'aria-label': __( 'Help options', 'classifai' ),
+						} }
 						icon={ help }
-						text={ __( 'Help' ) }
+						text={ __( 'Help', 'classifai' ) }
 					>
 						{ ( { onClose } ) => (
 							<MenuGroup>
 								<MenuItem
-									href={
-										'https://github.com/10up/classifai#frequently-asked-questions'
-									}
+									href="https://github.com/10up/classifai#frequently-asked-questions"
 									target="_blank"
 									rel="noopener noreferrer"
 									icon={ external }
@@ -60,9 +60,7 @@ export const Header = () => {
 									</VisuallyHidden>
 								</MenuItem>
 								<MenuItem
-									href={
-										'https://github.com/10up/classifai/issues/new/choose'
-									}
+									href="https://github.com/10up/classifai/issues/new/choose"
 									target="_blank"
 									rel="noopener noreferrer"
 									icon={ external }

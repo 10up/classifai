@@ -54,6 +54,7 @@ export default [
 				"@wordpress/api-fetch",
 				"@wordpress/block-editor",
 				"@wordpress/block-library",
+				"@wordpress/blocks",
 				"@wordpress/commands",
 				"@wordpress/components",
 				"@wordpress/compose",

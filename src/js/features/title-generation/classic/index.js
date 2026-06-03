@@ -1,5 +1,12 @@
+/**
+ * WordPress dependencies
+ */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+
+/**
+ * Internal dependencies
+ */
 import './index.scss';
 
 const ClassifAI = window.ClassifAI || {};

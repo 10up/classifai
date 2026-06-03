@@ -133,7 +133,7 @@ const BlockEdit = ( props ) => {
 					<Button
 						label={ __( 'Generate key takeaways', 'classifai' ) }
 						text={ buttonText }
-						variant={ 'secondary' }
+						variant="secondary"
 						onClick={ () => setRun( true ) }
 						isBusy={ isLoading }
 					/>
@@ -196,7 +196,7 @@ const BlockEdit = ( props ) => {
 								'classifai'
 							) }
 							text={ buttonText }
-							variant={ 'secondary' }
+							variant="secondary"
 							onClick={ () => setRun( true ) }
 							isBusy={ isLoading }
 							style={ { width: '125px' } }

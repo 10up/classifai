@@ -1,4 +1,12 @@
-import React, { useState, CSSProperties } from 'react';
+/**
+ * External dependencies
+ */
+import type { CSSProperties } from 'react';
+import React, { useState } from 'react';
+
+/**
+ * WordPress dependencies
+ */
 import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { backup, check, copySmall } from '@wordpress/icons';

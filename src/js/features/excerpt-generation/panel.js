@@ -1,5 +1,5 @@
 /**
- * External Dependencies.
+ * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { Button, ExternalLink, TextareaControl } from '@wordpress/components';
@@ -9,7 +9,7 @@ import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
- * Internal Dependencies.
+ * Internal dependencies
  */
 import { DisableFeatureButton } from '../../components';
 import { browserAITextGeneration } from '../../helpers';
@@ -104,7 +104,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				__nextHasNoMarginBottom
 				label={
 					! isPublishPanelOpen
-						? __( 'Write an excerpt (optional)' )
+						? __( 'Write an excerpt (optional)', 'classifai' )
 						: null
 				}
 				className="editor-post-excerpt__textarea"
@@ -114,15 +114,16 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 			{ ! isPublishPanelOpen && (
 				<ExternalLink
 					href={ __(
-						'https://wordpress.org/support/article/settings-sidebar/#excerpt'
+						'https://wordpress.org/support/article/settings-sidebar/#excerpt',
+						'classifai'
 					) }
 				>
-					{ __( 'Learn more about manual excerpts' ) }
+					{ __( 'Learn more about manual excerpts', 'classifai' ) }
 				</ExternalLink>
 			) }
 			<Button
 				className="classifai-post-excerpt"
-				variant={ 'secondary' }
+				variant="secondary"
 				disabled={ isLoading }
 				data-id={ postId }
 				style={ { marginTop: '1rem' } }

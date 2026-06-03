@@ -1,12 +1,17 @@
+/**
+ * WordPress dependencies
+ */
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { registerCoreBlocks } from '@wordpress/block-library';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/blocks';
-
 import { Fill, Flex, FlexItem, Icon } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../../settings/components/settings-row';
 
 // To access core/query details.

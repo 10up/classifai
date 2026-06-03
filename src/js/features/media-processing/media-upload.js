@@ -1,6 +1,13 @@
 /* global ClassifAI */
 
+/**
+ * Internal dependencies
+ */
 import { handleClick } from '../../helpers';
+
+/**
+ * WordPress dependencies
+ */
 import { __ } from '@wordpress/i18n';
 
 ( function( $ ) { // eslint-disable-line

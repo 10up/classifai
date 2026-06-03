@@ -223,7 +223,7 @@ const PrePublishClassificationContent = () => {
 					) }
 				</div>
 				<Button
-					variant={ 'secondary' }
+					variant="secondary"
 					onClick={ () => saveTerms( updatedTaxQuery ) }
 					disabled={ isSaved }
 				>

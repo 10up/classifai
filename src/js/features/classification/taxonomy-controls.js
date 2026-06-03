@@ -4,9 +4,17 @@
  *
  * @see https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/query/edit/inspector-controls/taxonomy-controls.js
  */
+
+/**
+ * WordPress dependencies
+ */
 import { FormTokenField } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
+
+/**
+ * Internal dependencies
+ */
 import { getEntitiesInfo, useTaxonomies } from './utils';
 import {
 	useState,
@@ -20,7 +28,6 @@ import { __, sprintf } from '@wordpress/i18n';
 const termsPerPage = -1;
 
 // Helper function to get the term id based on user input in terms `FormTokenField`.
-// eslint-disable-next-line consistent-return
 const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 	// First we check for exact match by `term.id` or case sensitive `term.name` match.
 	const termId = termValue?.id || termsMappedByName[ termValue ]?.id;
@@ -39,7 +46,7 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 	 * In this edge case we always apply the first match from the terms list.
 	 */
 	const termValueLower = termValue.toLocaleLowerCase();
-	// eslint-disable-next-line no-restricted-syntax
+
 	for ( const term in termsMappedByName ) {
 		if ( term.toLocaleLowerCase() === termValueLower ) {
 			return termsMappedByName[ term ].id;
@@ -704,7 +711,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 	};
 
 	return (
-		// eslint-disable-next-line react/jsx-no-useless-fragment
 		<>
 			{ !! taxonomiesInfo?.length &&
 				taxonomiesInfo.map( ( { slug, name, terms } ) => {

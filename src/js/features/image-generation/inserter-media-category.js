@@ -2,6 +2,9 @@
  * Some code here was copied from Jetpack's implementation of the inserter media category.
  * See https://github.com/Automattic/jetpack/pull/31914
  */
+/**
+ * WordPress dependencies
+ */
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch, select, subscribe } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';

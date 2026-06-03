@@ -1,7 +1,8 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 /* eslint-disable no-shadow */
+
 /**
- * External Dependencies.
+ * WordPress dependencies
  */
 import { registerPlugin } from '@wordpress/plugins';
 import {
@@ -27,7 +28,7 @@ import {
 import { __, _nx } from '@wordpress/i18n';
 
 /**
- * Internal Dependencies.
+ * Internal dependencies
  */
 import { DisableFeatureButton } from '../../components';
 import { browserAITextGeneration } from '../../helpers';

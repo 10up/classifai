@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { Button } from '@wordpress/components';
 import { _nx } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';

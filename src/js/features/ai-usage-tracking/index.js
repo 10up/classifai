@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import domReady from '@wordpress/dom-ready';
 import apiFetch from '@wordpress/api-fetch';
 import { useSelect, useDispatch } from '@wordpress/data';

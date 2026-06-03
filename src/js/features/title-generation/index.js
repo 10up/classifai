@@ -1,5 +1,5 @@
 /**
- * External Dependencies.
+ * WordPress dependencies
  */
 import { dispatch, select } from '@wordpress/data';
 import { PluginPostStatusInfo, PostTypeSupportCheck } from '@wordpress/editor';
@@ -17,7 +17,7 @@ import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
- * Internal Dependencies.
+ * Internal dependencies
  */
 import { DisableFeatureButton } from '../../components';
 import { browserAITextGeneration } from '../../helpers';

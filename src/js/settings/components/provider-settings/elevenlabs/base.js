@@ -1,6 +1,13 @@
+/**
+ * WordPress dependencies
+ */
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { __experimentalInputControl as InputControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../../settings-row';
 
 /**

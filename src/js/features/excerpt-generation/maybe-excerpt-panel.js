@@ -6,13 +6,9 @@ import { withSelect } from '@wordpress/data';
 import { PluginPrePublishPanel } from '@wordpress/editor';
 import { Component } from '@wordpress/element';
 
-/**
- * Internal dependencies
- */
-
 const ExcerptPanel = ( { children } ) => {
 	const panelBodyTitle = [
-		__( 'Suggestion:' ),
+		__( 'Suggestion:', 'classifai' ),
 		<span className="editor-post-publish-panel__link" key="label">
 			{ __( 'Generate excerpt', 'classifai' ) }
 		</span>,
@@ -22,7 +18,7 @@ const ExcerptPanel = ( { children } ) => {
 		<PluginPrePublishPanel
 			title={ panelBodyTitle }
 			icon="aside"
-			initialOpen={ true }
+			initialOpen
 		>
 			{ children }
 		</PluginPrePublishPanel>

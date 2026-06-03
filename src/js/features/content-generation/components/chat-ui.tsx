@@ -1,11 +1,13 @@
-import React, {
-	useEffect,
-	useState,
-	useRef,
-	useLayoutEffect,
-	CSSProperties,
-} from 'react';
+/**
+ * External dependencies
+ */
+import type { CSSProperties } from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+
+/**
+ * WordPress dependencies
+ */
 import apiFetch from '@wordpress/api-fetch';
 import { select, dispatch } from '@wordpress/data';
 import { pasteHandler, parse } from '@wordpress/blocks';
@@ -14,12 +16,14 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 
-// Import our custom components
+/**
+ * Internal dependencies
+ */
 import { SparkleIcon } from './sparkle-icon';
 import { ChatHistory } from './chat-history';
 import { ErrorMessage } from './error-message';
 import { ChatInput } from './chat-input';
-import { ConversationEntry } from './types';
+import type { ConversationEntry } from './types';
 
 // Define style objects outside of JSX
 const chatContainerStyles: CSSProperties = {
