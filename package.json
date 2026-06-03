@@ -52,10 +52,10 @@
   },
   "dependencies": {
     "@wordpress/icons": "^11.4.0",
-    "choices.js": "^11.1.0",
+    "choices.js": "^11.2.3",
     "classnames": "^2.5.1",
-    "motion": "^12.24.7",
-    "react-router-dom": "^7.12.0",
+    "motion": "^12.40.0",
+    "react-router-dom": "^7.15.1",
     "tippy.js": "^6.3.7"
   }
 }
