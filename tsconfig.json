@@ -54,7 +54,7 @@
 
 		// File config
 		"baseUrl": "./src",
-		"outDir": "./build-scripts",
+		"outDir": "./dist",
 		"paths": {
 			"@/*": [ "./*" ]
 		}

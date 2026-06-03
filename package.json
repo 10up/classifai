@@ -9,6 +9,7 @@
     "build": "wp-scripts build",
     "lint:js": "wp-scripts lint-js ./src ./includes/Classifai/Blocks",
     "lint:js:fix": "wp-scripts lint-js ./src ./includes/Classifai/Blocks --fix",
+    "typecheck": "tsc --noEmit",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/classifai vendor/bin/phpunit -c phpunit.xml.dist",
     "test:e2e": "cypress run --browser chrome --config-file tests/cypress/config.config.js",
@@ -38,7 +39,6 @@
   },
   "devDependencies": {
     "@10up/cypress-wp-utils": "^0.6.0",
-    "@types/wordpress__blocks": "^15.17.0",
     "@wordpress/env": "^10.38.0",
     "@wordpress/scripts": "^32.1.0",
     "cypress": "^15.16.0",
