@@ -73,9 +73,13 @@ jobs:
       - name: Run PHPCS
         id: phpcs
         run: |
-          HEAD_REF=$(git rev-parse HEAD)
-          git checkout $HEAD_REF
-          ./vendor/bin/phpcs-changed -s --git --git-base origin/${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}
+          if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
+            HEAD_REF=$(git rev-parse HEAD)
+            git checkout $HEAD_REF
+            ./vendor/bin/phpcs-changed -s --git --git-base origin/${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            composer lint
+          fi
 
   # Runs the PHP compat coding standards checks.
   phpcompat:
@@ -428,6 +432,7 @@ jobs:
   # Runs dependency review.
   dependency-review:
     name: Run dependency review
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
