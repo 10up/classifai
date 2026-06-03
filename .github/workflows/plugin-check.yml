@@ -9,13 +9,21 @@ on:
     branches:
       - develop
 
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   build:
     uses: 10up/classifai/.github/workflows/build-release-zip.yml@develop
+    permissions:
+      contents: read
 
   test:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
