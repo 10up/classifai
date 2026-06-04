@@ -48,14 +48,11 @@ Desktop.ini
 config.local.php
 
 # Tests.
-tests/cypress/downloads
-tests/cypress/screenshots
-tests/cypress/videos
-tests/cypress/reports
 /tests/_output/*
 !/tests/_output/.gitkeep
 .wp-env.override.json
 /artifacts
+/flaky-tests
 
 # docs
 wp-hooks-docs/docs/01.get-started/05.CHANGELOG.md
