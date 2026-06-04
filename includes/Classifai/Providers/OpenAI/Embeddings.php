@@ -6,6 +6,7 @@
 namespace Classifai\Providers\OpenAI;
 
 use Classifai\Admin\Notifications;
+use Classifai\Embeddings\HasEmbeddingsStorage;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
@@ -26,8 +27,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Embeddings extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
+	use HasEmbeddingsStorage;
 
 	const ID = 'openai_embeddings';
+
+	/**
+	 * Legacy meta key still used by older installs / for backfill fallback.
+	 */
+	protected function legacy_embedding_meta_key(): string {
+		return 'classifai_openai_embeddings';
+	}
 
 	/**
 	 * OpenAI Embeddings URL.
@@ -488,18 +497,8 @@ class Embeddings extends Provider {
 		}
 
 		// Delete all post embeddings.
-		$embedding_posts = get_posts(
-			[
-				'post_type'      => 'any',
-				'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page
-				'fields'         => 'ids',
-				'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare'   => 'EXISTS',
-			]
-		);
-
-		foreach ( $embedding_posts as $post_id ) {
-			delete_post_meta( $post_id, 'classifai_openai_embeddings' );
+		foreach ( $this->objects_with_embeddings( 'post' ) as $post_id ) {
+			$this->delete_object_embedding( 'post', (int) $post_id );
 		}
 
 		// Hide the admin notice.
@@ -629,7 +628,7 @@ class Embeddings extends Provider {
 
 		// Try to use the stored embeddings first.
 		if ( ! $force ) {
-			$embeddings = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
+			$embeddings = $this->read_object_embedding( 'post', $post_id );
 
 			if ( ! empty( $embeddings ) ) {
 				return $embeddings;
@@ -676,7 +675,7 @@ class Embeddings extends Provider {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
-			update_post_meta( $post_id, 'classifai_openai_embeddings', $embeddings );
+			$this->write_object_embedding( 'post', $post_id, $embeddings, md5( $content ) );
 		}
 
 		return $embeddings;
@@ -894,6 +893,13 @@ class Embeddings extends Provider {
 				}
 			}
 
+			// Embeddings now live in the classifai_embeddings table — restrict the term
+			// lookup to objects that actually have an embedding stored.
+			$term_ids_with_embeddings = $this->objects_with_embeddings( 'term' );
+			if ( empty( $term_ids_with_embeddings ) ) {
+				continue;
+			}
+
 			$terms = get_terms(
 				[
 					'taxonomy'   => $tax,
@@ -901,7 +907,7 @@ class Embeddings extends Provider {
 					'order'      => 'DESC',
 					'hide_empty' => false,
 					'fields'     => 'ids',
-					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'include'    => $term_ids_with_embeddings,
 					'number'     => $this->get_max_terms(),
 					'exclude'    => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 				]
@@ -920,7 +926,7 @@ class Embeddings extends Provider {
 					continue;
 				}
 
-				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
+				$term_embedding = $this->read_object_embedding( 'term', (int) $term_id );
 
 				if ( ! empty( $term_embedding ) ) {
 					// Loop through the chunks and run a similarity calculation on each.
@@ -1037,17 +1043,21 @@ class Embeddings extends Provider {
 		static $threshold = null;
 
 		if ( null === $posts ) {
-			$posts = new WP_Query(
-				[
-					'post_type'      => $post_type,
-					'post_status'    => 'publish',
-					'posts_per_page' => $this->get_max_posts(),
-					'fields'         => 'ids',
-					'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					'meta_compare'   => 'EXISTS',
-				]
-			);
-			$posts = $posts->get_posts();
+			$post_ids_with_embeddings = $this->objects_with_embeddings( 'post' );
+			if ( empty( $post_ids_with_embeddings ) ) {
+				$posts = [];
+			} else {
+				$posts = new WP_Query(
+					[
+						'post_type'      => $post_type,
+						'post_status'    => 'publish',
+						'posts_per_page' => $this->get_max_posts(),
+						'fields'         => 'ids',
+						'post__in'       => $post_ids_with_embeddings,
+					]
+				);
+				$posts = $posts->get_posts();
+			}
 		}
 
 		if ( empty( $posts ) ) {
@@ -1064,7 +1074,7 @@ class Embeddings extends Provider {
 
 		// Get embedding similarity for each post.
 		foreach ( $posts as $post_id ) {
-			$post_embedding = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
+			$post_embedding = $this->read_object_embedding( 'post', (int) $post_id );
 
 			if ( empty( $post_embedding ) ) {
 				continue;
@@ -1130,28 +1140,22 @@ class Embeddings extends Provider {
 		 */
 		$number = apply_filters( 'classifai_openai_embeddings_items_per_job', 100 );
 
+		// Posts that already have embeddings — used to exclude when $all is false.
+		$post_ids_with_embeddings = $all ? [] : $this->objects_with_embeddings( 'post' );
+
 		$default_args = [
 			'post_type'      => $post_type,
 			'post_status'    => 'publish',
 			'posts_per_page' => $number,
 			'fields'         => 'ids',
-			'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare'   => 'NOT EXISTS',
 			'offset'         => 0,
-			'post__not_in'   => [], // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+			'post__not_in'   => $post_ids_with_embeddings, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		];
 
 		$default_args = array_merge( $default_args, $args );
 
-		// If we want all items, remove our meta query.
 		if ( $all ) {
-			if ( 'classifai_openai_embeddings' === $default_args['meta_key'] ) {
-				unset( $default_args['meta_key'] );
-			}
-
-			if ( 'NOT EXISTS' === $default_args['meta_compare'] ) {
-				unset( $default_args['meta_compare'] );
-			}
+			unset( $default_args['post__not_in'] );
 		} else {
 			unset( $default_args['offset'] );
 		}
@@ -1265,25 +1269,30 @@ class Embeddings extends Provider {
 		 */
 		$number = apply_filters( 'classifai_openai_embeddings_terms_per_job', 100 );
 
+		// Terms that already have embeddings — combined with $exclude when $all is false.
+		$term_exclude = $exclude;
+		if ( ! $all ) {
+			$term_exclude = array_values(
+				array_unique(
+					array_merge( $term_exclude, $this->objects_with_embeddings( 'term' ) )
+				)
+			);
+		}
+
 		$default_args = [
-			'taxonomy'     => $taxonomy,
-			'orderby'      => 'count',
-			'order'        => 'DESC',
-			'hide_empty'   => false,
-			'fields'       => 'ids',
-			'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare' => 'NOT EXISTS',
-			'number'       => $number,
-			'offset'       => 0,
-			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+			'taxonomy'   => $taxonomy,
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+			'hide_empty' => false,
+			'fields'     => 'ids',
+			'number'     => $number,
+			'offset'     => 0,
+			'exclude'    => $term_exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		];
 
 		$default_args = array_merge( $default_args, $args );
 
-		// If we want all terms, remove our meta query.
 		if ( $all ) {
-			unset( $default_args['meta_key'], $default_args['meta_compare'] );
-		} else {
 			unset( $default_args['offset'] );
 		}
 
@@ -1416,7 +1425,7 @@ class Embeddings extends Provider {
 		}
 
 		// Try to use the stored embeddings first.
-		$embeddings = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
+		$embeddings = $this->read_object_embedding( 'term', $term_id );
 
 		if ( ! empty( $embeddings ) && ! $force ) {
 			return $embeddings;
@@ -1442,7 +1451,7 @@ class Embeddings extends Provider {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
-			update_term_meta( $term_id, 'classifai_openai_embeddings', $embeddings );
+			$this->write_object_embedding( 'term', $term_id, $embeddings, md5( $content ) );
 		}
 
 		return $embeddings;

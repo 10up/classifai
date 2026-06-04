@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\Azure;
 
+use Classifai\Embeddings\HasEmbeddingsStorage;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Normalizer;
@@ -20,7 +21,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Embeddings extends OpenAI {
+
+	use HasEmbeddingsStorage;
+
 	const ID = 'azure_openai_embeddings';
+
+	/**
+	 * Legacy meta key still used by older installs / for backfill fallback.
+	 */
+	protected function legacy_embedding_meta_key(): string {
+		return 'classifai_azure_openai_embeddings';
+	}
 
 	/**
 	 * Embeddings URL fragment.
@@ -410,7 +421,7 @@ class Embeddings extends OpenAI {
 
 		// Try to use the stored embeddings first.
 		if ( ! $force ) {
-			$embeddings = get_post_meta( $post_id, 'classifai_azure_openai_embeddings', true );
+			$embeddings = $this->read_object_embedding( 'post', $post_id );
 
 			if ( ! empty( $embeddings ) ) {
 				return $embeddings;
@@ -457,7 +468,7 @@ class Embeddings extends OpenAI {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
-			update_post_meta( $post_id, 'classifai_azure_openai_embeddings', $embeddings );
+			$this->write_object_embedding( 'post', $post_id, $embeddings, md5( $content ) );
 		}
 
 		return $embeddings;
@@ -673,6 +684,11 @@ class Embeddings extends OpenAI {
 				}
 			}
 
+			$term_ids_with_embeddings = $this->objects_with_embeddings( 'term' );
+			if ( empty( $term_ids_with_embeddings ) ) {
+				continue;
+			}
+
 			$terms = get_terms(
 				[
 					'taxonomy'   => $tax,
@@ -680,7 +696,7 @@ class Embeddings extends OpenAI {
 					'order'      => 'DESC',
 					'hide_empty' => false,
 					'fields'     => 'ids',
-					'meta_key'   => 'classifai_azure_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'include'    => $term_ids_with_embeddings,
 					'number'     => $this->get_max_terms(),
 					'exclude'    => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 				]
@@ -699,7 +715,7 @@ class Embeddings extends OpenAI {
 					continue;
 				}
 
-				$term_embedding = get_term_meta( $term_id, 'classifai_azure_openai_embeddings', true );
+				$term_embedding = $this->read_object_embedding( 'term', (int) $term_id );
 
 				if ( ! empty( $term_embedding ) ) {
 					// Loop through the chunks and run a similarity calculation on each.
@@ -776,25 +792,29 @@ class Embeddings extends OpenAI {
 		 */
 		$number = apply_filters( 'classifai_azure_openai_embeddings_terms_per_job', 100 );
 
+		$term_exclude = $exclude;
+		if ( ! $all ) {
+			$term_exclude = array_values(
+				array_unique(
+					array_merge( $term_exclude, $this->objects_with_embeddings( 'term' ) )
+				)
+			);
+		}
+
 		$default_args = [
-			'taxonomy'     => $taxonomy,
-			'orderby'      => 'count',
-			'order'        => 'DESC',
-			'hide_empty'   => false,
-			'fields'       => 'ids',
-			'meta_key'     => 'classifai_azure_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare' => 'NOT EXISTS',
-			'number'       => $number,
-			'offset'       => 0,
-			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+			'taxonomy'   => $taxonomy,
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+			'hide_empty' => false,
+			'fields'     => 'ids',
+			'number'     => $number,
+			'offset'     => 0,
+			'exclude'    => $term_exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		];
 
 		$default_args = array_merge( $default_args, $args );
 
-		// If we want all terms, remove our meta query.
 		if ( $all ) {
-			unset( $default_args['meta_key'], $default_args['meta_compare'] );
-		} else {
 			unset( $default_args['offset'] );
 		}
 
@@ -927,7 +947,7 @@ class Embeddings extends OpenAI {
 		}
 
 		// Try to use the stored embeddings first.
-		$embeddings = get_term_meta( $term_id, 'classifai_azure_openai_embeddings', true );
+		$embeddings = $this->read_object_embedding( 'term', $term_id );
 
 		if ( ! empty( $embeddings ) && ! $force ) {
 			return $embeddings;
@@ -953,7 +973,7 @@ class Embeddings extends OpenAI {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
-			update_term_meta( $term_id, 'classifai_azure_openai_embeddings', $embeddings );
+			$this->write_object_embedding( 'term', $term_id, $embeddings, md5( $content ) );
 		}
 
 		return $embeddings;

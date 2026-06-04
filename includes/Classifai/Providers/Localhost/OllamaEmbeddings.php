@@ -6,6 +6,8 @@
 namespace Classifai\Providers\Localhost;
 
 use Classifai\Admin\Notifications;
+use Classifai\Embeddings\HasEmbeddingsStorage;
+use Classifai\Embeddings\MigrationRunner;
 use Classifai\Features\Classification;
 use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
@@ -26,10 +28,35 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class OllamaEmbeddings extends Ollama {
 
+	use HasEmbeddingsStorage;
+
 	/**
 	 * The Provider ID.
 	 */
 	const ID = 'ollama_embeddings';
+
+	/**
+	 * Legacy meta key still used by older installs / for backfill fallback.
+	 */
+	protected function legacy_embedding_meta_key(): string {
+		return 'classifai_ollama_embeddings';
+	}
+
+	/**
+	 * Ollama model is set in feature settings; reads pick that up so model swaps
+	 * land in a separate row instead of mixing dimensions in one bucket.
+	 */
+	protected function embeddings_model_id(): string {
+		if ( ! empty( $this->feature_instance ) ) {
+			$settings = $this->feature_instance->get_settings();
+			$model    = $settings[ static::ID ]['model'] ?? '';
+			if ( '' !== $model ) {
+				return (string) $model;
+			}
+		}
+
+		return MigrationRunner::DEFAULT_MODELS[ static::ID ] ?? 'default';
+	}
 
 	/**
 	 * Maximum number of terms we process.
@@ -382,18 +409,8 @@ class OllamaEmbeddings extends Ollama {
 		}
 
 		// Delete all post embeddings.
-		$embedding_posts = get_posts(
-			[
-				'post_type'      => 'any',
-				'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page
-				'fields'         => 'ids',
-				'meta_key'       => 'classifai_ollama_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare'   => 'EXISTS',
-			]
-		);
-
-		foreach ( $embedding_posts as $post_id ) {
-			delete_post_meta( $post_id, 'classifai_ollama_embeddings' );
+		foreach ( $this->objects_with_embeddings( 'post' ) as $post_id ) {
+			$this->delete_object_embedding( 'post', (int) $post_id );
 		}
 
 		// Hide the admin notice.
@@ -480,7 +497,7 @@ class OllamaEmbeddings extends Ollama {
 
 		// Try to use the stored embeddings first.
 		if ( ! $force ) {
-			$embeddings = get_post_meta( $post_id, 'classifai_ollama_embeddings', true );
+			$embeddings = $this->read_object_embedding( 'post', $post_id );
 
 			if ( ! empty( $embeddings ) ) {
 				return $embeddings;
@@ -530,7 +547,7 @@ class OllamaEmbeddings extends Ollama {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
-			update_post_meta( $post_id, 'classifai_ollama_embeddings', $embeddings );
+			$this->write_object_embedding( 'post', $post_id, $embeddings, md5( $content ) );
 		}
 
 		return $embeddings;
@@ -746,6 +763,11 @@ class OllamaEmbeddings extends Ollama {
 				}
 			}
 
+			$term_ids_with_embeddings = $this->objects_with_embeddings( 'term' );
+			if ( empty( $term_ids_with_embeddings ) ) {
+				continue;
+			}
+
 			$terms = get_terms(
 				[
 					'taxonomy'   => $tax,
@@ -753,7 +775,7 @@ class OllamaEmbeddings extends Ollama {
 					'order'      => 'DESC',
 					'hide_empty' => false,
 					'fields'     => 'ids',
-					'meta_key'   => 'classifai_ollama_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'include'    => $term_ids_with_embeddings,
 					'number'     => $this->get_max_terms(),
 					'exclude'    => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 				]
@@ -772,7 +794,7 @@ class OllamaEmbeddings extends Ollama {
 					continue;
 				}
 
-				$term_embedding = get_term_meta( $term_id, 'classifai_ollama_embeddings', true );
+				$term_embedding = $this->read_object_embedding( 'term', (int) $term_id );
 
 				if ( ! empty( $term_embedding ) ) {
 					// Loop through the chunks and run a similarity calculation on each.
@@ -849,25 +871,29 @@ class OllamaEmbeddings extends Ollama {
 		 */
 		$number = apply_filters( 'classifai_ollama_embeddings_terms_per_job', 100 );
 
+		$term_exclude = $exclude;
+		if ( ! $all ) {
+			$term_exclude = array_values(
+				array_unique(
+					array_merge( $term_exclude, $this->objects_with_embeddings( 'term' ) )
+				)
+			);
+		}
+
 		$default_args = [
-			'taxonomy'     => $taxonomy,
-			'orderby'      => 'count',
-			'order'        => 'DESC',
-			'hide_empty'   => false,
-			'fields'       => 'ids',
-			'meta_key'     => 'classifai_ollama_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare' => 'NOT EXISTS',
-			'number'       => $number,
-			'offset'       => 0,
-			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+			'taxonomy'   => $taxonomy,
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+			'hide_empty' => false,
+			'fields'     => 'ids',
+			'number'     => $number,
+			'offset'     => 0,
+			'exclude'    => $term_exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		];
 
 		$default_args = array_merge( $default_args, $args );
 
-		// If we want all terms, remove our meta query.
 		if ( $all ) {
-			unset( $default_args['meta_key'], $default_args['meta_compare'] );
-		} else {
 			unset( $default_args['offset'] );
 		}
 
@@ -1001,7 +1027,7 @@ class OllamaEmbeddings extends Ollama {
 		}
 
 		// Try to use the stored embeddings first.
-		$embeddings = get_term_meta( $term_id, 'classifai_ollama_embeddings', true );
+		$embeddings = $this->read_object_embedding( 'term', $term_id );
 
 		if ( ! empty( $embeddings ) && ! $force ) {
 			return $embeddings;
@@ -1027,7 +1053,7 @@ class OllamaEmbeddings extends Ollama {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
-			update_term_meta( $term_id, 'classifai_ollama_embeddings', $embeddings );
+			$this->write_object_embedding( 'term', $term_id, $embeddings, md5( $content ) );
 		}
 
 		return $embeddings;
