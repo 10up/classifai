@@ -232,7 +232,10 @@ const TextToSpeechPlugin = () => {
 				<>
 					<div style={ { marginTop: '12px' } }>
 						<ToggleControl
-							label={ __( 'Display audio controls', 'classifai' ) }
+							label={ __(
+								'Display audio controls',
+								'classifai'
+							) }
 							help={ __(
 								'Controls the display of the audio player on the front-end.',
 								'classifai'
