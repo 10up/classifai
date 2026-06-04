@@ -57,10 +57,12 @@ test.describe( 'Image processing Tests', () => {
 				.fill( 'password' );
 
 			// Allow feature to admin (open user permissions panel + check admin).
-			const permButton = page.locator(
-				'.components-panel__body.classifai-settings__user-permissions button'
-			);
-			await permButton.waitFor();
+			const permButton = page
+				.locator(
+					'.components-panel__body.classifai-settings__user-permissions button'
+				)
+				.first();
+			await permButton.waitFor( { state: 'attached' } );
 			const panelBody = permButton.locator(
 				'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " components-panel__body ")][1]'
 			);
@@ -75,14 +77,27 @@ test.describe( 'Image processing Tests', () => {
 				.locator( '.classifai-settings__user-based-opt-out input' )
 				.uncheck();
 
-			// Disable access for all users.
-			const removeBtns = page.locator(
-				'.classifai-settings__users .components-form-token-field__remove-token'
-			);
-			const removeCount = await removeBtns.count();
-			for ( let i = removeCount - 1; i >= 0; i-- ) {
-				await removeBtns.nth( i ).click();
-			}
+			// Disable access for all users. Dispatch directly to the store
+
+			// because the token field's tokens render asynchronously after a
+
+			// `/wp/v2/users?include=…` fetch, and the click-each-remove approach
+
+			// races with React.
+
+			await page.evaluate( () => {
+
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
+				// @ts-ignore
+
+				window.wp.data
+
+					.dispatch( 'classifai-settings' )
+
+					.setFeatureSettings( { users: [] } );
+
+			} );
 
 			const responsePromise = page.waitForResponse(
 				( res ) =>

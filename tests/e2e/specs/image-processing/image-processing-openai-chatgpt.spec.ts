@@ -78,14 +78,27 @@ for ( const provider of [ 'openai_chatgpt', 'xai_grok' ] as const ) {
 					)
 					.uncheck();
 
-				// Disable access for all users.
-				const removeBtns = page.locator(
-					'.classifai-settings__users .components-form-token-field__remove-token'
-				);
-				const removeCount = await removeBtns.count();
-				for ( let i = removeCount - 1; i >= 0; i-- ) {
-					await removeBtns.nth( i ).click();
-				}
+				// Disable access for all users. Dispatch directly to the store
+
+				// because the token field's tokens render asynchronously after a
+
+				// `/wp/v2/users?include=…` fetch, and the click-each-remove approach
+
+				// races with React.
+
+				await page.evaluate( () => {
+
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
+					// @ts-ignore
+
+					window.wp.data
+
+						.dispatch( 'classifai-settings' )
+
+						.setFeatureSettings( { users: [] } );
+
+				} );
 
 				const responsePromise = page.waitForResponse(
 					( res ) =>
@@ -488,14 +501,27 @@ test.describe( 'OpenAI ChatGPT Image Tag and Text Generator Tests', () => {
 				.locator( '.classifai-settings__user-based-opt-out input' )
 				.uncheck();
 
-			// Disable access for all users.
-			const removeBtns = page.locator(
-				'.classifai-settings__users .components-form-token-field__remove-token'
-			);
-			const removeCount = await removeBtns.count();
-			for ( let i = removeCount - 1; i >= 0; i-- ) {
-				await removeBtns.nth( i ).click();
-			}
+			// Disable access for all users. Dispatch directly to the store
+
+			// because the token field's tokens render asynchronously after a
+
+			// `/wp/v2/users?include=…` fetch, and the click-each-remove approach
+
+			// races with React.
+
+			await page.evaluate( () => {
+
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
+				// @ts-ignore
+
+				window.wp.data
+
+					.dispatch( 'classifai-settings' )
+
+					.setFeatureSettings( { users: [] } );
+
+			} );
 
 			const responsePromise = page.waitForResponse(
 				( res ) =>

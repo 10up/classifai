@@ -139,18 +139,21 @@ export class ClassifAIUtils {
 	}
 
 	async openUserPermissionsPanel(): Promise< void > {
-		const button = this.page
+		const panel = this.page
 			.locator(
-				'.components-panel__body.classifai-settings__user-permissions button'
+				'.components-panel__body.classifai-settings__user-permissions'
 			)
 			.first();
-		await button.waitFor( { state: 'attached' } );
-		const panelBody = button.locator(
-			'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " components-panel__body ")][1]'
-		);
-		const cls = ( await panelBody.getAttribute( 'class' ) ) || '';
+		await panel.waitFor( { state: 'visible' } );
+		const cls = ( await panel.getAttribute( 'class' ) ) || '';
 		if ( ! cls.includes( 'is-opened' ) ) {
-			await button.click();
+			await panel
+				.locator( '.components-panel__body-title button' )
+				.first()
+				.click();
+			// Wait for the React class update so subsequent reads see the
+			// expanded panel (token field, role checkboxes, etc.).
+			await expect( panel ).toHaveClass( /is-opened/ );
 		}
 	}
 
@@ -213,13 +216,17 @@ export class ClassifAIUtils {
 		await this.enableFeature();
 		await this.openUserPermissionsPanel();
 
+		// Clear users BEFORE toggling role checkboxes. Toggling a role triggers
+		// a React re-render of the permissions panel which momentarily strips
+		// the user tokens from the DOM, making the subsequent removal a no-op.
+		await this.disableFeatureForUsers();
+
 		for ( const role of roles ) {
 			await this.page
 				.locator( `.settings-allowed-roles input#${ role }` )
 				.uncheck( { force: true } );
 		}
 
-		await this.disableFeatureForUsers();
 		await this.page.waitForTimeout( 100 );
 		await this.saveFeatureSettings();
 	}
@@ -244,29 +251,50 @@ export class ClassifAIUtils {
 			}
 		}
 
-		await this.disableFeatureForUsers();
-
-		for ( const user of users ) {
-			await this.page
-				.locator(
-					'.classifai-settings__users input.components-form-token-field__input'
-				)
-				.fill( user );
-			await this.page.locator( '[aria-label="admin (admin)"]' ).click();
+		// Resolve usernames to IDs via WP REST so we can dispatch the user
+		// array directly. The token field's autocomplete is debounced and
+		// flaky to drive through the UI.
+		const userIds: number[] = [];
+		for ( const username of users ) {
+			const resp = await this.page.request.get(
+				`/wp-json/wp/v2/users?search=${ encodeURIComponent(
+					username
+				) }&context=view&__fields=id,slug`
+			);
+			const data = ( await resp.json() ) as Array< {
+				id: number;
+				slug: string;
+			} >;
+			const match = data.find( ( u ) => u.slug === username ) ?? data[ 0 ];
+			if ( match ) {
+				userIds.push( match.id );
+			}
 		}
+		await this.page.evaluate( ( ids: number[] ) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			window.wp.data
+				.dispatch( 'classifai-settings' )
+				.setFeatureSettings( { users: ids } );
+		}, userIds );
 
 		await this.saveFeatureSettings();
 	}
 
 	async disableFeatureForUsers(): Promise< void > {
-		await this.openUserPermissionsPanel();
-		const removeBtns = this.page.locator(
-			'.classifai-settings__users .components-form-token-field__remove-token'
-		);
-		const count = await removeBtns.count();
-		for ( let i = count - 1; i >= 0; i-- ) {
-			await removeBtns.nth( i ).click();
-		}
+		// Clear the users array directly via the classifai-settings store. The
+		// token field's tokens are populated asynchronously after fetching user
+		// details via `/wp/v2/users?include=…`, so the click-each-remove-token
+		// approach races with the React render and often no-ops. Dispatching to
+		// the store is deterministic and the subsequent saveFeatureSettings
+		// call persists it.
+		await this.page.evaluate( () => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			window.wp.data
+				.dispatch( 'classifai-settings' )
+				.setFeatureSettings( { users: [] } );
+		} );
 	}
 
 	async enableFeatureOptOut( feature: FeatureKey ): Promise< void > {

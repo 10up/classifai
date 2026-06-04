@@ -686,9 +686,9 @@ test.describe( '[Language processing] Classify content (IBM Watson - NLU) Tests'
 		const removeBtns = page.locator(
 			'.classifai-settings__users .components-form-token-field__remove-token'
 		);
-		const removeCount = await removeBtns.count();
-		for ( let i = removeCount - 1; i >= 0; i-- ) {
-			await removeBtns.nth( i ).click();
+		let __safety = 50;
+		while ( ( await removeBtns.count() ) > 0 && __safety-- > 0 ) {
+			await removeBtns.first().click();
 		}
 		await page
 			.locator(
