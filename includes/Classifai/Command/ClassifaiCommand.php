@@ -1349,6 +1349,72 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::warning( "Failed to classify $post_id: " . $output->get_error_message() );
 		}
 	}
+
+	/**
+	 * Migrate legacy embedding meta into the classifai_embeddings table.
+	 *
+	 * Runs the backfill inline, without Action Scheduler. Useful for hosts where
+	 * Action Scheduler is paused or for large sites that want a controlled run.
+	 *
+	 * ## Options
+	 *
+	 * [--batch-size=<int>]
+	 * : Number of objects to process per batch. Default 100.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp classifai migrate-embeddings
+	 *     wp classifai migrate-embeddings --batch-size=500
+	 *
+	 * @param array $args Positional args (unused).
+	 * @param array $opts Associative options.
+	 */
+	public function migrate_embeddings( $args = [], $opts = [] ) {
+		$batch_size = isset( $opts['batch-size'] ) ? max( 1, (int) $opts['batch-size'] ) : 100;
+
+		\Classifai\Embeddings\Schema::maybe_install();
+		$runner = new \Classifai\Embeddings\MigrationRunner();
+
+		\WP_CLI::log( 'Starting embeddings migration...' );
+
+		$total_migrated = 0;
+		$runner->mark_running();
+
+		while ( true ) {
+			$batch = $runner->scan( $batch_size );
+			if ( empty( $batch ) ) {
+				break;
+			}
+
+			$runner->process_batch( $batch );
+			$total_migrated += count( $batch );
+			\WP_CLI::log( sprintf( 'Migrated %d objects (cumulative: %d).', count( $batch ), $total_migrated ) );
+		}
+
+		$runner->mark_completed();
+		\WP_CLI::success( sprintf( 'Embeddings migration complete. Total objects migrated: %d.', $total_migrated ) );
+	}
+
+	/**
+	 * Show the current status of the embeddings migration.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp classifai embeddings-status
+	 *
+	 * @param array $args Positional args (unused).
+	 * @param array $opts Associative options (unused).
+	 */
+	public function embeddings_status( $args = [], $opts = [] ) {
+		unset( $args, $opts );
+		\Classifai\Embeddings\Schema::maybe_install();
+		$runner    = new \Classifai\Embeddings\MigrationRunner();
+		$status    = $runner->status();
+		$remaining = count( $runner->scan( PHP_INT_MAX ) );
+
+		\WP_CLI::log( sprintf( 'Status:    %s', $status ) );
+		\WP_CLI::log( sprintf( 'Remaining: %d legacy meta rows', $remaining ) );
+	}
 }
 
 try {

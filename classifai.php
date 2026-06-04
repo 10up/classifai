@@ -150,6 +150,10 @@ function classifai_autoload_notice() {
  */
 function classifai_activation() {
 	set_transient( 'classifai_activation_notice', 'classifai', HOUR_IN_SECONDS );
+
+	if ( classifai_autoload() ) {
+		\Classifai\Embeddings\Schema::maybe_install();
+	}
 }
 register_activation_hook( __FILE__, 'classifai_activation' );
 

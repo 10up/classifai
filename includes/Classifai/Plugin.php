@@ -37,15 +37,40 @@ class Plugin {
 	 * Setup WP hooks
 	 */
 	public function enable() {
+		add_action( 'init', [ \Classifai\Embeddings\Schema::class, 'maybe_install' ], 1 );
 		add_action( 'init', [ $this, 'init' ], 20 );
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
 		add_action( 'admin_init', [ $this, 'add_privacy_policy_content' ] );
 		add_action( 'admin_init', [ $this, 'maybe_migrate_to_v3' ] );
+		add_action( 'admin_init', [ $this, 'maybe_schedule_embeddings_migration' ] );
+		add_action( 'after_classifai_init', [ $this, 'register_embeddings_migration_hooks' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, [ $this, 'filter_plugin_action_links' ] );
 		add_filter( 'robots_txt', [ $this, 'maybe_block_ai_crawlers' ] );
 		add_action( 'after_classifai_init', [ $this, 'load_action_scheduler' ] );
+	}
+
+	/**
+	 * Wire Action Scheduler callbacks for the embeddings backfill.
+	 *
+	 * Runs on after_classifai_init so Action Scheduler is loaded.
+	 */
+	public function register_embeddings_migration_hooks() {
+		( new \Classifai\Embeddings\MigrationRunner() )->register_hooks();
+	}
+
+	/**
+	 * Schedule the embeddings backfill on plugin upgrade.
+	 *
+	 * Idempotent — returns immediately if already completed or already queued.
+	 */
+	public function maybe_schedule_embeddings_migration() {
+		$runner = new \Classifai\Embeddings\MigrationRunner();
+		if ( \Classifai\Embeddings\MigrationRunner::STATUS_COMPLETED === $runner->status() ) {
+			return;
+		}
+		$runner->schedule();
 	}
 
 	/**
