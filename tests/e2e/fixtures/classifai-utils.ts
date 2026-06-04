@@ -576,12 +576,7 @@ export class ClassifAIUtils {
 	}
 
 	async verifyClassifyContentEnabled( enabled = true ): Promise< void > {
-		await this.page.goto( '/wp-admin/edit.php' );
-		await this.page
-			.locator( '#the-list tr:nth-child(1) td.title a.row-title' )
-			.first()
-			.click();
-		await this.closeWelcomeGuide();
+		await this.editFreshPostInBlockEditor( 'Verify ClassifAI panel' );
 		await this.openClassifAIPostPanel();
 		const target = this.page.locator(
 			'label.components-toggle-control__label',
@@ -611,6 +606,22 @@ export class ClassifAIUtils {
 			await expect( flagged ).toHaveCount( 0 );
 			await expect( flags ).toHaveCount( 0 );
 		}
+	}
+
+	/**
+	 * Create a publish-state post via REST and navigate to its edit page in the
+	 * block editor. Verify helpers use this so they don't depend on whatever
+	 * post (or post type) happens to be first on /wp-admin/edit.php.
+	 */
+	async editFreshPostInBlockEditor( title: string ): Promise< void > {
+		const post = ( await this.requestUtils.createPost( {
+			title,
+			status: 'publish',
+		} ) ) as { id: number };
+		await this.page.goto(
+			`/wp-admin/post.php?post=${ post.id }&action=edit`
+		);
+		await this.closeWelcomeGuide();
 	}
 
 	async verifyExcerptGenerationEnabled( enabled = true ): Promise< void > {
