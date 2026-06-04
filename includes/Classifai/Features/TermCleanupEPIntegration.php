@@ -131,12 +131,13 @@ class TermCleanupEPIntegration {
 	 */
 	public function add_vector_field_to_term_sync( array $args, int $term_id ): array {
 		// Try to use the stored embeddings first.
-		$meta_key   = $this->term_cleanup->get_embeddings_meta_key();
-		$embeddings = get_term_meta( $term_id, $meta_key, true );
+		$provider   = $this->term_cleanup->get_feature_provider_instance();
+		$embeddings = method_exists( $provider, 'read_object_embedding' )
+			? $provider->read_object_embedding( 'term', $term_id )
+			: [];
 
 		// If they don't exist, make API requests to generate them.
-		if ( ! $embeddings ) {
-			$provider   = $this->term_cleanup->get_feature_provider_instance();
+		if ( empty( $embeddings ) ) {
 			$embeddings = $provider->generate_embeddings_for_term( $term_id, false, $this->term_cleanup );
 		}
 

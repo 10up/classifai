@@ -476,17 +476,21 @@ class TermCleanup extends Feature {
 			}
 		}
 
-		$meta_key = sanitize_text_field( $this->get_embeddings_meta_key() );
-		$args     = [
-			'taxonomy'     => $taxonomy,
-			'orderby'      => 'count',
-			'order'        => 'DESC',
-			'hide_empty'   => false,
-			'fields'       => 'ids',
-			'meta_key'     => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare' => 'NOT EXISTS',
-			'number'       => $this->get_max_terms(),
-			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+		$provider = $this->get_feature_provider_instance();
+
+		// Terms that already have embeddings — these get excluded so we only generate the missing ones.
+		$with_embeddings = method_exists( $provider, 'objects_with_embeddings' )
+			? $provider->objects_with_embeddings( 'term' )
+			: [];
+
+		$args = [
+			'taxonomy'   => $taxonomy,
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+			'hide_empty' => false,
+			'fields'     => 'ids',
+			'number'     => $this->get_max_terms(),
+			'exclude'    => array_values( array_unique( array_merge( $exclude, $with_embeddings ) ) ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		];
 
 		$terms = get_terms( $args );
@@ -494,8 +498,6 @@ class TermCleanup extends Feature {
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
 			return false;
 		}
-
-		$provider = $this->get_feature_provider_instance();
 
 		// Generate embedding data for each term.
 		foreach ( $terms as $term_id ) {
@@ -553,19 +555,24 @@ class TermCleanup extends Feature {
 		$processed = $args['processed'] ?? 0;
 		$term_id   = $args['term_id'] ?? 0;
 		$offset    = $args['offset'] ?? 0;
-		$meta_key  = sanitize_text_field( $this->get_embeddings_meta_key() );
+		$provider  = $this->get_feature_provider_instance();
+
+		if ( ! method_exists( $provider, 'read_object_embedding' ) || ! method_exists( $provider, 'objects_with_embeddings' ) ) {
+			return false;
+		}
+
+		$with_embeddings = $provider->objects_with_embeddings( 'term' );
 
 		if ( ! $term_id ) {
 			$params = [
-				'taxonomy'     => $taxonomy,
-				'orderby'      => 'count',
-				'order'        => 'DESC',
-				'hide_empty'   => false,
-				'fields'       => 'ids',
-				'meta_key'     => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare' => 'EXISTS',
-				'number'       => 1,
-				'offset'       => $processed,
+				'taxonomy'   => $taxonomy,
+				'orderby'    => 'count',
+				'order'      => 'DESC',
+				'hide_empty' => false,
+				'fields'     => 'ids',
+				'include'    => $with_embeddings,
+				'number'     => 1,
+				'offset'     => $processed,
 			];
 
 			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
@@ -584,55 +591,71 @@ class TermCleanup extends Feature {
 			$args['offset']  = $offset;
 		}
 
-		$meta_key       = sanitize_text_field( $this->get_embeddings_meta_key() );
-		$term_embedding = get_term_meta( $term_id, $meta_key, true );
+		$term_chunks = $provider->read_object_embedding( 'term', (int) $term_id );
 
-		if ( 1 === count( $term_embedding ) ) {
-			$term_embedding = $term_embedding[0];
+		if ( empty( $term_chunks ) ) {
+			return false;
 		}
 
-		global $wpdb;
-		$limit    = apply_filters( 'classifai_term_cleanup_compare_limit', 2000, $taxonomy );
-		$meta_key = sanitize_text_field( $this->get_embeddings_meta_key() );
+		// Compare against the source term's first chunk (current behavior is single-chunk per term).
+		$term_embedding = $term_chunks[0];
 
-		// SQL query to retrieve term meta using joins
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Running a custom query to get 1k terms embeddings at a time.
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT DISTINCT t.term_id, tm.meta_value, tt.count
-				FROM {$wpdb->terms} AS t
-				INNER JOIN {$wpdb->term_taxonomy} AS tt ON t.term_id = tt.term_id
-				INNER JOIN {$wpdb->termmeta} AS tm ON t.term_id = tm.term_id
+		global $wpdb;
+
+		/**
+		 * Filter the limit of terms to compare.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_term_cleanup_compare_limit
+		 *
+		 * @param int    $limit    Limit of terms to compare.
+		 * @param string $taxonomy Taxonomy to process.
+		 * @return int Limit of terms to compare.
+		 */
+		$limit = apply_filters( 'classifai_term_cleanup_compare_limit', 2000, $taxonomy );
+
+		// Pull the next batch of candidate term IDs from term_taxonomy,
+		// restricted to terms that have an embedding stored.
+		if ( empty( $with_embeddings ) ) {
+			$candidate_term_ids = [];
+		} else {
+			$placeholders = implode( ',', array_fill( 0, count( $with_embeddings ), '%d' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholders are %d generated above; the rest of the query is %s/%d via prepare().
+			$query = "SELECT DISTINCT tt.term_id
+				FROM {$wpdb->term_taxonomy} AS tt
 				WHERE tt.taxonomy = %s
-				AND tm.meta_key = %s
-				AND t.term_id != %d
+				AND tt.term_id IN ({$placeholders})
+				AND tt.term_id != %d
 				AND tt.parent = 0
 				ORDER BY tt.count DESC
-				LIMIT %d OFFSET %d",
-				$taxonomy,
-				$meta_key,
-				$term_id,
-				$limit,
-				absint( $offset + $processed ) // Add the processed terms counts to the offset to skip already processed terms.
-			)
-		);
-		$count   = count( $results );
+				LIMIT %d OFFSET %d";
+
+			$query_args = array_merge(
+				[ $taxonomy ],
+				$with_embeddings,
+				[ (int) $term_id, $limit, absint( $offset + $processed ) ]
+			);
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- batched comparison query against the term taxonomy table.
+			$candidate_term_ids = $wpdb->get_col( $wpdb->prepare( $query, $query_args ) );
+		}
+
+		$count = count( $candidate_term_ids );
 
 		$calculations  = new EmbeddingCalculations();
 		$similar_terms = [];
 
-		foreach ( $results as $index => $result ) {
-			// Skip if the term is the same as the term we are comparing.
-			if ( $term_id === $result->term_id ) {
+		foreach ( $candidate_term_ids as $compare_term_id ) {
+			$compare_term_id = (int) $compare_term_id;
+			if ( $term_id === $compare_term_id ) {
 				continue;
 			}
 
-			$compare_term_id   = $result->term_id;
-			$compare_embedding = maybe_unserialize( $result->meta_value );
-
-			if ( 1 === count( $compare_embedding ) ) {
-				$compare_embedding = $compare_embedding[0];
+			$compare_chunks = $provider->read_object_embedding( 'term', $compare_term_id );
+			if ( empty( $compare_chunks ) ) {
+				continue;
 			}
+			$compare_embedding = $compare_chunks[0];
 
 			$similarity = $calculations->cosine_similarity( $term_embedding, $compare_embedding );
 			if ( false !== $similarity && ( 1 - $similarity ) >= ( $threshold / 100 ) ) {
@@ -670,19 +693,25 @@ class TermCleanup extends Feature {
 	 * @return array|bool|WP_Error
 	 */
 	public function get_similar_terms_using_elasticpress( string $taxonomy, float $threshold, array $args = [] ) {
-		$processed = $args['processed'] ?? 0;
-		$meta_key  = sanitize_text_field( $this->get_embeddings_meta_key() );
+		$processed       = $args['processed'] ?? 0;
+		$provider        = $this->get_feature_provider_instance();
+		$with_embeddings = method_exists( $provider, 'objects_with_embeddings' )
+			? $provider->objects_with_embeddings( 'term' )
+			: [];
+
+		if ( empty( $with_embeddings ) ) {
+			return false;
+		}
 
 		$params = [
-			'taxonomy'     => $taxonomy,
-			'orderby'      => 'count',
-			'order'        => 'DESC',
-			'hide_empty'   => false,
-			'fields'       => 'ids',
-			'meta_key'     => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare' => 'EXISTS',
-			'number'       => 10,
-			'offset'       => $processed,
+			'taxonomy'   => $taxonomy,
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+			'hide_empty' => false,
+			'fields'     => 'ids',
+			'include'    => $with_embeddings,
+			'number'     => 10,
+			'offset'     => $processed,
 		];
 
 		if ( is_taxonomy_hierarchical( $taxonomy ) ) {
@@ -837,15 +866,19 @@ class TermCleanup extends Feature {
 				</p>
 				<?php
 			} else {
-				$meta_key  = sanitize_text_field( $this->get_embeddings_meta_key() );
-				$generated = wp_count_terms(
-					[
-						'taxonomy'     => $taxonomy,
-						'hide_empty'   => false,
-						'meta_key'     => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-						'meta_compare' => 'EXISTS',
-					]
-				);
+				$provider        = $this->get_feature_provider_instance();
+				$with_embeddings = method_exists( $provider, 'objects_with_embeddings' )
+					? $provider->objects_with_embeddings( 'term' )
+					: [];
+				$generated       = empty( $with_embeddings )
+					? 0
+					: wp_count_terms(
+						[
+							'taxonomy'   => $taxonomy,
+							'hide_empty' => false,
+							'include'    => $with_embeddings,
+						]
+					);
 				?>
 				<p>
 					<span class="spinner is-active" style="float:none; margin: 0px; vertical-align: bottom;"></span>
