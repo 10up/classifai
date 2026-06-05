@@ -636,20 +636,12 @@ export class ClassifAIUtils {
 		await this.editor.openDocumentSettingsSidebar();
 		await this.activatePostTab();
 
-		// Find the Excerpt panel heading (PluginDocumentSettingPanel) and expand
-		// it if collapsed. Works for both legacy components-panel__body and the
-		// WP 6.6+ heading-button structure.
-		const excerptHeadingBtn = this.page
-			.getByRole( 'button', { name: 'Excerpt', exact: true } )
-			.first();
-		if ( await excerptHeadingBtn.count() ) {
-			const aria = await excerptHeadingBtn.getAttribute( 'aria-expanded' );
-			if ( aria !== 'true' ) {
-				await excerptHeadingBtn.click();
-			}
-		}
+		// Find and open the excerpt panel.
+		await this.page
+			.locator( '.editor-post-excerpt__dropdown button' )
+			.click();
 
-		const btn = this.page.locator( 'button.classifai-post-excerpt' );
+		const btn = this.page.locator( '.classifai-excerpt-generation button' );
 		if ( enabled ) {
 			await expect( btn.first() ).toBeVisible();
 		} else {

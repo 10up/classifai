@@ -10,7 +10,7 @@ import { Component } from '@wordpress/element';
  * Internal dependencies
  */
 
-const ExcerptPanel = ( { children } ) => {
+const ExcerptPrePublishPanel = ( { children } ) => {
 	const panelBodyTitle = [
 		__( 'Suggestion:' ),
 		<span className="editor-post-publish-panel__link" key="label">
@@ -29,7 +29,7 @@ const ExcerptPanel = ( { children } ) => {
 	);
 };
 
-class MaybeExcerptPanel extends Component {
+class MaybeExcerptPrePublishPanel extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
@@ -55,7 +55,11 @@ class MaybeExcerptPanel extends Component {
 	 */
 	render() {
 		if ( ! this.state.hadExcerptWhenOpeningThePanel ) {
-			return <ExcerptPanel>{ this.props.children }</ExcerptPanel>;
+			return (
+				<ExcerptPrePublishPanel>
+					{ this.props.children }
+				</ExcerptPrePublishPanel>
+			);
 		}
 
 		return null;
@@ -67,4 +71,4 @@ export default withSelect( ( select ) => {
 		excerpt: select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
 		isPublishPanelOpen: select( 'core/editor' ).isPublishSidebarOpened(),
 	};
-} )( MaybeExcerptPanel );
+} )( MaybeExcerptPrePublishPanel );

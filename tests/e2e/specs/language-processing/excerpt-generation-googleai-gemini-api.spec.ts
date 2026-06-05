@@ -102,27 +102,15 @@ test.describe( '[Language processing] Excerpt Generation Tests', () => {
 		await classifaiUtils.editor.openDocumentSettingsSidebar();
 
 		// Find and open the excerpt panel.
-		const excerptPanelBtn = page
-			.locator(
-				'.components-panel__body .components-panel__body-title button:has-text("Excerpt")'
-			)
-			.first();
-		await excerptPanelBtn.waitFor();
-		const panel = excerptPanelBtn.locator(
-			'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " components-panel__body ")][1]'
-		);
-		const cls = ( await panel.getAttribute( 'class' ) ) || '';
-		if ( ! cls.includes( 'is-opened' ) ) {
-			await excerptPanelBtn.click();
-		}
-
-		// Verify button exists.
-		const generateBtn = panel.locator( '.editor-post-excerpt button' );
-		await expect( generateBtn ).toBeVisible();
+		await page.locator( '.editor-post-excerpt__dropdown button' ).click();
 
 		// Click on button and verify data loads in.
-		await generateBtn.click();
-		await expect( panel.locator( 'textarea' ) ).toHaveValue( data );
+		await page.locator( '.classifai-excerpt-generation button' ).click();
+		await expect(
+			page.locator(
+				'.editor-post-excerpt .editor-post-excerpt__textarea textarea'
+			)
+		).toHaveValue( data );
 	} );
 
 	test( 'Can see the generate excerpt button in a post (Classic Editor)', async ( {
