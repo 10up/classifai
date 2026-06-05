@@ -593,6 +593,7 @@ class BulkActions {
 			},
 			array_merge( $this->language_processing_features, $this->media_processing_features )
 		);
+		$feature_id      = '';
 
 		if ( empty( $all_feature_ids ) ) {
 			return;

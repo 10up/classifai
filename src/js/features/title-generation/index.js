@@ -97,13 +97,13 @@ const TitleGenerationPlugin = () => {
 		}
 
 		return (
-			<Flex gap="5" wrap>
+			<Flex gap="5" wrap align="flex-start">
 				{ dataToRender.map( ( item, i ) => {
 					return (
 						<FlexItem
 							className="classifai-title"
 							key={ i }
-							style={ { flexGrow: 1 } }
+							style={ { flexBasis: 'calc(50% - 10px)' } }
 						>
 							<TextareaControl
 								rows="5"
@@ -117,6 +117,7 @@ const TitleGenerationPlugin = () => {
 							/>
 							<Button
 								variant="secondary"
+								style={ { marginTop: '8px' } }
 								onClick={ async () => {
 									const isDirty =
 										select(
@@ -174,6 +175,7 @@ const TitleGenerationPlugin = () => {
 						<Button
 							className={ feature?.feature }
 							variant="secondary"
+							disabled={ isOpen }
 							onClick={ () => buttonClick( path ) }
 						>
 							{ feature?.buttonText }

@@ -38,24 +38,24 @@
   },
   "devDependencies": {
     "@10up/cypress-wp-utils": "^0.6.0",
-    "@types/wordpress__blocks": "^12.5.18",
+    "@types/wordpress__blocks": "^15.17.0",
     "@wordpress/env": "^10.38.0",
     "@wordpress/scripts": "^31.3.0",
-    "cypress": "^15.8.2",
+    "cypress": "^15.16.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-mochawesome-reporter": "^4.0.2",
-    "cypress-plugin-tab": "^1.0.5",
+    "cypress-plugin-tab": "^2.0.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
+    "lint-staged": "^16.4.0",
     "node-wp-i18n": "^1.2.8",
     "wp-hooks-documentor": "github:10up/wp-hooks-documentor#build"
   },
   "dependencies": {
-    "@wordpress/icons": "^11.4.0",
-    "choices.js": "^11.1.0",
+    "@wordpress/icons": "^13.0.0",
+    "choices.js": "^11.2.3",
     "classnames": "^2.5.1",
-    "motion": "^12.24.7",
-    "react-router-dom": "^7.12.0",
+    "motion": "^12.40.0",
+    "react-router-dom": "^7.15.1",
     "tippy.js": "^6.3.7"
   }
 }
