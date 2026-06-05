@@ -164,7 +164,17 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 
 	return card.length ? (
 		<>
-			{ allBelowThreshold ? (
+			<Notice
+				status="success"
+				isDismissible={ false }
+				className="classifai__classification-previewer-result-notice"
+			>
+				{ __(
+					'Results for each taxonomy are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.',
+					'classifai'
+				) }
+			</Notice>
+			{ allBelowThreshold && (
 				<Notice
 					status="warning"
 					isDismissible={ false }
@@ -172,17 +182,6 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 				>
 					{ __(
 						'None of the terms are above the configured threshold.',
-						'classifai'
-					) }
-				</Notice>
-			) : (
-				<Notice
-					status="success"
-					isDismissible={ false }
-					className="classifai__classification-previewer-result-notice"
-				>
-					{ __(
-						'Results for each taxonomy are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.',
 						'classifai'
 					) }
 				</Notice>
