@@ -1383,7 +1383,7 @@ abstract class Feature {
 		$common_debug_info = [
 			__( 'Authenticated', 'classifai' )      => self::get_debug_value_text( $this->is_configured() ),
 			__( 'Status', 'classifai' )             => self::get_debug_value_text( $feature_settings['status'], 1 ),
-			__( 'Allowed roles', 'classifai' )      => implode( ', ', $roles ?? [] ),
+			__( 'Allowed roles', 'classifai' )      => implode( ', ', $roles ),
 			__( 'Allowed users', 'classifai' )      => implode( ', ', $feature_settings['users'] ?? [] ),
 			__( 'User based opt-out', 'classifai' ) => self::get_debug_value_text( $feature_settings['user_based_opt_out'], 1 ),
 			__( 'Provider', 'classifai' )           => $feature_settings['provider'],

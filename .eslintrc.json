@@ -32,6 +32,7 @@
 	"settings": {
 		"import/core-modules": [
 			"@wordpress/api-fetch",
+			"@wordpress/blocks",
 			"@wordpress/block-editor",
 			"@wordpress/block-library",
 			"@wordpress/commands",
@@ -41,7 +42,7 @@
 			"@wordpress/data",
 			"@wordpress/dom-ready",
 			"@wordpress/dom",
-      "@wordpress/edit-post",
+			"@wordpress/edit-post",
 			"@wordpress/editor",
 			"@wordpress/element",
 			"@wordpress/hooks",
