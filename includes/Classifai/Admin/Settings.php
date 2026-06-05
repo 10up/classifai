@@ -6,7 +6,6 @@ use Classifai\Features\Classification;
 use Classifai\Features\RecommendedContent;
 use Classifai\Services\ServicesManager;
 use Classifai\Taxonomy\TaxonomyFactory;
-use Classifai\Helpers\CredentialReuse;
 use Classifai\Providers\CredentialObfuscator;
 
 use function Classifai\get_asset_info;
@@ -306,62 +305,6 @@ class Settings {
 				],
 			]
 		);
-
-		register_rest_route(
-			'classifai/v1',
-			'credential-reuse/(?P<feature_id>[a-zA-Z0-9_-]+)',
-			[
-				[
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_reusable_credentials' ],
-					'args'                => array(
-						'feature_id' => array(
-							'required'          => true,
-							'type'              => 'string',
-							'sanitize_callback' => 'sanitize_text_field',
-							'validate_callback' => 'rest_validate_request_arg',
-							'description'       => esc_html__( 'Feature ID to get reusable credentials for.', 'classifai' ),
-						),
-					),
-					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
-				],
-			]
-		);
-
-		register_rest_route(
-			'classifai/v1',
-			'credential-reuse/copy',
-			[
-				[
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'copy_credentials' ],
-					'args'                => array(
-						'source_feature_id' => array(
-							'required'          => true,
-							'type'              => 'string',
-							'sanitize_callback' => 'sanitize_text_field',
-							'validate_callback' => 'rest_validate_request_arg',
-							'description'       => esc_html__( 'Source feature ID to copy credentials from.', 'classifai' ),
-						),
-						'target_feature_id' => array(
-							'required'          => true,
-							'type'              => 'string',
-							'sanitize_callback' => 'sanitize_text_field',
-							'validate_callback' => 'rest_validate_request_arg',
-							'description'       => esc_html__( 'Target feature ID to copy credentials to.', 'classifai' ),
-						),
-						'provider_id'       => array(
-							'required'          => true,
-							'type'              => 'string',
-							'sanitize_callback' => 'sanitize_text_field',
-							'validate_callback' => 'rest_validate_request_arg',
-							'description'       => esc_html__( 'Provider ID to copy.', 'classifai' ),
-						),
-					),
-					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
-				],
-			]
-		);
 	}
 
 	/**
@@ -579,52 +522,6 @@ class Settings {
 		];
 
 		return rest_ensure_response( $response );
-	}
-
-	/**
-	 * Get reusable credentials for a feature.
-	 *
-	 * @param \WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response
-	 */
-	public function get_reusable_credentials( \WP_REST_Request $request ): \WP_REST_Response {
-		$feature_id = $request->get_param( 'feature_id' );
-		$reusable   = CredentialReuse::get_reusable_credentials( $feature_id );
-
-		// Add provider display names for better UX.
-		foreach ( $reusable as $provider_id => &$provider_data ) {
-			$provider_data['provider_display_name'] = CredentialReuse::get_provider_display_name( $provider_id );
-		}
-
-		return rest_ensure_response( $reusable );
-	}
-
-	/**
-	 * Copy credentials between features.
-	 *
-	 * @param \WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public function copy_credentials( \WP_REST_Request $request ) {
-		$source_feature_id = $request->get_param( 'source_feature_id' );
-		$target_feature_id = $request->get_param( 'target_feature_id' );
-		$provider_id       = $request->get_param( 'provider_id' );
-
-		$success = CredentialReuse::copy_provider_credentials(
-			$source_feature_id,
-			$target_feature_id,
-			$provider_id
-		);
-
-		if ( ! $success ) {
-			return new \WP_Error(
-				'copy_failed',
-				__( 'Failed to copy credentials.', 'classifai' ),
-				[ 'status' => 400 ]
-			);
-		}
-
-		return rest_ensure_response( [ 'success' => true ] );
 	}
 
 	/**

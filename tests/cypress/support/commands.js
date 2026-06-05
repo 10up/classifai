@@ -642,10 +642,7 @@ Cypress.Commands.add( 'saveGeneralSettings', () => {
 /**
  * Enable Feature.
  */
-Cypress.Commands.add( 'enableFeature', ( disableCredentialReuseModal = true ) => {
-	if ( disableCredentialReuseModal ) {
-		cy.disableCredentialReuseModal();
-	}
+Cypress.Commands.add( 'enableFeature', () => {
 	cy.get( '.classifai-enable-feature-toggle input[type="checkbox"]' ).check();
 } );
 
@@ -872,26 +869,6 @@ Cypress.Commands.add( 'classicCreateProduct', ( { title, content } ) => {
 	cy.visit( '/wp-admin/post-new.php?post_type=product' );
 	cy.get( '#title' ).type( title );
 	cy.get( '#content' ).type( content );
-} );
-
-/**
- * Disable credential reuse modal for all tests.
- * This prevents the modal from appearing when enabling features.
- */
-Cypress.Commands.add( 'disableCredentialReuseModal', () => {
-	cy.window().then( ( win ) => {
-		win.localStorage.setItem( 'classifai_dont_ask_credential_reuse', 'true' );
-	} );
-} );
-
-/**
- * Enable credential reuse modal (for testing the modal itself).
- * This allows the modal to appear when enabling features.
- */
-Cypress.Commands.add( 'enableCredentialReuseModal', () => {
-	cy.window().then( ( win ) => {
-		win.localStorage.removeItem( 'classifai_dont_ask_credential_reuse' );
-	} );
 } );
 
 /**
