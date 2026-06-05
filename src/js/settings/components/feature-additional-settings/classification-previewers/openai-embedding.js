@@ -85,6 +85,20 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 		} )();
 	}, [ postId ] );
 
+	const hasAnyTags = Object.keys( responseData ).some(
+		( taxSlug ) => responseData[ taxSlug ]?.data?.length > 0
+	);
+
+	const allBelowThreshold =
+		hasAnyTags &&
+		Object.keys( responseData ).every( ( taxSlug ) =>
+			( responseData[ taxSlug ]?.data || [] ).every( ( tag ) => {
+				const threshold = settings[ `${ taxSlug }_threshold` ];
+				const score = normalizeScore( tag.score );
+				return score < threshold;
+			} )
+		);
+
 	const card = Object.keys( responseData ).map( ( taxSlug ) => {
 		const tags = responseData[ taxSlug ]?.data.map( ( tag, _index ) => {
 			const threshold = settings[ `${ taxSlug }_threshold` ];
@@ -150,16 +164,29 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 
 	return card.length ? (
 		<>
-			<Notice
-				status="success"
-				isDismissible={ false }
-				className="classifai__classification-previewer-result-notice"
-			>
-				{ __(
-					'Results for each taxonomy are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.',
-					'classifai'
-				) }
-			</Notice>
+			{ allBelowThreshold ? (
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="classifai__classification-previewer-result-notice"
+				>
+					{ __(
+						'None of the terms are above the configured threshold.',
+						'classifai'
+					) }
+				</Notice>
+			) : (
+				<Notice
+					status="success"
+					isDismissible={ false }
+					className="classifai__classification-previewer-result-notice"
+				>
+					{ __(
+						'Results for each taxonomy are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.',
+						'classifai'
+					) }
+				</Notice>
+			) }
 			{ card }
 		</>
 	) : null;

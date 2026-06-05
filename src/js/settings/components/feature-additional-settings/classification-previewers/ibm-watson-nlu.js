@@ -104,6 +104,21 @@ export function IBMWatsonNLUResults( { postId } ) {
 		keywords: responseData.keywords,
 	};
 
+	const hasAnyTags = Object.keys( renderData ).some(
+		( taxSlug ) => renderData[ taxSlug ].length > 0
+	);
+
+	const allBelowThreshold =
+		hasAnyTags &&
+		Object.keys( renderData ).every( ( taxSlug ) =>
+			renderData[ taxSlug ].every( ( tag ) => {
+				const threshold =
+					settings[ `${ taxMap[ taxSlug ] }_threshold` ];
+				const score = normalizeScore( tag.score || tag.relevance );
+				return score < threshold;
+			} )
+		);
+
 	const card = Object.keys( renderData ).map( ( taxSlug ) => {
 		const tags = renderData[ taxSlug ].map( ( tag, _index ) => {
 			const threshold = settings[ `${ taxMap[ taxSlug ] }_threshold` ];
@@ -169,16 +184,29 @@ export function IBMWatsonNLUResults( { postId } ) {
 
 	return card.length ? (
 		<>
-			<Notice
-				status="success"
-				isDismissible={ false }
-				className="classifai__classification-previewer-result-notice"
-			>
-				{ __(
-					'Results for each category are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.',
-					'classifai'
-				) }
-			</Notice>
+			{ allBelowThreshold ? (
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="classifai__classification-previewer-result-notice"
+				>
+					{ __(
+						'None of the terms are above the configured threshold.',
+						'classifai'
+					) }
+				</Notice>
+			) : (
+				<Notice
+					status="success"
+					isDismissible={ false }
+					className="classifai__classification-previewer-result-notice"
+				>
+					{ __(
+						'Results for each category are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.',
+						'classifai'
+					) }
+				</Notice>
+			) }
 			{ card }
 		</>
 	) : null;
