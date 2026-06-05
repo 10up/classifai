@@ -28,6 +28,24 @@ class Schema {
 	}
 
 	/**
+	 * Add the embeddings table to the list of tables core drops when a site is deleted.
+	 *
+	 * Runs on the `wpmu_drop_tables` filter (multisite only) so the per-site
+	 * embeddings table is cleaned up alongside core's own site tables.
+	 *
+	 * @param string[] $tables  Table names to be dropped.
+	 * @param int      $site_id The ID of the site being deleted.
+	 * @return string[]
+	 */
+	public static function add_to_drop_tables( array $tables, int $site_id ): array {
+		global $wpdb;
+
+		$tables[] = $wpdb->get_blog_prefix( $site_id ) . 'classifai_embeddings';
+
+		return $tables;
+	}
+
+	/**
 	 * Run dbDelta only when the stored schema version is behind CURRENT_VERSION.
 	 */
 	public static function maybe_install() {

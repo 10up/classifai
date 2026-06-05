@@ -38,6 +38,7 @@ class Plugin {
 	 */
 	public function enable() {
 		add_action( 'init', [ \Classifai\Embeddings\Schema::class, 'maybe_install' ], 1 );
+		add_filter( 'wpmu_drop_tables', [ \Classifai\Embeddings\Schema::class, 'add_to_drop_tables' ], 10, 2 );
 		add_action( 'init', [ $this, 'init' ], 20 );
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
