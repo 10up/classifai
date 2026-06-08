@@ -367,7 +367,7 @@ class Embeddings extends Provider {
 
 			// Register hooks.
 			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+			add_action( 'edited_term', [ $this, 'update_embeddings_for_term' ] );
 			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 			add_action( 'admin_post_classifai_regen_embeddings', [ $this, 'classifai_regen_embeddings' ] );
 			add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10, 2 );

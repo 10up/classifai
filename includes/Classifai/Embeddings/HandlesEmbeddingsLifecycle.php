@@ -186,6 +186,15 @@ trait HandlesEmbeddingsLifecycle {
 	}
 
 	/**
+	 * Regenerate a term's embedding after it has been edited.
+	 *
+	 * @param int $term_id ID of the edited term.
+	 */
+	public function update_embeddings_for_term( $term_id ) {
+		$this->generate_embeddings_for_term( (int) $term_id, true );
+	}
+
+	/**
 	 * Decide between one-shot and per-chunk embedding requests based on token budget.
 	 *
 	 * @param array        $content_chunks Pre-chunked content.
