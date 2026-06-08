@@ -104,6 +104,21 @@ export function IBMWatsonNLUResults( { postId } ) {
 		keywords: responseData.keywords,
 	};
 
+	const hasAnyTags = Object.keys( renderData ).some(
+		( taxSlug ) => renderData[ taxSlug ].length > 0
+	);
+
+	const allBelowThreshold =
+		hasAnyTags &&
+		Object.keys( renderData ).every( ( taxSlug ) =>
+			renderData[ taxSlug ].every( ( tag ) => {
+				const threshold =
+					settings[ `${ taxMap[ taxSlug ] }_threshold` ];
+				const score = normalizeScore( tag.score || tag.relevance );
+				return score < threshold;
+			} )
+		);
+
 	const card = Object.keys( renderData ).map( ( taxSlug ) => {
 		const tags = renderData[ taxSlug ].map( ( tag, _index ) => {
 			const threshold = settings[ `${ taxMap[ taxSlug ] }_threshold` ];
@@ -112,7 +127,7 @@ export function IBMWatsonNLUResults( { postId } ) {
 			const scoreClass =
 				score >= threshold
 					? 'classifai__classification-previewer-result-tag--exceeds-threshold'
-					: '';
+					: 'classifai__classification-previewer-result-tag--below-threshold';
 
 			return (
 				<div
@@ -179,6 +194,18 @@ export function IBMWatsonNLUResults( { postId } ) {
 					'classifai'
 				) }
 			</Notice>
+			{ allBelowThreshold && (
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="classifai__classification-previewer-result-notice"
+				>
+					{ __(
+						'None of the terms are above the configured threshold.',
+						'classifai'
+					) }
+				</Notice>
+			) }
 			{ card }
 		</>
 	) : null;
