@@ -77,6 +77,34 @@ class RepositoryTest extends \WP_UnitTestCase {
 		$this->assertSame( [], $this->repo->get( 'post', 7, 'classification', 'openai_embeddings', 'm1' ) );
 	}
 
+	public function test_delete_all_for_object_removes_every_row_regardless_of_key() {
+		// Same object, different feature/provider/model tuples (e.g. provider was switched).
+		$this->repo->put( 'post', 7, 'classification', 'openai_embeddings', 'm1', [ [ 0.1, 0.2 ] ], 'h1' );
+		$this->repo->put( 'post', 7, 'recommended_content', 'openai_embeddings', 'm1', [ [ 0.3, 0.4 ] ], 'h2' );
+		$this->repo->put( 'post', 7, 'classification', 'azure_openai_embeddings', 'm2', [ [ 0.5, 0.6 ] ], 'h3' );
+		// A different object that must be left untouched.
+		$this->repo->put( 'post', 8, 'classification', 'openai_embeddings', 'm1', [ [ 0.7, 0.8 ] ], 'h4' );
+
+		$deleted = $this->repo->delete_all_for_object( 'post', 7 );
+
+		$this->assertSame( 3, $deleted );
+		$this->assertSame( [], $this->repo->get( 'post', 7, 'classification', 'openai_embeddings', 'm1' ) );
+		$this->assertSame( [], $this->repo->get( 'post', 7, 'recommended_content', 'openai_embeddings', 'm1' ) );
+		$this->assertSame( [], $this->repo->get( 'post', 7, 'classification', 'azure_openai_embeddings', 'm2' ) );
+		$this->assertNotEmpty( $this->repo->get( 'post', 8, 'classification', 'openai_embeddings', 'm1' ) );
+	}
+
+	public function test_delete_all_for_object_scopes_to_object_type() {
+		// A post and a term sharing the same numeric id must not collide.
+		$this->repo->put( 'post', 5, 'classification', 'openai_embeddings', 'm1', [ [ 0.1, 0.2 ] ], 'h1' );
+		$this->repo->put( 'term', 5, 'classification', 'openai_embeddings', 'm1', [ [ 0.3, 0.4 ] ], 'h2' );
+
+		$this->repo->delete_all_for_object( 'post', 5 );
+
+		$this->assertSame( [], $this->repo->get( 'post', 5, 'classification', 'openai_embeddings', 'm1' ) );
+		$this->assertNotEmpty( $this->repo->get( 'term', 5, 'classification', 'openai_embeddings', 'm1' ) );
+	}
+
 	public function test_exists_reflects_put_and_delete() {
 		$this->assertFalse( $this->repo->exists( 'post', 5, 'classification', 'openai_embeddings', 'm1' ) );
 

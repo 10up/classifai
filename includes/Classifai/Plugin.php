@@ -39,6 +39,8 @@ class Plugin {
 	public function enable() {
 		add_action( 'init', [ \Classifai\Embeddings\Schema::class, 'maybe_install' ], 1 );
 		add_filter( 'wpmu_drop_tables', [ \Classifai\Embeddings\Schema::class, 'add_to_drop_tables' ], 10, 2 );
+		add_action( 'before_delete_post', [ $this, 'delete_post_embeddings' ] );
+		add_action( 'delete_term', [ $this, 'delete_term_embeddings' ] );
 		add_action( 'init', [ $this, 'init' ], 20 );
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
@@ -50,6 +52,24 @@ class Plugin {
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, [ $this, 'filter_plugin_action_links' ] );
 		add_filter( 'robots_txt', [ $this, 'maybe_block_ai_crawlers' ] );
 		add_action( 'after_classifai_init', [ $this, 'load_action_scheduler' ] );
+	}
+
+	/**
+	 * Purge a post's embeddings from the custom table when it is permanently deleted.
+	 *
+	 * @param int $post_id ID of the post being deleted.
+	 */
+	public function delete_post_embeddings( $post_id ) {
+		( new \Classifai\Embeddings\Repository() )->delete_all_for_object( 'post', (int) $post_id );
+	}
+
+	/**
+	 * Purge a term's embeddings from the custom table when it is deleted.
+	 *
+	 * @param int $term_id ID of the term being deleted.
+	 */
+	public function delete_term_embeddings( $term_id ) {
+		( new \Classifai\Embeddings\Repository() )->delete_all_for_object( 'term', (int) $term_id );
 	}
 
 	/**

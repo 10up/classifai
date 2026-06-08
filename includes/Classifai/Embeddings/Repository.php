@@ -148,6 +148,34 @@ class Repository {
 	}
 
 	/**
+	 * Delete every row for an object, regardless of feature, provider, or model.
+	 *
+	 * Used when the underlying object is permanently deleted — all of its vectors
+	 * become garbage, including any stale rows left by a previously-configured
+	 * provider/model. Returns the number of rows removed.
+	 *
+	 * @param string $object_type Either 'post', 'term', etc.
+	 * @param int    $object_id   ID of the object.
+	 * @return int
+	 */
+	public function delete_all_for_object( string $object_type, int $object_id ): int {
+		global $wpdb;
+		$table = Schema::table_name();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- writing to our own custom table.
+		$deleted = $wpdb->delete(
+			$table,
+			[
+				'object_type' => $object_type,
+				'object_id'   => $object_id,
+			],
+			[ '%s', '%d' ]
+		);
+
+		return (int) $deleted;
+	}
+
+	/**
 	 * Whether any chunk row exists for the given key.
 	 *
 	 * @param string $object_type Either 'post', 'term', etc.
