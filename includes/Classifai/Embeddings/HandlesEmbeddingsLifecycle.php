@@ -491,7 +491,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @return array|WP_Error
 	 */
 	public function get_posts( array $embeddings = [], int $post_id = 0 ) {
-		$cache_key = 'classifai_recommended_content_' . $post_id;
+		$cache_key = \Classifai\recommended_content_cache_key( $post_id );
 		$results   = wp_cache_get( $cache_key );
 
 		if ( is_array( $results ) ) {
