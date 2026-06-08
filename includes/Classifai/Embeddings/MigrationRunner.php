@@ -249,7 +249,7 @@ class MigrationRunner {
 	 * @param int $batch_size Maximum rows to return.
 	 * @return array<int, array{object_type:string, object_id:int, meta_key:string}>
 	 */
-	public function scan( int $batch_size = 100 ): array {
+	public function scan( int $batch_size = 50 ): array {
 		global $wpdb;
 
 		$meta_keys    = array_keys( self::LEGACY_KEYS );
@@ -354,7 +354,7 @@ class MigrationRunner {
 	 * Pulls a batch, enqueues a BATCH_ACTION for it, and re-queues itself if there's more.
 	 */
 	public function handle_scan(): void {
-		$batch = $this->scan( 100 );
+		$batch = $this->scan( 50 );
 
 		if ( empty( $batch ) ) {
 			$this->mark_completed();
