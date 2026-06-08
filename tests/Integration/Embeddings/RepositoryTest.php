@@ -105,6 +105,40 @@ class RepositoryTest extends \WP_UnitTestCase {
 		$this->assertNotEmpty( $this->repo->get( 'term', 5, 'classification', 'openai_embeddings', 'm1' ) );
 	}
 
+	public function test_put_preserves_created_at_but_advances_updated_at_on_replace() {
+		global $wpdb;
+		$table = Schema::table_name();
+
+		$this->repo->put( 'post', 50, 'classification', 'openai_embeddings', 'm1', [ [ 0.1, 0.2 ] ], 'h1' );
+
+		// Backdate the timestamps so the replace's effect is deterministic.
+		$wpdb->query( "UPDATE {$table} SET created_at = '2020-01-01 00:00:00', updated_at = '2020-01-01 00:00:00' WHERE object_id = 50" ); // phpcs:ignore WordPress.DB
+
+		// Regenerate (replace semantics: delete + re-insert).
+		$this->repo->put( 'post', 50, 'classification', 'openai_embeddings', 'm1', [ [ 0.9, 0.8 ], [ 0.3, 0.4 ] ], 'h2' );
+
+		$rows = $wpdb->get_results( "SELECT created_at, updated_at FROM {$table} WHERE object_id = 50", ARRAY_A ); // phpcs:ignore WordPress.DB
+		$this->assertNotEmpty( $rows );
+
+		foreach ( $rows as $row ) {
+			// created_at is carried forward from the original row, not reset to now.
+			$this->assertSame( '2020-01-01 00:00:00', $row['created_at'] );
+			// updated_at advances past the backdated value.
+			$this->assertGreaterThan( '2020-01-01 00:00:00', $row['updated_at'] );
+		}
+	}
+
+	public function test_put_sets_created_at_for_a_brand_new_record() {
+		global $wpdb;
+		$table = Schema::table_name();
+
+		$this->repo->put( 'post', 51, 'classification', 'openai_embeddings', 'm1', [ [ 0.1, 0.2 ] ], 'h1' );
+
+		$row = $wpdb->get_row( "SELECT created_at, updated_at FROM {$table} WHERE object_id = 51", ARRAY_A ); // phpcs:ignore WordPress.DB
+		$this->assertNotEmpty( $row['created_at'] );
+		$this->assertSame( $row['created_at'], $row['updated_at'] );
+	}
+
 	public function test_exists_reflects_put_and_delete() {
 		$this->assertFalse( $this->repo->exists( 'post', 5, 'classification', 'openai_embeddings', 'm1' ) );
 

@@ -40,6 +40,10 @@ class Repository {
 		global $wpdb;
 		$table = Schema::table_name();
 
+		// Preserve the original creation time across regenerations. Replace semantics
+		// re-inserts every row, so created_at would otherwise reset on each update.
+		$created_at = $this->created_at( $object_type, $object_id, $feature, $provider, $model );
+
 		// Replace semantics — delete existing rows for this key first.
 		$this->delete( $object_type, $object_id, $feature, $provider, $model );
 
@@ -47,7 +51,8 @@ class Repository {
 			return;
 		}
 
-		$now = current_time( 'mysql', true );
+		$now        = current_time( 'mysql', true );
+		$created_at = null === $created_at ? $now : $created_at;
 
 		foreach ( $chunks as $chunk_index => $vector ) {
 			if ( ! is_array( $vector ) || empty( $vector ) ) {
@@ -70,7 +75,7 @@ class Repository {
 					'chunk_index'  => (int) $chunk_index,
 					'vector'       => $packed,
 					'content_hash' => $content_hash,
-					'created_at'   => $now,
+					'created_at'   => $created_at,
 					'updated_at'   => $now,
 				],
 				[ '%s', '%d', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s' ]
@@ -233,6 +238,39 @@ class Repository {
 		// phpcs:enable
 
 		return null === $hash ? null : (string) $hash;
+	}
+
+	/**
+	 * Earliest stored created_at for a key, or null when no rows exist.
+	 *
+	 * Used to carry the original creation time forward when put() replaces an
+	 * object's rows on regeneration.
+	 *
+	 * @param string $object_type Either 'post', 'term', etc.
+	 * @param int    $object_id   ID of the object.
+	 * @param string $feature     Feature ID.
+	 * @param string $provider    Provider ID.
+	 * @param string $model       Model identifier.
+	 * @return string|null
+	 */
+	protected function created_at( string $object_type, int $object_id, string $feature, string $provider, string $model ): ?string {
+		global $wpdb;
+		$table = Schema::table_name();
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- reading from our own custom table.
+		$value = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT MIN(created_at) FROM {$table} WHERE object_type = %s AND object_id = %d AND feature = %s AND provider = %s AND model = %s",
+				$object_type,
+				$object_id,
+				$feature,
+				$provider,
+				$model
+			)
+		);
+		// phpcs:enable
+
+		return null === $value ? null : (string) $value;
 	}
 
 	/**
