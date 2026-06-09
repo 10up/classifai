@@ -32,13 +32,6 @@ class ContentResizing extends Feature {
 	const ID = 'feature_content_resizing';
 
 	/**
-	 * Prompt for fixing grammar and spelling.
-	 *
-	 * @var string
-	 */
-	public $fix_grammar_prompt = 'Please correct any spelling errors and grammatical mistakes in the following text';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -289,7 +282,7 @@ class ContentResizing extends Feature {
 			'fix_grammar_text_prompt' => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->fix_grammar_prompt,
+					'prompt'   => $this->get_prompt( 'fix_grammar' ),
 					'original' => 1,
 				],
 			],
@@ -328,7 +321,7 @@ class ContentResizing extends Feature {
 		if ( $settings && ! empty( $settings['fix_grammar_text_prompt'] ) ) {
 			foreach ( $settings['fix_grammar_text_prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['fix_grammar_text_prompt'][ $key ]['prompt'] = $this->fix_grammar_prompt;
+					$settings['fix_grammar_text_prompt'][ $key ]['prompt'] = $this->get_prompt( 'fix_grammar' );
 					break;
 				}
 			}
