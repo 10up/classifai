@@ -39,9 +39,9 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/wordpress__blocks": "^15.17.0",
-    "@wordpress/e2e-test-utils-playwright": "^1.47.0",
+    "@wordpress/e2e-test-utils-playwright": "^1.48.0",
     "@wordpress/env": "^10.38.0",
-    "@wordpress/scripts": "^32.1.0",
+    "@wordpress/scripts": "^32.4.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "node-wp-i18n": "^1.2.8",
