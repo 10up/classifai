@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin name: ClassifAI Cypress Test Request Mock plugin
+ * Plugin name: ClassifAI E2E Test Request Mock plugin
  */
 
 // Mock the ClassifAI HTTP request calls and provide known response.

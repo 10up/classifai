@@ -136,6 +136,8 @@ const BlockEdit = ( props ) => {
 						variant="secondary"
 						onClick={ () => setRun( true ) }
 						isBusy={ isLoading }
+						disabled={ isLoading }
+						accessibleWhenDisabled
 					/>
 				</PanelBody>
 			</InspectorControls>

@@ -230,46 +230,55 @@ const TextToSpeechPlugin = () => {
 			/>
 			{ sourceUrl && (
 				<>
-					<ToggleControl
-						label={ __( 'Display audio controls', 'classifai' ) }
-						help={ __(
-							'Controls the display of the audio player on the front-end.',
-							'classifai'
-						) }
-						checked={ displayGeneratedAudio }
-						onChange={ ( value ) => {
-							wp.data.dispatch( 'core/editor' ).editPost( {
-								classifai_display_generated_audio: value,
-							} );
-						} }
-						disabled={ isProcessingAudio }
-						isBusy={ isProcessingAudio }
-					/>
-					<BaseControl
-						id="classifai-audio-preview-controls"
-						help={
-							isProcessingAudio
-								? ''
-								: __(
-										'Preview the generated audio.',
-										'classifai'
-								  )
-						}
-						__nextHasNoMarginBottom
-					>
-						<Button
-							id="classifai-audio-controls__preview-btn"
-							icon={ <Icon icon={ audioIcon } /> }
-							variant="secondary"
-							onClick={ () => setIsPreviewing( ! isPreviewing ) }
+					<div style={ { marginTop: '12px' } }>
+						<ToggleControl
+							label={ __(
+								'Display audio controls',
+								'classifai'
+							) }
+							help={ __(
+								'Controls the display of the audio player on the front-end.',
+								'classifai'
+							) }
+							checked={ displayGeneratedAudio }
+							onChange={ ( value ) => {
+								wp.data.dispatch( 'core/editor' ).editPost( {
+									classifai_display_generated_audio: value,
+								} );
+							} }
 							disabled={ isProcessingAudio }
 							isBusy={ isProcessingAudio }
+						/>
+					</div>
+					<div style={ { marginTop: '12px' } }>
+						<BaseControl
+							id="classifai-audio-preview-controls"
+							help={
+								isProcessingAudio
+									? ''
+									: __(
+											'Preview the generated audio.',
+											'classifai'
+									  )
+							}
+							__nextHasNoMarginBottom
 						>
-							{ isProcessingAudio
-								? __( 'Generating audio..', 'classifai' )
-								: __( 'Preview', 'classifai' ) }
-						</Button>
-					</BaseControl>
+							<Button
+								id="classifai-audio-controls__preview-btn"
+								icon={ <Icon icon={ audioIcon } /> }
+								variant="secondary"
+								onClick={ () =>
+									setIsPreviewing( ! isPreviewing )
+								}
+								disabled={ isProcessingAudio }
+								isBusy={ isProcessingAudio }
+							>
+								{ isProcessingAudio
+									? __( 'Generating audio..', 'classifai' )
+									: __( 'Preview', 'classifai' ) }
+							</Button>
+						</BaseControl>
+					</div>
 				</>
 			) }
 			{ sourceUrl && (

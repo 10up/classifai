@@ -389,28 +389,20 @@ jobs:
           command: |
             npm run env:start
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
       - name: Run E2E tests
-        run: npm run cypress:run
+        run: npm run test:e2e
 
-      - name: Update summary
-        run: |
-          npx mochawesome-merge ./tests/cypress/reports/*.json -o tests/cypress/reports/mochawesome.json
-          rm -rf ./tests/cypress/reports/mochawesome-*.json
-          npx mochawesome-json-to-md -p ./tests/cypress/reports/mochawesome.json -o ./tests/cypress/reports/mochawesome.md -t ./tests/cypress/template.md
-          npx mochawesome-report-generator tests/cypress/reports/mochawesome.json -o tests/cypress/reports/
-          cat ./tests/cypress/reports/mochawesome.md >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload artifacts
+      - name: Upload E2E test results as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: always()
         with:
-          name: cypress-artifact-classifai-wp-${{ matrix.core.name }}
-          retention-days: 7
-          path: |
-            ${{ github.workspace }}/tests/cypress/screenshots/
-            ${{ github.workspace }}/tests/cypress/videos/
-            ${{ github.workspace }}/tests/cypress/logs/
-            ${{ github.workspace }}/tests/cypress/reports/
+          name: playwright-report
+          path: artifacts/test-results
+          retention-days: 2
+          if-no-files-found: ignore
 
   # Runs spell checking.
   spell-checker:
@@ -428,7 +420,7 @@ jobs:
           persist-credentials: false
 
       - name: Spell Check
-        uses: crate-ci/typos@7b04f660f4ee4f048d18fd341887cf28dfbedfe2 # v1.46.3
+        uses: crate-ci/typos@f8a58b6b53f2279f71eb605f03a4ae4d10608f45 # v1.47.0
         with:
           files: ./
 

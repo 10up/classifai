@@ -623,6 +623,21 @@
 	}
 }
 
+.classifai__classification-previewer-result-tag--below-threshold {
+	border-color: #e74c3c;
+	font-weight: bold;
+
+	.classifai__classification-previewer-result-tag-score {
+		color: #f1f1f1;
+		background-color: #e74c3c;
+		border-right: 1px solid #e74c3c;
+	}
+
+	.classifai__classification-previewer-result-tag-label {
+		color: #e74c3c;
+	}
+}
+
 .components-button.classifai__classification-previewer-close-button.is-link {
 	position: relative;
 	margin: 0 auto;
