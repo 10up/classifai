@@ -4,6 +4,11 @@
 import classNames from 'classnames';
 
 /**
+ * Internal dependencies
+ */
+import { TooltipPopover } from '../../utils/utils';
+
+/**
  * Settings row component.
  *
  * @param {Object} props          All the props passed to this function.
@@ -13,7 +18,12 @@ import classNames from 'classnames';
 export const SettingsRow = ( props ) => {
 	return (
 		<div className={ classNames( 'settings-row', props?.className ) }>
-			<div className="settings-label">{ props.label }</div>
+			<div className="settings-label">
+				{ props.label }
+				{ props.helperText && (
+					<TooltipPopover tooltipContent={ props.helperText } />
+				) }
+			</div>
 			<div className="settings-control">
 				{ props.children }
 				<div className="settings-description">

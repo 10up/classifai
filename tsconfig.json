@@ -40,12 +40,11 @@
  		"types": []
 	},
 	"exclude": [
-		"cypress/**",
 		"example/**",
 		"node_modules/**",
 		"dist/**",
 		"webpack.config.js",
-		"cypress.config.js",
+		"tests/**",
 		"**/*.test.ts",
 		"**/*.test.js",
 		"**/*.spec.ts",

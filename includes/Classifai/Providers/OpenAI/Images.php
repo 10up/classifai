@@ -32,7 +32,7 @@ class Images extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $model = 'gpt-image-1';
+	protected $model = 'gpt-image-2';
 
 	/**
 	 * Maximum number of characters a prompt can have.
@@ -351,7 +351,7 @@ class Images extends Provider {
 			return new WP_Error( 'invalid_param', sprintf( esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed %d characters.', 'classifai' ), $max_prompt_chars ) );
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$model = $this->get_model();
 		$body  = [
@@ -364,8 +364,8 @@ class Images extends Provider {
 			'style'           => sanitize_text_field( $args['style'] ),
 		];
 
-		if ( 'gpt-image-1' === $model ) {
-			// The gpt-image-1 model doesn't support response_format or style.
+		if ( 'gpt-image-1' === $model || 'gpt-image-2' === $model ) {
+			// The gpt-image models don't support response_format or style.
 			unset( $body['response_format'] );
 			unset( $body['style'] );
 		} elseif ( 'dall-e-3' === $model ) {

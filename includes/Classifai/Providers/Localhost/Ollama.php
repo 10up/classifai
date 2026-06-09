@@ -144,7 +144,7 @@ class Ollama extends Provider {
 		}
 
 		// Make our request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this, [ static::ID => $default ] );
 		$response = $request->get(
 			$this->get_api_model_url( $default['endpoint_url'] ),
 			[
@@ -213,9 +213,9 @@ class Ollama extends Provider {
 
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
-			$excerpt_prompt = $feature->woo_prompt;
+			$excerpt_prompt = $feature->get_prompt( 'woocommerce' );
 		} else {
-			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->get_prompt( 'default' ) );
 		}
 
 		// Replace our variables in the prompt.
@@ -267,7 +267,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
 			[
@@ -319,9 +319,9 @@ class Ollama extends Provider {
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
-			$prompt = $feature->woo_prompt;
+			$prompt = $feature->get_prompt( 'woocommerce' );
 		} else {
-			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->get_prompt( 'default' ) );
 		}
 
 		/**
@@ -377,7 +377,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API requests.
-		$request = new APIRequest( 'test', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$responses = [];
 		for ( $i = 0; $i < $args['num']; $i++ ) {
@@ -434,11 +434,11 @@ class Ollama extends Provider {
 		);
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->get_prompt( 'condense' ) );
 		} elseif ( 'fix_grammar' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['fix_grammar_text_prompt'] ) ?? $feature->fix_grammar_prompt );
 		} else {
-			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->get_prompt( 'expand' ) );
 		}
 
 		/**
@@ -495,7 +495,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API requests.
-		$request = new APIRequest( 'test', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$responses = [];
 		for ( $i = 0; $i < $args['num']; $i++ ) {
@@ -585,7 +585,7 @@ class Ollama extends Provider {
 			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then click the "Generate results" button.', 'classifai' ) );
 		}
 
-		$prompt = esc_textarea( get_default_prompt( $settings['key_takeaways_prompt'] ) ?? $feature->prompt );
+		$prompt = esc_textarea( get_default_prompt( $settings['key_takeaways_prompt'] ) ?? $feature->get_prompt( 'default' ) );
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{TITLE}}' );
@@ -637,7 +637,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
 			[
@@ -711,7 +711,7 @@ class Ollama extends Provider {
 		 *
 		 * @return string Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_ollama_content_prompt', esc_textarea( get_default_prompt( $settings['prompt'] ) ?? $feature->prompt ), $post_id, $args );
+		$prompt = apply_filters( 'classifai_ollama_content_prompt', esc_textarea( get_default_prompt( $settings['prompt'] ) ?? $feature->get_prompt( 'default' ) ), $post_id, $args );
 
 		// Set up the content we are sending to the LLM.
 		if ( ! empty( $args['conversation'] ) ) {
@@ -728,7 +728,7 @@ class Ollama extends Provider {
 		$messages = [
 			[
 				'role'    => 'system',
-				'content' => $prompt . "\n" . $feature->return_format,
+				'content' => $prompt . "\n" . $feature->get_prompt( 'return-format' ),
 			],
 			[
 				'role'    => 'user',
@@ -780,7 +780,7 @@ class Ollama extends Provider {
 		);
 
 		// Make our API request.
-		$request  = new APIRequest( 'test' );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
 			[

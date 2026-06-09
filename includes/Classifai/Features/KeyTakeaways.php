@@ -30,13 +30,6 @@ class KeyTakeaways extends Feature {
 	const ID = 'feature_key_takeaways';
 
 	/**
-	 * Prompt for generating the key takeaways.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'The content you will be provided with is from an already written article. This article has the title of: {{TITLE}}. Your task is to carefully read through this article and provide a summary that captures all the important points. This summary should be concise and limited to about 2-4 points but should also be detailed enough to allow someone to quickly grasp the full article. Read the article a few times before providing the summary and trim each point down to be as concise as possible.';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -273,7 +266,7 @@ class KeyTakeaways extends Feature {
 			'key_takeaways_prompt' => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->prompt,
+					'prompt'   => $this->get_prompt( 'default' ),
 					'original' => 1,
 				],
 			],
@@ -294,7 +287,7 @@ class KeyTakeaways extends Feature {
 		if ( $settings && ! empty( $settings['key_takeaways_prompt'] ) ) {
 			foreach ( $settings['key_takeaways_prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['key_takeaways_prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings['key_takeaways_prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}

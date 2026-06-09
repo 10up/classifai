@@ -1,10 +1,10 @@
 === ClassifAI ===
 Contributors:      10up, jeffpaul, dkotter
 Tags:              AI, Artificial Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, OpenAI, ChatGPT, Content Tagging, Classification, Smart Cropping, Alt Text
-Requires at least: 6.8
-Tested up to:      6.9
+Requires at least: 6.9
+Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        3.7.1
+Stable tag:        3.8.0
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,29 +36,26 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Scan PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 * Modification of your `robots.txt` file to block the most common AI data scraping bots from indexing your site
+* Use [built-in filters to override AI credentials](https://10up.github.io/classifai/advanced-docs/programmatic-credentials), allowing management of credentials outside of the database, such as by using environment variables or a specific secret management service
 
 == Requirements ==
 
-* To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
-* To utilize the ChatGPT, Embeddings, Text to Speech or Speech to Text Language Processing functionality or Image Generation functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
-* To utilize the ElevenLabs Speech to Text Language Processing functionality, you will need an active [ElevenLabs](https://elevenlabs.io/sign-up) account.
-* To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
-* To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://customervoice.microsoft.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR7en2Ais5pxKtso_Pz4b1_xUNTZBNzRKNlVQSFhZMU9aV09EVzYxWFdORCQlQCN0PWcu) for OpenAI access.
-* To utilize the Google Gemini Language Processing functionality or Image Generation functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
-* To utilize the Together AI Image Generation functionality, you will need an active [Together AI](https://api.together.ai/) account.
-* To utilize the AWS Language Processing functionality, you will need an active [AWS](https://console.aws.amazon.com/) account.
-* To utilize the Ollama Language or Image Processing functionality, you will need to install [Ollama](https://ollama.com/) and download the appropriate models.
-* To utilize the Stable Diffusion Image Processing functionality, you will need to install [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) and download the appropriate models.
-* To utilize the Smart 404 feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access and you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
-* To utilize the Term Cleanup feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access. For better performance, you will need [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
+* PHP 7.4+
+* [WordPress](http://wordpress.org) 6.9+
+* Each individual Feature may have its own requirements, please refer to the [ClassifAI documentation site](https://10up.github.io/classifai/get-started/#requirements) for detailed requirements.
 
 == Frequently Asked Questions ==
+
+For a full list of frequently asked questions, please refer to the [ClassifAI documentation site](https://10up.github.io/classifai/get-started/faq).
 
 = Where do I report security bugs found in this plugin? =
 
 Please report security bugs found in the source code of the undefined plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/f298c330-8d56-4af5-8a69-736281841ce1).  The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == Upgrade Notice ==
+
+= 3.8.0 =
+**Note that the legacy settings screen (enabled via the `classifai_use_legacy_settings_panel` filter) is now formally deprecated and scheduled for removal in a future release. Please migrate to the new React-based settings experience.**
 
 = 3.3.0 =
 **Note that this release bumps the WordPress minimum from 6.5 to 6.6.**
@@ -85,4 +82,3 @@ Please report security bugs found in the source code of the undefined plugin thr
 
 = 1.8.0 =
 **Note that this release bumps the PHP minimum from 7.0 to 7.2.**
-

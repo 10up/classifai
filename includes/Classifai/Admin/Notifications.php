@@ -5,6 +5,8 @@ namespace Classifai\Admin;
 
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\Classification;
+use Classifai\Features\APIUsageTracking;
+use Classifai\Providers\UsageTrackingProvider;
 use function Classifai\should_use_legacy_settings_panel;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -50,6 +52,8 @@ class Notifications {
 		$this->thresholds_update_notice();
 		$this->v3_migration_completed_notice();
 		$this->render_embeddings_notice();
+		$this->render_legacy_settings_deprecation_notice();
+		$this->render_api_threshold_notice();
 		$this->render_notices();
 	}
 
@@ -205,7 +209,7 @@ class Notifications {
 		}
 		?>
 
-		<div class="notice notice-info is-dismissible classifai-dismissible-notice classifai-migation-notice" data-notice="<?php echo esc_attr( $key ); ?>">
+		<div class="notice notice-info is-dismissible classifai-dismissible-notice classifai-migration-notice" data-notice="<?php echo esc_attr( $key ); ?>">
 			<p>
 				<?php
 				echo wp_kses_post(
@@ -268,6 +272,46 @@ class Notifications {
 						// translators: %1$s: Feature specific message; %2$s: URL to Feature settings.
 						__( 'ClassifAI has updated to the <code>text-embedding-3-small</code> embeddings model. <br>This requires regenerating any stored embeddings for functionality to work properly. <br><a href="%1$s">Click here to do that</a>, noting this will make multiple API requests to OpenAI.', 'classifai' ),
 						wp_nonce_url( admin_url( 'admin-post.php?action=classifai_regen_embeddings' ), 'regen_embeddings', 'embeddings_nonce' )
+					)
+				);
+				?>
+			</p>
+		</div>
+
+		<?php
+	}
+
+	/**
+	 * Render a deprecation notice when the legacy settings filter is active.
+	 *
+	 * @since 3.8.0
+	 */
+	public function render_legacy_settings_deprecation_notice() {
+		// Only show if the legacy settings filter is active.
+		if ( ! should_use_legacy_settings_panel() ) {
+			return;
+		}
+
+		$key = 'legacy_settings_deprecation';
+
+		// Don't show the notice if the user has already dismissed it.
+		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
+			return;
+		}
+		?>
+
+		<div class="notice notice-warning is-dismissible classifai-dismissible-notice" data-notice="<?php echo esc_attr( $key ); ?>">
+			<p>
+				<strong><?php esc_html_e( 'ClassifAI Legacy Settings Deprecation Notice', 'classifai' ); ?></strong>
+			</p>
+			<p>
+				<?php
+				echo wp_kses_post(
+					sprintf(
+						/* translators: %1$s: filter name, %2$s: documentation URL */
+						__( 'The legacy settings screen is deprecated and will be removed in a future release. You are currently using the <code>%1$s</code> filter to enable it. Please migrate to the new React-based settings experience and remove this filter from your code. <a href="%2$s" target="_blank" rel="noopener noreferrer">Learn more about the new settings</a>.', 'classifai' ),
+						'classifai_use_legacy_settings_panel',
+						'https://10up.github.io/classifai/advanced-docs/useful-snippets#use-legacy-settings'
 					)
 				);
 				?>
@@ -347,6 +391,84 @@ EOD;
 		$notice_id = sanitize_text_field( wp_unslash( $_POST['notice_id'] ) );
 
 		update_user_meta( get_current_user_id(), "classifai_dismissed_{$notice_id}", true );
+	}
+
+	/**
+	 * Render a notice when AI usage exceeds the soft or hard threshold limit.
+	 */
+	public function render_api_threshold_notice() {
+
+		// Ensure the feature exists.
+		if ( ! class_exists( 'Classifai\Features\APIUsageTracking' ) ) {
+			return;
+		}
+
+		$feature_instance = new APIUsageTracking();
+
+		// Don't show the notice if the feature is not enabled.
+		if ( ! $feature_instance->is_feature_enabled() ) {
+			return;
+		}
+
+		// Don't show the notice if the provider is not UsageTrackingProvider.
+		$provider = $feature_instance->get_feature_provider_instance();
+
+		if ( ! $provider instanceof UsageTrackingProvider ) {
+			return;
+		}
+
+		$settings = $feature_instance->get_settings( $provider::ID );
+
+		if ( empty( $settings['soft_threshold_enabled'] ) && empty( $settings['hard_threshold_enabled'] ) ) {
+			return;
+		}
+
+		$hard_threshold_reached = get_option( $feature_instance::HARD_LIMIT_REACHED_KEY, false );
+
+		if ( $hard_threshold_reached ) {
+			$scope = isset( $settings['hard_threshold_scope'] ) ? $settings['hard_threshold_scope'] : 'current_month';
+		} else {
+			$scope = isset( $settings['soft_threshold_scope'] ) ? $settings['soft_threshold_scope'] : 'current_month';
+		}
+
+		$usage_data = $feature_instance->get_usage_data();
+		$amount     = $feature_instance->get_amount_for_scope( $usage_data, $scope );
+		$threshold  = $hard_threshold_reached ? (float) $settings['hard_threshold_amount'] : (float) $settings['soft_threshold_amount'];
+
+		if ( $amount < $threshold ) {
+			return;
+		}
+
+		$key          = 'api_threshold_reached';
+		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/api_usage_tracking' );
+		$classes      = [
+			'notice',
+		];
+
+		if ( $hard_threshold_reached ) {
+			$classes[] = 'notice-error';
+			$message   = sprintf(
+				/* translators: 1: amount with currency, 2: link to settings */
+				__( 'AI Features are currently disabled due to exceeding your hard threshold of $%1$s for this period. <a href="%2$s">Re-enable it from the pricing page</a>.', 'classifai' ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . strtoupper( $usage_data['currency'] ?? 'USD' ) ),
+				esc_url( $settings_url )
+			);
+		} else {
+			$classes[] = 'notice-warning';
+			$message   = sprintf(
+				/* translators: 1: amount with currency, 2: link to settings */
+				__( 'AI usage has exceeded your soft threshold of $%1$s for this period. <a href="%2$s">Configure alerts</a>.', 'classifai' ),
+				esc_html( number_format_i18n( $threshold, 2 ) . ' ' . strtoupper( $usage_data['currency'] ?? 'USD' ) ),
+				esc_url( $settings_url )
+			);
+		}
+		?>
+		<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-notice="<?php echo esc_attr( $key ); ?>">
+			<p>
+				<?php echo wp_kses_post( $message ); ?>
+			</p>
+		</div>
+		<?php
 	}
 
 	/**

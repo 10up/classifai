@@ -47,6 +47,7 @@ export const Smart404Settings = () => {
 							num: value,
 						} );
 					} }
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -65,6 +66,7 @@ export const Smart404Settings = () => {
 							num_search: value,
 						} );
 					} }
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -85,6 +87,7 @@ export const Smart404Settings = () => {
 							threshold: value,
 						} );
 					} }
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -154,6 +157,7 @@ export const Smart404Settings = () => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>

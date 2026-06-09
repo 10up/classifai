@@ -28,20 +28,6 @@ class ImageTagsGenerator extends Feature {
 	 */
 	const ID = 'feature_image_tags_generator';
 
-	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed, PluginCheck.CodeAnalysis.Heredoc.NotAllowed
-	/**
-	 * Prompt for generating tags.
-	 *
-	 * @var string
-	 */
-	public $prompt = <<<'INSTRUCTION'
-You are an assistant that generates image tags. You will be provided with an image and will generate a list of tags that best represent the image. Ensure the tags are short. Return at most the best 5 tags and return these in the following format:
-- Tag
-- Another tag
-- ...
-INSTRUCTION;
-	// phpcs:enable
-
 	/**
 	 * Constructor.
 	 */
@@ -82,7 +68,7 @@ INSTRUCTION;
 		if ( $settings && ! empty( $settings[ ChatGPT::ID ]['prompt'] ) ) {
 			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}
@@ -91,7 +77,7 @@ INSTRUCTION;
 		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
 			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}

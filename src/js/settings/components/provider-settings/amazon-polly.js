@@ -45,6 +45,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 							onChange={ ( value ) =>
 								onChange( { access_key_id: value } )
 							}
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 					<SettingsRow
@@ -61,6 +62,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 							onChange={ ( value ) =>
 								onChange( { secret_access_key: value } )
 							}
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 					<SettingsRow
@@ -82,6 +84,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 							onChange={ ( value ) =>
 								onChange( { aws_region: value } )
 							}
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 				</>
@@ -136,6 +139,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow label={ __( 'Voice', 'classifai' ) }>
@@ -156,6 +160,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 							};
 						} ) }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>

@@ -29,13 +29,6 @@ class DescriptiveTextGenerator extends Feature {
 	const ID = 'feature_descriptive_text_generator';
 
 	/**
-	 * Prompt for generating descriptive text.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'You are an assistant that generates descriptions of images that are used on a website. You will be provided with an image and will describe the main item you see in the image, giving details but staying concise. There is no need to say "the image contains" or similar, just describe what is actually in the image. This text will be important for screen readers, so make sure it is descriptive and accurate but not overly verbose. Before returning the text, re-evaluate your response and ensure you are following the above points, in particular ensuring the text is concise.';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -428,7 +421,7 @@ class DescriptiveTextGenerator extends Feature {
 		if ( $settings && ! empty( $settings[ ChatGPT::ID ]['prompt'] ) ) {
 			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}
@@ -437,7 +430,7 @@ class DescriptiveTextGenerator extends Feature {
 		if ( $settings && ! empty( $settings[ Grok::ID ]['prompt'] ) ) {
 			foreach ( $settings[ Grok::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings[ Grok::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings[ Grok::ID ]['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}
@@ -446,7 +439,7 @@ class DescriptiveTextGenerator extends Feature {
 		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
 			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}

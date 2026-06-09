@@ -4,6 +4,7 @@ namespace Classifai\Features;
 
 use WP_REST_Request;
 use WP_Error;
+use Classifai\Providers\CredentialObfuscator;
 
 use function Classifai\find_provider_class;
 use function Classifai\should_use_legacy_settings_panel;
@@ -98,8 +99,16 @@ abstract class Feature {
 		}
 
 		$default_settings = $this->get_default_settings();
-		$this->roles      = get_editable_roles() ?? [];
-		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
+		$editable_roles   = get_editable_roles() ?? [];
+		$this->roles      = [];
+
+		foreach ( $editable_roles as $role_key => $role ) {
+			if ( empty( $role['name'] ) ) {
+				continue;
+			}
+
+			$this->roles[ $role_key ] = $role['name'];
+		}
 
 		// Remove subscriber from the list of roles.
 		unset( $this->roles['subscriber'] );
@@ -300,6 +309,13 @@ abstract class Feature {
 
 		// Sanitize the feature specific settings.
 		$new_settings = $this->sanitize_default_feature_settings( $new_settings );
+
+		// Preserve obfuscated credentials for all Providers.
+		// This ensures switching Providers doesn't save obfuscated values for inactive Providers.
+		$new_settings = CredentialObfuscator::merge_all_provider_credentials(
+			$new_settings,
+			$current_settings
+		);
 
 		// Sanitize the provider specific settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
@@ -623,6 +639,62 @@ abstract class Feature {
 		if ( ! empty( $args['description'] ) ) {
 			echo '<span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
+	}
+
+	/**
+	 * Load a prompt from a file in the Feature's Prompts/ subdirectory.
+	 *
+	 * Prompt files live alongside the Feature class at
+	 * `Features/Prompts/{ShortClassName}/{name}.php` and must `return` a string.
+	 * Any keys in `$data` are extracted into the file's variable scope so prompts
+	 * can interpolate runtime values, e.g. `"Summarize in {$words} words."`.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $name The prompt file name without extension. Default 'default'.
+	 * @param array  $data Optional. Variables exposed to the prompt file.
+	 * @return string The prompt text, or an empty string if the file is missing.
+	 */
+	public function get_prompt( string $name = 'default', array $data = array() ): string {
+		$reflection = new \ReflectionClass( $this );
+		$file_name  = $reflection->getFileName();
+
+		if ( ! $file_name ) {
+			return '';
+		}
+
+		$file_path = trailingslashit( dirname( $file_name ) )
+			. 'Prompts/'
+			. $reflection->getShortName()
+			. '/'
+			. $name
+			. '.php';
+
+		if ( ! file_exists( $file_path ) || ! is_readable( $file_path ) ) {
+			return '';
+		}
+
+		if ( ! empty( $data ) ) {
+			extract( $data, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+		}
+
+		$content = require $file_path; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable
+		$prompt  = is_string( $content ) ? $content : '';
+
+		/**
+		 * Filter a Feature's default prompt loaded from file.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_feature_prompt
+		 *
+		 * @param string  $prompt  The prompt text.
+		 * @param string  $name    The prompt name (e.g. 'default', 'woocommerce').
+		 * @param array   $data    Data passed to the prompt file.
+		 * @param Feature $feature The feature instance.
+		 *
+		 * @return string The filtered prompt text.
+		 */
+		return apply_filters( 'classifai_feature_prompt', $prompt, $name, $data, $this );
 	}
 
 	/**
@@ -1311,7 +1383,7 @@ abstract class Feature {
 		$common_debug_info = [
 			__( 'Authenticated', 'classifai' )      => self::get_debug_value_text( $this->is_configured() ),
 			__( 'Status', 'classifai' )             => self::get_debug_value_text( $feature_settings['status'], 1 ),
-			__( 'Allowed roles', 'classifai' )      => implode( ', ', $roles ?? [] ),
+			__( 'Allowed roles', 'classifai' )      => implode( ', ', $roles ),
 			__( 'Allowed users', 'classifai' )      => implode( ', ', $feature_settings['users'] ?? [] ),
 			__( 'User based opt-out', 'classifai' ) => self::get_debug_value_text( $feature_settings['user_based_opt_out'], 1 ),
 			__( 'Provider', 'classifai' )           => $feature_settings['provider'],
@@ -1390,6 +1462,26 @@ abstract class Feature {
 		$settings          = $this->get_settings();
 		$provider_id       = $settings['provider'];
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+
+		/**
+		 * Filter the response before the Feature API endpoint is called.
+		 *
+		 * @since 3.8.0
+		 *
+		 * @hook classifai_pre_fetch_feature_response
+		 *
+		 * @param mixed                         $response Response to return.
+		 * @param \Classifai\Providers\Provider $provider_instance provider used.
+		 * @param mixed                         $args Arguments used by the feature.
+		 * @param \Classifai\Features\Feature   $this Current feature class.
+		 *
+		 * @return mixed Response to return.
+		 */
+		$pre_fetch_response = apply_filters( 'classifai_pre_fetch_feature_response', null, $provider_instance, $args, $this );
+
+		if ( ! is_null( $pre_fetch_response ) ) {
+			return $pre_fetch_response;
+		}
 
 		if ( ! is_callable( [ $provider_instance, 'rest_endpoint_callback' ] ) ) {
 			return new WP_Error( 'invalid_route', esc_html__( 'The selected provider does not have a valid callback in place.', 'classifai' ) );

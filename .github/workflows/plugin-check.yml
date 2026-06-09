@@ -9,20 +9,28 @@ on:
     branches:
       - develop
 
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   build:
     uses: 10up/classifai/.github/workflows/build-release-zip.yml@develop
+    permissions:
+      contents: read
 
   test:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Download built zip
-        uses: actions/download-artifact@b14cf4c92620c250e1c074ab0a5800e37df86765 # v4.2.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ${{ github.event.repository.name }}
           path: ${{ github.event.repository.name }}
@@ -32,7 +40,7 @@ jobs:
         working-directory: ${{ github.event.repository.name }}
 
       - name: Run plugin check
-        uses: wordpress/plugin-check-action@ec9b3fe9beaa76bcc4510b7ba2cb5855a5f80f3f # v1.1.4
+        uses: wordpress/plugin-check-action@18573eb38f13543484a1f095672dae3849a4fbb0 # v1.1.6
         with:
           build-dir: ${{ github.event.repository.name }}
           exclude-checks: 'plugin_readme,plugin_updater' # Plugin isn't on .org so excluding these for now.

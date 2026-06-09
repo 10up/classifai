@@ -8,6 +8,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
  */
 import { STORE_NAME } from '../../data/store';
 import { OpenAISettings } from './openai';
+import { moderationHelperText } from '../../utils/helper-text';
 
 /**
  * Component for OpenAI Moderation settings.
@@ -28,14 +29,20 @@ export const OpenAIModerationSettings = ( { isConfigured = false } ) => {
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
 
-	if ( isConfigured ) {
-		return null;
-	}
-
 	return (
-		<OpenAISettings
-			providerSettings={ providerSettings }
-			onChange={ onChange }
-		/>
+		<>
+			{ ! isConfigured && (
+				<OpenAISettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
+			) }
+
+			<div className="display-container-wrapper">
+				<div className="helper-text-content">
+					<div>{ moderationHelperText.content_types }</div>
+				</div>
+			</div>
+		</>
 	);
 };

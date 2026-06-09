@@ -29,6 +29,34 @@
 	"rules": {
 		"react/jsx-no-undef": "off"
 	},
+	"settings": {
+		"import/core-modules": [
+			"@wordpress/api-fetch",
+			"@wordpress/blocks",
+			"@wordpress/block-editor",
+			"@wordpress/block-library",
+			"@wordpress/commands",
+			"@wordpress/components",
+			"@wordpress/compose",
+			"@wordpress/core-data",
+			"@wordpress/data",
+			"@wordpress/dom-ready",
+			"@wordpress/dom",
+			"@wordpress/edit-post",
+			"@wordpress/editor",
+			"@wordpress/element",
+			"@wordpress/hooks",
+			"@wordpress/html-entities",
+			"@wordpress/i18n",
+			"@wordpress/media-utils",
+			"@wordpress/notices",
+			"@wordpress/plugins",
+			"@wordpress/url",
+			"@wordpress/wordcount",
+			"react-dom",
+			"react"
+		]
+	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
 	"ignorePatterns": ["*.json", "webpack.config.js"]
 }

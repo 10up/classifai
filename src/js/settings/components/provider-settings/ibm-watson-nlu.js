@@ -68,6 +68,7 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 					onChange={ ( value ) =>
 						onChange( { endpoint_url: value } )
 					}
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			{ ! useAPIkey && (
@@ -79,6 +80,7 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 						onChange={ ( value ) =>
 							onChange( { username: value } )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }
@@ -101,6 +103,7 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 						}
 						onChange( data );
 					} }
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow>

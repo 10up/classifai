@@ -132,52 +132,75 @@ class Speech extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( array $new_settings ): array {
-		$settings               = $this->feature_instance->get_settings();
-		$is_credentials_changed = false;
+		$settings      = $this->feature_instance->get_settings();
+		$authenticated = $this->authenticate_credentials( $new_settings );
 
-		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
-		$new_settings[ static::ID ]['voices']        = $settings[ static::ID ]['voices'];
-
-		if ( ! empty( $new_settings[ static::ID ]['endpoint_url'] ) && ! empty( $new_settings[ static::ID ]['api_key'] ) ) {
-			$new_url = trailingslashit( esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ) );
-			$new_key = sanitize_text_field( $new_settings[ static::ID ]['api_key'] );
-
-			if ( $new_url !== $settings[ static::ID ]['endpoint_url'] || $new_key !== $settings[ static::ID ]['api_key'] ) {
-				$is_credentials_changed = true;
-			}
-
-			if ( $is_credentials_changed ) {
-				$new_settings[ static::ID ]['endpoint_url'] = $new_url;
-				$new_settings[ static::ID ]['api_key']      = $new_key;
-				$new_settings[ static::ID ]['voices']       = $this->connect_to_service(
-					array(
-						'endpoint_url' => $new_url,
-						'api_key'      => $new_key,
-					)
-				);
-
-				if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
-					$new_settings[ static::ID ]['authenticated'] = true;
-				} else {
-					$new_settings[ static::ID ]['voices']        = [];
-					$new_settings[ static::ID ]['authenticated'] = false;
-				}
-			}
-		} else {
-			$new_settings[ static::ID ]['endpoint_url'] = $settings[ static::ID ]['endpoint_url'];
-			$new_settings[ static::ID ]['api_key']      = $settings[ static::ID ]['api_key'];
+		if ( is_wp_error( $authenticated ) ) {
+			$new_settings[ static::ID ]['authenticated'] = false;
 
 			add_settings_error(
-				$this->feature_instance->get_option_name(),
-				'classifai-azure-text-to-speech-auth-empty',
-				esc_html__( 'One or more credentials required to connect to the Azure Text to Speech service is empty.', 'classifai' ),
+				'api_key',
+				'classifai-auth',
+				$authenticated->get_error_message(),
 				'error'
 			);
+		} else {
+			$new_settings[ static::ID ]['authenticated'] = true;
+		}
+
+		$new_settings[ static::ID ]['voices'] = $settings[ static::ID ]['voices'];
+
+		$new_settings[ static::ID ]['endpoint_url'] = trailingslashit( esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] ) );
+		$new_settings[ static::ID ]['api_key']      = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
+
+		// Connect to the service and get voices.
+		$new_settings[ static::ID ]['voices'] = $this->connect_to_service(
+			array(
+				'endpoint_url' => $new_settings[ static::ID ]['endpoint_url'],
+				'api_key'      => $new_settings[ static::ID ]['api_key'],
+			)
+		);
+
+		if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
+			$new_settings[ static::ID ]['authenticated'] = true;
+		} else {
+			$new_settings[ static::ID ]['voices']        = [];
+			$new_settings[ static::ID ]['authenticated'] = false;
 		}
 
 		$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] ?? $settings[ static::ID ]['voice'] );
 
 		return $new_settings;
+	}
+
+	/**
+	 * Authenticates our credentials.
+	 *
+	 * @param array $settings Settings being saved.
+	 * @return bool|WP_Error
+	 */
+	public function authenticate_credentials( array $settings = [] ) {
+		$credentials = $this->get_credentials( $settings );
+
+		// Create request arguments.
+		$request_params = array(
+			'headers' => array(
+				'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
+				'Content-Type'              => 'application/json',
+			),
+			'timeout' => 20, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			'use_vip' => true,
+		);
+
+		// Create request URL.
+		$request_url = sprintf(
+			'%1$scognitiveservices/voices/list',
+			trailingslashit( $credentials['endpoint_url'] ?? '' )
+		);
+
+		$response = safe_wp_remote_get( $request_url, $request_params );
+
+		return ! is_wp_error( $response ) ? true : $response;
 	}
 
 	/**
@@ -188,39 +211,36 @@ class Speech extends Provider {
 	 */
 	public function connect_to_service( array $args = array() ): array {
 		$settings = $this->feature_instance->get_settings( static::ID );
-
-		$default = array(
+		$default  = array(
 			'endpoint_url' => isset( $settings[ static::ID ]['url'] ) ? $settings[ static::ID ]['url'] : '',
 			'api_key'      => isset( $settings[ static::ID ]['api_key'] ) ? $settings[ static::ID ]['api_key'] : '',
 		);
 
-		$default = wp_parse_args( $args, $default );
+		$default     = wp_parse_args( $args, $default );
+		$credentials = $this->get_credentials( [ static::ID => $default ] );
 
 		// Return if credentials don't exist.
-		if ( empty( $default['endpoint_url'] ) || empty( $default['api_key'] ) ) {
+		if ( empty( $credentials['endpoint_url'] ) || empty( $credentials['api_key'] ) ) {
 			return array();
 		}
 
 		// Create request arguments.
 		$request_params = array(
 			'headers' => array(
-				'Ocp-Apim-Subscription-Key' => $default['api_key'],
+				'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 				'Content-Type'              => 'application/json',
 			),
+			'timeout' => 20, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			'use_vip' => true,
 		);
 
 		// Create request URL.
 		$request_url = sprintf(
 			'%1$scognitiveservices/voices/list',
-			$default['endpoint_url']
+			trailingslashit( $credentials['endpoint_url'] ?? '' )
 		);
 
-		$request_params['timeout'] = $request_params['timeout'] ?? 20;
-		$response                  = safe_wp_remote_get(
-			$request_url,
-			$request_params
-		);
+		$response = safe_wp_remote_get( $request_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
 			add_settings_error(
@@ -364,19 +384,21 @@ class Speech extends Provider {
 			$post_content
 		);
 
+		$credentials = $this->get_credentials();
+
 		// Request parameters.
 		$request_params = array(
 			'method'  => 'POST',
 			'body'    => $request_body,
 			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			'headers' => array(
-				'Ocp-Apim-Subscription-Key' => $settings[ static::ID ]['api_key'],
+				'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 				'Content-Type'              => 'application/ssml+xml',
 				'X-Microsoft-OutputFormat'  => 'audio-16khz-128kbitrate-mono-mp3',
 			),
 		);
 
-		$remote_url = sprintf( '%s%s', $settings[ static::ID ]['endpoint_url'], self::API_PATH );
+		$remote_url = sprintf( '%s%s', trailingslashit( $credentials['endpoint_url'] ?? '' ), self::API_PATH );
 		$response   = safe_wp_remote_post( $remote_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
