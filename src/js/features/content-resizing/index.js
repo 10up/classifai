@@ -162,7 +162,7 @@ const ContentResizingPlugin = () => {
 					'Expanded text suggestion',
 					'Expanded text suggestions',
 					textArray.length,
-					'Modal title after expand content resizing.',
+					'Modal title after expand writing tools.',
 					'classifai'
 				)
 			);
@@ -172,7 +172,7 @@ const ContentResizingPlugin = () => {
 					'Grammar and spelling correction suggestion',
 					'Grammar and spelling correction suggestions',
 					textArray.length,
-					'Modal title after fix grammar content resizing.',
+					'Modal title after fix grammar writing tools.',
 					'classifai'
 				)
 			);
@@ -182,7 +182,7 @@ const ContentResizingPlugin = () => {
 					'Condensed text suggestion',
 					'Condensed text suggestions',
 					textArray.length,
-					'Modal title after condense content resizing.',
+					'Modal title after condense writing tools.',
 					'classifai'
 				)
 			);
@@ -327,7 +327,7 @@ const ContentResizingPlugin = () => {
 		}
 	}
 
-	// We don't want to use the reszing feature when multiple blocks are selected.
+	// We don't want to use the resizing feature when multiple blocks are selected.
 	// Nor do we want to use it when a block's content resizing is under process.
 	if ( isMultiBlocksSelected || isResizing ) {
 		return null;

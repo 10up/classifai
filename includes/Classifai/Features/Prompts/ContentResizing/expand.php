@@ -1,6 +1,6 @@
 <?php
 /**
- * Default prompt for expanding content via the Content Resizing feature.
+ * Default prompt for expanding content via the Writing Tools feature.
  *
  * @package Classifai
  */

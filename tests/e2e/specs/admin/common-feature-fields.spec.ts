@@ -5,7 +5,7 @@ const services: Record< string, Record< string, string > > = {
 		feature_classification: 'Classification',
 		feature_title_generation: 'Title Generation',
 		feature_excerpt_generation: 'Excerpt Generation',
-		feature_content_resizing: 'Content Resizing',
+		feature_content_resizing: 'Writing Tools',
 		feature_text_to_speech_generation: 'Text to Speech',
 		feature_audio_transcripts_generation: 'Audio Transcripts Generation',
 	},

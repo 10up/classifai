@@ -35,7 +35,7 @@ class ContentResizing extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->label = __( 'Content Resizing', 'classifai' );
+		$this->label = __( 'Writing Tools', 'classifai' );
 
 		// Contains all providers that are registered to the service.
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
@@ -142,7 +142,7 @@ class ContentResizing extends Feature {
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $this->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing is not currently enabled.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Writing tools are not currently enabled.', 'classifai' ) );
 		}
 
 		return true;

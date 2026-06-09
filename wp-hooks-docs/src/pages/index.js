@@ -122,10 +122,10 @@ export default function Home() {
 			configureLink: '/feature-configuration/title-generation',
 		},
 		{
-			title: 'Content Resizing',
+			title: 'Writing Tools',
 			tagline: 'Say More, Say Less',
 			description:
-				'Expand or condense your written content to create the ideal version that is precise and effective, with length indicators.',
+				'Expand, condense or fix grammar in your written content to create the ideal version that is precise and effective, with length indicators.',
 			configureLink: '/feature-configuration/content-resizing',
 		},
 		{

@@ -1,6 +1,6 @@
 <?php
 /**
- * Default prompt for condensing content via the Content Resizing feature.
+ * Default prompt for condensing content via the Writing Tools feature.
  *
  * @package Classifai
  */

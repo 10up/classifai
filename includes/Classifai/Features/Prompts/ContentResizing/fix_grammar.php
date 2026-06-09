@@ -1,6 +1,6 @@
 <?php
 /**
- * Default prompt for fixing grammar via the Content Resizing feature.
+ * Default prompt for fixing grammar via the Writing Tools feature.
  *
  * @package Classifai
  */

@@ -12,9 +12,9 @@ import { STORE_NAME } from '../../data/store';
 import { PromptRepeater } from './prompt-repeater';
 
 /**
- * Component for the Content Resizing feature settings.
+ * Component for the Writing Tools feature settings.
  *
- * This component is used within the FeatureSettings component to allow users to configure the Content Resizing feature.
+ * This component is used within the FeatureSettings component to allow users to configure the Writing Tools feature.
  *
  * @return {React.ReactElement} ContentResizingSettings component.
  */
