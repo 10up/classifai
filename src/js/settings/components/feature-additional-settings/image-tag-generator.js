@@ -38,6 +38,7 @@ export const ImageTagGeneratorSettings = () => {
 		<>
 			<SettingsRow label={ __( 'Tag taxonomy', 'classifai' ) }>
 				<SelectControl
+					// eslint-disable-next-line no-restricted-syntax
 					id="feature_image_tags_generator_tag_taxonomy"
 					onChange={ ( value ) => {
 						setFeatureSettings( {

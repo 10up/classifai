@@ -8,6 +8,7 @@ import {
 	RichText,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
 import {
 	Placeholder,
 	ToolbarGroup,
@@ -36,11 +37,11 @@ const BlockEdit = ( props ) => {
 
 	useEffect( () => {
 		if ( ( ! isLoading && takeaways.length === 0 ) || run ) {
-			const postId = select( 'core/editor' ).getCurrentPostId();
+			const postId = select( editorStore ).getCurrentPostId();
 			const postContent =
-				select( 'core/editor' ).getEditedPostAttribute( 'content' );
+				select( editorStore ).getEditedPostAttribute( 'content' );
 			const postTitle =
-				select( 'core/editor' ).getEditedPostAttribute( 'title' );
+				select( editorStore ).getEditedPostAttribute( 'title' );
 
 			// If no content or the only content in the post is this block, don't make an API call.
 			if (

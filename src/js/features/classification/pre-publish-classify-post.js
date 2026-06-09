@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { withSelect } from '@wordpress/data';
-import { PluginPrePublishPanel } from '@wordpress/editor';
+import { PluginPrePublishPanel, store as editorStore } from '@wordpress/editor';
 import { Component } from '@wordpress/element';
 
 const PrePubPanel = ( { children } ) => {
@@ -41,6 +41,6 @@ class PrePubClassifyPost extends Component {
 
 export default withSelect( ( select ) => {
 	return {
-		isPublishPanelOpen: select( 'core/editor' ).isPublishSidebarOpened(),
+		isPublishPanelOpen: select( editorStore ).isPublishSidebarOpened(),
 	};
 } )( PrePubClassifyPost );

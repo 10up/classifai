@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { withSelect } from '@wordpress/data';
-import { PluginPrePublishPanel } from '@wordpress/editor';
+import { PluginPrePublishPanel, store as editorStore } from '@wordpress/editor';
 import { Component } from '@wordpress/element';
 
 const ExcerptPrePublishPanel = ( { children } ) => {
@@ -64,7 +64,7 @@ class MaybeExcerptPrePublishPanel extends Component {
 
 export default withSelect( ( select ) => {
 	return {
-		excerpt: select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
-		isPublishPanelOpen: select( 'core/editor' ).isPublishSidebarOpened(),
+		excerpt: select( editorStore ).getEditedPostAttribute( 'excerpt' ),
+		isPublishPanelOpen: select( editorStore ).isPublishSidebarOpened(),
 	};
 } )( MaybeExcerptPrePublishPanel );

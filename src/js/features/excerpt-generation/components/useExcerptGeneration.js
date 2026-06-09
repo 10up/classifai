@@ -7,6 +7,7 @@
  */
 import { dispatch, useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
+import { store as coreStore } from '@wordpress/core-data';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
@@ -94,7 +95,7 @@ export function useExcerptGeneration() {
 		}
 	);
 	const author = useSelect( ( select ) =>
-		select( 'core' ).getUser( authorId )
+		select( coreStore ).getUser( authorId )
 	);
 	const { editPost } = useDispatch( editorStore );
 	const [ isGenerating, setIsGenerating ] = useState( false );

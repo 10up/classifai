@@ -181,7 +181,7 @@ export const ClassificationSettings = () => {
 						}
 						isEmbeddingInProgress.current = false;
 					}
-				} catch ( error ) {}
+				} catch {}
 			};
 
 			const intervalId = setInterval( getEmbeddingsInProgress, 10000 );

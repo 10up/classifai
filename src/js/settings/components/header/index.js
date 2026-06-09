@@ -23,6 +23,7 @@ import { ClassifAILogo } from '../../utils/icons';
  * @return {React.ReactElement} Header component.
  */
 export const Header = () => {
+	/* eslint-disable no-restricted-syntax -- these IDs are referenced by SCSS selectors and must stay static */
 	return (
 		<header id="classifai-header">
 			<div className="classifai-header-layout">
@@ -87,4 +88,5 @@ export const Header = () => {
 			</div>
 		</header>
 	);
+	/* eslint-enable no-restricted-syntax */
 };

@@ -51,6 +51,7 @@
 		// Completeness
 		"skipLibCheck": true,
 		"typeRoots": [ "./node_modules/@types" ],
+		"types": [],
 
 		// File config
 		"baseUrl": "./src",

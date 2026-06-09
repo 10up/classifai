@@ -86,6 +86,7 @@ export const ExcerptGenerationSettings = () => {
 				) }
 			>
 				<InputControl
+					// eslint-disable-next-line no-restricted-syntax
 					id="excerpt_length"
 					type="number"
 					value={ featureSettings.length || 55 }

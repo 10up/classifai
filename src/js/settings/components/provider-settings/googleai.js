@@ -44,6 +44,7 @@ export const GoogleAISettings = ( { providerSettings, onChange } ) => {
 				description={ <Description /> }
 			>
 				<InputControl
+					// eslint-disable-next-line no-restricted-syntax
 					id="googleai_gemini_api_key"
 					type="password"
 					value={ providerSettings.api_key || '' }

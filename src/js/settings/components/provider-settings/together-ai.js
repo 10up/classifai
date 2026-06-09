@@ -44,6 +44,7 @@ export const TogetherAISettings = ( { providerSettings, onChange } ) => {
 				description={ <Description /> }
 			>
 				<InputControl
+					// eslint-disable-next-line no-restricted-syntax
 					id="togetherai_api_key"
 					type="password"
 					value={ providerSettings.api_key || '' }

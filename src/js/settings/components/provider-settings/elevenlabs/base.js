@@ -44,6 +44,7 @@ export const ElevenLabsSettings = ( { providerSettings, onChange } ) => {
 				description={ <Description /> }
 			>
 				<InputControl
+					// eslint-disable-next-line no-restricted-syntax
 					id="elevenlabs_api_key"
 					type="password"
 					value={ providerSettings.api_key || '' }

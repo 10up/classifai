@@ -7,14 +7,17 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch, select, subscribe } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
+import { store as editWidgetsStore } from '@wordpress/edit-widgets';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 
 const { classifaiDalleData } = window;
 
 const isInserterOpened = () =>
-	select( 'core/editor' )?.isInserterOpened() ||
-	select( 'core/edit-widgets' )?.isInserterOpened?.();
+	select( editorStore )?.isInserterOpened() ||
+	select( editWidgetsStore )?.isInserterOpened?.();
 
 const waitFor = async ( selector ) =>
 	new Promise( ( resolve ) => {
@@ -27,7 +30,7 @@ const waitFor = async ( selector ) =>
 	} );
 
 waitFor( isInserterOpened ).then( () =>
-	dispatch( 'core/block-editor' )?.registerInserterMediaCategory?.(
+	dispatch( blockEditorStore )?.registerInserterMediaCategory?.(
 		registerGenerateImageMediaCategory()
 	)
 );

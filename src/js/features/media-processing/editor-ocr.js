@@ -10,7 +10,10 @@ import { createBlock } from '@wordpress/blocks';
 import apiFetch from '@wordpress/api-fetch';
 import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { BlockControls } from '@wordpress/block-editor';
+import {
+	BlockControls,
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 import {
 	Button,
 	Modal,
@@ -73,7 +76,7 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText ) => {
 		return;
 	}
 
-	const { getBlockIndex } = select( 'core/block-editor' );
+	const { getBlockIndex } = select( blockEditorStore );
 	const groupBlock = createBlock( 'core/group', {
 		anchor: `classifai-ocr-${ imageId }`,
 		className: 'is-style-classifai-ocr-text',
@@ -83,11 +86,11 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText ) => {
 		content: scannedText,
 	} );
 
-	await dispatch( 'core/block-editor' ).insertBlock(
+	await dispatch( blockEditorStore ).insertBlock(
 		groupBlock,
 		getBlockIndex( clientId ) + 1
 	);
-	dispatch( 'core/block-editor' ).insertBlock(
+	dispatch( blockEditorStore ).insertBlock(
 		textBlock,
 		0,
 		groupBlock.clientId
@@ -103,7 +106,7 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText ) => {
  */
 const hasOcrBlock = ( imageId, blocks = [] ) => {
 	if ( blocks.length === 0 ) {
-		const { getBlocks } = select( 'core/block-editor' );
+		const { getBlocks } = select( blockEditorStore );
 
 		blocks = getBlocks();
 	}
@@ -261,7 +264,7 @@ wp.blocks.registerBlockStyle( 'core/group', {
 
 	subscribe(
 		debounce( () => {
-			const blockEditor = select( 'core/block-editor' );
+			const blockEditor = select( blockEditorStore );
 			const selectedBlock = blockEditor.getSelectedBlock();
 			const blocks = blockEditor.getBlocks();
 

@@ -4,6 +4,7 @@
 import domReady from '@wordpress/dom-ready';
 import apiFetch from '@wordpress/api-fetch';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 import {
 	createRoot,
 	createElement,
@@ -16,9 +17,9 @@ const BUTTON_ID = 'api_usage_tracking_force_refresh_data';
 
 const APIUsageTrackingForceRefreshData = () => {
 	const [ saving, setSaving ] = useState( false );
-	const { invalidateResolution } = useDispatch( 'core' );
+	const { invalidateResolution } = useDispatch( coreStore );
 	const isForceRefreshScheduled = useSelect( ( select ) => {
-		const site = select( 'core' ).getEntityRecord( 'root', 'site' );
+		const site = select( coreStore ).getEntityRecord( 'root', 'site' );
 		return site?.classifai_api_usage_force_refresh || false;
 	} );
 
@@ -41,7 +42,7 @@ const APIUsageTrackingForceRefreshData = () => {
 
 			try {
 				invalidateResolution( 'getEntityRecord', [ 'root', 'site' ] );
-			} catch ( e ) {
+			} catch {
 				// Silently handle refresh errors.
 			}
 

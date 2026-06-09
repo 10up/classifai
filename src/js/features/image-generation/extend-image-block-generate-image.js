@@ -26,7 +26,7 @@ function addImageGenerationLink( Component ) {
 
 		try {
 			blockProps = useBlockProps();
-		} catch ( e ) {
+		} catch {
 			return <Component { ...props } />;
 		}
 

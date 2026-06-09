@@ -46,6 +46,7 @@ export const OpenAIEmbeddingsSettings = ( { isConfigured = false } ) => {
 			{ [ 'feature_recommended_content' ].includes( featureName ) && (
 				<SettingsRow label={ __( 'Threshold %', 'classifai' ) }>
 					<InputControl
+						// eslint-disable-next-line no-restricted-syntax
 						id="embedding-threshold"
 						type="number"
 						style={ { width: '10%' } }

@@ -130,7 +130,7 @@ export const ChatUI: React.FC = () => {
 							handleClickOutside
 						);
 					}
-				} catch ( e ) {
+				} catch {
 					// Cross-origin iframe access error - can't add listener
 					// Silently fail for cross-origin iframes
 				}
@@ -151,7 +151,7 @@ export const ChatUI: React.FC = () => {
 							handleClickOutside
 						);
 					}
-				} catch ( e ) {
+				} catch {
 					// Cross-origin iframe access error - can't remove listener
 					// Silently fail for cross-origin iframes
 				}

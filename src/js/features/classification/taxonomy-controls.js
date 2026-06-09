@@ -666,7 +666,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 	 * Render the inline edit input overlay.
 	 *
 	 * @param {string} taxonomySlug The taxonomy slug to check if editing.
-	 * @return {JSX.Element|null} The input overlay or null.
+	 * @return {React.ReactElement|null} The input overlay or null.
 	 */
 	const renderInlineEditInput = ( taxonomySlug ) => {
 		if ( ! editingToken || editingToken.taxonomySlug !== taxonomySlug ) {

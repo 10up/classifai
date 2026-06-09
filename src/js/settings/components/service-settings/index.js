@@ -119,7 +119,7 @@ export const ServiceSettings = () => {
 				setCurrentFeature( featureName );
 				setShowCredentialModal( true );
 			}
-		} catch ( error ) {
+		} catch {
 			// Error handled gracefully
 		}
 	};
