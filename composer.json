@@ -44,7 +44,18 @@
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",
     "lint-fix": "phpcbf .",
     "phpstan": "phpstan analyse --memory-limit=2048M -v",
-    "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices"
+    "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices",
+    "prefix-namespaces": [
+        "sh -c 'test -f ./bin/strauss.phar || curl -o bin/strauss.phar -L -C - https://github.com/BrianHenryIE/strauss/releases/latest/download/strauss.phar'",
+        "php -d memory_limit=2048M -d max_execution_time=300 bin/strauss.phar",
+        "@composer dump-autoload"
+    ],
+    "post-install-cmd": [
+        "@prefix-namespaces"
+    ],
+    "post-update-cmd": [
+        "@prefix-namespaces"
+    ]
   },
   "minimum-stability": "dev",
   "config": {
@@ -61,12 +72,23 @@
   },
   "archive": {
     "exclude": [
-      "!/vendor/"
+      "!/vendor/",
+      "!/vendor-prefixed/"
     ]
   },
   "extra": {
     "aws/aws-sdk-php": [
         "Polly"
-    ]
+    ],
+    "strauss": {
+      "target_directory": "vendor-prefixed",
+      "namespace_prefix": "ClassifaiVendor\\",
+      "classmap_prefix": "ClassifaiVendor_",
+      "packages": [
+        "aws/aws-sdk-php"
+      ],
+      "delete_vendor_packages": true,
+      "update_call_sites": false
+    }
   }
 }

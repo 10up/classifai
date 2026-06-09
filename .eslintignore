@@ -2,6 +2,7 @@ dist
 node_modules
 tests/*
 vendor/*
+vendor-prefixed/*
 bin/*
 wp-hooks-docs/*
 docs/*

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8bbbdae2e658c370e8d798884a967c48",
+    "content-hash": "a40a00e7927142ad296a809e248bea3e",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -160,16 +160,16 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "7.11.x-dev",
+            "version": "7.12.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "2b58257ecb619e462db4160adeae81471dc0579a"
+                "reference": "9f42ebe8df9cbde2e1f6e5a2318aa36051d7ba3d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/2b58257ecb619e462db4160adeae81471dc0579a",
-                "reference": "2b58257ecb619e462db4160adeae81471dc0579a",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/9f42ebe8df9cbde2e1f6e5a2318aa36051d7ba3d",
+                "reference": "9f42ebe8df9cbde2e1f6e5a2318aa36051d7ba3d",
                 "shasum": ""
             },
             "require": {
@@ -198,7 +198,6 @@
                 "ext-intl": "Required for Internationalized Domain Name (IDN) support",
                 "psr/log": "Required for using the Log middleware"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -269,7 +268,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/guzzle/issues",
-                "source": "https://github.com/guzzle/guzzle/tree/7.11"
+                "source": "https://github.com/guzzle/guzzle/tree/7.12"
             },
             "funding": [
                 {
@@ -285,7 +284,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-02T19:48:51+00:00"
+            "time": "2026-06-08T23:03:23+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -2275,8 +2274,8 @@
             "version": "2.2.x-dev",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1643f149524a298fa3db94da7f8bce6b020d4e84",
-                "reference": "1643f149524a298fa3db94da7f8bce6b020d4e84",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/c128b8456a3cc6308a085cce9dd3d7c4ce444c1e",
+                "reference": "c128b8456a3cc6308a085cce9dd3d7c4ce444c1e",
                 "shasum": ""
             },
             "require": {
@@ -2333,7 +2332,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-02T20:28:56+00:00"
+            "time": "2026-06-09T15:57:01+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -2341,12 +2340,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-deprecation-rules.git",
-                "reference": "99aff1a0142839dced7671b14aa63449d9561bfe"
+                "reference": "54db58033f3606c70ff7604282ca34be25594472"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-deprecation-rules/zipball/99aff1a0142839dced7671b14aa63449d9561bfe",
-                "reference": "99aff1a0142839dced7671b14aa63449d9561bfe",
+                "url": "https://api.github.com/repos/phpstan/phpstan-deprecation-rules/zipball/54db58033f3606c70ff7604282ca34be25594472",
+                "reference": "54db58033f3606c70ff7604282ca34be25594472",
                 "shasum": ""
             },
             "require": {
@@ -2385,7 +2384,7 @@
                 "issues": "https://github.com/phpstan/phpstan-deprecation-rules/issues",
                 "source": "https://github.com/phpstan/phpstan-deprecation-rules/tree/2.0.x"
             },
-            "time": "2026-05-25T15:58:20+00:00"
+            "time": "2026-06-08T06:03:24+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
@@ -2393,12 +2392,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-phpunit.git",
-                "reference": "2c07f226c355a9f7de0ab982d6c5087a9e931588"
+                "reference": "4a8e26fdfc14cdead6a1dc044dc5373551ce14af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/2c07f226c355a9f7de0ab982d6c5087a9e931588",
-                "reference": "2c07f226c355a9f7de0ab982d6c5087a9e931588",
+                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/4a8e26fdfc14cdead6a1dc044dc5373551ce14af",
+                "reference": "4a8e26fdfc14cdead6a1dc044dc5373551ce14af",
                 "shasum": ""
             },
             "require": {
@@ -2443,7 +2442,7 @@
                 "issues": "https://github.com/phpstan/phpstan-phpunit/issues",
                 "source": "https://github.com/phpstan/phpstan-phpunit/tree/2.0.x"
             },
-            "time": "2026-05-25T15:58:32+00:00"
+            "time": "2026-06-08T05:49:31+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -2770,12 +2769,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "2f0cd2c1721f81f85d5dcd2fd5cf440ca6f4c8b2"
+                "reference": "a8c3aa11fe963d7a2a9c70bfaf81203d71c611a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/2f0cd2c1721f81f85d5dcd2fd5cf440ca6f4c8b2",
-                "reference": "2f0cd2c1721f81f85d5dcd2fd5cf440ca6f4c8b2",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a8c3aa11fe963d7a2a9c70bfaf81203d71c611a3",
+                "reference": "a8c3aa11fe963d7a2a9c70bfaf81203d71c611a3",
                 "shasum": ""
             },
             "require": {
@@ -2857,7 +2856,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-05-29T04:47:48+00:00"
+            "time": "2026-06-09T13:37:27+00:00"
         },
         {
             "name": "sebastian/cli-parser",
