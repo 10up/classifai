@@ -12,7 +12,7 @@
   "require": {
     "aws/aws-sdk-php": "3.337.3",
     "php": ">=7.4",
-    "woocommerce/action-scheduler": "3.8.1",
+    "woocommerce/action-scheduler": "3.9.3",
     "yahnis-elsts/plugin-update-checker": "5.1"
   },
   "autoload": {
