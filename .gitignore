@@ -1,11 +1,13 @@
 release
 /vendor/*
+/vendor-prefixed/*
 phpunit.xml
 .phpunit.result.cache
 /dist
 coverage
 /docs
 languages
+strauss.phar
 
 debug.log
 
