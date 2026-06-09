@@ -5,6 +5,10 @@
  * @package ClassifAI
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $base_url            = admin_url( 'admin.php?page=classifai_setup&step=3' );
 $onboarding          = new Classifai\Admin\Onboarding();
 $enabled_features    = $onboarding->get_enabled_features();

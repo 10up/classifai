@@ -16,6 +16,10 @@ use WP_Error;
 use function Classifai\sanitize_prompts;
 use function Classifai\get_asset_info;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ContentResizing
  */
@@ -26,20 +30,6 @@ class ContentResizing extends Feature {
 	 * @var string
 	 */
 	const ID = 'feature_content_resizing';
-
-	/**
-	 * Prompt for shrinking content.
-	 *
-	 * @var string
-	 */
-	public $condense_prompt = 'Decrease the content length no more than 2 to 4 sentences.';
-
-	/**
-	 * Prompt for growing content.
-	 *
-	 * @var string
-	 */
-	public $expand_prompt = 'Increase the content length no more than 2 to 4 sentences.';
 
 	/**
 	 * Constructor.
@@ -264,14 +254,14 @@ class ContentResizing extends Feature {
 			'condense_text_prompt' => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->condense_prompt,
+					'prompt'   => $this->get_prompt( 'condense' ),
 					'original' => 1,
 				],
 			],
 			'expand_text_prompt'   => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->expand_prompt,
+					'prompt'   => $this->get_prompt( 'expand' ),
 					'original' => 1,
 				],
 			],
@@ -292,7 +282,7 @@ class ContentResizing extends Feature {
 		if ( $settings && ! empty( $settings['condense_text_prompt'] ) ) {
 			foreach ( $settings['condense_text_prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['condense_text_prompt'][ $key ]['prompt'] = $this->condense_prompt;
+					$settings['condense_text_prompt'][ $key ]['prompt'] = $this->get_prompt( 'condense' );
 					break;
 				}
 			}
@@ -301,7 +291,7 @@ class ContentResizing extends Feature {
 		if ( $settings && ! empty( $settings['expand_text_prompt'] ) ) {
 			foreach ( $settings['expand_text_prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['expand_text_prompt'][ $key ]['prompt'] = $this->expand_prompt;
+					$settings['expand_text_prompt'][ $key ]['prompt'] = $this->get_prompt( 'expand' );
 					break;
 				}
 			}

@@ -16,6 +16,10 @@ use WP_Error;
 use function Classifai\get_asset_info;
 use function Classifai\sanitize_prompts;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ExcerptGeneration
  */
@@ -26,20 +30,6 @@ class ExcerptGeneration extends Feature {
 	 * @var string
 	 */
 	const ID = 'feature_excerpt_generation';
-
-	/**
-	 * Prompt for generating excerpts.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'Summarize the following message using a maximum of {{WORDS}} words. The original message was written by {{AUTHOR}}. Ensure this summary pairs well with the following text: {{TITLE}}.';
-
-	/**
-	 * Prompt for generating excerpts for WooCommerce Products.
-	 *
-	 * @var string
-	 */
-	public $woo_prompt = 'Create a concise, compelling summary for an ecommerce product that highlights key features, benefits, and unique selling points. Keep it within {{WORDS}} words and ensure it pairs well with the product title: {{TITLE}}.';
 
 	/**
 	 * Constructor.
@@ -241,6 +231,17 @@ class ExcerptGeneration extends Feature {
 			return;
 		}
 
+		$screen = get_current_screen();
+
+		// Load the assets only if the post type supports excerpts and is not an attachment.
+		if (
+			! $screen ||
+			! post_type_supports( $screen->post_type, 'excerpt' ) ||
+			in_array( $screen->post_type, array( 'attachment' ), true )
+		) {
+			return;
+		}
+
 		// This script removes the core excerpt panel and replaces it with our own.
 		wp_enqueue_script(
 			'classifai-plugin-excerpt-generation-js',
@@ -330,7 +331,7 @@ class ExcerptGeneration extends Feature {
 			$this->get_option_name() . '_section',
 			[
 				'label_for'     => 'generate_excerpt_prompt',
-				'placeholder'   => $this->prompt,
+				'placeholder'   => $this->get_prompt( 'default' ),
 				'default_value' => $settings['generate_excerpt_prompt'],
 				'description'   => esc_html__( "Add a custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title. {{AUTHOR}} will be replaced with the post author's display name.", 'classifai' ),
 			]
@@ -377,7 +378,7 @@ class ExcerptGeneration extends Feature {
 			'generate_excerpt_prompt' => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->prompt,
+					'prompt'   => $this->get_prompt( 'default' ),
 					'original' => 1,
 				],
 			],
@@ -402,7 +403,7 @@ class ExcerptGeneration extends Feature {
 		if ( $settings && ! empty( $settings['generate_excerpt_prompt'] ) ) {
 			foreach ( $settings['generate_excerpt_prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['generate_excerpt_prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings['generate_excerpt_prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}

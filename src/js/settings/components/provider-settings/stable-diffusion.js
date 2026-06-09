@@ -80,6 +80,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 						onChange={ ( value ) =>
 							onChange( { endpoint_url: value } )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }
@@ -97,6 +98,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 					options={ models }
 					disabled={ ! isConfigured }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -117,6 +119,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 						value: i + 1,
 					} ) ) }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -145,6 +148,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -160,6 +164,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 						onChange( { per_image_settings: value } )
 					}
 					checked={ providerSettings.per_image_settings || false }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</>

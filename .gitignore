@@ -32,6 +32,9 @@ Session.vim
 *.swp
 .~lock*
 .vscode
+.cursor
+.claude
+CLAUDE.md
 
 # Mac OSX
 .DS_Store
@@ -45,12 +48,12 @@ Desktop.ini
 
 config.local.php
 
-# cypress.
-tests/cypress/downloads
-tests/cypress/screenshots
-tests/cypress/videos
-tests/cypress/reports
+# Tests.
+/tests/_output/*
+!/tests/_output/.gitkeep
 .wp-env.override.json
+/artifacts
+/flaky-tests
 
 # Strauss
 bin/strauss.phar

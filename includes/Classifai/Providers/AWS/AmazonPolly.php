@@ -13,6 +13,10 @@ use Classifai\Features\TextToSpeech;
 use WP_Error;
 use ClassifaiVendor\Aws\Sdk;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class AmazonPolly extends Provider {
 
 	const ID = 'aws_polly';
@@ -194,64 +198,96 @@ class AmazonPolly extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( array $new_settings ): array {
-		$settings               = $this->feature_instance->get_settings();
-		$is_credentials_changed = false;
+		$settings      = $this->feature_instance->get_settings();
+		$authenticated = $this->authenticate_credentials( $new_settings );
 
-		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
-		$new_settings[ static::ID ]['voices']        = $settings[ static::ID ]['voices'];
-
-		if (
-			! empty( $new_settings[ static::ID ]['access_key_id'] ) &&
-			! empty( $new_settings[ static::ID ]['secret_access_key'] ) &&
-			! empty( $new_settings[ static::ID ]['aws_region'] )
-		) {
-			$new_access_key_id     = sanitize_text_field( $new_settings[ static::ID ]['access_key_id'] );
-			$new_secret_access_key = sanitize_text_field( $new_settings[ static::ID ]['secret_access_key'] );
-			$new_aws_region        = sanitize_text_field( $new_settings[ static::ID ]['aws_region'] );
-
-			if (
-				$new_access_key_id !== $settings[ static::ID ]['access_key_id'] ||
-				$new_secret_access_key !== $settings[ static::ID ]['secret_access_key'] ||
-				$new_aws_region !== $settings[ static::ID ]['aws_region']
-			) {
-				$is_credentials_changed = true;
-			}
-
-			if ( $is_credentials_changed ) {
-				$new_settings[ static::ID ]['access_key_id']     = $new_access_key_id;
-				$new_settings[ static::ID ]['secret_access_key'] = $new_secret_access_key;
-				$new_settings[ static::ID ]['aws_region']        = $new_aws_region;
-				$new_settings[ static::ID ]['voices']            = $this->connect_to_service(
-					array(
-						'access_key_id'     => $new_access_key_id,
-						'secret_access_key' => $new_secret_access_key,
-						'aws_region'        => $new_aws_region,
-					)
-				);
-
-				if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
-					$new_settings[ static::ID ]['authenticated'] = true;
-				} else {
-					$new_settings[ static::ID ]['voices']        = [];
-					$new_settings[ static::ID ]['authenticated'] = false;
-				}
-			}
-		} else {
-			$new_settings[ static::ID ]['access_key_id']     = $settings[ static::ID ]['access_key_id'];
-			$new_settings[ static::ID ]['secret_access_key'] = $settings[ static::ID ]['secret_access_key'];
-			$new_settings[ static::ID ]['aws_region']        = $settings[ static::ID ]['aws_region'];
+		if ( is_wp_error( $authenticated ) ) {
+			$new_settings[ static::ID ]['authenticated'] = false;
 
 			add_settings_error(
-				$this->feature_instance->get_option_name(),
-				'classifai-ams-polly-auth-empty',
-				esc_html__( 'One or more credentials required to connect to the Amazon Polly service is empty.', 'classifai' ),
+				'api_key',
+				'classifai-auth',
+				$authenticated->get_error_message(),
 				'error'
 			);
+		} else {
+			$new_settings[ static::ID ]['authenticated'] = true;
+		}
+
+		$new_access_key_id     = sanitize_text_field( $new_settings[ static::ID ]['access_key_id'] ?? $settings[ static::ID ]['access_key_id'] );
+		$new_secret_access_key = sanitize_text_field( $new_settings[ static::ID ]['secret_access_key'] ?? $settings[ static::ID ]['secret_access_key'] );
+		$new_aws_region        = sanitize_text_field( $new_settings[ static::ID ]['aws_region'] ?? $settings[ static::ID ]['aws_region'] );
+
+		$new_settings[ static::ID ]['access_key_id']     = $new_access_key_id;
+		$new_settings[ static::ID ]['secret_access_key'] = $new_secret_access_key;
+		$new_settings[ static::ID ]['aws_region']        = $new_aws_region;
+
+		// Connect to the service and get voices.
+		$new_settings[ static::ID ]['voices'] = $this->connect_to_service(
+			array(
+				'access_key_id'     => $new_access_key_id,
+				'secret_access_key' => $new_secret_access_key,
+				'aws_region'        => $new_aws_region,
+			)
+		);
+
+		if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
+			$new_settings[ static::ID ]['authenticated'] = true;
+		} else {
+			$new_settings[ static::ID ]['voices']        = [];
+			$new_settings[ static::ID ]['authenticated'] = false;
 		}
 
 		$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] ?? $settings[ static::ID ]['voice'] );
 
 		return $new_settings;
+	}
+
+	/**
+	 * Authenticate our credentials.
+	 *
+	 * @param array $settings Settings being saved.
+	 * @return bool|WP_Error
+	 */
+	protected function authenticate_credentials( array $settings = [] ) {
+		$response = false;
+
+		try {
+			/**
+			 * Filters the return value of the connect to services function.
+			 *
+			 * Returning a non-false value from the filter will short-circuit
+			 * the describe voices request and return early with that value.
+			 * This filter is useful for E2E tests.
+			 *
+			 * @since 3.1.0
+			 * @hook classifai_aws_polly_pre_connect_to_service
+			 *
+			 * @param bool $pre The value of pre connect to service. Default false. A non-false value will short-circuit the describe voices request.
+			 *
+			 * @return bool|mixed The filtered value of connect to service.
+			 */
+			$pre = apply_filters( 'classifai_' . self::ID . '_pre_connect_to_service', false );
+
+			if ( false !== $pre ) {
+				return $pre;
+			}
+
+			$polly_client = $this->get_polly_client( $settings[ static::ID ] );
+
+			if ( $polly_client ) {
+				$polly_voices = $polly_client->describeVoices();
+				$polly_voices = $polly_voices->get( 'Voices' );
+			} else {
+				$polly_voices = [];
+			}
+
+			$response = ! empty( $polly_voices ) ? true : new WP_Error( 'auth', esc_html__( 'Connection to Amazon Polly failed.', 'classifai' ) );
+		} catch ( \Exception $e ) {
+			$response = new WP_Error( 'auth', esc_html__( 'Connection to Amazon Polly failed.', 'classifai' ) );
+		}
+
+		return ! is_wp_error( $response ) ? true : $response;
 	}
 
 	/**
@@ -296,7 +332,7 @@ class AmazonPolly extends Provider {
 				return $pre;
 			}
 
-			$polly_client = $this->get_polly_client( $args );
+			$polly_client = $this->get_polly_client( $default );
 			$polly_voices = $polly_client->describeVoices();
 			return $polly_voices->get( 'Voices' );
 		} catch ( \Exception $e ) {
@@ -525,29 +561,21 @@ class AmazonPolly extends Provider {
 	 * @return \Aws\Polly\PollyClient|null
 	 */
 	public function get_polly_client( array $aws_config = array() ) {
-		$settings = $this->feature_instance->get_settings( static::ID );
-
-		$default = array(
-			'access_key_id'     => $settings['access_key_id'] ?? '',
-			'secret_access_key' => $settings['secret_access_key'] ?? '',
-			'aws_region'        => $settings['aws_region'] ?? 'us-east-1',
-		);
-
-		$default = wp_parse_args( $aws_config, $default );
+		$credentials = $this->get_credentials( [ static::ID => $aws_config ] );
 
 		// Return if credentials don't exist.
-		if ( empty( $default['access_key_id'] ) || empty( $default['secret_access_key'] ) ) {
+		if ( empty( $credentials['access_key_id'] ) || empty( $credentials['secret_access_key'] ) ) {
 			return null;
 		}
 
 		// Set the AWS SDK configuration.
 		$aws_sdk_config = [
-			'region'      => $default['aws_region'] ?? 'us-east-1',
+			'region'      => $credentials['aws_region'] ?? 'us-east-1',
 			'version'     => 'latest',
 			'ua_append'   => [ 'request-source/classifai' ],
 			'credentials' => [
-				'key'    => $default['access_key_id'],
-				'secret' => $default['secret_access_key'],
+				'key'    => $credentials['access_key_id'],
+				'secret' => $credentials['secret_access_key'],
 			],
 		];
 

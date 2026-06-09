@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin name: ClassifAI Cypress Test Request Mock plugin
+ * Plugin name: ClassifAI E2E Test Request Mock plugin
  */
 
 // Mock the ClassifAI HTTP request calls and provide known response.
@@ -9,6 +9,9 @@ add_filter( 'pre_http_request', 'classifai_test_mock_http_requests', 10, 3 );
 // Mock the AWS Polly API request calls and provide known response.
 add_filter( 'classifai_aws_polly_pre_connect_to_service', 'classifai_mock_aws_polly_connect_to_service' );
 add_filter( 'classifai_aws_polly_pre_synthesize_speech', 'classifai_mock_aws_polly_pre_synthesize_speech' );
+
+// Disable ElasticPress admin bar.
+add_filter( 'ep_admin_bar_should_display', '__return_false' );
 
 /**
  * Mock ClassifAI's HTTP requests.
@@ -99,7 +102,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/computervision/imageanalysis:analyze?api-version=2024-02-01' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/generateThumbnail' ) !== false ) {
-		$response = file_get_contents( __DIR__ . '../classifai/assets/img/icon256x256.png' );
+		$response = file_get_contents( __DIR__ . '/../classifai/assets/img/icon-256x256.png' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/pdf-read-result' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/pdf.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/read' ) !== false ) {
@@ -192,8 +195,8 @@ add_action(
 			'classifai/v1',
 			'clean/taxonomy-terms',
 			array(
-				'methods'  => 'GET',
-				'callback' => function() {
+				'methods'             => 'GET',
+				'callback'            => function() {
 					$taxonomies = ['watson-category', 'watson-concept', 'watson-entity', 'watson-keyword'];
 
 					foreach ( $taxonomies as $taxonomy ) {
@@ -211,6 +214,7 @@ add_action(
 
 					return true;
 				},
+				'permission_callback' => '__return_true',
 			)
 		);
 	}

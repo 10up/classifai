@@ -80,6 +80,7 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 						type="password"
 						value={ providerSettings.api_key || '' }
 						onChange={ ( value ) => onChange( { api_key: value } ) }
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }
@@ -103,6 +104,7 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 						onChange={ ( value ) =>
 							onChange( { number_of_suggestions: value } )
 						}
+						__next40pxDefaultSize
 					/>
 				</SettingsRow>
 			) }

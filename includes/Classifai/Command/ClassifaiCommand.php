@@ -19,6 +19,10 @@ use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
 use function Classifai\safe_file_get_contents;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
  * It provides subcommands to test classification results and batch
@@ -180,6 +184,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		} elseif ( ! empty( $args ) ) {
 			$text = $args[0];
 		} else {
+			$text = '';
 			\WP_CLI::error( 'Please specify text to classify' );
 		}
 

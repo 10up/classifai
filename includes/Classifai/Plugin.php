@@ -1,6 +1,10 @@
 <?php
 namespace Classifai;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class Plugin {
 
 	/**
@@ -109,6 +113,7 @@ class Plugin {
 				'language_processing'    => 'Classifai\Services\LanguageProcessing',
 				'image_processing'       => 'Classifai\Services\ImageProcessing',
 				'content_recommendation' => 'Classifai\Services\ContentRecommendation',
+				'usage_tracking'         => 'Classifai\Services\UsageTracking',
 			]
 		);
 
@@ -310,12 +315,14 @@ Disallow: /
 			new \Classifai\Features\Classification(),
 			new \Classifai\Features\TermCleanup(),
 			new \Classifai\Features\RecommendedContent(),
+			new \Classifai\Features\TextToSpeech(),
+			new \Classifai\Features\APIUsageTracking(),
 		];
 		$is_feature_being_enabled = false;
 
 		foreach ( $features as $feature ) {
 			if ( ! $feature->get_feature_provider_instance() ) {
-				// Skip if the feature does not have a provider instance.
+				// Skip if the feature does not have a Provider instance.
 				continue;
 			}
 
@@ -324,6 +331,11 @@ Disallow: /
 				case 'openai_embeddings':
 				case 'azure_openai_embeddings':
 				case 'ollama_embeddings':
+				case 'aws_polly':
+				case 'ms_azure_text_to_speech':
+				case 'openai_text_to_speech':
+				case 'elevenlabs_text_to_speech':
+				case 'openai_usage_tracking':
 					break;
 				default:
 					continue 2;

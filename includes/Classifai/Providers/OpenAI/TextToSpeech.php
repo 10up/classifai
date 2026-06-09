@@ -90,7 +90,7 @@ class TextToSpeech extends Provider {
 		 *
 		 * Useful if you want to modify the instructions for certain use cases.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.1
 		 * @hook classifai_openai_text_to_speech_instructions
 		 *
 		 * @param string $instructions The current instructions to use.
@@ -364,7 +364,7 @@ class TextToSpeech extends Provider {
 		$post_content        = $feature->normalize_post_content( $post_id );
 		$content_hash        = get_post_meta( $post_id, FeatureTextToSpeech::AUDIO_HASH_KEY, true );
 		$saved_attachment_id = (int) get_post_meta( $post_id, $feature::AUDIO_ID_KEY, true );
-		$request             = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request             = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		if ( mb_strlen( $post_content ) > 4096 ) {
 			return new WP_Error(
@@ -402,7 +402,7 @@ class TextToSpeech extends Provider {
 		/**
 		 * Filter the request body before sending to OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 3.7.1
 		 * @hook classifai_openai_text_to_speech_request_body
 		 *
 		 * @param array  $request_body The request body that will be sent to OpenAI.

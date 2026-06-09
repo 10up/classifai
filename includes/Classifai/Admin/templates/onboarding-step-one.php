@@ -5,6 +5,10 @@
  * @package ClassifAI
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $onboarding         = new Classifai\Admin\Onboarding();
 $features           = $onboarding->get_features();
 $onboarding_options = $onboarding->get_onboarding_options();

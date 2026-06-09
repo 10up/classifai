@@ -4,6 +4,86 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.8.0] - 2026-03-20
+
+### Added
+
+- New filters, `classifai_provider_credentials_{$provider_id}` and `classifai_provider_credentials`, that allows developers the ability to override AI credentials prior to those being used. This allows you to manage credentials outside of the database, like as environment variables or other secret management services (props [@fabiankaegy](https://github.com/fabiankaegy), [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1043](https://github.com/10up/classifai/pull/1043)).
+- New Feature that allows you to track your OpenAI API usage and set both soft (admin notice only) and hard (admin notice and Feature disablement) thresholds, helping you from exceeding your API usage limits (props [@rahulsprajapati](https://github.com/rahulsprajapati), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#1065](https://github.com/10up/classifai/pull/1065)).
+- Content Generation integration with the WordPress Quick Draft widget for quick AI-powered draft content creation (props [@faisal-alvi](https://github.com/faisal-alvi), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#1012](https://github.com/10up/classifai/pull/1012)).
+- New methods on the Provider class that allow you to get all credentials or a specific credential, pulling the credentials from the larger Feature settings (props [@fabiankaegy](https://github.com/fabiankaegy), [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1043](https://github.com/10up/classifai/pull/1043)).
+- Ability to change any AI suggested terms when using the Classification Feature in manual mode (props [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#1039](https://github.com/10up/classifai/pull/1039)).
+- Helper texts for various settings, making it easier to understand what each setting does (props [@hugosolar](https://github.com/hugosolar), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#957](https://github.com/10up/classifai/pull/957)).
+- Ensure all Providers have an `authenticate_credentials` method that we can use to validate the credentials are valid (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1048](https://github.com/10up/classifai/pull/1048)).
+
+### Changed
+
+- Text-to-speech audio generation now runs asynchronously via Action Scheduler, ensuring request timeouts aren't hit (props [@rahulsprajapati](https://github.com/rahulsprajapati), [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1042](https://github.com/10up/classifai/pull/1042)).
+- Move the Ollama model dropdown setting out of the Provider configuration, making it easier to choose a model (props [@turtlepod](https://github.com/turtlepod), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#1031](https://github.com/10up/classifai/pull/1031)).
+- For filters that run when API requests are made, the Feature name, not the Feature option name is now passed as an argument. If you have code that relies on that argument, updates will be needed (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1043](https://github.com/10up/classifai/pull/1043)).
+- Allow all settings to be saved, including credential fields, even if they are blank. This is mostly to support those using the new `classifai_provider_credentials` filters to override credentials (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1048](https://github.com/10up/classifai/pull/1048)).
+
+### Fixed
+
+- Opt-in to new changes coming to Gutenberg react components, like larger font-sizing and removal of margins, to avoid deprecation notices being logged to the browser console (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1045](https://github.com/10up/classifai/pull/1045)).
+- Resolve deprecation warnings in our WordPress Playground integration (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1037](https://github.com/10up/classifai/pull/1037)).
+
+### Deprecated
+
+- The legacy settings screen (enabled via the `classifai_use_legacy_settings_panel` filter) is now formally deprecated and scheduled for removal in a future release. An admin notice will be displayed when this filter is active. Please migrate to the new React-based settings experience (props [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#1036](https://github.com/10up/classifai/pull/1036)).
+
+### Security
+
+- Add a `CredentialObfuscator` class that will obfuscate any private credentials before rendering those in the settings screen (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1047](https://github.com/10up/classifai/pull/1047)).
+- Hardening: add read post check for Watson NLU classification previewer (props [@peterwilsoncc](https://github.com/peterwilsoncc) [@dkotter](https://github.com/dkotter) via [#1049](https://github.com/10up/classifai/pull/1049)).
+- Ensure our helper files don't allow direct file access (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1028](https://github.com/10up/classifai/pull/1028)).
+
+### Developer
+
+- New documentation on how to extend ClassifAI with a custom Feature (props [@shadyvb](https://github.com/shadyvb), [@dkotter](https://github.com/dkotter) via [#1015](https://github.com/10up/classifai/pull/1015)).
+- Add Patchstack security-reporting FAQ (props [@jeffpaul](https://github.com/jeffpaul) via [#1029](https://github.com/10up/classifai/pull/1029)).
+- Remove SVG loader in favour of WP Scripts version (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1033](https://github.com/10up/classifai/pull/1033)).
+- E2E test: set fast fail to false in GitHub action (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1033](https://github.com/10up/classifai/pull/1033)).
+- Update `@wordpress/scripts` to 31.3.0 and `@wordpress/env` to 10.38.0 (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1033](https://github.com/10up/classifai/pull/1033)).
+- Move WP bundled dependencies to eslint config (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1033](https://github.com/10up/classifai/pull/1033)).
+- Update readmes to be more streamlined and link to our documentation site for those that want more information (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1041](https://github.com/10up/classifai/pull/1041)).
+- Update dependencies via npm audit fix (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#1033](https://github.com/10up/classifai/pull/1033)).
+- Bump `lodash` from 4.17.21 to 4.17.23 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1034](https://github.com/10up/classifai/pull/1034)).
+- Bump `lodash-es` from 4.17.22 to 4.17.23 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1035](https://github.com/10up/classifai/pull/1035)).
+- Bump `systeminformation` from 5.30.0 to 5.31.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1057](https://github.com/10up/classifai/pull/1057)).
+- Bump `basic-ftp` from 5.1.0 to 5.2.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1061](https://github.com/10up/classifai/pull/1061)).
+- Bump `immutable` from 5.1.4 to 5.1.5 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1063](https://github.com/10up/classifai/pull/1063)).
+- Bump `svgo` from 3.3.2 to 3.3.3 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1064](https://github.com/10up/classifai/pull/1064)).
+
+## [3.7.1] - 2026-01-12
+
+**Note that this release bumps the WordPress minimum from 6.7 to 6.8.**
+
+### Added
+
+- Support for OpenAI text-to-speech instructions parameter to control voice characteristics (props [@swissky](https://github.com/swissky), [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#1011](https://github.com/10up/classifai/pull/1011)).
+
+### Changed
+
+- For any HTTP requests that need extra time to run, ensure those don't utilize the WP VIP functions (props [@jhudson-ent](https://github.com/jhudson-ent), [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1022](https://github.com/10up/classifai/pull/1022)).
+- Bump WordPress minimum from 6.7 to 6.8 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1024](https://github.com/10up/classifai/pull/1024)).
+- Bump WordPress "tested up to" version to 6.9 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1024](https://github.com/10up/classifai/pull/1024)).
+
+### Fixed
+
+- Prevent duplicate "Disable this ClassifAI feature" links in Classic Editor Title Generation popup (props [@faisal-alvi](https://github.com/faisal-alvi), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#1009](https://github.com/10up/classifai/pull/1009)).
+- Removed redundant nesting of translation functions (props [@DAnn2012](https://github.com/DAnn2012), [@dkotter](https://github.com/dkotter) via [#1017](https://github.com/10up/classifai/pull/1017)).
+- Resolved all new Plugin Check errors (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1023](https://github.com/10up/classifai/pull/1023)).
+
+### Security
+
+- Bump `tar-fs` from 3.1.0 to 3.1.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1013](https://github.com/10up/classifai/pull/1013)).
+- Bump `react-router-dom` and `react-router` from 7.11.0 to 7.12.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1027](https://github.com/10up/classifai/pull/1027)).
+
+### Developer
+
+- Update outdated composer and node dependencies (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#1024](https://github.com/10up/classifai/pull/1024)).
+
 ## [3.7.0] - 2025-09-15
 
 ### Added
@@ -857,6 +937,8 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.8.0]: https://github.com/10up/classifai/compare/3.7.1...3.8.0
+[3.7.1]: https://github.com/10up/classifai/compare/3.7.0...3.7.1
 [3.7.0]: https://github.com/10up/classifai/compare/3.6.0...3.7.0
 [3.6.0]: https://github.com/10up/classifai/compare/3.5.0...3.6.0
 [3.5.0]: https://github.com/10up/classifai/compare/3.4.0...3.5.0

@@ -5,6 +5,10 @@
  * @package ClassifAI
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /* phpcs:disable PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage */
 
 /** @var array $args Arguments coming from the included file. */

@@ -47,21 +47,21 @@ class Grok extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $default_model = 'grok-2-1212';
+	protected $default_model = 'grok-4.3';
 
 	/**
 	 * xAI Grok default vision model
 	 *
 	 * @var string
 	 */
-	protected $default_vision_model = 'grok-2-vision-1212';
+	protected $default_vision_model = 'grok-4.3';
 
 	/**
 	 * Maximum number of tokens our model supports
 	 *
 	 * @var int
 	 */
-	protected $max_tokens = 131072;
+	protected $max_tokens = 1000000;
 
 	/**
 	 * xAI Grok constructor.
@@ -149,7 +149,7 @@ class Grok extends Provider {
 				$common_settings['prompt'] = [
 					[
 						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-						'prompt'   => $this->feature_instance->prompt,
+						'prompt'   => $this->feature_instance->get_prompt( 'default' ),
 						'original' => 1,
 						'default'  => 1,
 					],
@@ -198,7 +198,7 @@ class Grok extends Provider {
 	 * @return array
 	 */
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
-		$models = $this->get_models( $new_settings[ static::ID ]['api_key'] ?? '' );
+		$models = $this->authenticate_credentials( $new_settings );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 		$new_settings[ static::ID ]['models']        = $settings[ static::ID ]['models'] ?? [];
@@ -249,20 +249,15 @@ class Grok extends Provider {
 	}
 
 	/**
-	 * Authenticate our credentials.
+	 * Authenticate our credentials and get the models.
 	 *
-	 * @param string $api_key Api Key.
+	 * @param array $settings Settings being saved.
 	 * @return array|WP_Error
 	 */
-	protected function get_models( string $api_key = '' ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your xAI API key.', 'classifai' ) );
-		}
-
+	protected function authenticate_credentials( array $settings = [] ) {
 		// Make request to ensure credentials work.
-		$request  = new APIRequest( $api_key );
-		$response = $request->get( $this->models_url );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
+		$response = $request->get( $this->models_url, [ 'use_vip' => true ] );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -367,7 +362,7 @@ class Grok extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Descriptive text generation is disabled or xAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		/**
 		 * Filter the prompt we will send to xAI Grok.
@@ -380,7 +375,7 @@ class Grok extends Provider {
 		 *
 		 * @return string Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_xai_grok_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $post_id );
+		$prompt = apply_filters( 'classifai_xai_grok_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->get_prompt( 'default' ), $post_id );
 
 		/**
 		 * Filter the request body before sending to xAI Grok.
@@ -473,13 +468,13 @@ class Grok extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
-			$excerpt_prompt = $feature->woo_prompt;
+			$excerpt_prompt = $feature->get_prompt( 'woocommerce' );
 		} else {
-			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->get_prompt( 'default' ) );
 		}
 
 		// Replace our variables in the prompt.
@@ -582,13 +577,13 @@ class Grok extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or xAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
-			$prompt = $feature->woo_prompt;
+			$prompt = $feature->get_prompt( 'woocommerce' );
 		} else {
-			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->get_prompt( 'default' ) );
 		}
 
 		/**
@@ -687,12 +682,12 @@ class Grok extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->get_prompt( 'condense' ) );
 		} else {
-			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->get_prompt( 'expand' ) );
 		}
 
 		/**

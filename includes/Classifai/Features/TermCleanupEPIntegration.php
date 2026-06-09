@@ -9,6 +9,10 @@ use ElasticPress\Indexables;
 use ElasticPress\Elasticsearch;
 use WP_Error;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * ElasticPress Integration class.
  */
@@ -137,7 +141,7 @@ class TermCleanupEPIntegration {
 		}
 
 		// If we still don't have embeddings, return early.
-		if ( ! $embeddings || empty( $embeddings ) ) {
+		if ( ! $embeddings ) {
 			return $args;
 		}
 

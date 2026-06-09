@@ -6,6 +6,10 @@ use ActionScheduler_Action;
 use ActionScheduler_DBLogger;
 use ActionScheduler_Store;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class EmbeddingsScheduler {
 
 	/**

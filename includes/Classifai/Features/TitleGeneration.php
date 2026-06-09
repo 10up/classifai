@@ -16,6 +16,10 @@ use WP_Error;
 use function Classifai\sanitize_prompts;
 use function Classifai\get_asset_info;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class TitleGeneration
  */
@@ -26,20 +30,6 @@ class TitleGeneration extends Feature {
 	 * @var string
 	 */
 	const ID = 'feature_title_generation';
-
-	/**
-	 * Prompt for generating titles.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters and format it in sentence case.';
-
-	/**
-	 * Prompt for generating titles for WooCommerce Products.
-	 *
-	 * @var string
-	 */
-	public $woo_prompt = 'Write an SEO-friendly, engaging product title that encourages clicks and purchases. Use key details like product type, attributes, and categories while keeping it within 40 to 60 characters and format it in sentence case.';
 
 	/**
 	 * Constructor.
@@ -342,7 +332,7 @@ class TitleGeneration extends Feature {
 			$this->get_option_name() . '_section',
 			[
 				'label_for'     => 'generate_title_prompt',
-				'placeholder'   => $this->prompt,
+				'placeholder'   => $this->get_prompt( 'default' ),
 				'default_value' => $settings['generate_title_prompt'],
 				'description'   => esc_html__( 'Add a custom prompt, if desired.', 'classifai' ),
 			]
@@ -359,7 +349,7 @@ class TitleGeneration extends Feature {
 			'generate_title_prompt' => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->prompt,
+					'prompt'   => $this->get_prompt( 'default' ),
 					'original' => 1,
 				],
 			],
@@ -380,7 +370,7 @@ class TitleGeneration extends Feature {
 		if ( $settings && ! empty( $settings['generate_title_prompt'] ) ) {
 			foreach ( $settings['generate_title_prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['generate_title_prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings['generate_title_prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}

@@ -127,6 +127,17 @@
 		.classifai-panel-header-close {
 			margin-right: -10px;
 		}
+
+		.display-container-wrapper {
+			background-color: #f0f0f1;
+			margin-top: 8px;
+			margin-bottom: 8px;
+
+			.helper-text-content {
+				max-width: 600px;
+				padding: 4px 20px;
+			}
+		}
 	}
 
 	.classifai-settings-wrapper {
@@ -609,6 +620,21 @@
 
 	.classifai__classification-previewer-result-tag-label {
 		color: #37bb60;
+	}
+}
+
+.classifai__classification-previewer-result-tag--below-threshold {
+	border-color: #e74c3c;
+	font-weight: bold;
+
+	.classifai__classification-previewer-result-tag-score {
+		color: #f1f1f1;
+		background-color: #e74c3c;
+		border-right: 1px solid #e74c3c;
+	}
+
+	.classifai__classification-previewer-result-tag-label {
+		color: #e74c3c;
 	}
 }
 

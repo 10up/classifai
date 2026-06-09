@@ -25,6 +25,7 @@ module.exports = {
 		'classifai-plugin-classification-pre-publish': './src/js/features/classification/pre-publish-panel.js',
 		'classifai-plugin-fill': './src/js/features/slot-fill/index.js',
 		'classifai-plugin-text-to-speech': './src/js/features/text-to-speech/index.js',
+		'classifai-plugin-classic-text-to-speech': './src/js/features/text-to-speech/classic/index.js',
 		'classifai-plugin-text-to-speech-frontend': './src/js/features/text-to-speech/frontend/index.js',
 		'classifai-plugin-content-resizing': './src/js/features/content-resizing/index.js',
 		'classifai-plugin-title-generation': './src/js/features/title-generation/index.js',
@@ -32,6 +33,7 @@ module.exports = {
 		'classifai-plugin-excerpt-generation': './src/js/features/excerpt-generation/index.js',
 		'classifai-plugin-classic-excerpt-generation': './src/js/features/excerpt-generation/classic/index.js',
 		'classifai-plugin-content-generation': './src/js/features/content-generation/index.js',
+		'classifai-quick-draft': './src/js/features/content-generation/quick-draft/index.js',
 		'classifai-plugin-inserter-media-category': './src/js/features/image-generation/inserter-media-category.js',
 		'classifai-plugin-image-generation-media-modal': [
 			'./src/js/features/image-generation/media-modal/index.js',
@@ -39,20 +41,8 @@ module.exports = {
 		],
 		'classifai-plugin-image-generation-generate-image-media-upload': './src/js/features/image-generation/media-modal/views/generate-image-media-upload.js',
 		'classifai-plugin-recommended-content-feature-fields': './src/js/features/recommended-content/feature-fields-plugin.js',
+		'classifai-plugin-api-usage-tracking': './src/js/features/ai-usage-tracking/index.js',
 		settings: './src/js/settings/index.js',
-	},
-	module: {
-		rules: [
-			...defaultConfig.module.rules,
-			{
-				test: /\.svg$/,
-				use: [
-					{
-						loader: 'svg-react-loader',
-					},
-				],
-			},
-		],
 	},
 	externals: {
 		react: 'React',

@@ -14,6 +14,10 @@ use Classifai\Features\Moderation;
 
 use function Classifai\attachment_is_pdf;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Handle bulk actions.
  */
@@ -589,6 +593,7 @@ class BulkActions {
 			},
 			array_merge( $this->language_processing_features, $this->media_processing_features )
 		);
+		$feature_id      = '';
 
 		if ( empty( $all_feature_ids ) ) {
 			return;

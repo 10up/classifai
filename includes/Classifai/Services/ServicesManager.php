@@ -8,6 +8,10 @@ namespace Classifai\Services;
 use function Classifai\should_use_legacy_settings_panel;
 use function Classifai\safe_wp_remote_post;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class ServicesManager {
 
 	/**
@@ -48,6 +52,7 @@ class ServicesManager {
 		add_filter( 'language_processing_features', [ $this, 'register_language_processing_features' ] );
 		add_filter( 'image_processing_features', [ $this, 'register_image_processing_features' ] );
 		add_filter( 'content_recommendation_features', [ $this, 'register_recommendation_service_features' ] );
+		add_filter( 'usage_tracking_features', [ $this, 'register_usage_tracking_features' ] );
 
 		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
@@ -126,6 +131,24 @@ class ServicesManager {
 	public function register_recommendation_service_features( array $features ): array {
 		$core_features = [
 			'\Classifai\Features\RecommendedContent',
+		];
+
+		foreach ( $core_features as $feature ) {
+			$features[] = $feature;
+		}
+
+		return $features;
+	}
+
+	/**
+	 * Registers Features under the Usage Tracking Service.
+	 *
+	 * @param array $features The list of Features to be registered.
+	 * @return array
+	 */
+	public function register_usage_tracking_features( array $features ): array {
+		$core_features = [
+			'\Classifai\Features\APIUsageTracking',
 		];
 
 		foreach ( $core_features as $feature ) {
@@ -265,7 +288,12 @@ class ServicesManager {
 		$license_key = $this->get_settings( 'license_key' );
 		?>
 		<input type="password" name="classifai_settings[license_key]" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>"/>
-		<br /><span class="description"><?php _e( __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ) );// @codingStandardsIgnoreLine ?></span>
+		<br />
+		<span class="description">
+			<?php esc_html_e( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.', 'classifai' ); ?>
+			<br />
+			<a href="https://classifaiplugin.com/#cta" target="_blank" rel="noreferrer"><?php esc_html_e( 'Register for your key', 'classifai' ); ?></a>
+		</span>
 		<?php
 	}
 
@@ -373,6 +401,7 @@ class ServicesManager {
 					'license_key' => $license_key,
 					'email'       => $email,
 				],
+				'use_vip' => true,
 			]
 		);
 

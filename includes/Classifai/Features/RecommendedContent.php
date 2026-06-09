@@ -7,6 +7,10 @@ use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
 
 use function Classifai\get_asset_info;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class RecommendedContent
  */

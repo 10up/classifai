@@ -7,6 +7,7 @@ import {
 	BaseControl,
 	Button,
 	Icon,
+	Spinner,
 } from '@wordpress/components';
 import { useSelect, subscribe } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
@@ -34,6 +35,11 @@ const TextToSpeechPlugin = () => {
 			'classifai_synthesize_speech'
 		)
 	);
+
+	const isTextToSpeechScheduled = useSelect( ( select ) => {
+		const meta = select( 'core/editor' ).getCurrentPostAttribute( 'meta' );
+		return meta?._classifai_text_to_speech_scheduled ?? false;
+	} );
 
 	// Indicates whether generated audio should be displayed on the frontend.
 	const displayGeneratedAudio = useSelect( ( select ) =>
@@ -141,6 +147,46 @@ const TextToSpeechPlugin = () => {
 		}
 	}, [ isSavingPost, isAutosavingPost, isSynthesizeSpeech ] );
 
+	// Refresh post data periodically while a background TTS job is running.
+	// Once the job completes, the meta updates are picked up by existing
+	// useSelect hooks, automatically updating the UI.
+	useEffect( () => {
+		if ( ! isTextToSpeechScheduled ) {
+			return;
+		}
+
+		let isRefreshing = false;
+		const intervalId = setInterval( async () => {
+			if ( isRefreshing ) {
+				return;
+			}
+
+			isRefreshing = true;
+
+			try {
+				const postId = wp.data
+					.select( 'core/editor' )
+					.getCurrentPostId();
+				const postType = wp.data
+					.select( 'core/editor' )
+					.getCurrentPostType();
+				wp.data
+					.dispatch( 'core' )
+					.invalidateResolution( 'getEntityRecord', [
+						'postType',
+						postType,
+						postId,
+					] );
+			} catch ( e ) {
+				// Silently handle refresh errors.
+			}
+
+			isRefreshing = false;
+		}, 5000 );
+
+		return () => clearInterval( intervalId );
+	}, [ isTextToSpeechScheduled ] );
+
 	// Fetches the latest audio file to avoid disk cache.
 	const cacheBustingUrl = `${ sourceUrl }?ver=${ timestamp }`;
 
@@ -150,6 +196,15 @@ const TextToSpeechPlugin = () => {
 		audioIcon = 'format-audio';
 	} else if ( isPreviewing ) {
 		audioIcon = 'controls-pause';
+	}
+
+	if ( isTextToSpeechScheduled ) {
+		return (
+			<ClassifaiEditorSettingPanel>
+				<p>{ __( 'Audio generation is in progress…', 'classifai' ) }</p>
+				<Spinner />
+			</ClassifaiEditorSettingPanel>
+		);
 	}
 
 	return (
@@ -175,45 +230,55 @@ const TextToSpeechPlugin = () => {
 			/>
 			{ sourceUrl && (
 				<>
-					<ToggleControl
-						label={ __( 'Display audio controls', 'classifai' ) }
-						help={ __(
-							'Controls the display of the audio player on the front-end.',
-							'classifai'
-						) }
-						checked={ displayGeneratedAudio }
-						onChange={ ( value ) => {
-							wp.data.dispatch( 'core/editor' ).editPost( {
-								classifai_display_generated_audio: value,
-							} );
-						} }
-						disabled={ isProcessingAudio }
-						isBusy={ isProcessingAudio }
-					/>
-					<BaseControl
-						id="classifai-audio-preview-controls"
-						help={
-							isProcessingAudio
-								? ''
-								: __(
-										'Preview the generated audio.',
-										'classifai'
-								  )
-						}
-					>
-						<Button
-							id="classifai-audio-controls__preview-btn"
-							icon={ <Icon icon={ audioIcon } /> }
-							variant="secondary"
-							onClick={ () => setIsPreviewing( ! isPreviewing ) }
+					<div style={ { marginTop: '12px' } }>
+						<ToggleControl
+							label={ __(
+								'Display audio controls',
+								'classifai'
+							) }
+							help={ __(
+								'Controls the display of the audio player on the front-end.',
+								'classifai'
+							) }
+							checked={ displayGeneratedAudio }
+							onChange={ ( value ) => {
+								wp.data.dispatch( 'core/editor' ).editPost( {
+									classifai_display_generated_audio: value,
+								} );
+							} }
 							disabled={ isProcessingAudio }
 							isBusy={ isProcessingAudio }
+						/>
+					</div>
+					<div style={ { marginTop: '12px' } }>
+						<BaseControl
+							id="classifai-audio-preview-controls"
+							help={
+								isProcessingAudio
+									? ''
+									: __(
+											'Preview the generated audio.',
+											'classifai'
+									  )
+							}
+							__nextHasNoMarginBottom
 						>
-							{ isProcessingAudio
-								? __( 'Generating audio..', 'classifai' )
-								: __( 'Preview', 'classifai' ) }
-						</Button>
-					</BaseControl>
+							<Button
+								id="classifai-audio-controls__preview-btn"
+								icon={ <Icon icon={ audioIcon } /> }
+								variant="secondary"
+								onClick={ () =>
+									setIsPreviewing( ! isPreviewing )
+								}
+								disabled={ isProcessingAudio }
+								isBusy={ isProcessingAudio }
+							>
+								{ isProcessingAudio
+									? __( 'Generating audio..', 'classifai' )
+									: __( 'Preview', 'classifai' ) }
+							</Button>
+						</BaseControl>
+					</div>
 				</>
 			) }
 			{ sourceUrl && (
@@ -231,16 +296,10 @@ registerPlugin( 'classifai-plugin-text-to-speech', {
 	render: TextToSpeechPlugin,
 } );
 
-let saveHappened = false;
 let showingNotice = false;
 
 subscribe( () => {
-	if ( saveHappened === false ) {
-		saveHappened = wp.data.select( 'core/editor' ).isSavingPost() === true;
-	}
-
 	if (
-		saveHappened &&
 		wp.data.select( 'core/editor' ).isSavingPost() === false &&
 		showingNotice === false
 	) {
@@ -255,8 +314,6 @@ subscribe( () => {
 				.createErrorNotice(
 					`Audio generation failed. Error: ${ error.code } - ${ error.message }`
 				);
-			saveHappened = false;
-			showingNotice = false;
 		}
 	}
 } );

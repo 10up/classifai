@@ -1,4 +1,5 @@
-name: 'Repo Automator'
+name: Repo Automator
+
 on:
   issues:
     types:
@@ -16,10 +17,17 @@ on:
     branches:
       - develop
 
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   Validate:
     runs-on: ubuntu-latest
     if: "${{ github.event_name == 'push' || github.event_name == 'issues' || ( github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork ) }}"
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - uses: 10up/action-repo-automator@280f5dc0b4ed1b5c50c816e08623bdefce55cdce # v2.1.3

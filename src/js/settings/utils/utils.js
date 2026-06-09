@@ -2,6 +2,10 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
+import { Icon, Popover } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+import { info } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
 
 // Update URL based on the current tab and feature selected
 export const updateUrl = ( key, value ) => {
@@ -204,4 +208,42 @@ export const isProviderConfigurationNeeded = ( feature ) => {
 	const authenticated = feature[ provider ]?.authenticated;
 
 	return isEnabled && ! authenticated;
+};
+
+/**
+ * Tooltip Popover component.
+ *
+ * @param {Object} props                The props object.
+ * @param {string} props.tooltipContent The tooltip content.
+ * @return {React.ReactElement} The TooltipPopover component.
+ */
+export const TooltipPopover = ( { tooltipContent } ) => {
+	const [ popoverAnchor, setPopoverAnchor ] = useState();
+	const [ isVisible, setIsVisible ] = useState( false );
+	const toggleVisible = () => {
+		setIsVisible( ( state ) => ! state );
+	};
+
+	return (
+		<div
+			onMouseEnter={ toggleVisible }
+			onMouseLeave={ toggleVisible }
+			style={ { display: 'inline-block' } }
+		>
+			<Icon
+				ref={ setPopoverAnchor }
+				icon={ info }
+				aria-label={ __( 'Click to show tooltip', 'classifai' ) }
+				title={ __( 'Click to show tooltip', 'classifai' ) }
+				style={ { cursor: 'pointer', verticalAlign: 'middle' } }
+			/>
+			{ isVisible && (
+				<Popover anchor={ popoverAnchor }>
+					<div style={ { minWidth: '350px', padding: '0 20px' } }>
+						{ tooltipContent }
+					</div>
+				</Popover>
+			) }
+		</div>
+	);
 };

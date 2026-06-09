@@ -14,6 +14,7 @@ import { getFeature, getScope, isProviderConfigured } from '../../utils/utils';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { OpenAIChatGPTSettings } from './openai-chatgpt';
+import { OpenAIUsageTrackingSettings } from './openai-usage-tracking';
 import { GoogleAIGeminiSettings } from './googleai-gemini';
 import { GoogleAIImagesSettings } from './googleai-images';
 import { AzureOpenAISettings } from './azure-openai';
@@ -30,9 +31,9 @@ import { AzureTextToSpeechSettings } from './azure-text-to-speech';
 import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
 import { ChromeAISettings } from './chrome-ai';
 import { XAIGrokSettings } from './xai-grok';
-import { OllamaSettings } from './ollama';
-import { OllamaMultimodalSettings } from './ollama-multimodal';
-import { OllamaEmbeddingsSettings } from './ollama-embeddings';
+import { OllamaSettings } from './ollama/ollama';
+import { OllamaMultimodalSettings } from './ollama/multimodal';
+import { OllamaEmbeddingsSettings } from './ollama/embeddings';
 import { TogetherAIImagesSettings } from './together-ai-images';
 import { ElevenLabsSpeechToTextSettings } from './elevenlabs/speech-to-text';
 import { ElevenLabsTextToSpeechSettings } from './elevenlabs/text-to-speech';
@@ -124,6 +125,11 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 		case 'ollama_embeddings':
 			return <OllamaEmbeddingsSettings isConfigured={ isConfigured } />;
 
+		case 'openai_usage_tracking':
+			return (
+				<OpenAIUsageTrackingSettings isConfigured={ isConfigured } />
+			);
+
 		default:
 			return null;
 	}
@@ -214,6 +220,7 @@ export const ProviderSettings = () => {
 							value={ provider }
 							options={ providers }
 							__nextHasNoMarginBottom
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 				) }

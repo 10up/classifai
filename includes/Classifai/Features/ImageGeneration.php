@@ -14,6 +14,10 @@ use WP_Error;
 use function Classifai\get_asset_info;
 use function Classifai\render_disable_feature_link;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class ImageGeneration
  */
@@ -437,14 +441,16 @@ class ImageGeneration extends Feature {
 		$default_settings = $this->get_default_settings();
 
 		// Get all roles that have the upload_files cap.
-		$roles = get_editable_roles() ?? [];
-		$roles = array_filter(
-			$roles,
-			function ( $role ) {
-				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
+		$editable_roles = get_editable_roles() ?? [];
+		$roles          = [];
+
+		foreach ( $editable_roles as $role_key => $role ) {
+			if ( empty( $role['name'] ) || empty( $role['capabilities']['upload_files'] ) ) {
+				continue;
 			}
-		);
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+			$roles[ $role_key ] = $role['name'];
+		}
 
 		/**
 		 * Filter the allowed WordPress roles for image generation.

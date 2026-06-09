@@ -11,6 +11,10 @@ use WP_Query;
 
 use function Classifai\is_elasticpress_installed;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class Smart404
  */

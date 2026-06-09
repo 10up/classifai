@@ -3,18 +3,20 @@
 namespace Classifai\Features;
 
 use Classifai\Providers\Azure\OpenAI;
-use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
-use Classifai\Providers\Browser\ChromeAI;
-use Classifai\Providers\XAI\Grok;
 use Classifai\Providers\Localhost\Ollama;
 use Classifai\Services\LanguageProcessing;
+use Classifai\Features\QuickDraftIntegration;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
 
 use function Classifai\sanitize_prompts;
 use function Classifai\get_asset_info;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Class ContentGeneration
@@ -26,59 +28,6 @@ class ContentGeneration extends Feature {
 	 * @var string
 	 */
 	const ID = 'feature_content_generation';
-
-	/**
-	 * Prompt for creating content.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'Act as an experienced SEO copywriter tasked with writing an article based off of a given summary and an optionally provided title. Your goal is to craft a compelling, informative piece that adheres to SEO best practices, is well-researched, engaging to the target audience, and structured in a way that enhances readability. Incorporate relevant keywords naturally throughout the text, without compromising the flow or quality of the content. Ensure that the article provides value to the reader. Only return the contents of the article, not the title or other commentary.';
-
-	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed
-	/**
-	 * The format of how we'd like content to be returned.
-	 *
-	 * @var string
-	 */
-	public $return_format = <<<EOD
-The content returned should be valid WordPress block markup as described below, using elements like paragraphs and headings where appropriate. Be selective on the elements you use, defaulting to paragraphs. Please check the content before returning to ensure each element has proper opening and closing block markup and HTML tags and any required block attributes. Ensure elements don't nest inside each other, i.e. don't put a paragraph inside another paragraph or a list within a paragraph. Don't start the content with a heading, start with a paragraph.
-
-Markup available to use; don't use any other blocks, even if requested:
-<!-- wp:paragraph -->
-<p>CONTENT</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">CONTENT</h2>
-<!-- /wp:heading -->
-
-<!-- wp:table -->
-<figure class="wp-block-table"><table class="has-fixed-layout"><tbody><tr><td>CONTENT</td></tr><tr><td>CONTENT</td></tr></tbody></table></figure>
-<!-- /wp:table -->
-
-<!-- wp:quote -->
-<blockquote class="wp-block-quote">
-<p>CONTENT</p>
-</blockquote>
-<!-- /wp:quote -->
-
-<!-- wp:pullquote -->
-<figure class="wp-block-pullquote"><blockquote><p>QUOTE</p><cite>AUTHOR</cite></blockquote></figure>
-<!-- /wp:pullquote -->
-
-<!-- wp:list -->
-<ul class="wp-block-list">
-<li>CONTENT</li>
-</ul>
-<!-- /wp:list -->
-
-<!-- wp:list {"ordered":true} -->
-<ol class="wp-block-list">
-<li>CONTENT</li>
-</ol>
-<!-- /wp:list -->
-EOD;
-	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
 
 	/**
 	 * Constructor.
@@ -112,6 +61,9 @@ EOD;
 	 */
 	public function feature_setup() {
 		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
+
+		$quick_draft = new QuickDraftIntegration();
+		$quick_draft->init();
 	}
 
 	/**
@@ -259,17 +211,18 @@ EOD;
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'prompt'     => [
+			'prompt'             => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->prompt,
+					'prompt'   => $this->get_prompt( 'default' ),
 					'original' => 1,
 				],
 			],
-			'post_types' => [
+			'post_types'         => [
 				'post' => 'post',
 			],
-			'provider'   => ChatGPT::ID,
+			'provider'           => ChatGPT::ID,
+			'enable_quick_draft' => false,
 		];
 	}
 
@@ -286,7 +239,7 @@ EOD;
 		if ( $settings && ! empty( $settings['prompt'] ) ) {
 			foreach ( $settings['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}
@@ -313,6 +266,9 @@ EOD;
 				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			}
 		}
+
+		// Sanitize Quick Draft setting.
+		$new_settings['enable_quick_draft'] = isset( $new_settings['enable_quick_draft'] ) ? (bool) $new_settings['enable_quick_draft'] : false;
 
 		return $new_settings;
 	}
