@@ -72,7 +72,8 @@
   },
   "archive": {
     "exclude": [
-      "!/vendor/"
+      "!/vendor/",
+      "!/vendor-prefixed/"
     ]
   },
   "extra": {

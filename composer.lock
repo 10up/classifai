@@ -2274,8 +2274,8 @@
             "version": "2.2.x-dev",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1574314bc7bfb11897e2538b9a971bd006a5b51d",
-                "reference": "1574314bc7bfb11897e2538b9a971bd006a5b51d",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/c128b8456a3cc6308a085cce9dd3d7c4ce444c1e",
+                "reference": "c128b8456a3cc6308a085cce9dd3d7c4ce444c1e",
                 "shasum": ""
             },
             "require": {
@@ -2332,7 +2332,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-08T15:33:01+00:00"
+            "time": "2026-06-09T15:57:01+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -2769,12 +2769,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "2906db9940ec6dff6ccc2aead2a8393f06f06b86"
+                "reference": "a8c3aa11fe963d7a2a9c70bfaf81203d71c611a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/2906db9940ec6dff6ccc2aead2a8393f06f06b86",
-                "reference": "2906db9940ec6dff6ccc2aead2a8393f06f06b86",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a8c3aa11fe963d7a2a9c70bfaf81203d71c611a3",
+                "reference": "a8c3aa11fe963d7a2a9c70bfaf81203d71c611a3",
                 "shasum": ""
             },
             "require": {
@@ -2856,7 +2856,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-06-08T13:38:38+00:00"
+            "time": "2026-06-09T13:37:27+00:00"
         },
         {
             "name": "sebastian/cli-parser",
