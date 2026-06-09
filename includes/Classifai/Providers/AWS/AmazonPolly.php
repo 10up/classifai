@@ -11,7 +11,7 @@ namespace Classifai\Providers\AWS;
 use Classifai\Providers\Provider;
 use Classifai\Features\TextToSpeech;
 use WP_Error;
-use Aws\Sdk;
+use ClassifaiVendor\Aws\Sdk;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

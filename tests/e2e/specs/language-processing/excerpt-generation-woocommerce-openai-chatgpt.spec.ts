@@ -85,7 +85,7 @@ test.describe( '[Language processing] WooCommerce Product Excerpt Generation Tes
 		await page.goto( '/wp-admin/post-new.php?post_type=product' );
 
 		// Ensure excerpt metabox is shown.
-		await page.locator( '#show-settings-link' ).click();
+		await page.locator( '#show-settings-link' ).click( { force: true } );
 		await page.locator( '#postexcerpt-hide' ).check( { force: true } );
 
 		// Verify button exists.

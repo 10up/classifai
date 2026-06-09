@@ -1,5 +1,6 @@
 release
 /vendor/*
+/vendor-prefixed/*
 phpunit.xml
 .phpunit.result.cache
 /dist
@@ -53,6 +54,9 @@ config.local.php
 .wp-env.override.json
 /artifacts
 /flaky-tests
+
+# Strauss
+bin/strauss.phar
 
 # docs
 wp-hooks-docs/docs/01.get-started/05.CHANGELOG.md
