@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { SelectControl, RadioControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -39,6 +38,7 @@ export const ImageTagGeneratorSettings = () => {
 		<>
 			<SettingsRow label={ __( 'Tag taxonomy', 'classifai' ) }>
 				<SelectControl
+					// eslint-disable-next-line no-restricted-syntax
 					id="feature_image_tags_generator_tag_taxonomy"
 					onChange={ ( value ) => {
 						setFeatureSettings( {

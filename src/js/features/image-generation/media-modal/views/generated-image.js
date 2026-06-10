@@ -1,5 +1,8 @@
 /* eslint object-shorthand: 0 */
 
+/**
+ * WordPress dependencies
+ */
 import { uploadMedia } from '@wordpress/media-utils';
 import { cleanForSlug } from '@wordpress/url';
 

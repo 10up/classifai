@@ -181,7 +181,7 @@ export const ClassificationSettings = () => {
 						}
 						isEmbeddingInProgress.current = false;
 					}
-				} catch ( error ) {}
+				} catch {}
 			};
 
 			const intervalId = setInterval( getEmbeddingsInProgress, 10000 );
@@ -451,7 +451,7 @@ function PostSelector( { placeholder = '', showLabel = true } ) {
 					__nextHasNoMarginBottom
 					hideLabelFromVision={ showLabel }
 					value={ searchText }
-					label={ __( 'Previewer:' ) }
+					label={ __( 'Previewer:', 'classifai' ) }
 					placeholder={
 						placeholder ||
 						__( 'Search a post by title…', 'classifai' )

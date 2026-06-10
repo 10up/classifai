@@ -1,4 +1,11 @@
+/**
+ * WordPress dependencies
+ */
 import { SVG, Path } from '@wordpress/components';
+
+/**
+ * External dependencies
+ */
 import React from 'react';
 
 /**

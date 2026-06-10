@@ -1,11 +1,13 @@
-import React, {
-	useEffect,
-	useState,
-	useRef,
-	useLayoutEffect,
-	CSSProperties,
-} from 'react';
+/**
+ * External dependencies
+ */
+import type { CSSProperties } from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+
+/**
+ * WordPress dependencies
+ */
 import apiFetch from '@wordpress/api-fetch';
 import { select, dispatch } from '@wordpress/data';
 import { pasteHandler, parse } from '@wordpress/blocks';
@@ -14,12 +16,14 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 
-// Import our custom components
+/**
+ * Internal dependencies
+ */
 import { SparkleIcon } from './sparkle-icon';
 import { ChatHistory } from './chat-history';
 import { ErrorMessage } from './error-message';
 import { ChatInput } from './chat-input';
-import { ConversationEntry } from './types';
+import type { ConversationEntry } from './types';
 
 // Define style objects outside of JSX
 const chatContainerStyles: CSSProperties = {
@@ -126,7 +130,7 @@ export const ChatUI: React.FC = () => {
 							handleClickOutside
 						);
 					}
-				} catch ( e ) {
+				} catch {
 					// Cross-origin iframe access error - can't add listener
 					// Silently fail for cross-origin iframes
 				}
@@ -147,112 +151,13 @@ export const ChatUI: React.FC = () => {
 							handleClickOutside
 						);
 					}
-				} catch ( e ) {
+				} catch {
 					// Cross-origin iframe access error - can't remove listener
 					// Silently fail for cross-origin iframes
 				}
 			} );
 		};
 	}, [ isExpanded ] );
-
-	// Handle quick action option selection
-	// TODO: Look to fully support this in the future.
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const handleOptionSelect = ( option: string ): void => {
-		let prompt = '';
-		const selectedContent = select( editorStore ).getEditedPostContent();
-
-		switch ( option ) {
-			case 'proofread':
-				prompt = `Proofread the following content and correct any grammar, spelling, or punctuation errors:\n\n${ selectedContent }`;
-				break;
-			case 'rewrite':
-				// If rewrite is clicked from the initial view, we handle it through the QuickActionOptions component
-				// which will expand and show all options rather than starting a conversation
-				return;
-			case 'rewrite-execute':
-				// This is when rewrite is clicked from the expanded options view
-				prompt = `Rewrite the following content to improve clarity and flow:\n\n${ selectedContent }`;
-				break;
-			case 'tone-friendly':
-				prompt = `Rewrite the following content using a friendly, conversational tone:\n\n${ selectedContent }`;
-				break;
-			case 'tone-professional':
-				prompt = `Rewrite the following content using a professional, formal tone:\n\n${ selectedContent }`;
-				break;
-			case 'tone-concise':
-				prompt = `Rewrite the following content to be more concise and direct:\n\n${ selectedContent }`;
-				break;
-			case 'summary':
-				prompt = `Create a summary of the following content:\n\n${ selectedContent }`;
-				break;
-			case 'key-points':
-				prompt = `Extract the key points from the following content:\n\n${ selectedContent }`;
-				break;
-			case 'table':
-				prompt = `Convert the following content into a well-structured table:\n\n${ selectedContent }`;
-				break;
-			case 'list':
-				prompt = `Convert the following content into a bulleted list:\n\n${ selectedContent }`;
-				break;
-			case 'compose':
-				prompt = `Write a blog post about: `;
-				setInputValue( prompt );
-				return;
-			case 'custom':
-				// Just focus the input field
-				return;
-			default:
-				return;
-		}
-
-		// Auto-submit the prompt
-		setInputValue( '' );
-
-		// Get post data
-		const postId = select( editorStore ).getCurrentPostId();
-		const title = select( editorStore ).getEditedPostAttribute( 'title' );
-
-		// Update conversation immediately with user message
-		const updatedConversation: ConversationEntry[] = [
-			...conversation,
-			{
-				prompt,
-				completion: null, // Will be filled in once API response is received
-			},
-		];
-		setConversation( updatedConversation );
-
-		// Call API
-		setIsLoading( true );
-		apiFetch( {
-			path: '/classifai/v1/create-content',
-			method: 'POST',
-			data: {
-				id: postId,
-				summary: prompt,
-				title,
-				conversation: updatedConversation.slice( 0, -1 ),
-			},
-		} ).then(
-			( res: unknown ) => {
-				// Update conversation with response
-				setConversation( [
-					...updatedConversation.slice( 0, -1 ),
-					{
-						prompt,
-						completion: res as string,
-					},
-				] );
-				setError( false );
-				setIsLoading( false );
-			},
-			( err: { message?: string } ) => {
-				setError( err?.message || 'An error occurred' );
-				setIsLoading( false );
-			}
-		);
-	};
 
 	const handleSubmit = ( event: React.FormEvent ): void => {
 		event.preventDefault();
@@ -364,20 +269,11 @@ export const ChatUI: React.FC = () => {
 	const getPlaceholderText = (): string => {
 		const hasActiveConversation =
 			conversation.length > 0 &&
-			conversation[ conversation.length - 1 ].completion !== null;
-
-		const currentContent = select( editorStore ).getEditedPostContent();
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const hasContent = currentContent.length > 0;
+			conversation[ conversation.length - 1 ]?.completion !== null;
 
 		if ( hasActiveConversation ) {
 			return __( 'Request changes to the content…', 'classifai' );
 		}
-
-		// TODO: Look to support modifying existing content in the future.
-		// if ( hasContent ) {
-		// 	return __( 'Request changes to the content…', 'classifai' );
-		// }
 
 		return __( 'Add a summary of your article', 'classifai' );
 	};

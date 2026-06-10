@@ -1,6 +1,14 @@
-import React, { CSSProperties } from 'react';
+/**
+ * External dependencies
+ */
+import type { CSSProperties } from 'react';
+import React from 'react';
+
+/**
+ * Internal dependencies
+ */
 import { ConversationItem } from './conversation-item';
-import { ConversationEntry } from './types';
+import type { ConversationEntry } from './types';
 
 // Define style object outside of JSX
 const historyContainerStyles: CSSProperties = {

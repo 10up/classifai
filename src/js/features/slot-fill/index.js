@@ -1,5 +1,5 @@
 /**
- * External dependencies
+ * WordPress dependencies
  */
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { Icon, SlotFillProvider, Slot, Fill } from '@wordpress/components';

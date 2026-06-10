@@ -1,5 +1,5 @@
 /**
- * External Dependencies.
+ * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { TextareaControl } from '@wordpress/components';
@@ -7,7 +7,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 
 /**
- * Internal Dependencies.
+ * Internal dependencies
  */
 import ExcerptGeneration from './ExcerptGeneration';
 
@@ -33,7 +33,7 @@ export default function PostExcerptForm() {
 				__nextHasNoMarginBottom
 				label={
 					! isPublishPanelOpen
-						? __( 'Write an excerpt (optional)' )
+						? __( 'Write an excerpt (optional)', 'classifai' )
 						: null
 				}
 				className="editor-post-excerpt__textarea"

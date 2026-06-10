@@ -56,7 +56,7 @@ const init = () => {
 
 			clearInterval( timer );
 			renderComplete( json.data );
-		} catch ( e ) {
+		} catch {
 			// Swallow transient fetch errors and try again next tick.
 		}
 	}, POLL_INTERVAL_MS );

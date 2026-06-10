@@ -1,13 +1,16 @@
 /**
- * External dependencies.
+ * WordPress dependencies
  */
 import { dispatch, useSelect } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
+import { store as coreStore } from '@wordpress/core-data';
+import { store as noticesStore } from '@wordpress/notices';
 import { useState } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import TaxonomyControls from './taxonomy-controls';
 import { DisableFeatureButton } from '../../components';
@@ -20,15 +23,15 @@ import { handleClick } from '../../../js/helpers';
  */
 export const ClassificationButton = () => {
 	const processContent = useSelect( ( select ) =>
-		select( 'core/editor' ).getEditedPostAttribute(
+		select( editorStore ).getEditedPostAttribute(
 			'classifai_process_content'
 		)
 	);
 
-	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
-	const postType = wp.data.select( 'core/editor' ).getCurrentPostType();
+	const postId = wp.data.select( editorStore ).getCurrentPostId();
+	const postType = wp.data.select( editorStore ).getCurrentPostType();
 	const postTypeLabel =
-		wp.data.select( 'core/editor' ).getPostTypeLabel() ||
+		wp.data.select( editorStore ).getPostTypeLabel() ||
 		__( 'Post', 'classifai' );
 
 	const [ isLoading, setLoading ] = useState( false );
@@ -59,7 +62,7 @@ export const ClassificationButton = () => {
 
 			// get current terms of the post
 			const currentTerms = wp.data
-				.select( 'core' )
+				.select( coreStore )
 				.getEntityRecord( 'postType', postType, postId );
 
 			Object.keys( taxonomies ).forEach( ( taxonomy ) => {
@@ -145,7 +148,7 @@ export const ClassificationButton = () => {
 			} )
 		);
 
-		await dispatch( 'core' ).editEntityRecord(
+		await dispatch( coreStore ).editEntityRecord(
 			'postType',
 			postType,
 			postId,
@@ -153,11 +156,9 @@ export const ClassificationButton = () => {
 		);
 
 		// If no edited values in post trigger save.
-		const isDirty = await wp.data
-			.select( 'core/editor' )
-			.isEditedPostDirty();
+		const isDirty = await wp.data.select( editorStore ).isEditedPostDirty();
 		if ( ! isDirty ) {
-			await dispatch( 'core' ).saveEditedEntityRecord(
+			await dispatch( coreStore ).saveEditedEntityRecord(
 				'postType',
 				postType,
 				postId
@@ -165,7 +166,7 @@ export const ClassificationButton = () => {
 		}
 
 		// Display success notice.
-		dispatch( 'core/notices' ).createSuccessNotice(
+		dispatch( noticesStore ).createSuccessNotice(
 			sprintf(
 				/** translators: %s is post type label. */
 				__( '%s classified successfully.', 'classifai' ),
@@ -228,7 +229,7 @@ export const ClassificationButton = () => {
 					) }
 				</div>
 				<Button
-					variant={ 'secondary' }
+					variant="secondary"
 					onClick={ () => saveTerms( updatedTaxQuery ) }
 				>
 					{ __( 'Save', 'classifai' ) }
@@ -239,6 +240,7 @@ export const ClassificationButton = () => {
 	);
 
 	return (
+		// eslint-disable-next-line no-restricted-syntax
 		<div id="classify-post-component">
 			{ isOpen && (
 				<Modal
@@ -251,7 +253,7 @@ export const ClassificationButton = () => {
 				</Modal>
 			) }
 			<Button
-				variant={ 'secondary' }
+				variant="secondary"
 				data-id={ postId }
 				onClick={ ( e ) => {
 					handleClick( {

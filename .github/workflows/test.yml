@@ -336,6 +336,9 @@ jobs:
             npm run lint:js
           fi
 
+      - name: Run TypeScript type checking
+        run: npm run typecheck
+
   # Runs E2E tests.
   e2e:
     name: Run E2E tests on ${{ matrix.core.name }}

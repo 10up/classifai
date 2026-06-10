@@ -3,16 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { withSelect } from '@wordpress/data';
-import { PluginPrePublishPanel } from '@wordpress/editor';
+import { PluginPrePublishPanel, store as editorStore } from '@wordpress/editor';
 import { Component } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
 
 const PrePubPanel = ( { children } ) => {
 	const panelBodyTitle = [
-		__( 'Suggestion:' ),
+		__( 'Suggestion:', 'classifai' ),
 		<span className="editor-post-publish-panel__link" key="label">
 			{ __( 'Classify Post', 'classifai' ) }
 		</span>,
@@ -22,7 +18,7 @@ const PrePubPanel = ( { children } ) => {
 		<PluginPrePublishPanel
 			title={ panelBodyTitle }
 			icon="aside"
-			initialOpen={ true }
+			initialOpen
 		>
 			{ children }
 		</PluginPrePublishPanel>
@@ -45,6 +41,6 @@ class PrePubClassifyPost extends Component {
 
 export default withSelect( ( select ) => {
 	return {
-		isPublishPanelOpen: select( 'core/editor' ).isPublishSidebarOpened(),
+		isPublishPanelOpen: select( editorStore ).isPublishSidebarOpened(),
 	};
 } )( PrePubClassifyPost );

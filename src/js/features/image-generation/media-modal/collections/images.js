@@ -1,5 +1,8 @@
 /* eslint object-shorthand: 0 */
 
+/**
+ * Internal dependencies
+ */
 import Image from '../models/image';
 import ErrorMessage from '../views/error-message';
 

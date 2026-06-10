@@ -1,10 +1,18 @@
-import React, { CSSProperties, useEffect, useRef } from 'react';
+/**
+ * External dependencies
+ */
+import type { CSSProperties } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+
+/**
+ * Internal dependencies
+ */
 import { UserMessage } from './user-message';
 import { AIResponse } from './ai-response';
 import { LoadingResponse } from './loading-response';
 import { ChatActionButtons } from './chat-action-buttons';
-import { ConversationEntry } from './types';
+import type { ConversationEntry } from './types';
 
 // Define style objects outside of JSX
 const responseContainerStyles: CSSProperties = {

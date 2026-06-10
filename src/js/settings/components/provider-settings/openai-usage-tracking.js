@@ -11,6 +11,7 @@ import {
 	ToggleControl,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 import { useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -38,11 +39,11 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 	);
 	const [ saving, setSaving ] = useState( false );
 	const { setProviderSettings } = useDispatch( STORE_NAME );
-	const { invalidateResolution } = useDispatch( 'core' );
+	const { invalidateResolution } = useDispatch( coreStore );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
 
 	const isForceRefreshScheduled = useSelect( ( select ) => {
-		const site = select( 'core' ).getEntityRecord( 'root', 'site' );
+		const site = select( coreStore ).getEntityRecord( 'root', 'site' );
 		return site?.classifai_api_usage_force_refresh || false;
 	} );
 
@@ -97,7 +98,7 @@ export const OpenAIUsageTrackingSettings = ( { isConfigured = false } ) => {
 
 			try {
 				invalidateResolution( 'getEntityRecord', [ 'root', 'site' ] );
-			} catch ( e ) {
+			} catch {
 				// Silently handle refresh errors.
 			}
 

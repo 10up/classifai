@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { createReduxStore, register } from '@wordpress/data';
 
 const DEFAULT_STATE = {

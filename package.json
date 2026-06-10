@@ -8,7 +8,8 @@
     "start": "wp-scripts start",
     "build": "wp-scripts build",
     "lint:js": "wp-scripts lint-js ./src ./includes/Classifai/Blocks",
-    "lint:js-fix": "wp-scripts lint-js ./src ./includes/Classifai/Blocks --fix",
+    "lint:js:fix": "wp-scripts lint-js ./src ./includes/Classifai/Blocks --fix",
+    "typecheck": "tsc --noEmit",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/classifai vendor/bin/phpunit -c phpunit.xml.dist",
     "makepot": "wpi18n makepot && echo '.pot file updated'",
@@ -38,9 +39,9 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/wordpress__blocks": "^15.17.0",
-    "@wordpress/e2e-test-utils-playwright": "^1.47.0",
+    "@wordpress/e2e-test-utils-playwright": "^1.46.0",
     "@wordpress/env": "^10.38.0",
-    "@wordpress/scripts": "^31.3.0",
+    "@wordpress/scripts": "^32.4.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "node-wp-i18n": "^1.2.8",
@@ -49,7 +50,7 @@
   "dependencies": {
     "@wordpress/icons": "^13.0.0",
     "choices.js": "^11.2.3",
-    "classnames": "^2.5.1",
+    "clsx": "^2.1.1",
     "motion": "^12.40.0",
     "react-router-dom": "^7.15.1",
     "tippy.js": "^6.3.7"
