@@ -184,7 +184,7 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => {
 						<Flex align="flex-end" justify="flex-end">
 							<FlexItem>
 								<Button
-									isPrimary
+									variant="primary"
 									onClick={ () => {
 										insertOcrScannedText(
 											clientId,
@@ -199,7 +199,7 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => {
 							</FlexItem>
 							<FlexItem>
 								<Button
-									isSecondary
+									variant="secondary"
 									onClick={ () => setModalOpen( false ) }
 								>
 									{ __( 'Dismiss', 'classifai' ) }
