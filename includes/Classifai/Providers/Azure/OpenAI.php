@@ -284,8 +284,8 @@ class OpenAI extends Provider {
 				],
 				'body'    => wp_json_encode(
 					[
-						'prompt'     => 'Once upon a time',
-						'max_tokens' => 5,
+						'prompt'                => 'Once upon a time',
+						'max_completion_tokens' => 5,
 					]
 				),
 				'use_vip' => true,
@@ -631,7 +631,7 @@ class OpenAI extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+						'content' => $prompt . ' You will be provided with content delimited by triple quotes',
 					],
 					[
 						'role'    => 'user',

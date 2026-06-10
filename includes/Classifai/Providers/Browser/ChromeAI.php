@@ -320,7 +320,7 @@ class ChromeAI extends Provider {
 		$body = apply_filters(
 			'classifai_chrome_ai_resize_content_request_body',
 			[
-				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+				'prompt'  => $prompt . ' You will be provided with content delimited by triple quotes',
 				'content' => esc_html( $args['content'] ),
 				'func'    => static::ID,
 			],

@@ -132,7 +132,7 @@ abstract class Provider {
 			$messages = [
 				[
 					'role'    => 'system',
-					'content' => $this->system_prompt . ' ' . $prompt,
+					'content' => $prompt . ' ' . $this->system_prompt,
 				],
 				[
 					'role'    => 'user',

@@ -49,7 +49,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			$messages = isset( $body['messages'] ) ? $body['messages'] : [];
 			$prompt   = count( $messages ) > 0 ? $messages[0]['content'] : '';
 
-			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
+			if ( str_contains( $prompt, 'increase the content length' ) || str_contains( $prompt, 'decrease the content length' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content.json' );
 			} else if ( str_contains( $prompt, 'This is a custom excerpt prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-custom-excerpt-prompt.json' );
@@ -57,7 +57,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-custom-title-prompt.json' );
 			} else if ( str_contains( $prompt, 'This is a custom shrink prompt' ) || str_contains( $prompt, 'This is a custom grow prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content-custom-prompt.json' );
-			} else if ( str_contains( $prompt, 'provide a summary that captures all the important points' ) ) {
+			} else if ( str_contains( $prompt, 'extracting the key takeaways from an article' ) ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-key-takeaways.json' );
 			}
 		}
@@ -129,7 +129,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			$parts    = isset( $contents[0]['parts'] ) ? $contents[0]['parts'] : [];
 			$prompt   = $parts['text'] ?? '';
 
-			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
+			if ( str_contains( $prompt, 'increase the content length' ) || str_contains( $prompt, 'decrease the content length' ) ) {
 				$response = file_get_contents( __DIR__ . '/geminiapi-resize-content.json' );
 			}
 		}
@@ -144,9 +144,9 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			$messages = isset( $body['messages'] ) ? $body['messages'] : [];
 			$prompt   = count( $messages ) > 0 ? $messages[0]['content'] : '';
 
-			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
+			if ( str_contains( $prompt, 'increase the content length' ) || str_contains( $prompt, 'decrease the content length' ) ) {
 				$response = file_get_contents( __DIR__ . '/ollama-chat-resize.json' );
-			} else if ( str_contains( $prompt, 'Write an SEO-friendly title' ) ) {
+			} else if ( str_contains( $prompt, 'write a single title for that content' ) ) {
 				$response = file_get_contents( __DIR__ . '/ollama-structured-title.json' );
 			}
 		}

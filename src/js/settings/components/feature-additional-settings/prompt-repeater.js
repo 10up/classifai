@@ -86,7 +86,9 @@ export const PromptRepeater = ( props ) => {
 										'classifai'
 									) }
 								</strong>{ ' ' }
-								{ prompt.prompt }
+								<span style={ { whiteSpace: 'pre-line' } }>
+									{ prompt.prompt }
+								</span>
 							</p>
 						</>
 					) }
