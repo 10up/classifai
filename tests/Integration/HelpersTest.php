@@ -60,8 +60,10 @@ class HelpersTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_can_lookup_supported_post_types_from_option() {
-		$this->markTestSkipped();
-		update_option( 'classifai_settings', [ 'post_types' => [ 'post' => 1, 'page' => 1 ] ] );
+		update_option(
+			'classifai_feature_classification',
+			[ 'post_types' => [ 'post' => 'post', 'page' => 'page' ] ]
+		);
 
 		$actual = $this->get_feature_class()->get_supported_post_types();
 		$this->assertEquals( [ 'post', 'page' ], $actual );
@@ -77,48 +79,40 @@ class HelpersTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_has_feature_thresholds() {
-		$this->markTestSkipped();
-		update_option( 'classifai_settings', [
-			'features' => [
-				'category_threshold' => 50,
-			]
-		] );
+		update_option(
+			'classifai_feature_classification',
+			[ 'category_threshold' => 50 ]
+		);
 
 		$actual = get_feature_threshold( 'category' );
 		$this->assertEquals( 0.50, $actual );
 	}
 
 	function test_it_can_change_plugin_settings() {
-		$this->markTestSkipped();
-		set_plugin_settings( [
-			'features' => [
-				'category_threshold' => 50,
-			]
-		] );
+		update_option(
+			'classifai_feature_classification',
+			[ 'category_threshold' => 25 ]
+		);
 
 		$actual = get_feature_threshold( 'category' );
-		$this->assertEquals( 0.50, $actual );
+		$this->assertEquals( 0.25, $actual );
 	}
 
 	function test_it_knows_configured_username() {
-		$this->markTestSkipped();
-		set_plugin_settings( [
-			'credentials' => [
-				'watson_username' => 'foo',
-			]
-		] );
+		update_option(
+			'classifai_feature_classification',
+			[ 'ibm_watson_nlu' => [ 'username' => 'foo' ] ]
+		);
 
 		$actual = get_username();
 		$this->assertEquals( 'foo', $actual );
 	}
 
 	function test_it_knows_configured_password() {
-		$this->markTestSkipped();
-		set_plugin_settings( [
-			'credentials' => [
-				'watson_password' => 'foo',
-			]
-		] );
+		update_option(
+			'classifai_feature_classification',
+			[ 'ibm_watson_nlu' => [ 'password' => 'foo' ] ]
+		);
 
 		$actual = get_password();
 		$this->assertEquals( 'foo', $actual );
@@ -139,22 +133,18 @@ class HelpersTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_knows_configured_feature_taxonomies() {
-		$this->markTestSkipped();
-		set_plugin_settings( [
-			'features'              => [
-				'category'          => true,
+		// Custom taxonomies are only honored when the IBM Watson NLU provider is
+		// selected; other providers force the taxonomy to the feature name.
+		update_option(
+			'classifai_feature_classification',
+			[
+				'provider'          => 'ibm_watson_nlu',
 				'category_taxonomy' => 'a',
-
-				'keyword'          => true,
-				'keyword_taxonomy' => 'b',
-
-				'concept'          => true,
-				'concept_taxonomy' => 'c',
-
-				'entity'          => true,
-				'entity_taxonomy' => 'd',
+				'keyword_taxonomy'  => 'b',
+				'concept_taxonomy'  => 'c',
+				'entity_taxonomy'   => 'd',
 			]
-		] );
+		);
 
 		$expected = [
 			'category' => 'a',
