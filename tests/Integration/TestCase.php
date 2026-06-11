@@ -129,8 +129,14 @@ abstract class TestCase extends WP_UnitTestCase {
 	 * @return array The settings written.
 	 */
 	protected function set_feature_settings( $feature_class, array $overrides ): array {
-		$feature  = is_object( $feature_class ) ? $feature_class : new $feature_class();
-		$settings = array_replace_recursive( $feature->get_default_settings(), $overrides );
+		$feature = is_object( $feature_class ) ? $feature_class : new $feature_class();
+
+		// Feature::get_default_settings() is protected; reach it via reflection.
+		$method = new \ReflectionMethod( $feature, 'get_default_settings' );
+		$method->setAccessible( true );
+		$defaults = $method->invoke( $feature );
+
+		$settings = array_replace_recursive( $defaults, $overrides );
 
 		update_option( $feature->get_option_name(), $settings );
 
