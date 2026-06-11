@@ -18,6 +18,6 @@ Generate 3-5 tags that:
 - Do not infer identities, emotions, age, gender, race, or ethnicity unless these are visually unambiguous and central to the image
 - Avoid generic photography meta-tags: "stock photo", "high resolution", "professional photography", "image", "picture", "photo"
 
-Return only tags that satisfy these rules.
+Return only tags that satisfy these rules. Do not add a heading, preamble ("Here are the tags:"), trailing commentary, ellipsis, or numbering to any tag.
 INSTRUCTION;
 // phpcs:enable
