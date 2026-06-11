@@ -18,8 +18,6 @@ Generate 3-5 tags that:
 - Do not infer identities, emotions, age, gender, race, or ethnicity unless these are visually unambiguous and central to the image
 - Avoid generic photography meta-tags: "stock photo", "high resolution", "professional photography", "image", "picture", "photo"
 
-Format the output as a Markdown bulleted list, one tag per line, prefixed with "- ".
-
-Output only the list. Do not add a heading, preamble ("Here are the tags:"), trailing commentary, ellipsis, or numbering.
+Return only tags that satisfy these rules.
 INSTRUCTION;
 // phpcs:enable
