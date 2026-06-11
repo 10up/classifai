@@ -43,7 +43,7 @@
     "@wordpress/env": "^11.5.0",
     "@wordpress/scripts": "^32.4.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
+    "lint-staged": "^17.0.4",
     "node-wp-i18n": "^1.2.8",
     "wp-hooks-documentor": "github:10up/wp-hooks-documentor#build"
   },
