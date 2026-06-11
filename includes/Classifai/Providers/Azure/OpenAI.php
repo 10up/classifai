@@ -788,8 +788,10 @@ class OpenAI extends Provider {
 							'type'                 => 'object',
 							'properties'           => [
 								'takeaways' => [
-									'type'  => 'array',
-									'items' => [
+									'type'     => 'array',
+									'minItems' => 2,
+									'maxItems' => 4,
+									'items'    => [
 										'type' => 'string',
 									],
 								],

@@ -23,6 +23,6 @@ Extract 2-4 key takeaways that:
 - Are written in the same language as the article
 - Avoid restating the title or article headings verbatim
 
-Output only the list. Do not add a heading ("Key takeaways:"), do not add a preamble ("Here are the…"), do not number the items, and do not add trailing commentary.
+Return only takeaways that satisfy these rules. Do not add a heading ("Key takeaways:"), do not add a preamble ("Here are the…"), do not number the items, and do not add trailing commentary.
 INSTRUCTION;
 // phpcs:enable
