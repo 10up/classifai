@@ -539,6 +539,28 @@ class ChatGPT extends Provider {
 						],
 					],
 				],
+				'response_format'       => [
+					'type'        => 'json_schema',
+					'json_schema' => [
+						'name'   => 'image_tags',
+						'schema' => [
+							'type'                 => 'object',
+							'properties'           => [
+								'tags' => [
+									'type'     => 'array',
+									'minItems' => 3,
+									'maxItems' => 5,
+									'items'    => [
+										'type' => 'string',
+									],
+								],
+							],
+							'required'             => [ 'tags' ],
+							'additionalProperties' => false,
+						],
+						'strict' => true,
+					],
+				],
 				'temperature'           => 0.2,
 				'max_completion_tokens' => 300,
 			],
@@ -561,8 +583,22 @@ class ChatGPT extends Provider {
 		if ( ! empty( $response['choices'] ) ) {
 			foreach ( $response['choices'] as $choice ) {
 				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
-					$response = array_filter( explode( '- ', $choice['message']['content'] ) );
-					$response = array_map( 'trim', $response );
+					// We expect the response to be valid JSON since we requested that schema.
+					$image_tags = json_decode( $choice['message']['content'], true );
+
+					if ( empty( $image_tags['tags'] ) || ! is_array( $image_tags['tags'] ) ) {
+						$response = new WP_Error( 'invalid_response', esc_html__( 'No tags found.', 'classifai' ) );
+						break;
+					}
+
+					$response = array_filter(
+						array_map(
+							function ( $tag ) {
+								return sanitize_text_field( trim( $tag, ' "\'' ) );
+							},
+							$image_tags['tags']
+						)
+					);
 
 					// Save all the tags for later.
 					update_post_meta( $post_id, 'classifai_computer_vision_image_tags', $response );
@@ -1017,8 +1053,10 @@ class ChatGPT extends Provider {
 							'type'                 => 'object',
 							'properties'           => [
 								'takeaways' => [
-									'type'  => 'array',
-									'items' => [
+									'type'     => 'array',
+									'minItems' => 2,
+									'maxItems' => 4,
+									'items'    => [
 										'type' => 'string',
 									],
 								],
