@@ -946,8 +946,8 @@ class OllamaEmbeddings extends Ollama {
 	/**
 	 * Trigger embedding generation for a term.
 	 *
-	 * @param int     $term_id ID of term.
-	 * @param bool    $force Whether to force generation of embeddings even if they already exist. Default false.
+	 * @param int                                                                     $term_id ID of term.
+	 * @param bool                                                                    $force Whether to force generation of embeddings even if they already exist. Default false.
 	 * @param \Classifai\Features\Classification|\Classifai\Features\TermCleanup|null $feature The feature instance.
 	 * @return array|WP_Error
 	 */

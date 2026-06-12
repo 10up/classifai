@@ -145,7 +145,7 @@ class SimilarTermsListTable extends WP_List_Table {
 	 *
 	 * @param \WP_Term $term         Term Object.
 	 * @param \WP_Term $similar_term Similar Term Object.
-	 * @param float   $score        Similarity score.
+	 * @param float    $score        Similarity score.
 	 * @return string
 	 */
 	public function generate_term_html( $term, $similar_term, $score = null ) {

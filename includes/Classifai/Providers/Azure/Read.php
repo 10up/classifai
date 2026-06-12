@@ -54,8 +54,8 @@ class Read {
 	/**
 	 * Constructor
 	 *
-	 * @param array             $settings Computer Vision settings.
-	 * @param int               $attachment_id Attachment ID to process.
+	 * @param array                                 $settings Computer Vision settings.
+	 * @param int                                   $attachment_id Attachment ID to process.
 	 * @param \Classifai\Features\PDFTextExtraction $feature Feature instance.
 	 */
 	public function __construct( array $settings, int $attachment_id, $feature ) {
