@@ -83,15 +83,16 @@ class EmbeddingCalculationsTest extends TestCase {
 	}
 
 	/**
-	 * A zero-magnitude vector divides by zero. Documenting the current contract:
-	 * PHP 8 raises DivisionByZeroError rather than returning a value.
+	 * A zero-magnitude vector has an undefined cosine similarity. Rather than
+	 * dividing by zero (which throws on PHP 8.0+ and warns on PHP 7.4), the
+	 * method bails out gracefully like it does for empty embeddings.
 	 *
 	 * @covers ::cosine_similarity
 	 */
-	public function test_zero_magnitude_vector_throws() {
+	public function test_zero_magnitude_vector_returns_false() {
 		$calc = new EmbeddingCalculations();
 
-		$this->expectException( \DivisionByZeroError::class );
-		$calc->cosine_similarity( [ 0, 0, 0 ], [ 1, 2, 3 ] );
+		$this->assertFalse( $calc->cosine_similarity( [ 0, 0, 0 ], [ 1, 2, 3 ] ) );
+		$this->assertFalse( $calc->cosine_similarity( [ 1, 2, 3 ], [ 0, 0, 0 ] ) );
 	}
 }
