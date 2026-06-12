@@ -44,9 +44,9 @@ class ImageCropping extends Feature {
 		$this->provider_instances = $this->get_provider_instances( ImageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -56,19 +56,19 @@ class ImageCropping extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 	}
 
 	/**
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_action( 'edit_attachment', [ $this, 'maybe_crop_image' ] );
+		add_action( 'add_meta_boxes_attachment', array( $this, 'setup_attachment_meta_box' ) );
+		add_action( 'edit_attachment', array( $this, 'maybe_crop_image' ) );
 
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
-		add_filter( 'wp_prepare_attachment_for_js', [ $this, 'set_media_library_attachment_size' ], 10, 1 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_smart_crops' ], 7, 2 );
+		add_filter( 'attachment_fields_to_edit', array( $this, 'add_rescan_button_to_media_modal' ), 10, 2 );
+		add_filter( 'wp_prepare_attachment_for_js', array( $this, 'set_media_library_attachment_size' ), 10, 1 );
+		add_filter( 'wp_generate_attachment_metadata', array( $this, 'generate_smart_crops' ), 7, 2 );
 	}
 
 	/**
@@ -78,19 +78,19 @@ class ImageCropping extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'smart-crop/(?P<id>\d+)',
-			[
+			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
-				'args'                => [
-					'id' => [
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
+				'args'                => array(
+					'id' => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Image ID to generate smart crop.', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'smart_crop_permissions_check' ],
-			]
+					),
+				),
+				'permission_callback' => array( $this, 'smart_crop_permissions_check' ),
+			)
 		);
 	}
 
@@ -239,10 +239,10 @@ class ImageCropping extends Feature {
 				'classifai_smart_cropping_thumb_file_name',
 				$new_thumb_file_name,
 				$attachment_id,
-				[
+				array(
 					'width'  => $image['width'],
 					'height' => $image['height'],
-				]
+				)
 			);
 
 			$filesystem = $this->get_wp_filesystem();
@@ -267,7 +267,7 @@ class ImageCropping extends Feature {
 		}
 
 		// Add our content to the metabox.
-		add_action( 'classifai_render_attachment_metabox', [ $this, 'attachment_data_meta_box_content' ] );
+		add_action( 'classifai_render_attachment_metabox', array( $this, 'attachment_data_meta_box_content' ) );
 
 		// If the metabox was already registered, don't add it again.
 		if ( isset( $wp_meta_boxes['attachment']['side']['high']['classifai_image_processing'] ) ) {
@@ -278,7 +278,7 @@ class ImageCropping extends Feature {
 		add_meta_box(
 			'classifai_image_processing',
 			__( 'ClassifAI Image Processing', 'classifai' ),
-			[ $this, 'attachment_data_meta_box' ],
+			array( $this, 'attachment_data_meta_box' ),
 			'attachment',
 			'side',
 			'high'
@@ -351,12 +351,12 @@ class ImageCropping extends Feature {
 
 		$smart_crop_text = empty( get_transient( 'classifai_azure_computer_vision_image_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
 
-		$form_fields['rescan_smart_crop'] = [
+		$form_fields['rescan_smart_crop'] = array(
 			'label'        => __( 'Smart thumbnail', 'classifai' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
 			'html'         => '<button class="button secondary" id="classifai-rescan-smart-crop" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $smart_crop_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-		];
+		);
 
 		return $form_fields;
 	}
@@ -376,10 +376,10 @@ class ImageCropping extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
+		return array(
 			'processing_mode' => 'automatic',
 			'provider'        => ComputerVision::ID,
-		];
+		);
 	}
 
 	/**

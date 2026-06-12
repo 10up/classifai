@@ -43,12 +43,12 @@ class Ollama extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'endpoint_url'  => 'http://localhost:11434/',
 			'authenticated' => false,
 			'model'         => '',
-			'models'        => [],
-		];
+			'models'        => array(),
+		);
 
 		/**
 		 * Default values for feature specific settings.
@@ -79,9 +79,9 @@ class Ollama extends Provider {
 			$new_url = trailingslashit( esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ) );
 
 			$new_settings[ static::ID ]['models'] = $this->get_models(
-				[
+				array(
 					'endpoint_url' => $new_url,
-				]
+				)
 			);
 
 			// Check to see if credentials have changed.
@@ -96,7 +96,7 @@ class Ollama extends Provider {
 				if ( ! empty( $new_settings[ static::ID ]['models'] ) ) {
 					$new_settings[ static::ID ]['authenticated'] = true;
 				} else {
-					$new_settings[ static::ID ]['models']        = [];
+					$new_settings[ static::ID ]['models']        = array();
 					$new_settings[ static::ID ]['authenticated'] = false;
 				}
 			}
@@ -129,28 +129,28 @@ class Ollama extends Provider {
 	 * @param array $args Overridable args.
 	 * @return array
 	 */
-	public function get_models( array $args = [] ): array {
+	public function get_models( array $args = array() ): array {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
-		$default = [
+		$default = array(
 			'endpoint_url' => $settings[ static::ID ]['endpoint_url'] ?? '',
-		];
+		);
 
 		$default = wp_parse_args( $args, $default );
 
 		// Return if credentials don't exist.
 		if ( empty( $default['endpoint_url'] ) ) {
-			return [];
+			return array();
 		}
 
 		// Make our request.
-		$request  = new APIRequest( '', $this->feature_instance::ID, $this, [ static::ID => $default ] );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this, array( static::ID => $default ) );
 		$response = $request->get(
 			$this->get_api_model_url( $default['endpoint_url'] ),
-			[
+			array(
 				'timeout' => 30, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				'use_vip' => true,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -165,10 +165,10 @@ class Ollama extends Provider {
 				'error'
 			);
 
-			return [];
+			return array();
 		}
 
-		$sanitized_models = [];
+		$sanitized_models = array();
 
 		if ( is_array( $response['models'] ) ) {
 			foreach ( $response['models'] as $model ) {
@@ -186,7 +186,7 @@ class Ollama extends Provider {
 	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_excerpt( int $post_id = 0, array $args = [] ) {
+	public function generate_excerpt( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
@@ -195,11 +195,11 @@ class Ollama extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'author'  => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -258,11 +258,11 @@ class Ollama extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_excerpt_request_body',
-			[
+			array(
 				'model'    => $settings[ static::ID ]['model'] ?? '',
 				'messages' => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'stream'   => false,
-			],
+			),
 			$post_id
 		);
 
@@ -270,9 +270,9 @@ class Ollama extends Provider {
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -295,7 +295,7 @@ class Ollama extends Provider {
 	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_title( int $post_id = 0, array $args = [] ) {
+	public function generate_title( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
@@ -304,10 +304,10 @@ class Ollama extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num'     => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
 				'content' => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -359,37 +359,37 @@ class Ollama extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_title_request_body',
-			[
+			array(
 				'model'    => $settings[ static::ID ]['model'] ?? '',
 				'messages' => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'stream'   => false,
-				'format'   => [
+				'format'   => array(
 					'type'       => 'object',
-					'properties' => [
-						'title' => [
+					'properties' => array(
+						'title' => array(
 							'type' => 'string',
-						],
-					],
-					'required'   => [ 'title' ],
-				],
-			],
+						),
+					),
+					'required'   => array( 'title' ),
+				),
+			),
 			$post_id
 		);
 
 		// Make our API requests.
 		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
-		$responses = [];
+		$responses = array();
 		for ( $i = 0; $i < $args['num']; $i++ ) {
 			$responses[] = $request->post(
 				$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-				[
+				array(
 					'body' => wp_json_encode( $body ),
-				]
+				)
 			);
 		}
 
-		$cleaned_responses = [];
+		$cleaned_responses = array();
 
 		foreach ( $responses as $response ) {
 			// Extract out the response, if it exists.
@@ -427,10 +427,10 @@ class Ollama extends Provider {
 
 		$args = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num'     => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
 				'content' => '',
-			]
+			)
 		);
 
 		if ( 'shrink' === $args['resize_type'] ) {
@@ -466,46 +466,46 @@ class Ollama extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_resize_content_request_body',
-			[
+			array(
 				'model'    => $settings[ static::ID ]['model'] ?? '',
-				'messages' => [
-					[
+				'messages' => array(
+					array(
 						'role'    => 'system',
 						'content' => $prompt . ' You will be provided with content delimited by triple quotes',
-					],
-					[
+					),
+					array(
 						'role'    => 'user',
 						'content' => '"""' . esc_html( $args['content'] ) . '"""',
-					],
-				],
+					),
+				),
 				'stream'   => false,
-				'format'   => [
+				'format'   => array(
 					'type'       => 'object',
-					'properties' => [
-						'content' => [
+					'properties' => array(
+						'content' => array(
 							'type' => 'string',
-						],
-					],
-					'required'   => [ 'content' ],
-				],
-			],
+						),
+					),
+					'required'   => array( 'content' ),
+				),
+			),
 			$post_id
 		);
 
 		// Make our API requests.
 		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
-		$responses = [];
+		$responses = array();
 		for ( $i = 0; $i < $args['num']; $i++ ) {
 			$responses[] = $request->post(
 				$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-				[
+				array(
 					'body' => wp_json_encode( $body ),
-				]
+				)
 			);
 		}
 
-		$cleaned_responses = [];
+		$cleaned_responses = array();
 
 		foreach ( $responses as $response ) {
 			// Extract out the response, if it exists.
@@ -533,7 +533,7 @@ class Ollama extends Provider {
 	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_key_takeaways( int $post_id = 0, array $args = [] ) {
+	public function generate_key_takeaways( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate key takeaways.', 'classifai' ) );
 		}
@@ -542,12 +542,12 @@ class Ollama extends Provider {
 		$settings = $feature->get_settings();
 		$args     = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'render'  => 'list',
 				'run'     => 'auto',
-			]
+			)
 		);
 
 		// These checks (and the one above) happen in the REST permission_callback,
@@ -616,35 +616,35 @@ class Ollama extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_key_takeaways_request_body',
-			[
+			array(
 				'model'    => $settings[ static::ID ]['model'] ?? '',
-				'messages' => [
-					[
+				'messages' => array(
+					array(
 						'role'    => 'system',
 						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
-					],
-					[
+					),
+					array(
 						'role'    => 'user',
 						'content' => '"""' . $content . '"""',
-					],
-				],
-				'format'   => [
+					),
+				),
+				'format'   => array(
 					'type'                 => 'object',
-					'properties'           => [
-						'takeaways' => [
+					'properties'           => array(
+						'takeaways' => array(
 							'type'     => 'array',
 							'minItems' => 2,
 							'maxItems' => 4,
-							'items'    => [
+							'items'    => array(
 								'type' => 'string',
-							],
-						],
-					],
-					'required'             => [ 'takeaways' ],
+							),
+						),
+					),
+					'required'             => array( 'takeaways' ),
 					'additionalProperties' => false,
-				],
+				),
 				'stream'   => false,
-			],
+			),
 			$post_id
 		);
 
@@ -652,9 +652,9 @@ class Ollama extends Provider {
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -689,7 +689,7 @@ class Ollama extends Provider {
 	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_content( int $post_id = 0, array $args = [] ) {
+	public function generate_content( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate content.', 'classifai' ) );
 		}
@@ -698,11 +698,11 @@ class Ollama extends Provider {
 		$settings = $feature->get_settings();
 		$args     = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'title'        => '',
 				'summary'      => '',
-				'conversation' => [],
-			]
+				'conversation' => array(),
+			)
 		);
 
 		// These checks happen in the REST permission_callback,
@@ -737,37 +737,37 @@ class Ollama extends Provider {
 		}
 
 		// Set up our messages.
-		$messages = [
-			[
+		$messages = array(
+			array(
 				'role'    => 'system',
 				'content' => $prompt . "\n" . $feature->get_prompt( 'return-format' ),
-			],
-			[
+			),
+			array(
 				'role'    => 'user',
 				'content' => $content,
-			],
-		];
+			),
+		);
 
 		// If we have an existing conversation, add it to the messages.
 		if ( ! empty( $args['conversation'] ) ) {
 			foreach ( $args['conversation'] as $i => $conversation ) {
 				if ( $i > 0 ) {
-					$messages[] = [
+					$messages[] = array(
 						'role'    => 'user',
 						'content' => $conversation['prompt'],
-					];
+					);
 				}
 
-				$messages[] = [
+				$messages[] = array(
 					'role'    => 'assistant',
 					'content' => $conversation['completion'],
-				];
+				);
 			}
 
-			$messages[] = [
+			$messages[] = array(
 				'role'    => 'user',
 				'content' => $args['summary'],
-			];
+			);
 		}
 
 		/**
@@ -783,11 +783,11 @@ class Ollama extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_content_request_body',
-			[
+			array(
 				'model'    => $settings[ static::ID ]['model'] ?? '',
 				'messages' => $messages,
 				'stream'   => false,
-			],
+			),
 			$post_id
 		);
 
@@ -795,9 +795,9 @@ class Ollama extends Provider {
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -821,7 +821,7 @@ class Ollama extends Provider {
 	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
@@ -904,7 +904,7 @@ class Ollama extends Provider {
 		// Split text by single whitespace.
 		$words = explode( ' ', $content );
 
-		$chunks     = [];
+		$chunks     = array();
 		$text_count = count( $words );
 
 		// Iterate through and chunk data with an overlap.

@@ -37,11 +37,11 @@ class Smart404 extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
 			OllamaEmbeddings::ID => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -96,96 +96,96 @@ class Smart404 extends Feature {
 		add_settings_field(
 			'num',
 			esc_html__( 'Number of posts to show', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'num',
 				'input_type'    => 'number',
 				'min'           => 1,
 				'step'          => 1,
 				'default_value' => $settings['num'],
 				'description'   => __( 'Determines the maximum number of posts that will show on a 404 page. This can be overridden in the display functions.', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'num_search',
 			esc_html__( 'Number of posts to search', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'num_search',
 				'input_type'    => 'number',
 				'min'           => 1,
 				'step'          => 1,
 				'default_value' => $settings['num_search'],
 				'description'   => __( 'Determines the maximum number of posts Elasticsearch will use for the vector search. A higher number can give more accurate results but will be slower. This can be overridden in the display functions.', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'threshold',
 			esc_html__( 'Threshold', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'threshold',
 				'input_type'    => 'number',
 				'min'           => 0,
 				'step'          => 0.01,
 				'default_value' => $settings['threshold'],
 				'description'   => __( 'Set the minimum threshold we want for our results. Any result that falls below this number will be automatically removed.', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'rescore',
 			esc_html__( 'Use rescore query', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'rescore',
 				'input_type'    => 'checkbox',
 				'default_value' => $settings['rescore'],
 				'description'   => __( 'Will run a normal Elasticsearch query and then rescore those results using a vector query. Can give better results but often results in worse performance. This can be overridden in the display functions', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'fallback',
 			esc_html__( 'Use fallback results', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'fallback',
 				'input_type'    => 'checkbox',
 				'default_value' => $settings['fallback'],
 				'description'   => __( 'If no results are found in Elasticsearch, will fallback to displaying most recent results from WordPress. This can be overridden in the display functions', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'score_function',
 			esc_html__( 'Score function', 'classifai' ),
-			[ $this, 'render_select' ],
+			array( $this, 'render_select' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'score_function',
-				'options'       => [
+				'options'       => array(
 					'cosine'      => __( 'Cosine', 'classifai' ),
 					'dot_product' => __( 'Dot Product', 'classifai' ),
 					'l1_norm'     => __( 'L1 Norm', 'classifai' ),
 					'l2_norm'     => __( 'L2 Norm', 'classifai' ),
-				],
+				),
 				'default_value' => $settings['score_function'],
 				'description'   => __( 'Choose which vector scoring function you want to use. You may need to adjust the threshold if you change this. This can be overridden in the display functions', 'classifai' ),
-			]
+			)
 		);
 	}
 
@@ -195,7 +195,7 @@ class Smart404 extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
+		return array(
 			'provider'       => OpenAIEmbeddings::ID,
 			'num'            => 3,
 			'num_search'     => 5000,
@@ -203,7 +203,7 @@ class Smart404 extends Feature {
 			'rescore'        => 0,
 			'fallback'       => 1,
 			'score_function' => 'cosine',
-		];
+		);
 	}
 
 	/**
@@ -231,7 +231,7 @@ class Smart404 extends Feature {
 			$new_settings['fallback'] = '1';
 		}
 
-		if ( isset( $new_settings['score_function'] ) && in_array( $new_settings['score_function'], [ 'cosine', 'dot_product', 'l1_norm', 'l2_norm' ], true ) ) {
+		if ( isset( $new_settings['score_function'] ) && in_array( $new_settings['score_function'], array( 'cosine', 'dot_product', 'l1_norm', 'l2_norm' ), true ) ) {
 			$new_settings['score_function'] = sanitize_text_field( $new_settings['score_function'] );
 		} else {
 			$new_settings['score_function'] = 'cosine';
@@ -247,7 +247,7 @@ class Smart404 extends Feature {
 	 * @param array  $args Arguments to pass to the search.
 	 * @return array|WP_Error
 	 */
-	public function exact_knn_search( string $query, array $args = [] ) {
+	public function exact_knn_search( string $query, array $args = array() ) {
 		// Ensure the Feature is enabled and configured before trying to use it.
 		if ( ! is_elasticpress_installed() || ! $this->is_configured() || ! $this->is_enabled() ) {
 			return new WP_Error( 'not_enabled', __( 'Feature is not enabled.', 'classifai' ) );
@@ -263,15 +263,15 @@ class Smart404 extends Feature {
 		// Parse the arguments, setting our defaults.
 		$args = wp_parse_args(
 			$args,
-			[
+			array(
 				'index'          => 'post',
-				'post_type'      => [ 'post' ],
+				'post_type'      => array( 'post' ),
 				'num'            => $settings['num'] ?? 5,
 				'num_candidates' => $settings['num_search'] ?? 5000,
 				'rescore'        => $settings['rescore'] ?? '1',
 				'fallback'       => $settings['fallback'] ?? '1',
 				'score_function' => $settings['score_function'] ?? 'cosine',
-			]
+			)
 		);
 
 		/**
@@ -286,7 +286,7 @@ class Smart404 extends Feature {
 
 		// Ensure our post types are set as an array.
 		if ( ! is_array( $args['post_type'] ) ) {
-			$args['post_type'] = [ $args['post_type'] ];
+			$args['post_type'] = array( $args['post_type'] );
 		}
 
 		$integration = new Smart404EPIntegration( $this->get_feature_provider_instance() );
@@ -331,7 +331,7 @@ class Smart404 extends Feature {
 	 * @param array $args Arguments to pass to the search.
 	 * @return array|WP_Error
 	 */
-	public function fallback_results( array $args = [] ) {
+	public function fallback_results( array $args = array() ) {
 		// Ensure the Feature is enabled and configured before trying to use it.
 		if ( ! $this->is_configured() || ! $this->is_enabled() ) {
 			return new WP_Error( 'not_enabled', __( 'Feature is not enabled.', 'classifai' ) );
@@ -342,20 +342,20 @@ class Smart404 extends Feature {
 		// Parse the arguments, setting our defaults.
 		$args = wp_parse_args(
 			$args,
-			[
+			array(
 				'num' => $settings['num'] ?? 5,
-			]
+			)
 		);
 
 		// Run our query.
 		$results = new WP_Query(
-			[
+			array(
 				'post_type'      => 'post',
 				'posts_per_page' => $args['num'],
 				'post_status'    => 'publish',
 				'orderby'        => 'date',
 				'order'          => 'DESC',
-			]
+			)
 		);
 
 		// Ensure we have some results.

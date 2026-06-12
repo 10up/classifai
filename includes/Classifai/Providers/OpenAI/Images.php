@@ -63,7 +63,7 @@ class Images extends Provider {
 			return;
 		}
 
-		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
+		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', array( $this, 'register_rest_args' ) );
 	}
 
 	/**
@@ -135,12 +135,12 @@ class Images extends Provider {
 	 * @return array
 	 */
 	public static function get_image_quality_options(): array {
-		$options = [
+		$options = array(
 			'auto'   => __( 'Auto', 'classifai' ),
 			'low'    => __( 'Low', 'classifai' ),
 			'medium' => __( 'Medium', 'classifai' ),
 			'high'   => __( 'High', 'classifai' ),
-		];
+		);
 
 		/**
 		 * Filter the image quality options that are available.
@@ -164,12 +164,12 @@ class Images extends Provider {
 	 * @return array
 	 */
 	public static function get_image_size_options(): array {
-		$options = [
+		$options = array(
 			'auto'      => __( 'Auto', 'classifai' ),
 			'1024x1024' => __( '1024x1024 (square)', 'classifai' ),
 			'1536x1024' => __( '1536x1024 (landscape)', 'classifai' ),
 			'1024x1536' => __( '1024x1536 (portrait)', 'classifai' ),
-		];
+		);
 
 		/**
 		 * Filter the image size options that are available.
@@ -193,7 +193,7 @@ class Images extends Provider {
 	 * @return array
 	 */
 	public static function get_image_style_options(): array {
-		$options = [];
+		$options = array();
 
 		/**
 		 * Filter the image style options that are available.
@@ -217,22 +217,22 @@ class Images extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'api_key'       => '',
 			'authenticated' => false,
-		];
+		);
 
 		switch ( $this->feature_instance::ID ) {
 			case ImageGeneration::ID:
 				return array_merge(
 					$common_settings,
-					[
+					array(
 						'number_of_images'   => 1,
 						'quality'            => 'auto',
 						'image_size'         => '1024x1024',
 						'style'              => 'vivid',
 						'per_image_settings' => false,
-					]
+					)
 				);
 		}
 
@@ -254,13 +254,13 @@ class Images extends Provider {
 		if ( $this->feature_instance instanceof ImageGeneration ) {
 			$new_settings[ static::ID ]['number_of_images'] = absint( $new_settings[ static::ID ]['number_of_images'] ?? $settings[ static::ID ]['number_of_images'] );
 
-			if ( in_array( $new_settings[ static::ID ]['quality'], [ 'auto', 'low', 'medium', 'high' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['quality'], array( 'auto', 'low', 'medium', 'high' ), true ) ) {
 				$new_settings[ static::ID ]['quality'] = sanitize_text_field( $new_settings[ static::ID ]['quality'] );
 			} else {
 				$new_settings[ static::ID ]['quality'] = $settings[ static::ID ]['quality'];
 			}
 
-			if ( in_array( $new_settings[ static::ID ]['image_size'], [ 'auto', '1024x1024', '1536x1024', '1024x1536' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['image_size'], array( 'auto', '1024x1024', '1536x1024', '1024x1536' ), true ) ) {
 				$new_settings[ static::ID ]['image_size'] = sanitize_text_field( $new_settings[ static::ID ]['image_size'] );
 			} else {
 				$new_settings[ static::ID ]['image_size'] = $settings[ static::ID ]['image_size'];
@@ -278,7 +278,7 @@ class Images extends Provider {
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = array() ) {
 		$route_to_call = strtolower( $route_to_call );
 		$return        = '';
 
@@ -299,7 +299,7 @@ class Images extends Provider {
 	 * @param array  $args Optional arguments passed to endpoint.
 	 * @return string|WP_Error
 	 */
-	public function generate_image( string $prompt = '', array $args = [] ) {
+	public function generate_image( string $prompt = '', array $args = array() ) {
 		if ( ! $prompt ) {
 			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
 		}
@@ -308,22 +308,22 @@ class Images extends Provider {
 		$settings         = $image_generation->get_settings( static::ID );
 		$args             = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num'     => $settings['number_of_images'] ?? 1,
 				'quality' => $settings['quality'] ?? 'auto',
 				'size'    => $settings['image_size'] ?? '1024x1024',
 				'style'   => $settings['style'] ?? 'vivid',
 				'format'  => 'b64_json',
-			]
+			)
 		);
 
 		// Force proper image quality for those that had been using DALL·E 2 or 3 and haven't updated settings.
-		if ( ! in_array( $args['quality'], [ 'auto', 'low', 'medium', 'high' ], true ) ) {
+		if ( ! in_array( $args['quality'], array( 'auto', 'low', 'medium', 'high' ), true ) ) {
 			$args['size'] = 'auto';
 		}
 
 		// Force proper image size for those that had been using DALL·E 2 or 3 and haven't updated settings.
-		if ( ! in_array( $args['size'], [ '1024x1024', '1536x1024', '1024x1536' ], true ) ) {
+		if ( ! in_array( $args['size'], array( '1024x1024', '1536x1024', '1024x1536' ), true ) ) {
 			$args['size'] = '1024x1024';
 		}
 
@@ -354,7 +354,7 @@ class Images extends Provider {
 		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$model = $this->get_model();
-		$body  = [
+		$body  = array(
 			'prompt'          => sanitize_text_field( $prompt ),
 			'model'           => $model,
 			'n'               => absint( $args['num'] ),
@@ -362,7 +362,7 @@ class Images extends Provider {
 			'response_format' => sanitize_text_field( $args['format'] ),
 			'size'            => sanitize_text_field( $args['size'] ),
 			'style'           => sanitize_text_field( $args['style'] ),
-		];
+		);
 
 		if ( 'gpt-image-1' === $model || 'gpt-image-2' === $model ) {
 			// The gpt-image models don't support response_format or style.
@@ -385,28 +385,28 @@ class Images extends Provider {
 		 */
 		$body = apply_filters( 'classifai_dalle_request_body', $body );
 
-		$responses = [];
+		$responses = array();
 
 		// DALL·E 3 doesn't support multiple images in a single request so make one request per image.
 		if ( 'dall-e-3' === $model ) {
 			for ( $i = 0; $i < $args['num']; $i++ ) {
 				$responses[] = $request->post(
 					$this->get_api_url(),
-					[
+					array(
 						'body' => wp_json_encode( $body ),
-					]
+					)
 				);
 			}
 		} else {
 			$responses[] = $request->post(
 				$this->get_api_url(),
-				[
+				array(
 					'body' => wp_json_encode( $body ),
-				]
+				)
 			);
 		}
 
-		$cleaned_responses = [];
+		$cleaned_responses = array();
 
 		foreach ( $responses as $response ) {
 			// Extract out the image response, if it exists.
@@ -414,9 +414,9 @@ class Images extends Provider {
 				foreach ( $response['data'] as $data ) {
 					if ( ! empty( $data[ $args['format'] ] ) ) {
 						if ( 'url' === $args['format'] ) {
-							$cleaned_responses[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
+							$cleaned_responses[] = array( 'url' => esc_url_raw( $data[ $args['format'] ] ) );
 						} else {
-							$cleaned_responses[] = [ 'url' => $data[ $args['format'] ] ];
+							$cleaned_responses[] = array( 'url' => $data[ $args['format'] ] );
 						}
 					}
 				}
@@ -436,7 +436,7 @@ class Images extends Provider {
 	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$debug_info        = array();
 
 		if ( $this->feature_instance instanceof ImageGeneration ) {
 			$debug_info[ __( 'Number of images', 'classifai' ) ] = $provider_settings['number_of_images'] ?? 1;
@@ -461,48 +461,48 @@ class Images extends Provider {
 	 * @param array $args Existing REST arguments.
 	 * @return array
 	 */
-	public function register_rest_args( array $args = [] ): array {
-		$provider_args = [
-			'n'       => [
+	public function register_rest_args( array $args = array() ): array {
+		$provider_args = array(
+			'n'       => array(
 				'type'              => 'integer',
 				'minimum'           => 1,
 				'maximum'           => 10,
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
-			],
-			'quality' => [
+			),
+			'quality' => array(
 				'type'              => 'string',
 				'enum'              => array_keys( $this->get_image_quality_options() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Quality of generated image', 'classifai' ),
-			],
-			'size'    => [
+			),
+			'size'    => array(
 				'type'              => 'string',
 				'enum'              => array_keys( $this->get_image_size_options() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Size of generated image', 'classifai' ),
-			],
-			'style'   => [
+			),
+			'style'   => array(
 				'type'              => 'string',
 				'enum'              => array_keys( $this->get_image_style_options() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Style of generated image', 'classifai' ),
-			],
-			'format'  => [
+			),
+			'format'  => array(
 				'type'              => 'string',
-				'enum'              => [
+				'enum'              => array(
 					'url',
 					'b64_json',
-				],
+				),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Format of generated image', 'classifai' ),
-			],
-		];
+			),
+		);
 
 		// Merge the provider args with the existing args.
 		$args['args'] = array_merge( $args['args'], $provider_args );

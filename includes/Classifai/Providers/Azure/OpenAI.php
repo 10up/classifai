@@ -93,10 +93,10 @@ class OpenAI extends Provider {
 		add_settings_field(
 			static::ID . '_endpoint_url',
 			esc_html__( 'Endpoint URL', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
@@ -105,31 +105,31 @@ class OpenAI extends Provider {
 					'' :
 					__( 'Supported protocol and hostname endpoints, e.g., <code>https://EXAMPLE.openai.azure.com</code>.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_api_key',
 			esc_html__( 'API key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_deployment',
 			esc_html__( 'Deployment name', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'deployment',
 				'input_type'    => 'text',
@@ -138,7 +138,7 @@ class OpenAI extends Provider {
 					'' :
 					__( 'Custom name you chose for your deployment when you deployed a model.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
-			]
+			)
 		);
 
 		switch ( $this->feature_instance::ID ) {
@@ -147,10 +147,10 @@ class OpenAI extends Provider {
 				add_settings_field(
 					static::ID . '_number_of_suggestions',
 					esc_html__( 'Number of suggestions', 'classifai' ),
-					[ $this->feature_instance, 'render_input' ],
+					array( $this->feature_instance, 'render_input' ),
 					$this->feature_instance->get_option_name(),
 					$this->feature_instance->get_option_name() . '_section',
-					[
+					array(
 						'option_index'  => static::ID,
 						'label_for'     => 'number_of_suggestions',
 						'input_type'    => 'number',
@@ -159,7 +159,7 @@ class OpenAI extends Provider {
 						'default_value' => $settings['number_of_suggestions'],
 						'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 						'description'   => esc_html__( 'Number of suggestions that will be generated in one request.', 'classifai' ),
-					]
+					)
 				);
 				break;
 		}
@@ -173,12 +173,12 @@ class OpenAI extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'endpoint_url'  => '',
 			'api_key'       => '',
 			'deployment'    => '',
 			'authenticated' => false,
-		];
+		);
 
 		/**
 		 * Default values for feature specific settings.
@@ -237,7 +237,7 @@ class OpenAI extends Provider {
 	 * @return string
 	 */
 	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
-		$credentials = $this->get_credentials( $feature->get_settings() ?? [] );
+		$credentials = $this->get_credentials( $feature->get_settings() ?? array() );
 		$endpoint    = $credentials['endpoint_url'] ?? '';
 		$deployment  = $credentials['deployment'] ?? '';
 
@@ -266,7 +266,7 @@ class OpenAI extends Provider {
 	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	protected function authenticate_credentials( array $settings = array() ) {
 		$credentials = $this->get_credentials( $settings );
 		$rtn         = false;
 
@@ -277,19 +277,19 @@ class OpenAI extends Provider {
 
 		$request = safe_wp_remote_post(
 			$endpoint,
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode(
-					[
+					array(
 						'prompt'                => 'Once upon a time',
 						'max_completion_tokens' => 5,
-					]
+					)
 				),
 				'use_vip' => true,
-			]
+			)
 		);
 
 		if ( ! is_wp_error( $request ) ) {
@@ -314,7 +314,7 @@ class OpenAI extends Provider {
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
@@ -351,7 +351,7 @@ class OpenAI extends Provider {
 	 * @param array $args    Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_excerpt( int $post_id = 0, array $args = [] ) {
+	public function generate_excerpt( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
@@ -360,11 +360,11 @@ class OpenAI extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'author'  => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -423,23 +423,23 @@ class OpenAI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_excerpt_request_body',
-			[
+			array(
 				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'temperature' => 0.9,
-			],
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode( $body ),
-			]
+			)
 		);
 		$response = $this->get_result( $response );
 
@@ -465,7 +465,7 @@ class OpenAI extends Provider {
 	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_titles( int $post_id = 0, array $args = [] ) {
+	public function generate_titles( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
@@ -474,10 +474,10 @@ class OpenAI extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num'     => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
 				'content' => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -529,24 +529,24 @@ class OpenAI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_title_request_body',
-			[
+			array(
 				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'n'           => absint( $args['num'] ),
-			],
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode( $body ),
-			]
+			)
 		);
 		$response = $this->get_result( $response );
 
@@ -561,7 +561,7 @@ class OpenAI extends Provider {
 		}
 
 		// Extract out the text response.
-		$return = [];
+		$return = array();
 		foreach ( $response['choices'] as $choice ) {
 			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
 				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
@@ -589,9 +589,9 @@ class OpenAI extends Provider {
 
 		$args = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num' => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
-			]
+			)
 		);
 
 		if ( 'shrink' === $args['resize_type'] ) {
@@ -627,33 +627,33 @@ class OpenAI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_resize_content_request_body',
-			[
-				'messages'    => [
-					[
+			array(
+				'messages'    => array(
+					array(
 						'role'    => 'system',
 						'content' => $prompt . ' You will be provided with content delimited by triple quotes',
-					],
-					[
+					),
+					array(
 						'role'    => 'user',
 						'content' => '"""' . esc_html( $args['content'] ) . '"""',
-					],
-				],
+					),
+				),
 				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'n'           => absint( $args['num'] ),
-			],
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode( $body ),
-			]
+			)
 		);
 		$response = $this->get_result( $response );
 
@@ -668,7 +668,7 @@ class OpenAI extends Provider {
 		}
 
 		// Extract out the text response.
-		$return = [];
+		$return = array();
 		foreach ( $response['choices'] as $choice ) {
 			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
 				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
@@ -686,7 +686,7 @@ class OpenAI extends Provider {
 	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_key_takeaways( int $post_id = 0, array $args = [] ) {
+	public function generate_key_takeaways( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate key takeaways.', 'classifai' ) );
 		}
@@ -695,12 +695,12 @@ class OpenAI extends Provider {
 		$settings = $feature->get_settings();
 		$args     = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'render'  => 'list',
 				'run'     => 'auto',
-			]
+			)
 		);
 
 		// These checks (and the one above) happen in the REST permission_callback,
@@ -769,54 +769,54 @@ class OpenAI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_key_takeaways_request_body',
-			[
-				'messages'        => [
-					[
+			array(
+				'messages'        => array(
+					array(
 						'role'    => 'system',
 						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
-					],
-					[
+					),
+					array(
 						'role'    => 'user',
 						'content' => '"""' . $content . '"""',
-					],
-				],
-				'response_format' => [
+					),
+				),
+				'response_format' => array(
 					'type'        => 'json_schema',
-					'json_schema' => [
+					'json_schema' => array(
 						'name'   => 'key_takeaways',
-						'schema' => [
+						'schema' => array(
 							'type'                 => 'object',
-							'properties'           => [
-								'takeaways' => [
+							'properties'           => array(
+								'takeaways' => array(
 									'type'     => 'array',
 									'minItems' => 2,
 									'maxItems' => 4,
-									'items'    => [
+									'items'    => array(
 										'type' => 'string',
-									],
-								],
-							],
-							'required'             => [ 'takeaways' ],
+									),
+								),
+							),
+							'required'             => array( 'takeaways' ),
 							'additionalProperties' => false,
-						],
+						),
 						'strict' => true,
-					],
-				],
+					),
+				),
 				'temperature'     => 0.9,
-			],
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode( $body ),
-			]
+			)
 		);
 		$response = $this->get_result( $response );
 
@@ -859,7 +859,7 @@ class OpenAI extends Provider {
 	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_content( int $post_id = 0, array $args = [] ) {
+	public function generate_content( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate content.', 'classifai' ) );
 		}
@@ -868,11 +868,11 @@ class OpenAI extends Provider {
 		$settings = $feature->get_settings();
 		$args     = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'title'        => '',
 				'summary'      => '',
-				'conversation' => [],
-			]
+				'conversation' => array(),
+			)
 		);
 
 		// These checks happen in the REST permission_callback,
@@ -907,37 +907,37 @@ class OpenAI extends Provider {
 		}
 
 		// Set up our messages.
-		$messages = [
-			[
+		$messages = array(
+			array(
 				'role'    => 'system',
 				'content' => $prompt . "\n" . $feature->get_prompt( 'return-format' ),
-			],
-			[
+			),
+			array(
 				'role'    => 'user',
 				'content' => $content,
-			],
-		];
+			),
+		);
 
 		// If we have an existing conversation, add it to the messages.
 		if ( ! empty( $args['conversation'] ) ) {
 			foreach ( $args['conversation'] as $i => $conversation ) {
 				if ( $i > 0 ) {
-					$messages[] = [
+					$messages[] = array(
 						'role'    => 'user',
 						'content' => $conversation['prompt'],
-					];
+					);
 				}
 
-				$messages[] = [
+				$messages[] = array(
 					'role'    => 'assistant',
 					'content' => $conversation['completion'],
-				];
+				);
 			}
 
-			$messages[] = [
+			$messages[] = array(
 				'role'    => 'user',
 				'content' => $args['summary'],
-			];
+			);
 		}
 
 		/**
@@ -953,23 +953,23 @@ class OpenAI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_content_request_body',
-			[
+			array(
 				'messages'    => $messages,
 				'temperature' => 0.9,
-			],
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode( $body ),
-			]
+			)
 		);
 		$response = $this->get_result( $response );
 
@@ -1070,20 +1070,20 @@ class OpenAI extends Provider {
 	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$debug_info        = array();
 
 		if ( $this->feature_instance instanceof TitleGeneration ) {
 			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_suggestions'] ?? 1;
-			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? [] );
+			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]       = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_title_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
-			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? [] );
+			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_excerpt_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ContentResizing ) {
 			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'] ?? 1;
-			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
-			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? array() );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_content_resizing_latest_response' ) );
 		}
 

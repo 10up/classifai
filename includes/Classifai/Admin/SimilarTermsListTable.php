@@ -74,13 +74,13 @@ class SimilarTermsListTable extends WP_List_Table {
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
 		$total = wp_count_terms(
-			[
+			array(
 				'taxonomy'     => $this->taxonomy,
 				'hide_empty'   => false,
 				'meta_key'     => 'classifai_similar_terms', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_compare' => 'EXISTS',
 				'search'       => $search,
-			]
+			)
 		);
 
 		$this->set_pagination_args(
@@ -95,7 +95,7 @@ class SimilarTermsListTable extends WP_List_Table {
 		$offset  = ( $current - 1 ) * $per_page;
 
 		$terms = get_terms(
-			[
+			array(
 				'taxonomy'     => $this->taxonomy,
 				'orderby'      => 'count',
 				'order'        => 'DESC',
@@ -106,10 +106,10 @@ class SimilarTermsListTable extends WP_List_Table {
 				'number'       => $per_page,
 				'offset'       => $offset,
 				'search'       => $search,
-			]
+			)
 		);
 
-		$items = [];
+		$items = array();
 
 		foreach ( $terms as $term_id ) {
 			$similar_terms = get_term_meta( $term_id, 'classifai_similar_terms', true );
@@ -121,11 +121,11 @@ class SimilarTermsListTable extends WP_List_Table {
 			foreach ( $similar_terms as $k => $v ) {
 				$similar_term = get_term( $k );
 				if ( $similar_term ) {
-					$items[] = [
+					$items[] = array(
 						'term'         => get_term( $term_id ),
 						'similar_term' => $similar_term,
 						'score'        => $v,
-					];
+					);
 				} else {
 					unset( $similar_terms[ $k ] );
 					update_term_meta( $term_id, 'classifai_similar_terms', $similar_terms );

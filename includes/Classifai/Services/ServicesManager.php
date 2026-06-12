@@ -17,7 +17,7 @@ class ServicesManager {
 	/**
 	 * @var array List of registered services
 	 */
-	public $services = [];
+	public $services = array();
 
 	/**
 	 * @var array List of class instances being managed.
@@ -39,9 +39,9 @@ class ServicesManager {
 	 *
 	 * @param array $services The list of services available.
 	 */
-	public function __construct( array $services = [] ) {
+	public function __construct( array $services = array() ) {
 		$this->services        = $services;
-		$this->service_classes = [];
+		$this->service_classes = array();
 		$this->get_menu_title();
 	}
 
@@ -49,10 +49,10 @@ class ServicesManager {
 	 * Register the actions required for the settings page.
 	 */
 	public function register() {
-		add_filter( 'language_processing_features', [ $this, 'register_language_processing_features' ] );
-		add_filter( 'image_processing_features', [ $this, 'register_image_processing_features' ] );
-		add_filter( 'content_recommendation_features', [ $this, 'register_recommendation_service_features' ] );
-		add_filter( 'usage_tracking_features', [ $this, 'register_usage_tracking_features' ] );
+		add_filter( 'language_processing_features', array( $this, 'register_language_processing_features' ) );
+		add_filter( 'image_processing_features', array( $this, 'register_image_processing_features' ) );
+		add_filter( 'content_recommendation_features', array( $this, 'register_recommendation_service_features' ) );
+		add_filter( 'usage_tracking_features', array( $this, 'register_usage_tracking_features' ) );
 
 		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
@@ -68,7 +68,7 @@ class ServicesManager {
 		// Register the functionality
 		$this->register_services();
 
-		add_filter( 'classifai_debug_information', [ $this, 'add_debug_information' ], 1 );
+		add_filter( 'classifai_debug_information', array( $this, 'add_debug_information' ), 1 );
 	}
 
 	/**
@@ -78,7 +78,7 @@ class ServicesManager {
 	 * @return array
 	 */
 	public function register_language_processing_features( array $features ): array {
-		$core_features = [
+		$core_features = array(
 			'\Classifai\Features\Classification',
 			'\Classifai\Features\TitleGeneration',
 			'\Classifai\Features\ExcerptGeneration',
@@ -90,7 +90,7 @@ class ServicesManager {
 			'\Classifai\Features\Moderation',
 			'\Classifai\Features\Smart404',
 			'\Classifai\Features\TermCleanup',
-		];
+		);
 
 		foreach ( $core_features as $feature ) {
 			$features[] = $feature;
@@ -106,14 +106,14 @@ class ServicesManager {
 	 * @return array
 	 */
 	public function register_image_processing_features( array $features ): array {
-		$core_features = [
+		$core_features = array(
 			'\Classifai\Features\DescriptiveTextGenerator',
 			'\Classifai\Features\ImageTagsGenerator',
 			'\Classifai\Features\ImageCropping',
 			'\Classifai\Features\ImageTextExtraction',
 			'\Classifai\Features\ImageGeneration',
 			'\Classifai\Features\PDFTextExtraction',
-		];
+		);
 
 		foreach ( $core_features as $feature ) {
 			$features[] = $feature;
@@ -129,9 +129,9 @@ class ServicesManager {
 	 * @return array
 	 */
 	public function register_recommendation_service_features( array $features ): array {
-		$core_features = [
+		$core_features = array(
 			'\Classifai\Features\RecommendedContent',
-		];
+		);
 
 		foreach ( $core_features as $feature ) {
 			$features[] = $feature;
@@ -147,9 +147,9 @@ class ServicesManager {
 	 * @return array
 	 */
 	public function register_usage_tracking_features( array $features ): array {
-		$core_features = [
+		$core_features = array(
 			'\Classifai\Features\APIUsageTracking',
-		];
+		);
 
 		foreach ( $core_features as $feature ) {
 			$features[] = $feature;
@@ -165,7 +165,7 @@ class ServicesManager {
 	 * @return mixed
 	 */
 	public function get_settings( $index = false ) {
-		$settings = get_option( 'classifai_settings', [] );
+		$settings = get_option( 'classifai_settings', array() );
 
 		// Special handling polyfill for pre-1.3 settings which were nested
 		if ( ! isset( $settings['email'] ) && isset( $settings['registration']['email'] ) ) {
@@ -189,16 +189,16 @@ class ServicesManager {
 	 * Create the settings pages.
 	 */
 	public function do_settings() {
-		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
-		add_action( 'admin_init', [ $this, 'register_settings' ] );
-		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+		add_action( 'admin_menu', array( $this, 'register_admin_menu_item' ) );
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_init', array( $this, 'setup_fields_sections' ) );
 	}
 
 	/**
 	 * Register the settings and sanitization callback method.
 	 */
 	public function register_settings() {
-		register_setting( 'classifai_settings', 'classifai_settings', [ $this, 'sanitize_settings' ] );
+		register_setting( 'classifai_settings', 'classifai_settings', array( $this, 'sanitize_settings' ) );
 	}
 
 	/**
@@ -208,7 +208,7 @@ class ServicesManager {
 	 * @return array
 	 */
 	public function sanitize_settings( $settings ): array {
-		$new_settings = [];
+		$new_settings = array();
 
 		// Save registration settings.
 		if ( ! empty( $settings['email'] )
@@ -246,28 +246,28 @@ class ServicesManager {
 		add_settings_field(
 			'email',
 			esc_html__( 'Registered Email', 'classifai' ),
-			[ $this, 'render_email_field' ],
+			array( $this, 'render_email_field' ),
 			'classifai_settings',
 			'classifai_settings',
-			[
+			array(
 				'label_for'    => 'email',
 				'option_index' => 'registration',
 				'input_type'   => 'text',
-			]
+			)
 		);
 
 		add_settings_field(
 			'registration-key',
 			esc_html__( 'Registration Key', 'classifai' ),
-			[ $this, 'render_password_field' ],
+			array( $this, 'render_password_field' ),
 			'classifai_settings',
 			'classifai_settings',
-			[
+			array(
 				'label_for'    => 'license_key',
 				'option_index' => 'registration',
 				'input_type'   => 'password',
 				'description'  => __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ),
-			]
+			)
 		);
 	}
 
@@ -341,7 +341,7 @@ class ServicesManager {
 			$this->menu_title,
 			'manage_options',
 			'classifai',
-			[ $this, 'render_settings_page' ]
+			array( $this, 'render_settings_page' )
 		);
 	}
 
@@ -395,14 +395,14 @@ class ServicesManager {
 
 		$request = safe_wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
-			[
+			array(
 				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-				'body'    => [
+				'body'    => array(
 					'license_key' => $license_key,
 					'email'       => $email,
-				],
+				),
 				'use_vip' => true,
-			]
+			)
 		);
 
 		if ( is_wp_error( $request ) ) {
@@ -432,15 +432,15 @@ class ServicesManager {
 
 		$valid_license       = intval( $settings['valid_license'] ?? 0 );
 		$valid_license_text  = 1 === $valid_license ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' );
-		$debug_information[] = [
+		$debug_information[] = array(
 			'label' => __( 'Valid license', 'classifai' ),
 			'value' => $valid_license_text,
-		];
+		);
 
-		$debug_information[] = [
+		$debug_information[] = array(
 			'label' => __( 'Email', 'classifai' ),
 			'value' => $settings['email'] ?? '',
-		];
+		);
 
 		return $debug_information;
 	}

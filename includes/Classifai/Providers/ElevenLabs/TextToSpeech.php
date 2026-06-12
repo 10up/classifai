@@ -65,14 +65,14 @@ class TextToSpeech extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		return [
+		return array(
 			'api_key'       => '',
 			'authenticated' => false,
 			'model'         => 'eleven_multilingual_v2',
 			'voice'         => '',
-			'models'        => [],
-			'voices'        => [],
-		];
+			'models'        => array(),
+			'voices'        => array(),
+		);
 	}
 
 	/**
@@ -88,8 +88,8 @@ class TextToSpeech extends Provider {
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
-		$new_settings[ static::ID ]['models'] = $api_key_settings[ static::ID ]['models'] ?? [];
-		$new_settings[ static::ID ]['voices'] = $api_key_settings[ static::ID ]['voices'] ?? [];
+		$new_settings[ static::ID ]['models'] = $api_key_settings[ static::ID ]['models'] ?? array();
+		$new_settings[ static::ID ]['voices'] = $api_key_settings[ static::ID ]['voices'] ?? array();
 
 		$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] ?? $settings[ static::ID ]['model'] );
 		$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] ?? $settings[ static::ID ]['voice'] );
@@ -115,7 +115,7 @@ class TextToSpeech extends Provider {
 	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
@@ -194,10 +194,10 @@ class TextToSpeech extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_elevenlabs_text_to_speech_request_body',
-			[
+			array(
 				'text'     => $post_content,
 				'model_id' => $this->get_model(),
-			],
+			),
 			$post_id,
 			$post_content
 		);
@@ -207,12 +207,12 @@ class TextToSpeech extends Provider {
 			$this->get_api_url( $this->api_path . '/' . $voice_id ),
 			$settings['api_key'] ?? '',
 			'post',
-			[
+			array(
 				'body'    => wp_json_encode( $body ),
-				'headers' => [
+				'headers' => array(
 					'Content-Type' => 'application/json',
-				],
-			]
+				),
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -241,7 +241,7 @@ class TextToSpeech extends Provider {
 
 		$settings = $this->feature_instance->get_settings();
 		$model_id = $this->get_model();
-		$models   = $settings[ static::ID ]['models'] ?? [];
+		$models   = $settings[ static::ID ]['models'] ?? array();
 
 		$selected_model = array_filter(
 			$models,
@@ -267,7 +267,7 @@ class TextToSpeech extends Provider {
 	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$debug_info        = array();
 
 		if ( $this->feature_instance instanceof FeatureTextToSpeech ) {
 			$debug_info[ __( 'Model', 'classifai' ) ] = $provider_settings['model'] ?? '';

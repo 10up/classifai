@@ -71,26 +71,26 @@ abstract class Provider {
 			return '';
 		}
 
-		$product_data = [
+		$product_data = array(
 			'title'       => $product->get_name(),
 			'type'        => $product->get_type(),
 			'sku'         => $product->get_sku(),
 			'categories'  => function_exists( 'wc_get_product_category_list' ) ? wp_strip_all_tags( \wc_get_product_category_list( $product_id ) ) : null,
 			'tags'        => function_exists( 'wc_get_product_tag_list' ) ? wp_strip_all_tags( \wc_get_product_tag_list( $product_id ) ) : null,
-			'attributes'  => [],
+			'attributes'  => array(),
 			'price'       => $product->get_price(),
 			'stock'       => $product->is_in_stock() ? 'In Stock' : 'Out of Stock',
 			'short_desc'  => wp_strip_all_tags( $product->get_short_description() ),
 			'description' => wp_strip_all_tags( $product->get_description() ),
-		];
+		);
 
 		// Fetch attributes.
 		foreach ( $product->get_attributes() as $attribute_name => $attribute ) {
 			if ( $attribute->is_taxonomy() ) {
-				$terms                        = function_exists( 'wc_get_product_terms' ) ? \wc_get_product_terms( $product_id, $attribute_name, [ 'fields' => 'names' ] ) : [];
+				$terms                        = function_exists( 'wc_get_product_terms' ) ? \wc_get_product_terms( $product_id, $attribute_name, array( 'fields' => 'names' ) ) : array();
 				$product_data['attributes'][] = $attribute_name . ': ' . implode( ', ', $terms );
 			} else {
-				$options                      = is_array( $attribute->get_options() ) ? $attribute->get_options() : [];
+				$options                      = is_array( $attribute->get_options() ) ? $attribute->get_options() : array();
 				$product_data['attributes'][] = $attribute_name . ': ' . implode( ', ', $options );
 			}
 		}
@@ -109,7 +109,7 @@ abstract class Provider {
 	 * @return array
 	 */
 	public function get_request_messages( int $post_id, string $prompt, string $message_content = '' ): array {
-		$messages = [];
+		$messages = array();
 
 		// WooCommerce Product Handling.
 		if (
@@ -117,28 +117,28 @@ abstract class Provider {
 			function_exists( 'wc_get_product' ) &&
 			\wc_get_product( $post_id )
 		) {
-			$messages = [
-				[
+			$messages = array(
+				array(
 					'role'    => 'system',
 					'content' => $this->system_prompt_woo . ' ' . $prompt,
-				],
-				[
+				),
+				array(
 					'role'    => 'user',
 					'content' => sprintf( 'Product data: """%s"""', $message_content ),
-				],
-			];
+				),
+			);
 		} else {
 			// Fallback for regular WordPress posts, or when WooCommerce is not active.
-			$messages = [
-				[
+			$messages = array(
+				array(
 					'role'    => 'system',
 					'content' => $prompt . ' ' . $this->system_prompt,
-				],
-				[
+				),
+				array(
 					'role'    => 'user',
 					'content' => '"""' . $message_content . '"""',
-				],
-			];
+				),
+			);
 		}
 
 		return $messages;
@@ -149,7 +149,7 @@ abstract class Provider {
 	 *
 	 * @param array $args API key field arguments.
 	 */
-	public function add_api_key_field( array $args = [] ) {
+	public function add_api_key_field( array $args = array() ) {
 		$default_settings = $this->feature_instance->get_settings();
 		$default_settings = $default_settings[ static::ID ];
 		$id               = $args['id'] ?? 'api_key';
@@ -157,16 +157,16 @@ abstract class Provider {
 		add_settings_field(
 			$id,
 			$args['label'] ?? esc_html__( 'API key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => $id,
 				'input_type'    => 'password',
 				'default_value' => $default_settings[ $id ],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 	}
 
@@ -178,7 +178,7 @@ abstract class Provider {
 	 * @param array $settings Feature settings. Optional, will default to using saved settings.
 	 * @return array
 	 */
-	public function get_credentials( array $settings = [] ): array {
+	public function get_credentials( array $settings = array() ): array {
 		$provider_id = static::ID;
 
 		// Get our Provider-specific settings.
@@ -189,7 +189,7 @@ abstract class Provider {
 		) {
 			$feature_provider_settings = $settings[ $provider_id ];
 		} else {
-			$feature_provider_settings = $this->feature_instance ? $this->feature_instance->get_settings( $provider_id ) : [];
+			$feature_provider_settings = $this->feature_instance ? $this->feature_instance->get_settings( $provider_id ) : array();
 		}
 
 		// Get our credentials.
@@ -266,7 +266,7 @@ abstract class Provider {
 	 * @param array  $settings       Feature settings. Optional, will default to using saved settings.
 	 * @return mixed The credential value, or null if not set.
 	 */
-	public function get_credential( string $credential_key, array $settings = [] ) {
+	public function get_credential( string $credential_key, array $settings = array() ) {
 		$credentials = $this->get_credentials( $settings );
 		return $credentials[ $credential_key ] ?? null;
 	}

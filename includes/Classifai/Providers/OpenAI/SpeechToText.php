@@ -36,13 +36,13 @@ class SpeechToText extends Provider {
 	 *
 	 * @var array
 	 */
-	public $file_formats = [
+	public $file_formats = array(
 		'mp3',
 		'mp4',
 		'mpeg',
 		'wav',
 		'ogg',
-	];
+	);
 
 	/**
 	 * Maximum file size our model supports
@@ -113,10 +113,10 @@ class SpeechToText extends Provider {
 		add_settings_field(
 			static::ID . '_api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
@@ -128,16 +128,16 @@ class SpeechToText extends Provider {
 						wp_kses(
 							/* translators: %1$s is replaced with the OpenAI sign up URL */
 							__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							]
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							)
 						),
 						esc_url( 'https://platform.openai.com/signup' )
 					),
-			]
+			)
 		);
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
@@ -149,11 +149,11 @@ class SpeechToText extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'api_key'       => '',
 			'model'         => 'gpt-4o-mini-transcribe',
 			'authenticated' => false,
-		];
+		);
 
 		return $common_settings;
 	}
@@ -170,7 +170,7 @@ class SpeechToText extends Provider {
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
-		if ( in_array( $new_settings[ static::ID ]['model'], [ 'whisper-1', 'gpt-4o-mini-transcribe', 'gpt-4o-transcribe' ], true ) ) {
+		if ( in_array( $new_settings[ static::ID ]['model'], array( 'whisper-1', 'gpt-4o-mini-transcribe', 'gpt-4o-transcribe' ), true ) ) {
 			$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] );
 		} else {
 			$new_settings[ static::ID ]['model'] = 'gpt-4o-mini-transcribe';
@@ -187,7 +187,7 @@ class SpeechToText extends Provider {
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( string $audio_resource, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( string $audio_resource, string $route_to_call = '', array $args = array() ) {
 		$return = '';
 
 		switch ( $route_to_call ) {
@@ -214,7 +214,7 @@ class SpeechToText extends Provider {
 	 * @param array  $args      Optional arguments passed in.
 	 * @return WP_Error|bool
 	 */
-	public function transcribe_audio( string $file_path = '', array $args = [] ) {
+	public function transcribe_audio( string $file_path = '', array $args = array() ) {
 		$feature = new AudioTranscriptsGeneration();
 
 		if ( ! $feature->is_feature_enabled() ) {
@@ -237,12 +237,12 @@ class SpeechToText extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_whisper_transcribe_request_body',
-			[
+			array(
 				'file'            => $file_path,
 				'model'           => $this->get_model(),
 				'response_format' => 'json',
 				'temperature'     => 0,
-			],
+			),
 			$file_path,
 			$args
 		);
@@ -270,7 +270,7 @@ class SpeechToText extends Provider {
 	 */
 	public function get_debug_information(): array {
 		$settings   = $this->feature_instance->get_settings();
-		$debug_info = [];
+		$debug_info = array();
 
 		if ( $this->feature_instance instanceof AudioTranscriptsGeneration ) {
 			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_whisper_latest_response' ) );

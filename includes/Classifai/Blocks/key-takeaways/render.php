@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $block_title = $attributes['title'] ?? '';
 $layout      = $attributes['render'] ?? 'list';
-$takeaways   = $attributes['takeaways'] ?? [];
+$takeaways   = $attributes['takeaways'] ?? array();
 
 // If there are no takeaways, don't render the block.
 if ( empty( $takeaways ) ) {

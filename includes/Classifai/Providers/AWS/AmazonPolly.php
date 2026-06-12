@@ -30,7 +30,7 @@ class AmazonPolly extends Provider {
 		$this->feature_instance = $feature_instance;
 
 		do_action( 'classifai_' . static::ID . '_init', $this );
-		add_action( 'wp_ajax_classifai_get_voice_dropdown', [ $this, 'get_voice_dropdown' ] );
+		add_action( 'wp_ajax_classifai_get_voice_dropdown', array( $this, 'get_voice_dropdown' ) );
 	}
 
 	/**
@@ -42,10 +42,10 @@ class AmazonPolly extends Provider {
 		add_settings_field(
 			'access_key_id',
 			esc_html__( 'Access key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'access_key_id',
 				'input_type'    => 'text',
@@ -57,25 +57,25 @@ class AmazonPolly extends Provider {
 						wp_kses(
 							/* translators: %1$s is replaced with the OpenAI sign up URL */
 							__( 'Enter the AWS access key. Please follow the steps given <a title="AWS documentation" href="%1$s">here</a> to generate AWS credentials.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							]
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							)
 						),
 						esc_url( 'https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey' )
 					),
-			]
+			)
 		);
 
 		add_settings_field(
 			'secret_access_key',
 			esc_html__( 'Secret access key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'secret_access_key',
 				'input_type'    => 'password',
@@ -84,16 +84,16 @@ class AmazonPolly extends Provider {
 				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
 					'' :
 					esc_html__( 'Enter the AWS secret access key.', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'aws_region',
 			esc_html__( 'Region', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'aws_region',
 				'input_type'    => 'text',
@@ -103,20 +103,20 @@ class AmazonPolly extends Provider {
 					'' :
 					wp_kses(
 						__( 'Enter the AWS Region. eg: <code>us-east-1</code>', 'classifai' ),
-						[
-							'code' => [],
-						]
+						array(
+							'code' => array(),
+						)
 					),
-			]
+			)
 		);
 
 		add_settings_field(
 			'voice_engine',
 			esc_html__( 'Engine', 'classifai' ),
-			[ $this->feature_instance, 'render_select' ],
+			array( $this->feature_instance, 'render_select' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'voice_engine',
 				'options'       => array(
@@ -132,18 +132,18 @@ class AmazonPolly extends Provider {
 						wp_kses(
 							/* translators: %1$s is replaced with the OpenAI sign up URL */
 							__( 'Amazon Polly offers <a href="%1$s">Long-Form</a>, <a href="%2$s">Neural</a> and Standard text-to-speech voices. Please check the <a title="Pricing" href="%3$s">documentation</a> to review pricing for Long-Form, Neural and Standard usage.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							]
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							)
 						),
 						esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/long-form-voice-overview.html' ),
 						esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/NTTS-main.html' ),
 						esc_url( 'https://aws.amazon.com/polly/pricing/' )
 					),
-			]
+			)
 		);
 
 		$voices_options = $this->get_voices_select_options( $settings['voice_engine'] ?? '' );
@@ -151,16 +151,16 @@ class AmazonPolly extends Provider {
 			add_settings_field(
 				'voice',
 				esc_html__( 'Voice', 'classifai' ),
-				[ $this->feature_instance, 'render_select' ],
+				array( $this->feature_instance, 'render_select' ),
 				$this->feature_instance->get_option_name(),
 				$this->feature_instance->get_option_name() . '_section',
-				[
+				array(
 					'option_index'  => static::ID,
 					'label_for'     => 'voice',
 					'options'       => $voices_options,
 					'default_value' => $settings['voice'],
 					'class'         => 'classifai-aws-polly-voices classifai-provider-field hidden provider-scope-' . static::ID,
-				]
+				)
 			);
 		}
 
@@ -173,22 +173,22 @@ class AmazonPolly extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'access_key_id'     => '',
 			'secret_access_key' => '',
 			'aws_region'        => '',
 			'authenticated'     => false,
 			'voice_engine'      => 'standard',
-			'voices'            => [],
+			'voices'            => array(),
 			'voice'             => '',
-		];
+		);
 
 		switch ( $this->feature_instance::ID ) {
 			case TextToSpeech::ID:
 				return $common_settings;
 		}
 
-		return [];
+		return array();
 	}
 
 	/**
@@ -234,7 +234,7 @@ class AmazonPolly extends Provider {
 		if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
 			$new_settings[ static::ID ]['authenticated'] = true;
 		} else {
-			$new_settings[ static::ID ]['voices']        = [];
+			$new_settings[ static::ID ]['voices']        = array();
 			$new_settings[ static::ID ]['authenticated'] = false;
 		}
 
@@ -249,7 +249,7 @@ class AmazonPolly extends Provider {
 	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	protected function authenticate_credentials( array $settings = array() ) {
 		$response = false;
 
 		try {
@@ -279,7 +279,7 @@ class AmazonPolly extends Provider {
 				$polly_voices = $polly_client->describeVoices();
 				$polly_voices = $polly_voices->get( 'Voices' );
 			} else {
-				$polly_voices = [];
+				$polly_voices = array();
 			}
 
 			$response = ! empty( $polly_voices ) ? true : new WP_Error( 'auth', esc_html__( 'Connection to Amazon Polly failed.', 'classifai' ) );
@@ -505,7 +505,7 @@ class AmazonPolly extends Provider {
 	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
@@ -531,7 +531,7 @@ class AmazonPolly extends Provider {
 	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$debug_info        = array();
 
 		if ( $this->feature_instance instanceof TextToSpeech ) {
 			$post_types = array_filter(
@@ -561,7 +561,7 @@ class AmazonPolly extends Provider {
 	 * @return \Aws\Polly\PollyClient|null
 	 */
 	public function get_polly_client( array $aws_config = array() ) {
-		$credentials = $this->get_credentials( [ static::ID => $aws_config ] );
+		$credentials = $this->get_credentials( array( static::ID => $aws_config ) );
 
 		// Return if credentials don't exist.
 		if ( empty( $credentials['access_key_id'] ) || empty( $credentials['secret_access_key'] ) ) {
@@ -569,15 +569,15 @@ class AmazonPolly extends Provider {
 		}
 
 		// Set the AWS SDK configuration.
-		$aws_sdk_config = [
+		$aws_sdk_config = array(
 			'region'      => $credentials['aws_region'] ?? 'us-east-1',
 			'version'     => 'latest',
-			'ua_append'   => [ 'request-source/classifai' ],
-			'credentials' => [
+			'ua_append'   => array( 'request-source/classifai' ),
+			'credentials' => array(
 				'key'    => $credentials['access_key_id'],
 				'secret' => $credentials['secret_access_key'],
-			],
-		];
+			),
+		);
 
 		$sdk = new Sdk( $aws_sdk_config );
 		return $sdk->createPolly();
@@ -610,13 +610,13 @@ class AmazonPolly extends Provider {
 
 		ob_start();
 		$this->feature_instance->render_select(
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'voice',
 				'options'       => $voices_options,
 				'default_value' => $settings['voice'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
+			)
 		);
 		$voice_dropdown = ob_get_clean();
 

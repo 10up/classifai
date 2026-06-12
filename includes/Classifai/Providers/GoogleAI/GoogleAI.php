@@ -24,7 +24,7 @@ trait GoogleAI {
 	 * @param array $settings     Current settings, if any.
 	 * @return array
 	 */
-	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
+	public function sanitize_api_key_settings( array $new_settings = array(), array $settings = array() ): array {
 		$authenticated = $this->authenticate_credentials( $new_settings );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
@@ -55,10 +55,10 @@ trait GoogleAI {
 	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	public function authenticate_credentials( array $settings = [] ) {
+	public function authenticate_credentials( array $settings = array() ) {
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
-		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
+		$response = $request->get( $this->model_url, array( 'use_vip' => true ) );
 
 		return ! is_wp_error( $response ) ? true : $response;
 	}
@@ -69,16 +69,16 @@ trait GoogleAI {
 	 * @param array $settings Settings being saved.
 	 * @return array|WP_Error
 	 */
-	protected function get_models( array $settings = [] ) {
+	protected function get_models( array $settings = array() ) {
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
-		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
+		$response = $request->get( $this->model_url, array( 'use_vip' => true ) );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 
-		$models = [];
+		$models = array();
 		foreach ( $response['models'] as $model ) {
 			if ( 'googleai_gemini_api' === self::ID && is_array( $model['supportedGenerationMethods'] ) && in_array( 'generateContent', $model['supportedGenerationMethods'], true ) ) {
 				$models[ $model['name'] ] = $model['displayName'];

@@ -31,10 +31,10 @@ class Settings {
 	 * Initialize the class and register the actions needed.
 	 */
 	public function init() {
-		add_action( 'admin_menu', [ $this, 'register_settings_page' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-		add_action( 'after_plugin_row_' . CLASSIFAI_PLUGIN_BASENAME, [ $this, 'update_notice' ] );
+		add_action( 'admin_menu', array( $this, 'register_settings_page' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+		add_action( 'after_plugin_row_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'update_notice' ) );
 	}
 
 	/**
@@ -58,7 +58,7 @@ class Settings {
 			$menu_title,
 			'manage_options',
 			'classifai',
-			[ $this, 'render_settings_page' ]
+			array( $this, 'render_settings_page' )
 		);
 	}
 
@@ -144,15 +144,15 @@ class Settings {
 	public function get_features( bool $with_instance = false ): array {
 		$services = get_plugin()->services;
 		if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
-			return [];
+			return array();
 		}
 
 		/** @var ServicesManager $service_manager Instance of the services manager class. */
 		$service_manager = $services['service_manager'];
-		$services        = [];
+		$services        = array();
 
 		if ( empty( $service_manager->service_classes ) ) {
-			return [];
+			return array();
 		}
 
 		if ( $with_instance ) {
@@ -182,7 +182,7 @@ class Settings {
 				if ( 'language_processing' === $service->get_menu_slug() && ! empty( $post_types ) ) {
 					$post_types_taxonomies = array();
 					foreach ( $post_types as $post_type ) {
-						$post_types_taxonomies[ $post_type->name ] = $feature->get_taxonomies( [ $post_type->name ] );
+						$post_types_taxonomies[ $post_type->name ] = $feature->get_taxonomies( array( $post_type->name ) );
 					}
 					$services[ $service->get_menu_slug() ][ $feature::ID ]['taxonomiesByPostTypes'] = $post_types_taxonomies;
 				}
@@ -198,7 +198,7 @@ class Settings {
 	 * @return array
 	 */
 	public function get_nlu_taxonomies(): array {
-		$taxonomies       = [];
+		$taxonomies       = array();
 		$taxonomy_factory = new TaxonomyFactory();
 		$nlu_taxonomies   = $taxonomy_factory->get_supported_taxonomies();
 		foreach ( $nlu_taxonomies as $taxonomy ) {
@@ -234,7 +234,7 @@ class Settings {
 	 */
 	public function get_settings(): array {
 		$features = $this->get_features( true );
-		$settings = [];
+		$settings = array();
 
 		foreach ( $features as $feature ) {
 			$feature_settings         = $feature->get_settings();
@@ -251,69 +251,69 @@ class Settings {
 		register_rest_route(
 			'classifai/v1',
 			'settings',
-			[
-				[
+			array(
+				array(
 					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_settings_callback' ],
-					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
-				],
-				[
+					'callback'            => array( $this, 'get_settings_callback' ),
+					'permission_callback' => array( $this, 'get_settings_permissions_check' ),
+				),
+				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => [ $this, 'update_settings_callback' ],
-					'permission_callback' => [ $this, 'update_settings_permissions_check' ],
-				],
-			]
+					'callback'            => array( $this, 'update_settings_callback' ),
+					'permission_callback' => array( $this, 'update_settings_permissions_check' ),
+				),
+			)
 		);
 
 		register_rest_route(
 			'classifai/v1',
 			'registration',
-			[
-				[
+			array(
+				array(
 					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_registration_settings_callback' ],
-					'permission_callback' => [ $this, 'registration_settings_permissions_check' ],
-				],
-				[
+					'callback'            => array( $this, 'get_registration_settings_callback' ),
+					'permission_callback' => array( $this, 'registration_settings_permissions_check' ),
+				),
+				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => [ $this, 'update_registration_settings_callback' ],
-					'permission_callback' => [ $this, 'registration_settings_permissions_check' ],
-				],
-			]
+					'callback'            => array( $this, 'update_registration_settings_callback' ),
+					'permission_callback' => array( $this, 'registration_settings_permissions_check' ),
+				),
+			)
 		);
 
 		register_rest_route(
 			'classifai/v1',
 			'embeddings_in_progress/(?P<feature>\w+)',
-			[
-				[
+			array(
+				array(
 					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'check_embedding_generation_status' ],
+					'callback'            => array( $this, 'check_embedding_generation_status' ),
 					'args'                => array(
 						'feature' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'enum'              => [
+							'enum'              => array(
 								'classification',
 								'recommended_content',
-							],
+							),
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Feature being used.', 'classifai' ),
 						),
 					),
-					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
-				],
-			]
+					'permission_callback' => array( $this, 'get_settings_permissions_check' ),
+				),
+			)
 		);
 
 		register_rest_route(
 			'classifai/v1',
 			'credential-reuse/(?P<feature_id>[a-zA-Z0-9_-]+)',
-			[
-				[
+			array(
+				array(
 					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_reusable_credentials' ],
+					'callback'            => array( $this, 'get_reusable_credentials' ),
 					'args'                => array(
 						'feature_id' => array(
 							'required'          => true,
@@ -323,18 +323,18 @@ class Settings {
 							'description'       => esc_html__( 'Feature ID to get reusable credentials for.', 'classifai' ),
 						),
 					),
-					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
-				],
-			]
+					'permission_callback' => array( $this, 'get_settings_permissions_check' ),
+				),
+			)
 		);
 
 		register_rest_route(
 			'classifai/v1',
 			'credential-reuse/copy',
-			[
-				[
+			array(
+				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'copy_credentials' ],
+					'callback'            => array( $this, 'copy_credentials' ),
 					'args'                => array(
 						'source_feature_id' => array(
 							'required'          => true,
@@ -358,9 +358,9 @@ class Settings {
 							'description'       => esc_html__( 'Provider ID to copy.', 'classifai' ),
 						),
 					),
-					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
-				],
-			]
+					'permission_callback' => array( $this, 'get_settings_permissions_check' ),
+				),
+			)
 		);
 	}
 
@@ -391,7 +391,7 @@ class Settings {
 	 */
 	public function update_settings_callback( \WP_REST_Request $request ) {
 		$params   = $request->get_json_params();
-		$settings = $params['settings'] ?? [];
+		$settings = $params['settings'] ?? array();
 		$is_setup = $params['is_setup'] ?? false;
 		$step     = $params['step'] ?? '';
 		$features = $this->get_features( true );
@@ -406,12 +406,12 @@ class Settings {
 
 			// Ensure this is a valid Feature.
 			if ( ! $feature ) {
-				return new \WP_Error( 'invalid_feature', __( 'Invalid Feature.', 'classifai' ), [ 'status' => 400 ] );
+				return new \WP_Error( 'invalid_feature', __( 'Invalid Feature.', 'classifai' ), array( 'status' => 400 ) );
 			}
 
 			// Ensure the selected Provider is supported by the Feature.
 			if ( ! in_array( $feature_settings['provider'], array_keys( $feature->get_providers() ), true ) ) {
-				return new \WP_Error( 'invalid_provider', __( 'Invalid Provider.', 'classifai' ), [ 'status' => 400 ] );
+				return new \WP_Error( 'invalid_provider', __( 'Invalid Provider.', 'classifai' ), array( 'status' => 400 ) );
 			}
 
 			// Skip sanitizing settings for setup step 1.
@@ -568,15 +568,15 @@ class Settings {
 				break;
 			default:
 				return rest_ensure_response(
-					[
+					array(
 						'classifAIEmbedInProgress' => false,
-					]
+					)
 				);
 		}
 
-		$response = [
+		$response = array(
 			'classifAIEmbedInProgress' => $feature->is_embeddings_generation_in_progress(),
-		];
+		);
 
 		return rest_ensure_response( $response );
 	}
@@ -620,11 +620,11 @@ class Settings {
 			return new \WP_Error(
 				'copy_failed',
 				__( 'Failed to copy credentials.', 'classifai' ),
-				[ 'status' => 400 ]
+				array( 'status' => 400 )
 			);
 		}
 
-		return rest_ensure_response( [ 'success' => true ] );
+		return rest_ensure_response( array( 'success' => true ) );
 	}
 
 	/**

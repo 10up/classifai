@@ -56,8 +56,8 @@ class Images extends Provider {
 			return;
 		}
 
-		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
-		add_filter( 'classifai_dalle_caption', [ $this, 'modify_default_caption' ] );
+		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', array( $this, 'register_rest_args' ) );
+		add_filter( 'classifai_dalle_caption', array( $this, 'modify_default_caption' ) );
 	}
 
 	/**
@@ -66,11 +66,11 @@ class Images extends Provider {
 	 * @return array
 	 */
 	public static function get_image_size_options(): array {
-		$options = [
+		$options = array(
 			'1024x1024' => __( '1024x1024 (square)', 'classifai' ),
 			'1536x1024' => __( '1536x1024 (landscape)', 'classifai' ),
 			'1024x1536' => __( '1024x1536 (portrait)', 'classifai' ),
-		];
+		);
 
 		/**
 		 * Filter the image size options that are available.
@@ -94,15 +94,15 @@ class Images extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		return [
+		return array(
 			'api_key'            => '',
 			'authenticated'      => false,
 			'model'              => '',
-			'models'             => [],
+			'models'             => array(),
 			'number_of_images'   => 1,
 			'image_size'         => '1024x1024',
 			'per_image_settings' => false,
-		];
+		);
 	}
 
 	/**
@@ -153,7 +153,7 @@ class Images extends Provider {
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = array() ) {
 		$route_to_call = strtolower( $route_to_call );
 		$return        = '';
 
@@ -174,7 +174,7 @@ class Images extends Provider {
 	 * @param array  $args Optional arguments passed to endpoint.
 	 * @return string|WP_Error
 	 */
-	public function generate_image( string $prompt = '', array $args = [] ) {
+	public function generate_image( string $prompt = '', array $args = array() ) {
 		if ( ! $prompt ) {
 			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
 		}
@@ -183,12 +183,12 @@ class Images extends Provider {
 		$settings         = $image_generation->get_settings( static::ID );
 		$args             = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num'    => $settings['number_of_images'] ?? 1,
 				'size'   => $settings['image_size'] ?? '1024x1024',
 				'format' => 'b64_json',
 				'model'  => $settings['model'] ?? '',
-			]
+			)
 		);
 
 		if ( ! $image_generation->is_feature_enabled() ) {
@@ -210,14 +210,14 @@ class Images extends Provider {
 		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$dimensions = $this->get_dimensions_from_size( $args['size'] );
-		$body       = [
+		$body       = array(
 			'prompt'          => sanitize_text_field( $prompt ),
 			'model'           => sanitize_text_field( $args['model'] ),
 			'n'               => absint( $args['num'] ),
 			'height'          => absint( $dimensions['height'] ),
 			'width'           => absint( $dimensions['width'] ),
 			'response_format' => 'b64_json' === $args['format'] ? 'base64' : 'url',
-		];
+		);
 
 		/**
 		 * Filter the request body before sending to Together AI.
@@ -231,16 +231,16 @@ class Images extends Provider {
 		 */
 		$body = apply_filters( 'classifai_togetherai_image_request_body', $body );
 
-		$responses = [];
+		$responses = array();
 
 		$responses[] = $request->post(
 			$this->get_api_url( $this->api_path ),
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
-		$cleaned_responses = [];
+		$cleaned_responses = array();
 
 		foreach ( $responses as $response ) {
 			// Extract out the image response, if it exists.
@@ -248,9 +248,9 @@ class Images extends Provider {
 				foreach ( $response['data'] as $data ) {
 					if ( ! empty( $data[ $args['format'] ] ) ) {
 						if ( 'url' === $args['format'] ) {
-							$cleaned_responses[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
+							$cleaned_responses[] = array( 'url' => esc_url_raw( $data[ $args['format'] ] ) );
 						} else {
-							$cleaned_responses[] = [ 'url' => $data[ $args['format'] ] ];
+							$cleaned_responses[] = array( 'url' => $data[ $args['format'] ] );
 						}
 					}
 				}
@@ -268,34 +268,34 @@ class Images extends Provider {
 	 * @param array $args Existing REST arguments.
 	 * @return array
 	 */
-	public function register_rest_args( array $args = [] ): array {
-		$provider_args = [
-			'n'      => [
+	public function register_rest_args( array $args = array() ): array {
+		$provider_args = array(
+			'n'      => array(
 				'type'              => 'integer',
 				'minimum'           => 1,
 				'maximum'           => 10,
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
-			],
-			'size'   => [
+			),
+			'size'   => array(
 				'type'              => 'string',
 				'enum'              => array_keys( $this->get_image_size_options() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Size of generated image', 'classifai' ),
-			],
-			'format' => [
+			),
+			'format' => array(
 				'type'              => 'string',
-				'enum'              => [
+				'enum'              => array(
 					'url',
 					'b64_json',
-				],
+				),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Format of generated image', 'classifai' ),
-			],
-		];
+			),
+		);
 
 		// Merge the provider args with the existing args.
 		$args['args'] = array_merge( $args['args'], $provider_args );
@@ -325,9 +325,9 @@ class Images extends Provider {
 	public function get_dimensions_from_size( string $size ): array {
 		$dimensions = explode( 'x', $size );
 
-		return [
+		return array(
 			'width'  => $dimensions[0],
 			'height' => $dimensions[1],
-		];
+		);
 	}
 }

@@ -41,9 +41,9 @@ class EmbeddingsScheduler {
 	 * Initialize the class.
 	 */
 	public function init() {
-		add_filter( 'heartbeat_send', [ $this, 'check_embedding_generation_status' ] );
-		add_action( 'classifai_before_feature_nav', [ $this, 'render_embeddings_generation_status' ] );
-		add_action( 'action_scheduler_after_execute', [ $this, 'log_failed_embeddings' ], 10, 2 );
+		add_filter( 'heartbeat_send', array( $this, 'check_embedding_generation_status' ) );
+		add_action( 'classifai_before_feature_nav', array( $this, 'render_embeddings_generation_status' ) );
+		add_action( 'action_scheduler_after_execute', array( $this, 'log_failed_embeddings' ), 10, 2 );
 	}
 
 	/**

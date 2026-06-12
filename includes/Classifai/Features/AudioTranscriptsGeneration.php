@@ -40,10 +40,10 @@ class AudioTranscriptsGeneration extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			OpenAISpeechToText::ID     => __( 'OpenAI Audio Transcription', 'classifai' ),
 			ElevenLabsSpeechToText::ID => __( 'ElevenLabs Audio Transcription', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -53,19 +53,19 @@ class AudioTranscriptsGeneration extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 	}
 
 	/**
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'add_meta_boxes_attachment', array( $this, 'setup_attachment_meta_box' ) );
+		add_action( 'edit_attachment', array( $this, 'maybe_transcribe_audio' ) ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'add_attachment', array( $this, 'transcribe_audio' ) ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
+		add_filter( 'attachment_fields_to_edit', array( $this, 'add_buttons_to_media_modal' ), 10, 2 );
 	}
 
 	/**
@@ -75,19 +75,19 @@ class AudioTranscriptsGeneration extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'generate-transcript/(?P<id>\d+)',
-			[
+			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
-				'args'                => [
-					'id' => [
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
+				'args'                => array(
+					'id' => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Attachment ID to generate transcript for.', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'generate_audio_transcript_permissions_check' ],
-			]
+					),
+				),
+				'permission_callback' => array( $this, 'generate_audio_transcript_permissions_check' ),
+			)
 		);
 	}
 
@@ -171,12 +171,12 @@ class AudioTranscriptsGeneration extends Feature {
 
 		$text = empty( get_the_content( null, false, $attachment ) ) ? __( 'Transcribe', 'classifai' ) : __( 'Re-transcribe', 'classifai' );
 
-		$form_fields['retranscribe'] = [
+		$form_fields['retranscribe'] = array(
 			'label'        => __( 'Transcribe audio', 'classifai' ),
 			'input'        => 'html',
 			'html'         => '<button class="button secondary" id="classifai-retranscribe" data-id="' . esc_attr( absint( $attachment->ID ) ) . '">' . esc_html( $text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 			'show_in_edit' => false,
-		];
+		);
 
 		return $form_fields;
 	}
@@ -194,7 +194,7 @@ class AudioTranscriptsGeneration extends Feature {
 		add_meta_box(
 			'attachment_meta_box',
 			__( 'ClassifAI Audio Processing', 'classifai' ),
-			[ $this, 'attachment_meta_box' ],
+			array( $this, 'attachment_meta_box' ),
 			'attachment',
 			'side',
 			'high'
@@ -257,7 +257,7 @@ class AudioTranscriptsGeneration extends Feature {
 
 		if ( clean_input( 'retranscribe' ) ) {
 			// Remove to avoid infinite loop.
-			remove_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
+			remove_action( 'edit_attachment', array( $this, 'maybe_transcribe_audio' ) );
 
 			return $this->transcribe_audio( $attachment_id );
 		}
@@ -278,9 +278,9 @@ class AudioTranscriptsGeneration extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
+		return array(
 			'provider' => OpenAISpeechToText::ID,
-		];
+		);
 	}
 
 	/**
@@ -301,7 +301,7 @@ class AudioTranscriptsGeneration extends Feature {
 		$process            = false;
 
 		foreach ( $matched_extensions as $ext ) {
-			if ( in_array( $ext, $provider_instance->file_formats ?? [ 'mp3' ], true ) ) {
+			if ( in_array( $ext, $provider_instance->file_formats ?? array( 'mp3' ), true ) ) {
 				$process = true;
 			}
 		}
@@ -343,10 +343,10 @@ class AudioTranscriptsGeneration extends Feature {
 		$text = apply_filters( 'classifai_whisper_transcribe_result', $text, $attachment_id );
 
 		$update = wp_update_post(
-			[
+			array(
 				'ID'           => (int) $attachment_id,
 				'post_content' => wp_kses_post( $text ),
-			],
+			),
 			true
 		);
 
@@ -380,9 +380,9 @@ class AudioTranscriptsGeneration extends Feature {
 
 		$response = safe_wp_remote_get(
 			$url,
-			[
+			array(
 				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -417,7 +417,7 @@ class AudioTranscriptsGeneration extends Feature {
 			finfo_close( $finfo ); // phpcs:ignore PHPCompatibility.FunctionUse.RemovedFunctions.finfo_closeDeprecated
 		}
 
-		$supported_audio_mime_types = [
+		$supported_audio_mime_types = array(
 			'audio/mpeg',
 			'audio/mp4',
 			'audio/x-m4a',
@@ -425,7 +425,7 @@ class AudioTranscriptsGeneration extends Feature {
 			'audio/x-wav',
 			'audio/x-pn-wav',
 			'audio/webm',
-		];
+		);
 
 		if ( ! in_array( $real_mime_type, $supported_audio_mime_types, true ) ) {
 			return new WP_Error(
@@ -489,7 +489,7 @@ class AudioTranscriptsGeneration extends Feature {
 	 * @param array $args          Optional arguments to pass to the route.
 	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
 	 */
-	public function transcribe_from_attachment( int $attachment_id = 0, array $args = [] ) {
+	public function transcribe_from_attachment( int $attachment_id = 0, array $args = array() ) {
 		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
 			return new WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
 		}
@@ -527,7 +527,7 @@ class AudioTranscriptsGeneration extends Feature {
 	 * @param array  $args  Optional arguments to pass to the route.
 	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
 	 */
-	public function transcribe_from_path( string $path, array $args = [] ) {
+	public function transcribe_from_path( string $path, array $args = array() ) {
 		$settings          = $this->get_settings();
 		$provider_id       = $settings['provider'];
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
@@ -550,7 +550,6 @@ class AudioTranscriptsGeneration extends Feature {
 		} elseif ( is_local_path( $path ) ) {
 			if ( file_exists( $path ) ) {
 				return $provider_instance->transcribe_audio( $path, $args );
-
 			} else {
 				return $result;
 			}

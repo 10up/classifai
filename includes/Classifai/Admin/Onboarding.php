@@ -32,10 +32,10 @@ class Onboarding {
 	 * Initialize the class and register the actions needed.
 	 */
 	public function init() {
-		add_action( 'admin_menu', [ $this, 'register_setup_page' ] );
-		add_action( 'admin_init', [ $this, 'handle_step_submission' ] );
-		add_action( 'admin_init', [ $this, 'prevent_direct_step_visits' ] );
-		add_action( 'admin_post_classifai_skip_step', [ $this, 'handle_skip_setup_step' ] );
+		add_action( 'admin_menu', array( $this, 'register_setup_page' ) );
+		add_action( 'admin_init', array( $this, 'handle_step_submission' ) );
+		add_action( 'admin_init', array( $this, 'prevent_direct_step_visits' ) );
+		add_action( 'admin_post_classifai_skip_step', array( $this, 'handle_skip_setup_step' ) );
 	}
 
 	/**
@@ -48,7 +48,7 @@ class Onboarding {
 			'',
 			'manage_options',
 			'classifai_setup',
-			[ $this, 'render_setup_page' ]
+			array( $this, 'render_setup_page' )
 		);
 	}
 
@@ -475,12 +475,12 @@ class Onboarding {
 		if ( empty( $this->features ) ) {
 			$services = Plugin::$instance->services;
 			if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
-				return [];
+				return array();
 			}
 
 			/** @var ServicesManager $service_manager Instance of the services manager class. */
 			$service_manager     = $services['service_manager'];
-			$onboarding_features = [];
+			$onboarding_features = array();
 
 			foreach ( $service_manager->service_classes as $service ) {
 				$display_name = $service->get_display_name();
@@ -510,10 +510,10 @@ class Onboarding {
 		}
 
 		if ( empty( $this->features ) ) {
-			return [];
+			return array();
 		}
 
-		$features = [];
+		$features = array();
 		foreach ( $this->features as $service_slug => $service ) {
 			foreach ( $service['features'] as $feature_slug => $feature ) {
 				$features[ $feature_slug ] = $feature;

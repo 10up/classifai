@@ -53,8 +53,8 @@ class StableDiffusion extends Provider {
 			return;
 		}
 
-		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
-		add_filter( 'classifai_dalle_caption', [ $this, 'modify_default_caption' ] );
+		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', array( $this, 'register_rest_args' ) );
+		add_filter( 'classifai_dalle_caption', array( $this, 'modify_default_caption' ) );
 	}
 
 	/**
@@ -63,11 +63,11 @@ class StableDiffusion extends Provider {
 	 * @return array
 	 */
 	public static function get_image_size_options(): array {
-		$options = [
+		$options = array(
 			'1024x1024' => __( '1024x1024 (square)', 'classifai' ),
 			'1536x1024' => __( '1536x1024 (landscape)', 'classifai' ),
 			'1024x1536' => __( '1024x1536 (portrait)', 'classifai' ),
-		];
+		);
 
 		/**
 		 * Filter the image size options that are available.
@@ -91,15 +91,15 @@ class StableDiffusion extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		return [
+		return array(
 			'endpoint_url'       => 'http://127.0.0.1:7860/',
 			'authenticated'      => false,
 			'model'              => '',
-			'models'             => [],
+			'models'             => array(),
 			'number_of_images'   => 1,
 			'image_size'         => '1024x1024',
 			'per_image_settings' => false,
-		];
+		);
 	}
 
 	/**
@@ -117,9 +117,9 @@ class StableDiffusion extends Provider {
 			$new_url = trailingslashit( esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ) );
 
 			$new_settings[ static::ID ]['models'] = $this->get_models(
-				[
+				array(
 					'endpoint_url' => $new_url,
-				]
+				)
 			);
 
 			$new_settings[ static::ID ]['endpoint_url'] = $new_url;
@@ -127,7 +127,7 @@ class StableDiffusion extends Provider {
 			if ( ! empty( $new_settings[ static::ID ]['models'] ) ) {
 				$new_settings[ static::ID ]['authenticated'] = true;
 			} else {
-				$new_settings[ static::ID ]['models']        = [];
+				$new_settings[ static::ID ]['models']        = array();
 				$new_settings[ static::ID ]['authenticated'] = false;
 			}
 		} else {
@@ -165,24 +165,24 @@ class StableDiffusion extends Provider {
 	 * @param array $args Existing REST arguments.
 	 * @return array
 	 */
-	public function register_rest_args( array $args = [] ): array {
-		$provider_args = [
-			'n'    => [
+	public function register_rest_args( array $args = array() ): array {
+		$provider_args = array(
+			'n'    => array(
 				'type'              => 'integer',
 				'minimum'           => 1,
 				'maximum'           => 5,
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
-			],
-			'size' => [
+			),
+			'size' => array(
 				'type'              => 'string',
 				'enum'              => array_keys( $this->get_image_size_options() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Size of generated image', 'classifai' ),
-			],
-		];
+			),
+		);
 
 		// Merge the provider args with the existing args.
 		$args['args'] = array_merge( $args['args'], $provider_args );
@@ -209,28 +209,28 @@ class StableDiffusion extends Provider {
 	 * @param array $args Overridable args.
 	 * @return array
 	 */
-	public function get_models( array $args = [] ): array {
+	public function get_models( array $args = array() ): array {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
-		$default = [
+		$default = array(
 			'endpoint_url' => $settings[ static::ID ]['endpoint_url'] ?? '',
-		];
+		);
 
 		$default = wp_parse_args( $args, $default );
 
 		// Return if credentials don't exist.
 		if ( empty( $default['endpoint_url'] ) ) {
-			return [];
+			return array();
 		}
 
 		// Make our request.
-		$request  = new APIRequest( '', $this->feature_instance::ID, $this, [ static::ID => $default ] );
+		$request  = new APIRequest( '', $this->feature_instance::ID, $this, array( static::ID => $default ) );
 		$response = $request->get(
 			$this->get_api_model_url( $default['endpoint_url'] ),
-			[
+			array(
 				'timeout' => 30, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				'use_vip' => true,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -245,10 +245,10 @@ class StableDiffusion extends Provider {
 				'error'
 			);
 
-			return [];
+			return array();
 		}
 
-		$sanitized_models = [];
+		$sanitized_models = array();
 
 		if ( is_array( $response ) ) {
 			foreach ( $response as $model ) {
@@ -266,7 +266,7 @@ class StableDiffusion extends Provider {
 	 * @param array  $args Optional arguments passed to endpoint.
 	 * @return string|WP_Error
 	 */
-	public function generate_image( string $prompt = '', array $args = [] ) {
+	public function generate_image( string $prompt = '', array $args = array() ) {
 		if ( ! $prompt ) {
 			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
 		}
@@ -275,11 +275,11 @@ class StableDiffusion extends Provider {
 		$settings         = $image_generation->get_settings( static::ID );
 		$args             = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num'    => $settings['number_of_images'] ?? 1,
 				'size'   => $settings['image_size'] ?? '1024x1024',
 				'format' => 'b64_json',
-			]
+			)
 		);
 
 		if ( ! $image_generation->is_feature_enabled() ) {
@@ -307,16 +307,16 @@ class StableDiffusion extends Provider {
 		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		$dimensions = $this->get_dimensions_from_size( $args['size'] );
-		$body       = [
+		$body       = array(
 			'prompt'            => sanitize_text_field( $prompt ),
 			'batch_size'        => 1,
 			'height'            => absint( $dimensions['height'] ),
 			'width'             => absint( $dimensions['width'] ),
 			'steps'             => 15,
-			'override_settings' => [
+			'override_settings' => array(
 				'sd_model_checkpoint' => sanitize_text_field( $settings['model'] ?? '' ),
-			],
-		];
+			),
+		);
 
 		/**
 		 * Filter the request body before sending to Stable Diffusion.
@@ -330,25 +330,25 @@ class StableDiffusion extends Provider {
 		 */
 		$body = apply_filters( 'classifai_stable_diffusion_request_body', $body );
 
-		$responses = [];
+		$responses = array();
 
 		for ( $i = 0; $i < $args['num']; $i++ ) {
 			$responses[] = $request->post(
 				$this->get_api_url( $settings['endpoint_url'] ),
-				[
+				array(
 					'body'    => wp_json_encode( $body ),
 					'timeout' => 180, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-				]
+				)
 			);
 		}
 
-		$cleaned_responses = [];
+		$cleaned_responses = array();
 
 		foreach ( $responses as $response ) {
 			// Extract out the image response, if it exists.
 			if ( ! is_wp_error( $response ) && ! empty( $response['images'] ) ) {
 				foreach ( $response['images'] as $image ) {
-					$cleaned_responses[] = [ 'url' => $image ];
+					$cleaned_responses[] = array( 'url' => $image );
 				}
 			} elseif ( is_wp_error( $response ) ) {
 				return $response;
@@ -366,7 +366,7 @@ class StableDiffusion extends Provider {
 	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = array() ) {
 		$route_to_call = strtolower( $route_to_call );
 		$return        = '';
 
@@ -409,9 +409,9 @@ class StableDiffusion extends Provider {
 	public function get_dimensions_from_size( string $size ): array {
 		$dimensions = explode( 'x', $size );
 
-		return [
+		return array(
 			'width'  => $dimensions[0],
 			'height' => $dimensions[1],
-		];
+		);
 	}
 }

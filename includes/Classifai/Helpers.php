@@ -60,11 +60,11 @@ function reset_plugin_settings() {
 	$options = get_option( 'classifai_settings' );
 	if ( $options && isset( $options['registration'] ) ) {
 		// This is a legacy option set, so let's update it to the new format.
-		$new_settings = [
+		$new_settings = array(
 			'valid_license' => $options['valid_license'],
 			'email'         => isset( $options['registration']['email'] ) ? $options['registration']['email'] : '',
 			'license_key'   => isset( $options['registration']['license_key'] ) ? $options['registration']['license_key'] : '',
-		];
+		);
 		update_option( 'classifai_settings', $new_settings );
 	}
 
@@ -97,7 +97,7 @@ function reset_plugin_settings() {
  * @return array
  */
 function get_post_types_for_language_settings(): array {
-	$post_types = get_post_types( [ 'public' => true ], 'objects' );
+	$post_types = get_post_types( array( 'public' => true ), 'objects' );
 	$post_types = array_filter( $post_types, 'is_post_type_viewable' );
 
 	// Remove the attachment post type
@@ -226,7 +226,7 @@ function get_largest_acceptable_image_url( string $full_image, string $full_url,
  * @param int    $max_size   The maximum acceptable filesize. Default 1MB.
  * @return string|null The image URL, or null if no acceptable image found.
  */
-function get_largest_size_and_dimensions_image_url( string $full_image, string $full_url, array $metadata, array $width = [ 0, 4200 ], array $height = [ 0, 4200 ], int $max_size = MB_IN_BYTES ) {
+function get_largest_size_and_dimensions_image_url( string $full_image, string $full_url, array $metadata, array $width = array( 0, 4200 ), array $height = array( 0, 4200 ), int $max_size = MB_IN_BYTES ) {
 	// Check if the full size image meets our filesize and dimension requirements
 	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	if (
@@ -329,12 +329,12 @@ function get_asset_info( string $slug, ?string $attribute = null ) {
 function get_services_menu(): array {
 	$services = Plugin::$instance->services;
 	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
-		return [];
+		return array();
 	}
 
 	/** @var ServicesManager $service_manager Instance of the services manager class. */
 	$service_manager = $services['service_manager'];
-	$services        = [];
+	$services        = array();
 
 	foreach ( $service_manager->service_classes as $service ) {
 		$services[ $service->get_menu_slug() ] = $service->get_display_name();
@@ -373,7 +373,7 @@ function clean_input( string $key = '', bool $is_get = false, string $sanitize_c
  * @param string $provider_id      ID of the provider.
  * @return Provider|WP_Error
  */
-function find_provider_class( array $provider_classes = [], string $provider_id = '' ) {
+function find_provider_class( array $provider_classes = array(), string $provider_id = '' ) {
 	$provider = '';
 
 	foreach ( $provider_classes as $provider_class ) {
@@ -397,7 +397,7 @@ function find_provider_class( array $provider_classes = [], string $provider_id 
 function get_all_post_statuses(): array {
 	$all_statuses = wp_list_pluck(
 		get_post_stati(
-			[],
+			array(),
 			'objects'
 		),
 		'label'
@@ -501,9 +501,8 @@ function render_disable_feature_link( string $feature ) {
  * @param array $new_settings   Settings data.
  * @return array Sanitized prompt data.
  */
-function sanitize_prompts( $prompt_key = '', array $new_settings = [] ): array {
+function sanitize_prompts( $prompt_key = '', array $new_settings = array() ): array {
 	if ( isset( $new_settings[ $prompt_key ] ) && is_array( $new_settings[ $prompt_key ] ) ) {
-
 		$prompts = $new_settings[ $prompt_key ];
 
 		// Remove any prompts that don't have a title and prompt.
@@ -735,13 +734,13 @@ function is_elasticpress_installed(): bool {
  * @param array $args Arguments to pass to the search.
  * @return array
  */
-function get_smart_404_results( array $args = [] ): array {
+function get_smart_404_results( array $args = array() ): array {
 	// Run our query.
 	$results = ( new Smart404() )->exact_knn_search( get_last_url_slug(), $args );
 
 	// Ensure the query ran successfully.
 	if ( is_wp_error( $results ) ) {
-		return [];
+		return array();
 	}
 
 	// Convert the results to normal WP_Post objects.
@@ -755,7 +754,7 @@ function get_smart_404_results( array $args = [] ): array {
  *
  * @param array $args Arguments to pass to the search.
  */
-function render_smart_404_results( array $args = [] ) {
+function render_smart_404_results( array $args = array() ) {
 	// Get the results.
 	$results = get_smart_404_results( $args );
 
@@ -852,7 +851,7 @@ function is_local_path( string $resource_ref ): bool {
  * @param array  $args   Request args.
  * @return array|\WP_Error
  */
-function safe_wp_remote_request( string $method, string $url, array $args = [] ) {
+function safe_wp_remote_request( string $method, string $url, array $args = array() ) {
 	$method         = strtoupper( $method );
 	$args['method'] = $method;
 	$use_vip        = $args['use_vip'] ?? false;
@@ -883,9 +882,9 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
 
 	$args = wp_parse_args(
 		$args,
-		[
+		array(
 			'timeout' => $timeout,
-		]
+		)
 	);
 
 	return wp_remote_request( $url, $args ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_request_wp_remote_request
@@ -908,7 +907,7 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
  * @param array  $args     Optional HTTP args (timeout, headers, etc.).
  * @return string|false Raw contents on success; false on failure.
  */
-function safe_file_get_contents( string $file_path, array $args = [] ) {
+function safe_file_get_contents( string $file_path, array $args = array() ) {
 	if ( is_remote_url( $file_path ) ) {
 		if ( function_exists( 'wpcom_vip_file_get_contents' ) ) {
 			$content = wpcom_vip_file_get_contents( $file_path );
@@ -949,7 +948,7 @@ function safe_file_get_contents( string $file_path, array $args = [] ) {
  * @param array  $args Request args.
  * @return array|\WP_Error
  */
-function safe_wp_remote_get( string $url, array $args = [] ) {
+function safe_wp_remote_get( string $url, array $args = array() ) {
 	return safe_wp_remote_request( 'GET', $url, $args );
 }
 
@@ -967,7 +966,7 @@ function safe_wp_remote_get( string $url, array $args = [] ) {
  * @param array  $args Request args.
  * @return array|\WP_Error
  */
-function safe_wp_remote_post( string $url, array $args = [] ) {
+function safe_wp_remote_post( string $url, array $args = array() ) {
 	return safe_wp_remote_request( 'POST', $url, $args );
 }
 

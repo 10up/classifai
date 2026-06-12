@@ -35,8 +35,8 @@ class ImageProcessing extends Service {
 
 		$this->register_image_tags_taxonomy();
 
-		add_filter( 'attachment_fields_to_edit', [ $this, 'custom_fields_edit' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_media_scripts' ] );
+		add_filter( 'attachment_fields_to_edit', array( $this, 'custom_fields_edit' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_media_scripts' ) );
 	}
 
 	/**
@@ -57,7 +57,7 @@ class ImageProcessing extends Service {
 		 */
 		return apply_filters(
 			'classifai_image_processing_service_providers',
-			[
+			array(
 				'Classifai\Providers\Azure\ComputerVision',
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Images',
@@ -66,7 +66,7 @@ class ImageProcessing extends Service {
 				'Classifai\Providers\Localhost\OllamaMultimodal',
 				'Classifai\Providers\Localhost\StableDiffusion',
 				'Classifai\Providers\TogetherAI\Images',
-			]
+			)
 		);
 	}
 

@@ -33,9 +33,9 @@ class Notifications {
 	 * Register the actions needed.
 	 */
 	public function register() {
-		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ], 0 );
-		add_action( 'admin_enqueue_scripts', [ $this, 'add_dismiss_script' ] );
-		add_action( 'wp_ajax_classifai_dismiss_notice', [ $this, 'ajax_maybe_dismiss_notice' ] );
+		add_action( 'admin_notices', array( $this, 'maybe_render_notices' ), 0 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_dismiss_script' ) );
+		add_action( 'wp_ajax_classifai_dismiss_notice', array( $this, 'ajax_maybe_dismiss_notice' ) );
 	}
 
 	/**
@@ -132,9 +132,9 @@ class Notifications {
 	 * version of the AI Vision API, seems 70% is a better threshold.
 	 */
 	public function thresholds_update_notice() {
-		$features = [
+		$features = array(
 			'feature_descriptive_text_generator' => 'Classifai\Features\DescriptiveTextGenerator',
-		];
+		);
 
 		foreach ( $features as $name => $feature_class ) {
 			if ( ! class_exists( $feature_class ) ) {
@@ -441,9 +441,9 @@ EOD;
 
 		$key          = 'api_threshold_reached';
 		$settings_url = admin_url( 'tools.php?page=classifai#/usage_tracking/api_usage_tracking' );
-		$classes      = [
+		$classes      = array(
 			'notice',
-		];
+		);
 
 		if ( $hard_threshold_reached ) {
 			$classes[] = 'notice-error';
@@ -515,13 +515,13 @@ EOD;
 	public function set_notice( string $message, string $type = 'info' ) {
 		$notices = get_transient( 'classifai_notices' );
 		if ( ! is_array( $notices ) ) {
-			$notices = [];
+			$notices = array();
 		}
 
-		$notices[] = [
+		$notices[] = array(
 			'type'    => $type,
 			'message' => $message,
-		];
+		);
 		set_transient( 'classifai_notices', $notices );
 	}
 }

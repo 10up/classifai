@@ -69,12 +69,12 @@ class TextToSpeech extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			AmazonPolly::ID   => __( 'Amazon Polly', 'classifai' ),
 			Speech::ID        => __( 'Microsoft Azure AI Speech', 'classifai' ),
 			OpenAITTS::ID     => __( 'OpenAI Text to Speech', 'classifai' ),
 			ElevenLabsTTS::ID => __( 'ElevenLabs', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -83,11 +83,11 @@ class TextToSpeech extends Feature {
 	public function setup() {
 		parent::setup();
 
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-		add_action( 'classifai_schedule_text_to_speech_job', [ $this, 'generate_text_to_speech_audio' ], 10, 2 );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
+		add_action( 'classifai_schedule_text_to_speech_job', array( $this, 'generate_text_to_speech_audio' ), 10, 2 );
 
 		if ( $this->is_enabled() ) {
-			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
+			add_filter( 'the_content', array( $this, 'render_post_audio_controls' ) );
 		}
 	}
 
@@ -95,18 +95,18 @@ class TextToSpeech extends Feature {
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'rest_api_init', [ $this, 'add_meta_to_rest_api' ] );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_action( 'rest_api_init', array( $this, 'add_meta_to_rest_api' ) );
 
 		foreach ( $this->get_supported_post_types() as $post_type ) {
-			add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
+			add_action( 'rest_insert_' . $post_type, array( $this, 'rest_handle_audio' ), 10, 2 );
 		}
 
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
-		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
-		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
-		add_action( 'wp_ajax_classifai_get_tts_status', [ $this, 'ajax_get_audio_generation_status' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
+		add_action( 'admin_notices', array( $this, 'show_error_if' ) );
+		add_action( 'save_post', array( $this, 'save_post_metadata' ), 5 );
+		add_action( 'wp_ajax_classifai_get_tts_status', array( $this, 'ajax_get_audio_generation_status' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 	}
 
 	/**
@@ -198,10 +198,10 @@ class TextToSpeech extends Feature {
 						return false;
 					}
 				},
-				'schema'       => [
+				'schema'       => array(
 					'type'    => 'boolean',
-					'context' => [ 'view', 'edit' ],
-				],
+					'context' => array( 'view', 'edit' ),
+				),
 			)
 		);
 
@@ -223,10 +223,10 @@ class TextToSpeech extends Feature {
 						update_post_meta( $data->ID, self::DISPLAY_GENERATED_AUDIO, false );
 					}
 				},
-				'schema'          => [
+				'schema'          => array(
 					'type'    => 'boolean',
-					'context' => [ 'view', 'edit' ],
-				],
+					'context' => array( 'view', 'edit' ),
+				),
 			)
 		);
 
@@ -238,10 +238,10 @@ class TextToSpeech extends Feature {
 					$post_audio_id = get_post_meta( $data['id'], self::AUDIO_ID_KEY, true );
 					return (int) $post_audio_id;
 				},
-				'schema'       => [
+				'schema'       => array(
 					'type'    => 'integer',
-					'context' => [ 'view', 'edit' ],
-				],
+					'context' => array( 'view', 'edit' ),
+				),
 			)
 		);
 	}
@@ -264,10 +264,10 @@ class TextToSpeech extends Feature {
 			return;
 		}
 
-		$job_args = [
+		$job_args = array(
 			'post_id'         => $post_id,
 			'calling_user_id' => get_current_user_id(),
-		];
+		);
 
 		// We return early if the job is already scheduled.
 		if ( function_exists( 'as_has_scheduled_action' ) && \as_has_scheduled_action( 'classifai_schedule_text_to_speech_job', $job_args, 'classifai' ) ) {
@@ -308,32 +308,32 @@ class TextToSpeech extends Feature {
 			register_meta(
 				'post',
 				'_classifai_text_to_speech_error',
-				[
+				array(
 					'object_subtype' => $post_type,
 					'type'           => 'string',
 					'show_in_rest'   => true,
 					'single'         => true,
 					'auth_callback'  => '__return_true',
-				]
+				)
 			);
 
 			register_meta(
 				'post',
 				'_classifai_text_to_speech_scheduled',
-				[
+				array(
 					'object_subtype' => $post_type,
 					'type'           => 'boolean',
 					'show_in_rest'   => true,
 					'single'         => true,
 					'auth_callback'  => '__return_true',
-				]
+				)
 			);
 		}
 
 		register_rest_route(
 			'classifai/v1',
 			'synthesize-speech/(?P<id>\d+)',
-			[
+			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'rest_endpoint_callback' ),
 				'args'                => array(
@@ -344,8 +344,8 @@ class TextToSpeech extends Feature {
 						'description'       => esc_html__( 'ID of post to run text to speech conversion on.', 'classifai' ),
 					),
 				),
-				'permission_callback' => [ $this, 'speech_synthesis_permissions_check' ],
-			]
+				'permission_callback' => array( $this, 'speech_synthesis_permissions_check' ),
+			)
 		);
 	}
 
@@ -438,7 +438,7 @@ class TextToSpeech extends Feature {
 		\add_meta_box(
 			'classifai-text-to-speech-meta-box',
 			__( 'ClassifAI Text to Speech Processing', 'classifai' ),
-			[ $this, 'render_meta_box' ],
+			array( $this, 'render_meta_box' ),
 			null,
 			'side',
 			'high',
@@ -458,10 +458,10 @@ class TextToSpeech extends Feature {
 			function_exists( 'as_has_scheduled_action' ) &&
 			\as_has_scheduled_action(
 				'classifai_schedule_text_to_speech_job',
-				[
+				array(
 					'post_id'         => (int) $post->ID,
 					'calling_user_id' => get_current_user_id(),
-				],
+				),
 				'classifai'
 			);
 
@@ -539,9 +539,9 @@ class TextToSpeech extends Feature {
 		<?php
 		if ( $source_url ) {
 			$cache_busting_url = add_query_arg(
-				[
+				array(
 					'ver' => time(),
-				],
+				),
 				$source_url
 			);
 			?>
@@ -562,17 +562,17 @@ class TextToSpeech extends Feature {
 		$post_id = isset( $_POST['post_id'] ) ? absint( wp_unslash( $_POST['post_id'] ) ) : 0;
 
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid post.', 'classifai' ) ], 403 );
+			wp_send_json_error( array( 'message' => __( 'Invalid post.', 'classifai' ) ), 403 );
 		}
 
 		$in_progress =
 			function_exists( 'as_has_scheduled_action' ) &&
 			\as_has_scheduled_action(
 				'classifai_schedule_text_to_speech_job',
-				[
+				array(
 					'post_id'         => $post_id,
 					'calling_user_id' => get_current_user_id(),
-				],
+				),
 				'classifai'
 			);
 
@@ -597,11 +597,11 @@ class TextToSpeech extends Feature {
 		}
 
 		wp_send_json_success(
-			[
+			array(
 				'inProgress' => (bool) $in_progress,
 				'error'      => $error_message,
 				'html'       => $html,
-			]
+			)
 		);
 	}
 
@@ -632,10 +632,10 @@ class TextToSpeech extends Feature {
 			delete_post_meta( $post_id, self::DISPLAY_GENERATED_AUDIO );
 		}
 
-		$job_args = [
+		$job_args = array(
 			'post_id'         => (int) $post_id,
 			'calling_user_id' => get_current_user_id(),
-		];
+		);
 
 		// We return early if the job is already scheduled.
 		if (
@@ -683,10 +683,10 @@ class TextToSpeech extends Feature {
 				$post_id,
 				'_classifai_text_to_speech_error',
 				wp_json_encode(
-					[
+					array(
 						'code'    => $results->get_error_code(),
 						'message' => $results->get_error_message(),
-					]
+					)
 				)
 			);
 		}
@@ -922,15 +922,15 @@ class TextToSpeech extends Feature {
 		add_settings_field(
 			'post_types',
 			esc_html__( 'Allowed post types', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
+			array( $this, 'render_checkbox_group' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'      => 'post_types',
 				'options'        => $post_type_options,
 				'default_values' => $settings['post_types'],
 				'description'    => __( 'Choose which post types support this feature.', 'classifai' ),
-			]
+			)
 		);
 	}
 
@@ -956,12 +956,12 @@ class TextToSpeech extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
-			'post_types' => [
+		return array(
+			'post_types' => array(
 				'post' => 'post',
-			],
+			),
 			'provider'   => Speech::ID,
-		];
+		);
 	}
 
 	/**
@@ -1042,11 +1042,11 @@ class TextToSpeech extends Feature {
 	 * @return string The normalized post content.
 	 */
 	public function normalize_post_content( int $post_id ): string {
-		add_filter( 'classifai_pre_normalize', [ $this, 'strip_sub_sup_tags' ] );
+		add_filter( 'classifai_pre_normalize', array( $this, 'strip_sub_sup_tags' ) );
 		$normalizer   = new Normalizer();
 		$post         = get_post( $post_id );
 		$post_content = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
-		remove_filter( 'classifai_pre_normalize', [ $this, 'strip_sub_sup_tags' ] );
+		remove_filter( 'classifai_pre_normalize', array( $this, 'strip_sub_sup_tags' ) );
 
 		return $post_content;
 	}
