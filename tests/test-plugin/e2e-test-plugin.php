@@ -59,6 +59,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 				$response = file_get_contents( __DIR__ . '/resize-content-custom-prompt.json' );
 			} else if ( str_contains( $prompt, 'extracting the key takeaways from an article' ) ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-key-takeaways.json' );
+			} else if ( str_contains( $prompt, 'generating tags for an image uploaded' ) ) {
+				$response = file_get_contents( __DIR__ . '/chatgpt-image-tags.json' );
 			}
 		}
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/moderations' ) !== false ) {
