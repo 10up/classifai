@@ -442,5 +442,7 @@ class OllamaMultimodal extends Ollama {
 			case 'tags':
 				return $this->generate_image_tags( $image_url, $attachment_id );
 		}
+
+		return null;
 	}
 }

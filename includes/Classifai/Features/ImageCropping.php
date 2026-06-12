@@ -30,7 +30,7 @@ class ImageCropping extends Feature {
 	 *
 	 * @since 1.5.0
 	 *
-	 * @var WP_Filesystem_Base
+	 * @var \WP_Filesystem_Base
 	 */
 	private $wp_filesystem;
 
@@ -399,7 +399,7 @@ class ImageCropping extends Feature {
 	/**
 	 * Provides the global WP_Filesystem_Base class instance.
 	 *
-	 * @return WP_Filesystem_Base
+	 * @return \WP_Filesystem_Base
 	 */
 	public function get_wp_filesystem() {
 		global $wp_filesystem;

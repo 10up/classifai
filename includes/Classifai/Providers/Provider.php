@@ -270,4 +270,12 @@ abstract class Provider {
 		$credentials = $this->get_credentials( $settings );
 		return $credentials[ $credential_key ] ?? null;
 	}
+
+	/**
+	 * Sanitize the provider-specific settings prior to saving.
+	 *
+	 * @param array $new_settings The settings being saved.
+	 * @return array The sanitized settings.
+	 */
+	abstract public function sanitize_settings( array $new_settings ): array;
 }

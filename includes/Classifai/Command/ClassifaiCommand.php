@@ -953,9 +953,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 */
 	public function crop( $args = [], $opts = [] ) {
 		$image_cropping = new ImageCropping();
-		$provider       = $image_cropping->get_feature_provider_instance();
-		$provider_class = get_class( $provider );
-		$settings       = $image_cropping->get_settings( $provider_class::ID );
+		$provider = $image_cropping->get_feature_provider_instance();
+
+		if ( ! $provider ) {
+			\WP_CLI::error( 'No provider is configured for the Image Cropping feature.' );
+		}
+
+		$settings = $image_cropping->get_settings( $provider::ID );
 		$default_opts   = [
 			'limit' => false,
 		];

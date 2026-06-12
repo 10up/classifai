@@ -270,8 +270,8 @@ class OllamaEmbeddings extends Ollama {
 	/**
 	 * Modify the default settings for the classification feature.
 	 *
-	 * @param array   $settings Current settings.
-	 * @param Feature $feature_instance The feature instance.
+	 * @param array          $settings Current settings.
+	 * @param Classification $feature_instance The feature instance.
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
@@ -948,7 +948,7 @@ class OllamaEmbeddings extends Ollama {
 	 *
 	 * @param int     $term_id ID of term.
 	 * @param bool    $force Whether to force generation of embeddings even if they already exist. Default false.
-	 * @param Feature $feature The feature instance.
+	 * @param \Classifai\Features\Classification|\Classifai\Features\TermCleanup|null $feature The feature instance.
 	 * @return array|WP_Error
 	 */
 	public function generate_embeddings_for_term( int $term_id, bool $force = false, ?Feature $feature = null ) {

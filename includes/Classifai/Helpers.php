@@ -497,8 +497,8 @@ function render_disable_feature_link( string $feature ) {
  *
  * @since 2.4.0
  *
- * @param array $prompt_key Prompt key.
- * @param array $new_settings   Settings data.
+ * @param string $prompt_key Prompt key.
+ * @param array  $new_settings   Settings data.
  * @return array Sanitized prompt data.
  */
 function sanitize_prompts( $prompt_key = '', array $new_settings = [] ): array {

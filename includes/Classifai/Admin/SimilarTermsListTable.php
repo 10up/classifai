@@ -143,8 +143,8 @@ class SimilarTermsListTable extends WP_List_Table {
 	/**
 	 * Generate term html to show it in Similar terms list table
 	 *
-	 * @param WP_Term $term         Term Object.
-	 * @param WP_Term $similar_term Similar Term Object.
+	 * @param \WP_Term $term         Term Object.
+	 * @param \WP_Term $similar_term Similar Term Object.
 	 * @param float   $score        Similarity score.
 	 * @return string
 	 */

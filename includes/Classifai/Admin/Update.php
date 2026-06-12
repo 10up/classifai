@@ -28,7 +28,7 @@ class Update {
 	/**
 	 * The update checker object.
 	 *
-	 * @var YahnisElsts\PluginUpdateChecker\v5p1\Vcs\PluginUpdateChecker
+	 * @var \YahnisElsts\PluginUpdateChecker\v5p1\Vcs\PluginUpdateChecker
 	 */
 	protected $updater;
 
@@ -62,7 +62,12 @@ class Update {
 			'classifai'
 		);
 
-		$this->updater->getVcsApi()->enableReleaseAssets();
+		$vcs_api = $this->updater->getVcsApi();
+
+		// Release assets are only supported by the GitHub/GitLab VCS APIs.
+		if ( method_exists( $vcs_api, 'enableReleaseAssets' ) ) {
+			$vcs_api->enableReleaseAssets();
+		}
 
 		$this->updater->addResultFilter(
 			function ( $plugin_info ) {
@@ -93,7 +98,7 @@ class Update {
 
 			// Adding the plugin info to the `no_update` property is required
 			// for the enable/disable auto-update links to appear correctly in the UI.
-			if ( $update ) {
+			if ( $update && property_exists( $update, 'filename' ) ) {
 				$transient->no_update[ $update->filename ] = $update;
 			}
 		}

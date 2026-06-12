@@ -252,15 +252,14 @@ class Classification extends Feature {
 		 */
 		$results = apply_filters( 'classifai_' . static::ID . '_pre_save_results', $results, $post_id, $link, $this );
 
-		switch ( $provider_instance::ID ) {
-			case NLU::ID:
-				$results = $provider_instance->link( $post_id, $results, $link );
-				break;
-			case AzureEmbeddings::ID:
-			case OpenAIEmbeddings::ID:
-			case OllamaEmbeddings::ID:
-				$results = $provider_instance->set_terms( $post_id, $results, $link );
-				break;
+		if ( $provider_instance instanceof NLU ) {
+			$results = $provider_instance->link( $post_id, $results, $link );
+		} elseif (
+			$provider_instance instanceof AzureEmbeddings
+			|| $provider_instance instanceof OpenAIEmbeddings
+			|| $provider_instance instanceof OllamaEmbeddings
+		) {
+			$results = $provider_instance->set_terms( $post_id, $results, $link );
 		}
 
 		return $results;

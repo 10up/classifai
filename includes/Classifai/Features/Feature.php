@@ -377,7 +377,7 @@ abstract class Feature {
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -1269,7 +1269,7 @@ abstract class Feature {
 	 * Returns the instance of the provider set for the feature.
 	 *
 	 * @param string $provider_id The ID of the provider.
-	 * @return \Classifai\Providers|null
+	 * @return \Classifai\Providers\Provider|null
 	 */
 	public function get_feature_provider_instance( string $provider_id = '' ) {
 		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );

@@ -56,7 +56,7 @@ class Read {
 	 *
 	 * @param array             $settings Computer Vision settings.
 	 * @param int               $attachment_id Attachment ID to process.
-	 * @param PDFTextExtraction $feature Feature instance.
+	 * @param \Classifai\Features\PDFTextExtraction $feature Feature instance.
 	 */
 	public function __construct( array $settings, int $attachment_id, $feature ) {
 		$this->settings      = $settings;
@@ -269,6 +269,8 @@ class Read {
 					return $this->log_error( new WP_Error( 'invalid_read_result_status', esc_html__( 'Invalid Read result status.', 'classifai' ) ) );
 			}
 		}
+
+		return null;
 	}
 
 	/**
@@ -323,6 +325,8 @@ class Read {
 		}
 
 		$this->update_status( $data );
+
+		return null;
 	}
 
 	/**

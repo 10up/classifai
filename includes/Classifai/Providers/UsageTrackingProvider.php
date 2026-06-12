@@ -42,15 +42,6 @@ abstract class UsageTrackingProvider extends Provider {
 	abstract public static function get_provider_ids(): array;
 
 	/**
-	 * Sanitization for the options being saved.
-	 *
-	 * @param array $new_settings Array of settings about to be saved.
-	 *
-	 * @return array The sanitized settings to be saved.
-	 */
-	abstract public function sanitize_settings( array $new_settings ): array;
-
-	/**
 	 * Process the data from the API.
 	 *
 	 * @param array $data The data from the API.

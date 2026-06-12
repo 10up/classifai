@@ -558,7 +558,7 @@ class AmazonPolly extends Provider {
 	 * Returns aws polly client.
 	 *
 	 * @param array $aws_config AWS configuration array.
-	 * @return \Aws\Polly\PollyClient|null
+	 * @return \ClassifaiVendor\Aws\Polly\PollyClient|null
 	 */
 	public function get_polly_client( array $aws_config = array() ) {
 		$credentials = $this->get_credentials( [ static::ID => $aws_config ] );
