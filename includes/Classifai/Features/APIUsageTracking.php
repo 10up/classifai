@@ -627,7 +627,7 @@ class APIUsageTracking extends Feature {
 		if ( ! empty( $bcc_emails ) ) {
 			$headers[] = 'Bcc: ' . implode( ', ', $bcc_emails );
 		}
-		wp_mail( $emails[0], $subject, $message, $headers );
+		wp_mail( $emails[0], $subject, $message, $headers ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_mail_wp_mail
 
 		$settings[ $sent_key ] = $period_key;
 		$this->update_settings( array( $provider::ID => $settings ) );
@@ -709,7 +709,7 @@ class APIUsageTracking extends Feature {
 		if ( ! empty( $bcc_emails ) ) {
 			$headers[] = 'Bcc: ' . implode( ', ', $bcc_emails );
 		}
-		wp_mail( $emails[0], $subject, $message, $headers );
+		wp_mail( $emails[0], $subject, $message, $headers ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_mail_wp_mail
 
 		$settings[ $sent_key ] = $period_key;
 		$this->update_settings( array( $provider::ID => $settings ) );

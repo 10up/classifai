@@ -116,7 +116,7 @@ class Moderation extends Feature {
 		$cap       = 'post' === $item_type ? 'edit_post' : 'edit_comment';
 
 		// Ensure we have a logged in user that can edit the item.
-		if ( empty( $item_id ) || ! current_user_can( $cap, $item_id ) ) {
+		if ( empty( $item_id ) || ! current_user_can( $cap, $item_id ) ) { // phpcs:ignore WordPress.WP.Capabilities.Undetermined, - $cap is either edit_post or edit_comment
 			return false;
 		}
 

@@ -239,7 +239,7 @@ class RecommendedContent extends Feature {
 		// If we have no matches, remove the current post from the query
 		// but otherwise keep the query as is.
 		if ( empty( $post__in ) ) {
-			$query_vars['post__not_in'] = array( $post_id );
+			$query_vars['post__not_in'] = array( $post_id ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 			return $query_vars;
 		}
 
@@ -256,7 +256,7 @@ class RecommendedContent extends Feature {
 					$new_query_vars,
 					array(
 						'posts_per_page' => (int) $query_vars['posts_per_page'] - $post_count,
-						'post__not_in'   => array( $post_id ),
+						'post__not_in'   => array( $post_id ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 						'fields'         => 'ids',
 					)
 				)

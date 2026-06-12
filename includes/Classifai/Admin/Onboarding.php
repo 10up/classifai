@@ -76,7 +76,7 @@ class Onboarding {
 
 		<div class="classifai-content classifai-setup-page">
 			<?php
-			include_once 'templates/classifai-header.php';
+			include_once __DIR__ . '/templates/classifai-header.php';
 			?>
 			<div class="classifai-setup">
 				<div class="classifai-setup__header">
@@ -129,19 +129,19 @@ class Onboarding {
 						// Load the appropriate step.
 						switch ( $current_step ) {
 							case '1':
-								require_once 'templates/onboarding-step-one.php';
+								require_once __DIR__ . '/templates/onboarding-step-one.php';
 								break;
 
 							case '2':
-								require_once 'templates/onboarding-step-two.php';
+								require_once __DIR__ . '/templates/onboarding-step-two.php';
 								break;
 
 							case '3':
-								require_once 'templates/onboarding-step-three.php';
+								require_once __DIR__ . '/templates/onboarding-step-three.php';
 								break;
 
 							case '4':
-								require_once 'templates/onboarding-step-four.php';
+								require_once __DIR__ . '/templates/onboarding-step-four.php';
 								break;
 
 							default:

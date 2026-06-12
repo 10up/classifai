@@ -192,7 +192,7 @@ function sort_images_by_size_cb( array $size_1, array $size_2 ): int {
  * @return string|null The image URL, or null if no acceptable image found.
  */
 function get_largest_acceptable_image_url( string $full_image, string $full_url, array $sizes, int $max = MB_IN_BYTES ) {
-	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Generic.PHP.NoSilencedErrors.Forbidden
 	if ( $file_size && $max >= $file_size ) {
 		return $full_url;
 	}
@@ -201,7 +201,7 @@ function get_largest_acceptable_image_url( string $full_image, string $full_url,
 
 	foreach ( $sizes as $size ) {
 		$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
-		$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Generic.PHP.NoSilencedErrors.Forbidden
 
 		if ( $file_size && $max >= $file_size ) {
 			return str_replace( basename( $full_url ), $size['file'], $full_url );
@@ -228,7 +228,7 @@ function get_largest_acceptable_image_url( string $full_image, string $full_url,
  */
 function get_largest_size_and_dimensions_image_url( string $full_image, string $full_url, array $metadata, array $width = array( 0, 4200 ), array $height = array( 0, 4200 ), int $max_size = MB_IN_BYTES ) {
 	// Check if the full size image meets our filesize and dimension requirements
-	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Generic.PHP.NoSilencedErrors.Forbidden
 	if (
 		( $file_size && $max_size >= $file_size )
 		&& ( $metadata['width'] >= $width[0] && $metadata['width'] <= $width[1] )
@@ -243,7 +243,7 @@ function get_largest_size_and_dimensions_image_url( string $full_image, string $
 
 		foreach ( $metadata['sizes'] as $size ) {
 			$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
-			$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Generic.PHP.NoSilencedErrors.Forbidden
 
 			if (
 				( $file_size && $max_size >= $file_size )
@@ -463,7 +463,7 @@ function check_term_permissions( string $tax = '' ) {
 
 	$create_cap = is_taxonomy_hierarchical( $taxonomy->name ) ? $taxonomy->cap->edit_terms : $taxonomy->cap->assign_terms;
 
-	if ( ! current_user_can( $create_cap ) || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
+	if ( ! current_user_can( $create_cap ) || ! current_user_can( $taxonomy->cap->assign_terms ) ) { // phpcs:ignore WordPress.WP.Capabilities.Undetermined
 		return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not allowed to create or assign to this taxonomy.', 'classifai' ) );
 	}
 
@@ -931,7 +931,7 @@ function safe_file_get_contents( string $file_path, array $args = array() ) {
 	}
 
 	// Local file path: fall back to native.
-	return @file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged, WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
+	return @file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged, WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown, Generic.PHP.NoSilencedErrors.Forbidden
 }
 
 /**

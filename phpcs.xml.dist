@@ -64,11 +64,16 @@
 	<rule ref="WordPress-VIP-Go">
 		<!-- Deprecated: @todo remove in PHPCS 4.0 -->
 		<exclude name="WordPressVIPMinimum.JS" />
+
+		<!-- Caching warning is very out of date -->
+		<exclude name="WordPressVIPMinimum.Functions.RestrictedFunctions.get_posts_get_posts"/>
 	</rule>
 	<rule ref="WordPress-Core">
 		<exclude name="Generic.Files.OneObjectStructurePerFile"/>
 		<exclude name="Universal.Files.SeparateFunctionsFromOO"/>
 	</rule>
+	<rule ref="WordPress.DB"/>
+	<rule ref="WordPress.Security"/>
 	<rule ref="WordPress-Extra">
 		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound" />
 		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed" />

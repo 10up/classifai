@@ -258,6 +258,7 @@ class NLU extends Provider {
 
 		$text_to_classify        = $normalizer->normalize( $post_id );
 		$body                    = $classifier->get_body( $text_to_classify );
+		$request_options         = array();
 		$request_options['body'] = $body;
 		$request                 = $classifier->get_request();
 

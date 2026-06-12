@@ -305,7 +305,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						'posts_per_page'   => $opts['per_page'],
 						'paged'            => $paged,
 						'post_status'      => $opts['post_status'],
-						'suppress_filters' => 'false',
+						'suppress_filters' => false,
 						'fields'           => 'ids',
 					)
 				);
@@ -574,7 +574,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						'posts_per_page'   => $opts['per_page'],
 						'post_mime_type'   => array_unique( $mime_types ),
 						'paged'            => $paged,
-						'suppress_filters' => 'false',
+						'suppress_filters' => false,
 						'fields'           => 'ids',
 					)
 				);
@@ -704,7 +704,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						'posts_per_page'   => $opts['per_page'],
 						'paged'            => $paged,
 						'post_status'      => $opts['post_status'],
-						'suppress_filters' => 'false',
+						'suppress_filters' => false,
 					)
 				);
 				$total = count( $posts );
@@ -1105,7 +1105,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						'posts_per_page'   => $opts['per_page'],
 						'paged'            => $paged,
 						'post_status'      => $opts['post_status'],
-						'suppress_filters' => 'false',
+						'suppress_filters' => false,
 						'fields'           => 'ids',
 					)
 				);

@@ -1138,7 +1138,7 @@ class Embeddings extends Provider {
 			'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare'   => 'NOT EXISTS',
 			'offset'         => 0,
-			'post__not_in'   => array(), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+			'post__not_in'   => array(), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 		);
 
 		$default_args = array_merge( $default_args, $args );
@@ -1219,7 +1219,7 @@ class Embeddings extends Provider {
 		}
 
 		if ( ! empty( $exclude ) ) {
-			$args['post__not_in'] = array_merge( $args['post__not_in'], $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+			$args['post__not_in'] = array_merge( $args['post__not_in'], $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 		}
 
 		$this->trigger_post_update( $post_type, $all, $args, $user_id );

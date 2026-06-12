@@ -44,7 +44,7 @@ class Plugin {
 		add_action( 'admin_init', array( $this, 'maybe_migrate_to_v3' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
-		add_filter( 'robots_txt', array( $this, 'maybe_block_ai_crawlers' ) );
+		add_filter( 'robots_txt', array( $this, 'maybe_block_ai_crawlers' ) ); // phpcs:ignore WordPressVIPMinimum.Hooks.RestrictedHooks.robots_txt
 		add_action( 'after_classifai_init', array( $this, 'load_action_scheduler' ) );
 	}
 
