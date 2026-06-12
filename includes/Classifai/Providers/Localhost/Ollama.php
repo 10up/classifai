@@ -293,7 +293,7 @@ class Ollama extends Provider {
 	 *
 	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function generate_title( int $post_id = 0, array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -415,7 +415,7 @@ class Ollama extends Provider {
 	 *
 	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function resize_content( int $post_id, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -531,7 +531,7 @@ class Ollama extends Provider {
 	 *
 	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function generate_key_takeaways( int $post_id = 0, array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {

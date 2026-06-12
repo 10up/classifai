@@ -60,7 +60,9 @@ abstract class Feature {
 	/**
 	 * Array of providers supported by the feature.
 	 *
-	 * @var \Classifai\Providers\Provider[]
+	 * Maps each supported provider's ID to its display label.
+	 *
+	 * @var array<string, string>
 	 */
 	public $supported_providers = [];
 

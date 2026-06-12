@@ -328,7 +328,7 @@ class AmazonPolly extends Provider {
 			 */
 			$pre = apply_filters( 'classifai_' . self::ID . '_pre_connect_to_service', false );
 
-			if ( false !== $pre ) {
+			if ( is_array( $pre ) ) {
 				return $pre;
 			}
 
@@ -391,7 +391,7 @@ class AmazonPolly extends Provider {
 	 * Synthesizes speech from a post item.
 	 *
 	 * @param int $post_id Post ID.
-	 * @return string|WP_Error
+	 * @return int|string|bool|WP_Error
 	 */
 	public function synthesize_speech( int $post_id ) {
 		if ( empty( $post_id ) ) {

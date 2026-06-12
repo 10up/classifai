@@ -312,7 +312,7 @@ class OpenAI extends Provider {
 	 * @param int    $post_id The Post ID we're processing.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
-	 * @return string|WP_Error
+	 * @return string|array|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -463,7 +463,7 @@ class OpenAI extends Provider {
 	 *
 	 * @param int   $post_id The Post Id we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function generate_titles( int $post_id = 0, array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -577,7 +577,7 @@ class OpenAI extends Provider {
 	 *
 	 * @param int   $post_id The Post Id we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function resize_content( int $post_id, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {

@@ -305,7 +305,7 @@ function attachment_is_pdf( $post ): bool {
  *
  * @param string $slug Asset slug as defined in build/webpack configuration.
  * @param string $attribute Optional attribute to get. Can be version or dependencies.
- * @return string|array
+ * @return string|array|null
  */
 function get_asset_info( string $slug, ?string $attribute = null ) {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {

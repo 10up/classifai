@@ -137,7 +137,7 @@ class TextToSpeech extends Provider {
 	 * Synthesizes speech from a post item.
 	 *
 	 * @param int $post_id Post ID.
-	 * @return string|WP_Error
+	 * @return int|string|WP_Error
 	 */
 	public function synthesize_speech( int $post_id ) {
 		if ( empty( $post_id ) ) {
