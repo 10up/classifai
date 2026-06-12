@@ -277,7 +277,7 @@ class ComputerVision extends Provider {
 			wp_send_json_error( $error );
 		}
 
-		wp_send_json_success( self::get_read_status( [], $attachment_id ) );
+		wp_send_json_success( self::get_read_status( [], (int) $attachment_id ) );
 	}
 
 	/**

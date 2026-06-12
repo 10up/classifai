@@ -301,11 +301,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			do {
 				$posts = get_posts(
 					array(
-						'post_type'        => $opts['post_type'],
-						'posts_per_page'   => $opts['per_page'],
+						'post_type'        => (string) $opts['post_type'],
+						'posts_per_page'   => (int) $opts['per_page'],
 						'paged'            => $paged,
-						'post_status'      => $opts['post_status'],
-						'suppress_filters' => 'false',
+						'post_status'      => (string) $opts['post_status'],
+						'suppress_filters' => false,
 						'fields'           => 'ids',
 					)
 				);
@@ -571,10 +571,10 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				$attachments = get_posts(
 					array(
 						'post_type'        => 'attachment',
-						'posts_per_page'   => $opts['per_page'],
-						'post_mime_type'   => array_unique( $mime_types ),
+						'posts_per_page'   => (int) $opts['per_page'],
+						'post_mime_type'   => implode( ',', array_unique( $mime_types ) ),
 						'paged'            => $paged,
-						'suppress_filters' => 'false',
+						'suppress_filters' => false,
 						'fields'           => 'ids',
 					)
 				);
@@ -700,11 +700,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			do {
 				$posts = get_posts(
 					array(
-						'post_type'        => $opts['post_type'],
-						'posts_per_page'   => $opts['per_page'],
+						'post_type'        => (string) $opts['post_type'],
+						'posts_per_page'   => (int) $opts['per_page'],
 						'paged'            => $paged,
-						'post_status'      => $opts['post_status'],
-						'suppress_filters' => 'false',
+						'post_status'      => (string) $opts['post_status'],
+						'suppress_filters' => false,
 					)
 				);
 				$total = count( $posts );
@@ -1062,7 +1062,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::error( 'This command is only available for the OpenAI Embeddings and Azure OpenAI Embeddings providers.' );
 		}
 
-		$embeddings          = new Embeddings( false );
+		$embeddings          = new Embeddings( null );
 		$opts                = wp_parse_args( $opts, $defaults );
 		$opts['per_page']    = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
 		$allowed_post_types  = $feature->get_supported_post_types();
@@ -1105,11 +1105,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			do {
 				$posts = get_posts(
 					array(
-						'post_type'        => $opts['post_type'],
-						'posts_per_page'   => $opts['per_page'],
+						'post_type'        => (string) $opts['post_type'],
+						'posts_per_page'   => (int) $opts['per_page'],
 						'paged'            => $paged,
-						'post_status'      => $opts['post_status'],
-						'suppress_filters' => 'false',
+						'post_status'      => (string) $opts['post_status'],
+						'suppress_filters' => false,
 						'fields'           => 'ids',
 					)
 				);

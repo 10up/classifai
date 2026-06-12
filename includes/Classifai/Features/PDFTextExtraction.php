@@ -251,7 +251,7 @@ class PDFTextExtraction extends Feature {
 		if ( ! empty( $status['running'] ) ) {
 			$html = '<button class="button secondary" disabled>' . esc_html__( 'In progress!', 'classifai' ) . '</button>';
 		} else {
-			$html = '<button class="button secondary" id="classifai-rescan-pdf" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $read_text ) . '</button>';
+			$html = '<button class="button secondary" id="classifai-rescan-pdf" data-id="' . esc_attr( (string) absint( $post->ID ) ) . '">' . esc_html( $read_text ) . '</button>';
 		}
 
 		$form_fields['rescan_pdf'] = [

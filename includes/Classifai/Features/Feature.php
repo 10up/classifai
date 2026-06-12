@@ -603,15 +603,15 @@ abstract class Feature {
 				$attrs = ' value="' . esc_attr( $value ) . '"';
 
 				if ( isset( $args['max'] ) && is_numeric( $args['max'] ) ) {
-					$attrs .= ' max="' . esc_attr( (float) $args['max'] ) . '"';
+					$attrs .= ' max="' . esc_attr( (string) (float) $args['max'] ) . '"';
 				}
 
 				if ( isset( $args['min'] ) && is_numeric( $args['min'] ) ) {
-					$attrs .= ' min="' . esc_attr( (float) $args['min'] ) . '"';
+					$attrs .= ' min="' . esc_attr( (string) (float) $args['min'] ) . '"';
 				}
 
 				if ( isset( $args['step'] ) && is_numeric( $args['step'] ) ) {
-					$attrs .= ' step="' . esc_attr( (float) $args['step'] ) . '"';
+					$attrs .= ' step="' . esc_attr( (string) (float) $args['step'] ) . '"';
 				}
 
 				$class = 'small-text';

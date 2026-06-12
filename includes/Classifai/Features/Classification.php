@@ -716,7 +716,7 @@ class Classification extends Feature {
 			<div id="classifai-post-preview-controls">
 				<select id="classifai-preview-post-selector">
 					<?php foreach ( $posts_to_preview as $post ) : ?>
-						<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
+						<option value="<?php echo esc_attr( (string) $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
 					<?php endforeach; ?>
 				</select>
 
