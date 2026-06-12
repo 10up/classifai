@@ -362,8 +362,6 @@ function clean_input( string $key = '', bool $is_get = false, string $sanitize_c
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		return isset( $_POST[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_POST[ $key ] ) ) : '';
 	}
-
-	return false;
 }
 
 /**

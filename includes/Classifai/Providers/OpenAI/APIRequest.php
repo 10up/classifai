@@ -366,6 +366,6 @@ class APIRequest {
 			return $this->provider->get_credential( 'api_key', $this->settings ) ?? '';
 		}
 
-		return $this->api_key ?? '';
+		return $this->api_key;
 	}
 }

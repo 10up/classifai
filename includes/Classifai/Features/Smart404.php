@@ -313,7 +313,7 @@ class Smart404 extends Feature {
 		$results = array_filter(
 			$results,
 			function ( $result ) use ( $settings ) {
-				return (float) $result['score'] >= $settings['threshold'] ?? 2.35;
+				return (float) $result['score'] >= ( $settings['threshold'] ?? 2.35 );
 			}
 		);
 

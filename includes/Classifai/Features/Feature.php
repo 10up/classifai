@@ -1275,7 +1275,7 @@ abstract class Feature {
 	 */
 	public function get_feature_provider_instance( string $provider_id = '' ) {
 		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );
-		$provider_instance = find_provider_class( $this->provider_instances ?? [], $provider_id );
+		$provider_instance = find_provider_class( $this->provider_instances, $provider_id );
 
 		if ( is_wp_error( $provider_instance ) ) {
 			return null;
