@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { execFileSync } from 'child_process';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -380,6 +381,19 @@ export class ClassifAIUtils {
 		} catch ( _ ) {
 			// already inactive
 		}
+		execFileSync(
+			'npx',
+			[
+				'wp-env',
+				'run',
+				'tests-cli',
+				'wp',
+				'plugin',
+				'deactivate',
+				'classic-editor',
+			],
+			{ stdio: 'inherit' }
+		);
 	}
 
 	async enableClassicEditor(): Promise< void > {
@@ -388,6 +402,33 @@ export class ClassifAIUtils {
 		} catch ( _ ) {
 			// already active
 		}
+		execFileSync(
+			'npx',
+			[
+				'wp-env',
+				'run',
+				'tests-cli',
+				'wp',
+				'plugin',
+				'activate',
+				'classic-editor',
+			],
+			{ stdio: 'inherit' }
+		);
+		execFileSync(
+			'npx',
+			[
+				'wp-env',
+				'run',
+				'tests-cli',
+				'wp',
+				'option',
+				'update',
+				'classic-editor-replace',
+				'classic',
+			],
+			{ stdio: 'inherit' }
+		);
 	}
 
 	async showClassicEditorExcerptMetabox(): Promise< void > {
@@ -739,15 +780,31 @@ export class ClassifAIUtils {
 	}
 
 	async verifyTextToSpeechEnabled( enabled = true ): Promise< void > {
-		await this.page.goto( '/wp-admin/edit.php' );
-		await this.page
-			.locator( '#the-list tr:nth-child(1) td.title a.row-title' )
-			.first()
-			.click();
-		await this.closeWelcomeGuide();
+		await this.createPost( {
+			title: 'Verify text to speech controls',
+			content: 'Does this post expose the text to speech controls?',
+		} );
 		await this.openClassifAIPostPanel();
 		const btn = this.page.locator( '#classifai-audio-controls__preview-btn' );
 		if ( enabled ) {
+			await expect( this.page.locator( '.classifai-panel' ) ).toContainText(
+				'Audio generation is in progress…'
+			);
+			execFileSync(
+				'npx',
+				[
+					'wp-env',
+					'run',
+					'tests-cli',
+					'wp',
+					'action-scheduler',
+					'run',
+					'--hooks=classifai_schedule_text_to_speech_job',
+				],
+				{ timeout: 20000, stdio: 'inherit' }
+			);
+			await this.page.reload();
+			await this.openClassifAIPostPanel();
 			await expect( btn ).toBeVisible();
 		} else {
 			await expect( btn ).toHaveCount( 0 );
