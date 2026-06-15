@@ -36,9 +36,9 @@ class PDFTextExtraction extends Feature {
 		$this->provider_instances = $this->get_provider_instances( ImageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -48,18 +48,18 @@ class PDFTextExtraction extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 	}
 
 	/**
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_action( 'add_attachment', [ $this, 'read_pdf' ] );
-		add_action( 'edit_attachment', [ $this, 'maybe_rescan_pdf' ] );
+		add_action( 'add_meta_boxes_attachment', array( $this, 'setup_attachment_meta_box' ) );
+		add_action( 'add_attachment', array( $this, 'read_pdf' ) );
+		add_action( 'edit_attachment', array( $this, 'maybe_rescan_pdf' ) );
 
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
+		add_filter( 'attachment_fields_to_edit', array( $this, 'add_rescan_button_to_media_modal' ), 10, 2 );
 	}
 
 	/**
@@ -69,19 +69,19 @@ class PDFTextExtraction extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'read-pdf/(?P<id>\d+)',
-			[
+			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
-				'args'                => [
-					'id' => [
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
+				'args'                => array(
+					'id' => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Attachment ID to extract text from the PDF file.', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'read_pdf_permissions_check' ],
-			]
+					),
+				),
+				'permission_callback' => array( $this, 'read_pdf_permissions_check' ),
+			)
 		);
 	}
 
@@ -143,7 +143,7 @@ class PDFTextExtraction extends Feature {
 		add_meta_box(
 			'classifai_pdf_processing',
 			__( 'ClassifAI PDF Processing', 'classifai' ),
-			[ $this, 'attachment_data_meta_box' ],
+			array( $this, 'attachment_data_meta_box' ),
 			'attachment',
 			'side',
 			'high'
@@ -167,7 +167,7 @@ class PDFTextExtraction extends Feature {
 		 *
 		 * @return array Status.
 		 */
-		$status = apply_filters( 'classifai_' . static::ID . '_read_status', [], $post->ID );
+		$status = apply_filters( 'classifai_' . static::ID . '_read_status', array(), $post->ID );
 
 		$read    = ! empty( $status['read'] ) ? __( 'Rescan PDF for text', 'classifai' ) : __( 'Scan PDF for text', 'classifai' );
 		$running = ! empty( $status['running'] );
@@ -223,13 +223,13 @@ class PDFTextExtraction extends Feature {
 	 */
 	public function save( string $result, int $attachment_id ) {
 		// Ensure we don't re-run this when the attachment is updated.
-		remove_action( 'edit_attachment', [ $this, 'maybe_rescan_pdf' ] );
+		remove_action( 'edit_attachment', array( $this, 'maybe_rescan_pdf' ) );
 
 		return wp_update_post(
-			[
+			array(
 				'ID'           => $attachment_id,
 				'post_content' => $result,
-			]
+			)
 		);
 	}
 
@@ -246,7 +246,7 @@ class PDFTextExtraction extends Feature {
 		}
 
 		$read_text = empty( get_the_content( null, false, $post ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
-		$status    = apply_filters( 'classifai_' . static::ID . '_read_status', [], $post->ID );
+		$status    = apply_filters( 'classifai_' . static::ID . '_read_status', array(), $post->ID );
 
 		if ( ! empty( $status['running'] ) ) {
 			$html = '<button class="button secondary" disabled>' . esc_html__( 'In progress!', 'classifai' ) . '</button>';
@@ -254,12 +254,12 @@ class PDFTextExtraction extends Feature {
 			$html = '<button class="button secondary" id="classifai-rescan-pdf" data-id="' . esc_attr( (string) absint( $post->ID ) ) . '">' . esc_html( $read_text ) . '</button>';
 		}
 
-		$form_fields['rescan_pdf'] = [
+		$form_fields['rescan_pdf'] = array(
 			'label'        => __( 'Scan PDF for text', 'classifai' ),
 			'input'        => 'html',
 			'html'         => $html,
 			'show_in_edit' => false,
-		];
+		);
 
 		return $form_fields;
 	}
@@ -279,10 +279,10 @@ class PDFTextExtraction extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
+		return array(
 			'processing_mode' => 'automatic',
 			'provider'        => ComputerVision::ID,
-		];
+		);
 	}
 
 	/**

@@ -54,9 +54,9 @@ class TermCleanupEPIntegration {
 			return;
 		}
 
-		add_filter( 'ep_term_mapping', [ $this, 'add_term_vector_field_mapping' ] );
-		add_filter( 'ep_prepare_term_meta_excluded_public_keys', [ $this, 'exclude_vector_meta' ] );
-		add_filter( 'ep_term_sync_args', [ $this, 'add_vector_field_to_term_sync' ], 10, 2 );
+		add_filter( 'ep_term_mapping', array( $this, 'add_term_vector_field_mapping' ) );
+		add_filter( 'ep_prepare_term_meta_excluded_public_keys', array( $this, 'exclude_vector_meta' ) );
+		add_filter( 'ep_term_sync_args', array( $this, 'add_vector_field_to_term_sync' ), 10, 2 );
 	}
 
 	/**
@@ -74,15 +74,15 @@ class TermCleanupEPIntegration {
 		}
 
 		// Add the default vector field mapping.
-		$mapping['mappings']['properties']['chunks'] = [
+		$mapping['mappings']['properties']['chunks'] = array(
 			'type'       => 'nested',
-			'properties' => [
-				'vector' => [
+			'properties' => array(
+				'vector' => array(
 					'type' => 'dense_vector',
 					'dims' => (int) $dimensions, // This needs to match the dimensions your model uses.
-				],
-			],
-		];
+				),
+			),
+		);
 
 		// Add extra vector fields for newer versions of Elasticsearch.
 		if ( version_compare( $this->es_version, '8.0', '>=' ) ) {
@@ -90,10 +90,10 @@ class TermCleanupEPIntegration {
 			// were added in 8.0. The similarity field must be set if index is true.
 			$mapping['mappings']['properties']['chunks']['properties']['vector'] = array_merge(
 				$mapping['mappings']['properties']['chunks']['properties']['vector'],
-				[
+				array(
 					'index'      => true,
 					'similarity' => 'cosine',
-				]
+				)
 			);
 
 			// The element_type field was added in 8.6. This can be either float (default) or byte.
@@ -156,12 +156,12 @@ class TermCleanupEPIntegration {
 		}
 
 		// Add the embeddings data to the sync args.
-		$args['chunks'] = [];
+		$args['chunks'] = array();
 
 		foreach ( $embeddings as $embedding ) {
-			$args['chunks'][] = [
+			$args['chunks'][] = array(
 				'vector' => array_map( 'floatval', $embedding ),
-			];
+			);
 		}
 
 		return $args;
@@ -222,49 +222,49 @@ class TermCleanupEPIntegration {
 		}
 
 		// Build our exact kNN query.
-		$knn_query = [
+		$knn_query = array(
 			'from'      => 0,
 			'size'      => (int) $num,
-			'query'     => [
-				'bool' => [
-					'must'     => [
-						[
-							'nested' => [
+			'query'     => array(
+				'bool' => array(
+					'must'     => array(
+						array(
+							'nested' => array(
 								'path'  => 'chunks',
-								'query' => [
-									'script_score' => [
-										'query'  => [
-											'match_all' => (object) [],
-										],
-										'script' => [
+								'query' => array(
+									'script_score' => array(
+										'query'  => array(
+											'match_all' => (object) array(),
+										),
+										'script' => array(
 											'source' => 'cosineSimilarity(params.query_vector, "chunks.vector") + 1.0',
-											'params' => [
+											'params' => array(
 												'query_vector' => array_map( 'floatval', $query_embedding ),
-											],
-										],
-									],
-								],
-							],
-						],
-					],
-					'must_not' => [
-						[
-							'term' => [
+											),
+										),
+									),
+								),
+							),
+						),
+					),
+					'must_not' => array(
+						array(
+							'term' => array(
 								'term_id' => $term_id,
-							],
-						],
-					],
-				],
-			],
-			'_source'   => [ 'term_id', 'score', 'taxonomy' ],
+							),
+						),
+					),
+				),
+			),
+			'_source'   => array( 'term_id', 'score', 'taxonomy' ),
 			'min_score' => $min_score,
-		];
+		);
 
 		// Add the score field to the document.
-		add_filter( 'ep_retrieve_the_term', [ $this, 'add_score_field_to_document' ], 10, 2 );
+		add_filter( 'ep_retrieve_the_term', array( $this, 'add_score_field_to_document' ), 10, 2 );
 
 		// Run the query using the ElasticPress indexable.
-		$res = $indexable->query_es( $knn_query, [] );
+		$res = $indexable->query_es( $knn_query, array() );
 
 		if ( false === $res || ! isset( $res['documents'] ) ) {
 			return new WP_Error( 'es_error', esc_html__( 'Unable to query Elasticsearch', 'classifai' ) );

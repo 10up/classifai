@@ -31,7 +31,7 @@ class TermCleanupScheduler {
 	 * Initialize the class.
 	 */
 	public function init() {
-		add_action( $this->job_name, [ $this, 'run' ] );
+		add_action( $this->job_name, array( $this, 'run' ) );
 	}
 
 	/**
@@ -39,7 +39,7 @@ class TermCleanupScheduler {
 	 *
 	 * @param array $item Item details to process.
 	 */
-	public function run( array $item = [] ) {
+	public function run( array $item = array() ) {
 		$action = $item['action'];
 
 		if ( ! $action ) {
@@ -82,11 +82,11 @@ class TermCleanupScheduler {
 					// If get we false, then there are no further terms to process.
 					if ( false === $results ) {
 						$item['embeddings_generated'] = true;
-						$this->schedule( [ $item ] );
+						$this->schedule( array( $item ) );
 						return;
 					}
 
-					$this->schedule( [ $item ] );
+					$this->schedule( array( $item ) );
 					return;
 				}
 
@@ -142,7 +142,7 @@ class TermCleanupScheduler {
 				$item['term_id']   = $res['term_id'];
 				$item['offset']    = $res['offset'];
 
-				$this->schedule( [ $item ] );
+				$this->schedule( array( $item ) );
 				return;
 			default:
 				return;
@@ -154,7 +154,7 @@ class TermCleanupScheduler {
 	 *
 	 * @param array $args Arguments to pass to the job.
 	 */
-	public function schedule( array $args = [] ) {
+	public function schedule( array $args = array() ) {
 		if ( function_exists( 'as_enqueue_async_action' ) ) {
 			as_enqueue_async_action( $this->job_name, $args );
 		}

@@ -33,10 +33,10 @@ class OllamaMultimodal extends Ollama {
 	 * @param array $args Overridable args.
 	 * @return array
 	 */
-	public function get_models( array $args = [] ): array {
+	public function get_models( array $args = array() ): array {
 		$models = parent::get_models( $args );
 
-		$supported_models = [
+		$supported_models = array(
 			'bakllava',
 			'deepseek-ocr',
 			'devstral-small-2',
@@ -70,7 +70,7 @@ class OllamaMultimodal extends Ollama {
 			'qwen3.5',
 			'qwen3.6',
 			'translategemma',
-		];
+		);
 
 		// Ensure our model list only contains the ones we support.
 		foreach ( $models as $key => $model ) {
@@ -99,14 +99,14 @@ class OllamaMultimodal extends Ollama {
 			case DescriptiveTextGenerator::ID:
 			case ImageTagsGenerator::ID:
 			case ImageTextExtraction::ID:
-				$common_settings['prompt'] = [
-					[
+				$common_settings['prompt'] = array(
+					array(
 						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 						'prompt'   => $this->feature_instance->get_prompt( 'default' ),
 						'original' => 1,
 						'default'  => 1,
-					],
-				];
+					),
+				);
 				break;
 		}
 
@@ -125,9 +125,9 @@ class OllamaMultimodal extends Ollama {
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this );
 		$response = $request->post(
 			$url,
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		// Return the error if we have one.
@@ -182,7 +182,7 @@ class OllamaMultimodal extends Ollama {
 		 *
 		 * @return string Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_ollama_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->get_prompt( 'default' ), $attachment_id );
+		$prompt = apply_filters( 'classifai_ollama_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? array() ) ?? $feature->get_prompt( 'default' ), $attachment_id );
 
 		/**
 		 * Filter the request body before sending to Ollama.
@@ -197,12 +197,12 @@ class OllamaMultimodal extends Ollama {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_descriptive_text_request_body',
-			[
+			array(
 				'model'  => $settings['model'] ?? '',
 				'prompt' => $prompt,
-				'images' => [ base64_encode( $image_data ) ], // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				'images' => array( base64_encode( $image_data ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 				'stream' => false,
-			],
+			),
 			$attachment_id
 		);
 
@@ -250,7 +250,7 @@ class OllamaMultimodal extends Ollama {
 		 *
 		 * @return string Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_ollama_ocr_processing_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->get_prompt( 'default' ), $attachment_id );
+		$prompt = apply_filters( 'classifai_ollama_ocr_processing_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? array() ) ?? $feature->get_prompt( 'default' ), $attachment_id );
 
 		/**
 		 * Filter the request body before sending to Ollama.
@@ -265,12 +265,12 @@ class OllamaMultimodal extends Ollama {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_ocr_processing_request_body',
-			[
+			array(
 				'model'  => $settings['model'] ?? '',
 				'prompt' => $prompt,
-				'images' => [ base64_encode( $image_data ) ], // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				'images' => array( base64_encode( $image_data ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 				'stream' => false,
-			],
+			),
 			$attachment_id
 		);
 
@@ -323,7 +323,7 @@ class OllamaMultimodal extends Ollama {
 		 *
 		 * @return string Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_ollama_image_tag_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->get_prompt( 'default' ), $attachment_id );
+		$prompt = apply_filters( 'classifai_ollama_image_tag_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? array() ) ?? $feature->get_prompt( 'default' ), $attachment_id );
 
 		/**
 		 * Filter the request body before sending to Ollama.
@@ -338,27 +338,27 @@ class OllamaMultimodal extends Ollama {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_image_tag_request_body',
-			[
+			array(
 				'model'  => $settings['model'] ?? '',
 				'prompt' => $prompt,
-				'images' => [ base64_encode( $image_data ) ], // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-				'format' => [
+				'images' => array( base64_encode( $image_data ) ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				'format' => array(
 					'type'                 => 'object',
-					'properties'           => [
-						'tags' => [
+					'properties'           => array(
+						'tags' => array(
 							'type'     => 'array',
 							'minItems' => 3,
 							'maxItems' => 5,
-							'items'    => [
+							'items'    => array(
 								'type' => 'string',
-							],
-						],
-					],
-					'required'             => [ 'tags' ],
+							),
+						),
+					),
+					'required'             => array( 'tags' ),
 					'additionalProperties' => false,
-				],
+				),
 				'stream' => false,
-			],
+			),
 			$attachment_id
 		);
 
@@ -398,11 +398,11 @@ class OllamaMultimodal extends Ollama {
 	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error|null
 	 */
-	public function rest_endpoint_callback( $attachment_id, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $attachment_id, string $route_to_call = '', array $args = array() ) {
 		// Check to be sure the post both exists and is an attachment.
 		if ( ! get_post( $attachment_id ) || 'attachment' !== get_post_type( $attachment_id ) ) {
 			/* translators: %1$s: the attachment ID */
-			return new WP_Error( 'incorrect_ID', sprintf( esc_html__( '%1$d is not found or is not an attachment', 'classifai' ), $attachment_id ), [ 'status' => 404 ] );
+			return new WP_Error( 'incorrect_ID', sprintf( esc_html__( '%1$d is not found or is not an attachment', 'classifai' ), $attachment_id ), array( 'status' => 404 ) );
 		}
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -419,8 +419,8 @@ class OllamaMultimodal extends Ollama {
 					get_attached_file( $attachment_id ),
 					wp_get_attachment_url( $attachment_id ),
 					$metadata,
-					[ 50, 16000 ],
-					[ 50, 16000 ],
+					array( 50, 16000 ),
+					array( 50, 16000 ),
 					computer_vision_max_filesize()
 				);
 			} else {

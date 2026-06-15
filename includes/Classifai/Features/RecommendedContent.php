@@ -33,9 +33,9 @@ class RecommendedContent extends Feature {
 		$this->provider_instances = $this->get_provider_instances( ContentRecommendationService::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -44,12 +44,12 @@ class RecommendedContent extends Feature {
 	public function feature_setup() {
 		$settings = $this->get_settings();
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_feature_setting_assets' ] );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_feature_setting_assets' ) );
 
 		if ( isset( $settings['provider'] ) && OpenAIEmbeddings::ID === $settings['provider'] ) {
-			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-			add_filter( 'pre_render_block', [ $this, 'pre_render_block' ], 10, 2 );
-			add_filter( 'rest_post_query', [ $this, 'modify_block_query_vars_rest' ], 10, 2 );
+			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+			add_filter( 'pre_render_block', array( $this, 'pre_render_block' ), 10, 2 );
+			add_filter( 'rest_post_query', array( $this, 'modify_block_query_vars_rest' ), 10, 2 );
 		}
 	}
 
@@ -68,10 +68,10 @@ class RecommendedContent extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
+		return array(
 			'provider'         => OpenAIEmbeddings::ID,
 			'default_template' => 'title-date',
-		];
+		);
 	}
 
 	/**
@@ -100,9 +100,9 @@ class RecommendedContent extends Feature {
 		);
 
 		$settings = $this->get_settings();
-		$data     = [
+		$data     = array(
 			'default_template' => $settings['default_template'],
-		];
+		);
 
 		wp_add_inline_script(
 			'classifai-recommended-content-block-variation',
@@ -126,7 +126,7 @@ class RecommendedContent extends Feature {
 			isset( $block['attrs']['namespace'] ) &&
 			'classifai/recommended-content' === $block['attrs']['namespace']
 		) {
-			add_filter( 'query_loop_block_query_vars', [ $this, 'modify_block_query_vars_front_end' ] );
+			add_filter( 'query_loop_block_query_vars', array( $this, 'modify_block_query_vars_front_end' ) );
 		}
 
 		return $pre_render;
@@ -193,9 +193,9 @@ class RecommendedContent extends Feature {
 	 * @param int   $post_id The post ID.
 	 * @return array
 	 */
-	public function modify_block_query_vars( array $query_vars = [], int $post_id = 0 ) {
+	public function modify_block_query_vars( array $query_vars = array(), int $post_id = 0 ) {
 		$post_id           = ! $post_id ? get_the_ID() : $post_id;
-		$post__in          = [];
+		$post__in          = array();
 		$count             = 0;
 		$provider_instance = $this->get_feature_provider_instance();
 
@@ -239,7 +239,7 @@ class RecommendedContent extends Feature {
 		// If we have no matches, remove the current post from the query
 		// but otherwise keep the query as is.
 		if ( empty( $post__in ) ) {
-			$query_vars['post__not_in'] = [ $post_id ];
+			$query_vars['post__not_in'] = array( $post_id ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 			return $query_vars;
 		}
 
@@ -254,11 +254,11 @@ class RecommendedContent extends Feature {
 			$backfill_query = new \WP_Query(
 				array_merge(
 					$new_query_vars,
-					[
+					array(
 						'posts_per_page' => (int) $query_vars['posts_per_page'] - $post_count,
-						'post__not_in'   => [ $post_id ],
+						'post__not_in'   => array( $post_id ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 						'fields'         => 'ids',
-					]
+					)
 				)
 			);
 
@@ -270,11 +270,11 @@ class RecommendedContent extends Feature {
 		// Add the post IDs we want to our query.
 		$query_vars = array_merge(
 			$query_vars,
-			[
+			array(
 				'posts_per_page' => $post_count,
 				'post__in'       => $post__in,
 				'orderby'        => 'post__in',
-			]
+			)
 		);
 
 		return $query_vars;

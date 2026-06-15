@@ -67,11 +67,11 @@ class TermCleanup extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
 			OllamaEmbeddings::ID => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -102,20 +102,20 @@ class TermCleanup extends Feature {
 	 * This will only fire if the Feature is enabled.
 	 */
 	public function feature_setup() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 
 		// Register the settings page for the Feature.
-		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
-		add_action( 'admin_post_classifai_init_term_cleanup', [ $this, 'start_term_cleanup_process' ] );
-		add_action( 'admin_post_classifai_cancel_term_cleanup', [ $this, 'cancel_term_cleanup_process' ] );
-		add_action( 'admin_post_classifai_merge_term', [ $this, 'merge_term' ] );
-		add_action( 'admin_post_classifai_skip_similar_term', [ $this, 'skip_similar_term' ] );
+		add_action( 'admin_menu', array( $this, 'register_admin_menu_item' ) );
+		add_action( 'admin_post_classifai_init_term_cleanup', array( $this, 'start_term_cleanup_process' ) );
+		add_action( 'admin_post_classifai_cancel_term_cleanup', array( $this, 'cancel_term_cleanup_process' ) );
+		add_action( 'admin_post_classifai_merge_term', array( $this, 'merge_term' ) );
+		add_action( 'admin_post_classifai_skip_similar_term', array( $this, 'skip_similar_term' ) );
 
 		// Ajax action handler
-		add_action( 'wp_ajax_classifai_get_term_cleanup_status', [ $this, 'get_term_cleanup_status' ] );
+		add_action( 'wp_ajax_classifai_get_term_cleanup_status', array( $this, 'get_term_cleanup_status' ) );
 
 		// Admin notices
-		add_action( 'admin_notices', [ $this, 'render_notices' ] );
+		add_action( 'admin_notices', array( $this, 'render_notices' ) );
 	}
 
 	/**
@@ -153,7 +153,7 @@ class TermCleanup extends Feature {
 			__( 'Term Cleanup', 'classifai' ),
 			'manage_options',
 			'classifai-term-cleanup',
-			[ $this, 'render_settings_page' ]
+			array( $this, 'render_settings_page' )
 		);
 	}
 
@@ -266,7 +266,7 @@ class TermCleanup extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		$tax_settings = [];
+		$tax_settings = array();
 		$taxonomies   = $this->get_taxonomies();
 
 		foreach ( $taxonomies as $name => $label ) {
@@ -279,11 +279,11 @@ class TermCleanup extends Feature {
 			$tax_settings[ "{$name}_threshold" ] = 75;
 		}
 
-		$settings = [
+		$settings = array(
 			'provider'   => OpenAIEmbeddings::ID,
 			'use_ep'     => is_elasticpress_installed() ? 1 : 0,
 			'taxonomies' => $tax_settings,
-		];
+		);
 
 		return $settings;
 	}
@@ -344,7 +344,7 @@ class TermCleanup extends Feature {
 		$taxonomies = $this->get_taxonomies();
 		$settings   = $this->get_settings( 'taxonomies' );
 
-		$enabled_taxonomies = [];
+		$enabled_taxonomies = array();
 		foreach ( $taxonomies as $name => $label ) {
 			if ( isset( $settings[ $name ] ) && (bool) $settings[ $name ] ) {
 				$enabled_taxonomies[] = $name;
@@ -378,13 +378,13 @@ class TermCleanup extends Feature {
 		}
 
 		// Clear previously found similar terms.
-		$args = [
+		$args = array(
 			'taxonomy'     => $taxonomy,
 			'hide_empty'   => false,
 			'fields'       => 'ids',
 			'meta_key'     => 'classifai_similar_terms', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare' => 'EXISTS',
-		];
+		);
 
 		$terms = get_terms( $args );
 
@@ -394,8 +394,8 @@ class TermCleanup extends Feature {
 			}
 		}
 
-		$job_args = [
-			[
+		$job_args = array(
+			array(
 				'taxonomy'             => $taxonomy,
 				'threshold'            => $threshold,
 				'action'               => 'term_cleanup',
@@ -405,8 +405,8 @@ class TermCleanup extends Feature {
 				'offset'               => 0,
 				'started_by'           => get_current_user_id(),
 				'job_id'               => str_replace( '-', '', wp_generate_uuid4() ),
-			],
-		];
+			),
+		);
 
 		$this->background_process->schedule( $job_args );
 
@@ -465,19 +465,19 @@ class TermCleanup extends Feature {
 	 * @return bool|WP_Error True if embeddings were generated, false otherwise.
 	 */
 	public function generate_embeddings( string $taxonomy ) {
-		$exclude = [];
+		$exclude = array();
 
 		// Exclude the uncategorized term.
 		if ( 'category' === $taxonomy ) {
 			// Exclude the uncategorized term.
 			$uncat_term = get_term_by( 'name', 'Uncategorized', 'category' );
 			if ( $uncat_term ) {
-				$exclude = [ $uncat_term->term_id ];
+				$exclude = array( $uncat_term->term_id );
 			}
 		}
 
 		$meta_key = sanitize_text_field( $this->get_embeddings_meta_key() );
-		$args     = [
+		$args     = array(
 			'taxonomy'     => $taxonomy,
 			'orderby'      => 'count',
 			'order'        => 'DESC',
@@ -487,7 +487,7 @@ class TermCleanup extends Feature {
 			'meta_compare' => 'NOT EXISTS',
 			'number'       => $this->get_max_terms(),
 			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-		];
+		);
 
 		$terms = get_terms( $args );
 
@@ -537,7 +537,7 @@ class TermCleanup extends Feature {
 	 * @param array  $args     Additional arguments.
 	 * @return array|bool|WP_Error
 	 */
-	public function get_similar_terms( string $taxonomy, float $threshold, array $args = [] ) {
+	public function get_similar_terms( string $taxonomy, float $threshold, array $args = array() ) {
 		if ( class_exists( '\\ElasticPress\\Feature' ) && '1' === $this->get_settings( 'use_ep' ) ) {
 			return $this->get_similar_terms_using_elasticpress( $taxonomy, $threshold, $args );
 		}
@@ -557,14 +557,14 @@ class TermCleanup extends Feature {
 	 * @param array  $args     Additional arguments.
 	 * @return array|bool
 	 */
-	public function get_similar_terms_using_wpdb( string $taxonomy, float $threshold, array $args = [] ) {
+	public function get_similar_terms_using_wpdb( string $taxonomy, float $threshold, array $args = array() ) {
 		$processed = $args['processed'] ?? 0;
 		$term_id   = $args['term_id'] ?? 0;
 		$offset    = $args['offset'] ?? 0;
 		$meta_key  = sanitize_text_field( $this->get_embeddings_meta_key() );
 
 		if ( ! $term_id ) {
-			$params = [
+			$params = array(
 				'taxonomy'     => $taxonomy,
 				'orderby'      => 'count',
 				'order'        => 'DESC',
@@ -574,7 +574,7 @@ class TermCleanup extends Feature {
 				'meta_compare' => 'EXISTS',
 				'number'       => 1,
 				'offset'       => $processed,
-			];
+			);
 
 			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
 				$params['parent'] = 0;
@@ -627,7 +627,7 @@ class TermCleanup extends Feature {
 		$count   = count( $results );
 
 		$calculations  = new EmbeddingCalculations();
-		$similar_terms = [];
+		$similar_terms = array();
 
 		foreach ( $results as $index => $result ) {
 			// Skip if the term is the same as the term we are comparing.
@@ -677,11 +677,11 @@ class TermCleanup extends Feature {
 	 * @param array  $args     Additional arguments.
 	 * @return array|bool|WP_Error
 	 */
-	public function get_similar_terms_using_elasticpress( string $taxonomy, float $threshold, array $args = [] ) {
+	public function get_similar_terms_using_elasticpress( string $taxonomy, float $threshold, array $args = array() ) {
 		$processed = $args['processed'] ?? 0;
 		$meta_key  = sanitize_text_field( $this->get_embeddings_meta_key() );
 
-		$params = [
+		$params = array(
 			'taxonomy'     => $taxonomy,
 			'orderby'      => 'count',
 			'order'        => 'DESC',
@@ -691,7 +691,7 @@ class TermCleanup extends Feature {
 			'meta_compare' => 'EXISTS',
 			'number'       => 10,
 			'offset'       => $processed,
-		];
+		);
 
 		if ( is_taxonomy_hierarchical( $taxonomy ) ) {
 			$params['parent'] = 0;
@@ -715,7 +715,7 @@ class TermCleanup extends Feature {
 				return $search_results;
 			}
 
-			$similar_terms    = [];
+			$similar_terms    = array();
 			$filtered_results = array_filter(
 				$search_results,
 				function ( $result ) use ( $taxonomy ) {
@@ -761,7 +761,7 @@ class TermCleanup extends Feature {
 	 */
 	public function get_background_processing_status( string $taxonomy ): array {
 		if ( ! $this->background_process ) {
-			return [];
+			return array();
 		}
 
 		$args = $this->background_process->get_args();
@@ -774,7 +774,7 @@ class TermCleanup extends Feature {
 			}
 		}
 
-		return [];
+		return array();
 	}
 
 	/**
@@ -847,12 +847,12 @@ class TermCleanup extends Feature {
 			} else {
 				$meta_key  = sanitize_text_field( $this->get_embeddings_meta_key() );
 				$generated = wp_count_terms(
-					[
+					array(
 						'taxonomy'     => $taxonomy,
 						'hide_empty'   => false,
 						'meta_key'     => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 						'meta_compare' => 'EXISTS',
-					]
+					)
 				);
 				?>
 				<p>
@@ -886,12 +886,12 @@ class TermCleanup extends Feature {
 	public function render_similar_terms( $taxonomy ) {
 		$label = $this->get_taxonomy_label( $taxonomy, true );
 		$count = wp_count_terms(
-			[
+			array(
 				'taxonomy'     => $taxonomy,
 				'hide_empty'   => false,
 				'meta_key'     => 'classifai_similar_terms', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_compare' => 'EXISTS',
-			]
+			)
 		);
 
 		if ( $count > 0 ) {
@@ -981,11 +981,11 @@ class TermCleanup extends Feature {
 		$from      = isset( $_GET['from'] ) ? absint( wp_unslash( $_GET['from'] ) ) : 0;
 		$to_term   = get_term( $to, $taxonomy );
 		$from_term = get_term( $from, $taxonomy );
-		$args      = [
+		$args      = array(
 			'tax'   => $taxonomy,
 			's'     => isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false,
 			'paged' => isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : false,
-		];
+		);
 		$redirect  = add_query_arg( $args, $this->setting_page_url );
 
 		if ( empty( $taxonomy ) || empty( $to ) || empty( $from ) ) {
@@ -1078,11 +1078,11 @@ class TermCleanup extends Feature {
 		$taxonomy     = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : '';
 		$term         = isset( $_GET['term'] ) ? absint( wp_unslash( $_GET['term'] ) ) : 0;
 		$similar_term = isset( $_GET['similar_term'] ) ? absint( wp_unslash( $_GET['similar_term'] ) ) : 0;
-		$args         = [
+		$args         = array(
 			'tax'   => $taxonomy,
 			's'     => isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false,
 			'paged' => isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : false,
-		];
+		);
 		$redirect     = add_query_arg( $args, $this->setting_page_url );
 
 		/**
@@ -1140,7 +1140,7 @@ class TermCleanup extends Feature {
 		$notices = get_transient( $this->notices_transient_key );
 
 		if ( ! is_array( $notices ) ) {
-			$notices = [];
+			$notices = array();
 		}
 
 		$notices[] = array(

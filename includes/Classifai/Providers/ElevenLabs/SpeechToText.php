@@ -36,13 +36,13 @@ class SpeechToText extends Provider {
 	 *
 	 * @var array
 	 */
-	public $file_formats = [
+	public $file_formats = array(
 		'mp3',
 		'mp4',
 		'mpeg',
 		'wav',
 		'ogg',
-	];
+	);
 
 	/**
 	 * Maximum file size our model supports.
@@ -70,12 +70,12 @@ class SpeechToText extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		return [
+		return array(
 			'api_key'       => '',
 			'authenticated' => false,
 			'model'         => '',
-			'models'        => [],
-		];
+			'models'        => array(),
+		);
 	}
 
 	/**
@@ -93,16 +93,16 @@ class SpeechToText extends Provider {
 
 		// Speech To Text only supports two models and they don't seem to be
 		// in the models endpoint, so we hardcode them here.
-		$new_settings[ static::ID ]['models'] = [
-			[
+		$new_settings[ static::ID ]['models'] = array(
+			array(
 				'id'           => 'scribe_v1',
 				'display_name' => 'Scribe v1',
-			],
-			[
+			),
+			array(
 				'id'           => 'scribe_v1_experimental',
 				'display_name' => 'Scribe v1 Experimental',
-			],
-		];
+			),
+		);
 
 		$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] ?? $settings[ static::ID ]['model'] );
 
@@ -122,7 +122,7 @@ class SpeechToText extends Provider {
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( string $audio_resource, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( string $audio_resource, string $route_to_call = '', array $args = array() ) {
 		switch ( $route_to_call ) {
 			case 'transcript':
 				if ( $this->feature_instance instanceof AudioTranscriptsGeneration ) {
@@ -150,7 +150,7 @@ class SpeechToText extends Provider {
 	 * @param array  $args      Optional arguments passed in.
 	 * @return WP_Error|bool
 	 */
-	public function transcribe_audio( string $file_path = '', array $args = [] ) {
+	public function transcribe_audio( string $file_path = '', array $args = array() ) {
 		$feature  = new AudioTranscriptsGeneration();
 		$settings = $feature->get_settings( static::ID );
 
@@ -172,10 +172,10 @@ class SpeechToText extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_elevenlabs_transcribe_request_body',
-			[
+			array(
 				'file'     => $file_path,
 				'model_id' => sanitize_text_field( $settings['model'] ),
-			],
+			),
 			$file_path,
 			$args
 		);
@@ -208,12 +208,12 @@ class SpeechToText extends Provider {
 			$this->get_api_url( $this->api_path ),
 			$settings['api_key'] ?? '',
 			'post',
-			[
+			array(
 				'body'    => $payload,
-				'headers' => [
+				'headers' => array(
 					'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
-				],
-			]
+				),
+			)
 		);
 
 		$return = '';

@@ -156,7 +156,7 @@ class CredentialObfuscator {
 		$profiles = ProviderProfiles::get_all_profiles();
 
 		// Get all Provider IDs from profiles.
-		$all_provider_ids = [];
+		$all_provider_ids = array();
 		foreach ( $profiles as $profile ) {
 			$all_provider_ids = array_merge( $all_provider_ids, $profile['provider_ids'] );
 		}
@@ -230,7 +230,7 @@ class CredentialObfuscator {
 		$profiles = ProviderProfiles::get_all_profiles();
 
 		// Get all Provider IDs from profiles.
-		$all_provider_ids = [];
+		$all_provider_ids = array();
 		foreach ( $profiles as $profile ) {
 			$all_provider_ids = array_merge( $all_provider_ids, $profile['provider_ids'] );
 		}
@@ -240,7 +240,7 @@ class CredentialObfuscator {
 			if ( is_array( $value ) && in_array( $key, $all_provider_ids, true ) ) {
 				$new_settings[ $key ] = self::merge_credentials(
 					$value,
-					$existing_settings[ $key ] ?? [],
+					$existing_settings[ $key ] ?? array(),
 					$key
 				);
 			}

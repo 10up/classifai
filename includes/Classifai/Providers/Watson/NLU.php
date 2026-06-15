@@ -32,7 +32,7 @@ class NLU extends Provider {
 	 *
 	 * @var array
 	 */
-	public $nlu_features = [];
+	public $nlu_features = array();
 
 	/**
 	 * Watson NLU constructor.
@@ -42,36 +42,36 @@ class NLU extends Provider {
 	public function __construct( $feature = null ) {
 		$this->feature_instance = $feature;
 
-		$this->nlu_features = [
-			'category' => [
+		$this->nlu_features = array(
+			'category' => array(
 				'feature'           => __( 'Category', 'classifai' ),
 				'threshold'         => __( 'Category Threshold (%)', 'classifai' ),
 				'taxonomy'          => __( 'Category Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_CATEGORY_THRESHOLD,
 				'taxonomy_default'  => WATSON_CATEGORY_TAXONOMY,
-			],
-			'keyword'  => [
+			),
+			'keyword'  => array(
 				'feature'           => __( 'Keyword', 'classifai' ),
 				'threshold'         => __( 'Keyword Threshold (%)', 'classifai' ),
 				'taxonomy'          => __( 'Keyword Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_KEYWORD_THRESHOLD,
 				'taxonomy_default'  => WATSON_KEYWORD_TAXONOMY,
-			],
-			'entity'   => [
+			),
+			'entity'   => array(
 				'feature'           => __( 'Entity', 'classifai' ),
 				'threshold'         => __( 'Entity Threshold (%)', 'classifai' ),
 				'taxonomy'          => __( 'Entity Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_ENTITY_THRESHOLD,
 				'taxonomy_default'  => WATSON_ENTITY_TAXONOMY,
-			],
-			'concept'  => [
+			),
+			'concept'  => array(
 				'feature'           => __( 'Concept', 'classifai' ),
 				'threshold'         => __( 'Concept Threshold (%)', 'classifai' ),
 				'taxonomy'          => __( 'Concept Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_CONCEPT_THRESHOLD,
 				'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -83,42 +83,42 @@ class NLU extends Provider {
 		add_settings_field(
 			static::ID . '_endpoint_url',
 			esc_html__( 'API URL', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'endpoint_url',
 				'default_value' => $settings['endpoint_url'],
 				'input_type'    => 'text',
 				'large'         => true,
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_username',
 			esc_html__( 'API Username', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'username',
 				'default_value' => $settings['username'],
 				'input_type'    => 'text',
 				'large'         => true,
 				'class'         => 'classifai-provider-field ' . ( $this->use_username_password() ? 'hide-username' : '' ) . ' provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_password',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'password',
 				'default_value' => $settings['password'],
@@ -131,23 +131,23 @@ class NLU extends Provider {
 						wp_kses(
 							/* translators: %1$s is the link to register for an IBM Cloud account, %2$s is the link to setup the NLU service */
 							__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							]
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							)
 						),
 						esc_url( 'https://cloud.ibm.com/registration' ),
 						esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
 					),
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_toggle',
 			'',
-			function ( $args = [] ) {
+			function ( $args = array() ) {
 				printf(
 					'<a id="classifai-waston-cred-toggle" href="#" class="%s">%s</a>',
 					$args['class'] ? esc_attr( $args['class'] ) : '', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -158,9 +158,9 @@ class NLU extends Provider {
 			},
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'class' => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
@@ -174,17 +174,17 @@ class NLU extends Provider {
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_feature_settings' ), 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
 		}
 
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		add_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_feature_settings' ), 10, 2 );
 
 		return array_merge(
 			$settings,
-			[
+			array(
 				'category'           => true,
 				'category_threshold' => WATSON_CATEGORY_THRESHOLD,
 				'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
@@ -200,7 +200,7 @@ class NLU extends Provider {
 				'entity'             => false,
 				'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
 				'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
-			]
+			)
 		);
 	}
 
@@ -210,12 +210,12 @@ class NLU extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'endpoint_url' => '',
 			'apikey'       => '',
 			'username'     => 'apikey',
 			'password'     => '',
-		];
+		);
 
 		return $common_settings;
 	}
@@ -224,7 +224,7 @@ class NLU extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		add_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_feature_settings' ), 10, 2 );
 
 		$feature = new Classification();
 
@@ -232,7 +232,6 @@ class NLU extends Provider {
 			$feature->is_feature_enabled() &&
 			$feature->get_feature_provider_instance()::ID === static::ID
 		) {
-
 			$this->taxonomy_factory = new TaxonomyFactory();
 			$this->taxonomy_factory->build_all();
 
@@ -259,6 +258,7 @@ class NLU extends Provider {
 
 		$text_to_classify        = $normalizer->normalize( (int) $post_id );
 		$body                    = $classifier->get_body( $text_to_classify );
+		$request_options         = array();
 		$request_options['body'] = $body;
 		$request                 = $classifier->get_request();
 
@@ -284,12 +284,12 @@ class NLU extends Provider {
 			return $classified_data;
 		}
 
-		$features = [
+		$features = array(
 			'category' => 'categories',
 			'concept'  => 'concepts',
 			'entity'   => 'entities',
 			'keyword'  => 'keywords',
-		];
+		);
 		foreach ( $features as $key => $feature ) {
 			$taxonomy = get_classification_feature_taxonomy( $key );
 			if ( ! $taxonomy ) {
@@ -369,28 +369,28 @@ class NLU extends Provider {
 	 * @param array $settings The list of settings to be saved
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	protected function authenticate_credentials( array $settings = array() ) {
 		$credentials       = $this->get_credentials( $settings );
 		$request           = new APIRequest();
 		$request->username = $credentials['username'] ?? '';
 		$request->password = $credentials['password'] ?? '';
 		$base_url          = trailingslashit( $credentials['endpoint_url'] ?? '' ) . 'v1/analyze';
-		$url               = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
-		$options           = [
+		$url               = esc_url( add_query_arg( array( 'version' => WATSON_NLU_VERSION ), $base_url ) );
+		$options           = array(
 			'body'    => wp_json_encode(
-				[
+				array(
 					'text'     => 'Lorem ipsum dolor sit amet.',
 					'language' => 'en',
-					'features' => [
-						'keywords' => [
+					'features' => array(
+						'keywords' => array(
 							'emotion' => false,
 							'limit'   => 1,
-						],
-					],
-				]
+						),
+					),
+				)
 			),
 			'use_vip' => true,
-		];
+		);
 
 		$response = $request->post( $url, $options );
 
@@ -440,7 +440,7 @@ class NLU extends Provider {
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to run classification.', 'classifai' ) );
 		}
@@ -508,7 +508,7 @@ class NLU extends Provider {
 
 		$classifier = new PostClassifier();
 
-		$output = $classifier->link( $post_id, $terms, [], $link );
+		$output = $classifier->link( $post_id, $terms, array(), $link );
 
 		return $output;
 	}
@@ -530,10 +530,10 @@ class NLU extends Provider {
 
 		$formatted_data = array_intersect_key(
 			$data,
-			[
+			array(
 				'usage'    => 1,
 				'language' => 1,
-			]
+			)
 		);
 
 		foreach ( array_diff_key( $data, $formatted_data ) as $key => $value ) {
@@ -550,7 +550,7 @@ class NLU extends Provider {
 	 */
 	public function get_debug_information(): array {
 		$settings   = $this->feature_instance->get_settings();
-		$debug_info = [];
+		$debug_info = array();
 
 		if ( $this->feature_instance instanceof Classification ) {
 			foreach ( $this->nlu_features as $slug => $feature ) {

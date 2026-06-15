@@ -34,12 +34,12 @@ abstract class Service {
 	/**
 	 * @var string[] array Array of feature classes for this service
 	 */
-	public $features = [];
+	public $features = array();
 
 	/**
 	 * @var \Classifai\Features\Feature[] Array of feature instances.
 	 */
-	public $feature_classes = [];
+	public $feature_classes = array();
 
 	/**
 	 * Service constructor.
@@ -101,7 +101,7 @@ abstract class Service {
 			}
 		}
 
-		add_filter( 'classifai_debug_information', [ $this, 'add_service_debug_information' ] );
+		add_filter( 'classifai_debug_information', array( $this, 'add_service_debug_information' ) );
 	}
 
 	/**
@@ -244,10 +244,10 @@ abstract class Service {
 	 */
 	public function get_service_debug_information(): array {
 		$make_line = function ( $feature ) {
-			return [
+			return array(
 				'label' => sprintf( '%s', $feature->get_label() ),
 				'value' => $feature->get_debug_information(),
-			];
+			);
 		};
 
 		return array_map( $make_line, $this->feature_classes );

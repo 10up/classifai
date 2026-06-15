@@ -44,12 +44,12 @@ class Classification extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			NLU::ID              => __( 'IBM Watson NLU', 'classifai' ),
 			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
 			OllamaEmbeddings::ID => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -59,7 +59,7 @@ class Classification extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 	}
 
 	/**
@@ -69,23 +69,23 @@ class Classification extends Feature {
 		$post_types = $this->get_supported_post_types();
 		if ( ! empty( $post_types ) ) {
 			foreach ( $post_types as $post_type ) {
-				add_action( 'rest_after_insert_' . $post_type, [ $this, 'rest_after_insert' ] );
+				add_action( 'rest_after_insert_' . $post_type, array( $this, 'rest_after_insert' ) );
 			}
 		}
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
-		add_action( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_action( 'classifai_after_feature_settings_form', array( $this, 'render_previewer' ) );
+		add_action( 'rest_api_init', array( $this, 'add_process_content_meta_to_rest_api' ) );
 		add_action( 'wp_ajax_classifai_get_post_search_results', array( $this, 'get_post_search_results' ) );
-		add_filter( 'default_post_metadata', [ $this, 'default_post_metadata' ], 10, 3 );
+		add_filter( 'default_post_metadata', array( $this, 'default_post_metadata' ), 10, 3 );
 
 		// Support the Classic Editor.
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ], 10, 2 );
-		add_action( 'save_post', [ $this, 'save_meta_box' ] );
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ), 10, 2 );
+		add_action( 'save_post', array( $this, 'save_meta_box' ) );
 		add_action( 'admin_post_classifai_classify_post', array( $this, 'classifai_classify_post' ) );
-		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
-		add_filter( 'removable_query_args', [ $this, 'removable_query_args' ] );
+		add_action( 'admin_notices', array( $this, 'show_error_if' ) );
+		add_filter( 'removable_query_args', array( $this, 'removable_query_args' ) );
 	}
 
 	/**
@@ -97,22 +97,22 @@ class Classification extends Feature {
 			register_meta(
 				'post',
 				'_classifai_error',
-				[
+				array(
 					'object_subtype' => $post_type,
 					'type'           => 'string',
 					'show_in_rest'   => true,
 					'single'         => true,
 					'auth_callback'  => '__return_true',
-				]
+				)
 			);
 		}
 
 		register_rest_route(
 			'classifai/v1',
 			'classify/(?P<id>\d+)',
-			[
+			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
 				'args'                => array(
 					'id'        => array(
 						'required'          => true,
@@ -126,8 +126,8 @@ class Classification extends Feature {
 						'default'     => true,
 					),
 				),
-				'permission_callback' => [ $this, 'classify_permissions_check' ],
-			]
+				'permission_callback' => array( $this, 'classify_permissions_check' ),
+			)
 		);
 	}
 
@@ -201,9 +201,9 @@ class Classification extends Feature {
 			$results = $this->run(
 				$request->get_param( 'id' ),
 				'classify',
-				[
+				array(
 					'link_terms' => $request->get_param( 'linkTerms' ),
-				]
+				)
 			);
 
 			// Save results or return the results that need saved.
@@ -212,10 +212,10 @@ class Classification extends Feature {
 			}
 
 			return rest_ensure_response(
-				[
+				array(
 					'terms'              => $results,
 					'feature_taxonomies' => $this->get_all_feature_taxonomies(),
-				]
+				)
 			);
 		}
 
@@ -297,10 +297,10 @@ class Classification extends Feature {
 				$post->ID,
 				'_classifai_error',
 				wp_json_encode(
-					[
+					array(
 						'code'    => $results->get_error_code(),
 						'message' => $results->get_error_message(),
-					]
+					)
 				)
 			);
 		}
@@ -366,12 +366,12 @@ class Classification extends Feature {
 			sprintf(
 				'var classifaiPostData = %s;',
 				wp_json_encode(
-					[
+					array(
 						'NLUEnabled'           => $this->is_feature_enabled(),
 						'supportedPostTypes'   => $this->get_supported_post_types(),
 						'supportedPostStatues' => $this->get_supported_post_statuses(),
 						'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-					]
+					)
 				)
 			),
 			'before'
@@ -387,7 +387,7 @@ class Classification extends Feature {
 		register_rest_field(
 			$supported_post_types,
 			'classifai_process_content',
-			[
+			array(
 				'get_callback'    => function ( $data ) {
 					$process_content = get_post_meta( $data['id'], '_classifai_process_content', true );
 					return ( 'no' === $process_content ) ? 'no' : 'yes';
@@ -396,11 +396,11 @@ class Classification extends Feature {
 					$value = ( 'no' === $value ) ? 'no' : 'yes';
 					return update_post_meta( $data->ID, '_classifai_process_content', $value );
 				},
-				'schema'          => [
+				'schema'          => array(
 					'type'    => 'string',
-					'context' => [ 'view', 'edit' ],
-				],
-			]
+					'context' => array( 'view', 'edit' ),
+				),
+			)
 		);
 	}
 
@@ -447,7 +447,7 @@ class Classification extends Feature {
 			add_meta_box(
 				'classifai_language_processing_metabox',
 				__( 'ClassifAI Language Processing', 'classifai' ),
-				[ $this, 'render_meta_box' ],
+				array( $this, 'render_meta_box' ),
 				null,
 				'side',
 				'high',
@@ -520,10 +520,10 @@ class Classification extends Feature {
 					$post_id,
 					'_classifai_error',
 					wp_json_encode(
-						[
+						array(
 							'code'    => $results->get_error_code(),
 							'message' => $results->get_error_message(),
-						]
+						)
 					)
 				);
 			}
@@ -575,10 +575,10 @@ class Classification extends Feature {
 				$post_id,
 				'_classifai_error',
 				wp_json_encode(
-					[
+					array(
 						'code'    => $results->get_error_code(),
 						'message' => $results->get_error_message(),
-					]
+					)
 				)
 			);
 		}
@@ -779,17 +779,17 @@ class Classification extends Feature {
 		add_settings_field(
 			'classification_mode',
 			esc_html__( 'Classification mode', 'classifai' ),
-			[ $this, 'render_radio_group' ],
+			array( $this, 'render_radio_group' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'classification_mode',
 				'default_value' => $settings['classification_mode'],
 				'options'       => array(
 					'manual_review'            => __( 'Manual review', 'classifai' ),
 					'automatic_classification' => __( 'Automatic classification', 'classifai' ),
 				),
-			]
+			)
 		);
 
 		$method_options = array(
@@ -806,58 +806,58 @@ class Classification extends Feature {
 		add_settings_field(
 			'classification_method',
 			esc_html__( 'Classification method', 'classifai' ),
-			[ $this, 'render_radio_group' ],
+			array( $this, 'render_radio_group' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'classification_method',
 				'default_value' => $settings['classification_method'],
 				'options'       => $method_options,
-			]
+			)
 		);
 
 		foreach ( $nlu_features as $classify_by => $labels ) {
 			add_settings_field(
 				$classify_by,
 				esc_html( $labels['feature'] ),
-				[ $this, 'render_nlu_feature_settings' ],
+				array( $this, 'render_nlu_feature_settings' ),
 				$this->get_option_name(),
 				$this->get_option_name() . '_section',
-				[
+				array(
 					'feature'       => $classify_by,
 					'labels'        => $labels,
 					'default_value' => $settings[ $classify_by ],
 					'post_types'    => $settings['post_types'],
-				]
+				)
 			);
 		}
 
 		add_settings_field(
 			'post_statuses',
 			esc_html__( 'Post statuses', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
+			array( $this, 'render_checkbox_group' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'      => 'post_statuses',
 				'options'        => $post_statuses,
 				'default_values' => $settings['post_statuses'],
 				'description'    => __( 'Choose which post statuses are allowed to use this feature.', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'post_types',
 			esc_html__( 'Post types', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
+			array( $this, 'render_checkbox_group' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'      => 'post_types',
 				'options'        => $post_type_options,
 				'default_values' => $settings['post_types'],
 				'description'    => __( 'Choose which post types are allowed to use this feature.', 'classifai' ),
-			]
+			)
 		);
 	}
 
@@ -867,17 +867,17 @@ class Classification extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
-			'post_statuses'         => [
+		return array(
+			'post_statuses'         => array(
 				'publish' => 'publish',
-			],
-			'post_types'            => [
+			),
+			'post_types'            => array(
 				'post' => 'post',
-			],
+			),
 			'classification_mode'   => 'manual_review',
 			'classification_method' => 'recommended_terms',
 			'provider'              => NLU::ID,
-		];
+		);
 	}
 
 	/**
@@ -920,7 +920,7 @@ class Classification extends Feature {
 	 * @return array
 	 */
 	public function get_all_feature_taxonomies(): array {
-		$feature_taxonomies = [];
+		$feature_taxonomies = array();
 		$provider_instance  = $this->get_feature_provider_instance();
 
 		if ( empty( $provider_instance->nlu_features ) ) {
@@ -967,19 +967,19 @@ class Classification extends Feature {
 		$taxonomy   = isset( $features[ "{$feature}_taxonomy" ] ) ? $features[ "{$feature}_taxonomy" ] : $labels['taxonomy_default'];
 
 		// Enable classification type
-		$feature_args = [
+		$feature_args = array(
 			'label_for'  => $feature,
 			'input_type' => 'checkbox',
-		];
+		);
 
-		$threshold_args = [
+		$threshold_args = array(
 			'label_for'     => "{$feature}_threshold",
 			'input_type'    => 'number',
 			'default_value' => $labels['threshold_default'],
 			'min'           => 0,
 			'max'           => 100,
 			'step'          => 0.01,
-		];
+		);
 		?>
 
 		<legend class="screen-reader-text">
@@ -1023,8 +1023,8 @@ class Classification extends Feature {
 	 * @param array $post_types Array of supported post types.
 	 * @return array
 	 */
-	public function get_supported_taxonomies( array $post_types = [] ): array {
-		$supported_post_types = [];
+	public function get_supported_taxonomies( array $post_types = array() ): array {
+		$supported_post_types = array();
 
 		if ( ! empty( $post_types ) ) {
 			foreach ( $post_types as $post_type => $enabled ) {
