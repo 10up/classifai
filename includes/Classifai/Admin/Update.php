@@ -8,7 +8,7 @@
 namespace Classifai\Admin;
 
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
-use YahnisElsts\PluginUpdateChecker\v5p1\Vcs\PluginUpdateChecker;
+use YahnisElsts\PluginUpdateChecker\v5p7\Vcs\PluginUpdateChecker;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -29,7 +29,7 @@ class Update {
 	/**
 	 * The update checker object.
 	 *
-	 * @var \YahnisElsts\PluginUpdateChecker\v5p1\Vcs\PluginUpdateChecker
+	 * @var \YahnisElsts\PluginUpdateChecker\v5p7\Vcs\PluginUpdateChecker
 	 */
 	protected $updater;
 
