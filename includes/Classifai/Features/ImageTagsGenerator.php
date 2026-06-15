@@ -58,7 +58,7 @@ class ImageTagsGenerator extends Feature {
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -323,7 +323,7 @@ class ImageTagsGenerator extends Feature {
 			'label'        => __( 'Image tags', 'classifai' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
-			'html'         => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+			'html'         => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( (string) absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 		];
 
 		return $form_fields;

@@ -28,7 +28,7 @@ abstract class UsageTrackingProvider extends Provider {
 	/**
 	 * Feature instance.
 	 *
-	 * @var \Classifai\Features\APIUsageTracking
+	 * @var \Classifai\Features\APIUsageTracking|null
 	 */
 	protected $feature_instance = null;
 
@@ -40,15 +40,6 @@ abstract class UsageTrackingProvider extends Provider {
 	 * @return array
 	 */
 	abstract public static function get_provider_ids(): array;
-
-	/**
-	 * Sanitization for the options being saved.
-	 *
-	 * @param array $new_settings Array of settings about to be saved.
-	 *
-	 * @return array The sanitized settings to be saved.
-	 */
-	abstract public function sanitize_settings( array $new_settings ): array;
 
 	/**
 	 * Process the data from the API.

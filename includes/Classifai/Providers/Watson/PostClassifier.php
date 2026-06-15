@@ -73,7 +73,7 @@ class PostClassifier {
 	 * @param int   $post_id    The post to classify
 	 * @param array $opts       The classification options
 	 * @param bool  $link_terms Whether to link the terms or not.
-	 * @return object|bool
+	 * @return array|bool|\WP_Error
 	 */
 	public function classify_and_link( int $post_id, array $opts = [], bool $link_terms = true ) {
 		$output = $this->classify( $post_id, $opts );

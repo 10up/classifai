@@ -60,7 +60,9 @@ abstract class Feature {
 	/**
 	 * Array of providers supported by the feature.
 	 *
-	 * @var \Classifai\Providers\Provider[]
+	 * Maps each supported provider's ID to its display label.
+	 *
+	 * @var array<string, string>
 	 */
 	public $supported_providers = [];
 
@@ -377,7 +379,7 @@ abstract class Feature {
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -601,15 +603,15 @@ abstract class Feature {
 				$attrs = ' value="' . esc_attr( $value ) . '"';
 
 				if ( isset( $args['max'] ) && is_numeric( $args['max'] ) ) {
-					$attrs .= ' max="' . esc_attr( (float) $args['max'] ) . '"';
+					$attrs .= ' max="' . esc_attr( (string) (float) $args['max'] ) . '"';
 				}
 
 				if ( isset( $args['min'] ) && is_numeric( $args['min'] ) ) {
-					$attrs .= ' min="' . esc_attr( (float) $args['min'] ) . '"';
+					$attrs .= ' min="' . esc_attr( (string) (float) $args['min'] ) . '"';
 				}
 
 				if ( isset( $args['step'] ) && is_numeric( $args['step'] ) ) {
-					$attrs .= ' step="' . esc_attr( (float) $args['step'] ) . '"';
+					$attrs .= ' step="' . esc_attr( (string) (float) $args['step'] ) . '"';
 				}
 
 				$class = 'small-text';
@@ -1269,11 +1271,11 @@ abstract class Feature {
 	 * Returns the instance of the provider set for the feature.
 	 *
 	 * @param string $provider_id The ID of the provider.
-	 * @return \Classifai\Providers|null
+	 * @return \Classifai\Providers\Provider|null
 	 */
 	public function get_feature_provider_instance( string $provider_id = '' ) {
 		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );
-		$provider_instance = find_provider_class( $this->provider_instances ?? [], $provider_id );
+		$provider_instance = find_provider_class( $this->provider_instances, $provider_id );
 
 		if ( is_wp_error( $provider_instance ) ) {
 			return null;

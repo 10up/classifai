@@ -27,7 +27,7 @@ class Smart404EPIntegration {
 	/**
 	 * Embeddings handler.
 	 *
-	 * @var Embeddings $embeddings_handler
+	 * @var \Classifai\Providers\OpenAI\Embeddings|\Classifai\Providers\Azure\Embeddings|\Classifai\Providers\Localhost\OllamaEmbeddings|null $embeddings_handler
 	 */
 	protected $embeddings_handler;
 
@@ -62,7 +62,7 @@ class Smart404EPIntegration {
 	/**
 	 * Setup needed variables.
 	 *
-	 * @param Classifai\Providers\Provider $provider Provider to use for embeddings.
+	 * @param \Classifai\Providers\OpenAI\Embeddings|\Classifai\Providers\Azure\Embeddings|\Classifai\Providers\Localhost\OllamaEmbeddings|null $provider Provider to use for embeddings.
 	 */
 	public function __construct( $provider = null ) {
 		$this->embeddings_handler = $provider;
@@ -677,9 +677,7 @@ class Smart404EPIntegration {
 
 			$post->elasticsearch = true;
 
-			if ( $post ) {
-				$new_posts[] = $post;
-			}
+			$new_posts[] = $post;
 		}
 
 		return $new_posts;

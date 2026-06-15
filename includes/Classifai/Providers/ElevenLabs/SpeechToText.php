@@ -125,10 +125,12 @@ class SpeechToText extends Provider {
 	public function rest_endpoint_callback( string $audio_resource, string $route_to_call = '', array $args = [] ) {
 		switch ( $route_to_call ) {
 			case 'transcript':
-				if ( is_attachment( $audio_resource ) ) {
-					return $this->feature_instance->transcribe_from_attachment( $audio_resource, $args );
-				} elseif ( is_remote_url( $audio_resource ) ) {
-					return $this->feature_instance->transcribe_from_path( $audio_resource );
+				if ( $this->feature_instance instanceof AudioTranscriptsGeneration ) {
+					if ( is_attachment( $audio_resource ) ) {
+						return $this->feature_instance->transcribe_from_attachment( (int) $audio_resource, $args );
+					} elseif ( is_remote_url( $audio_resource ) ) {
+						return $this->feature_instance->transcribe_from_path( $audio_resource );
+					}
 				} elseif ( is_local_path( $audio_resource ) ) {
 					return $this->transcribe_audio( $audio_resource, $args );
 				}

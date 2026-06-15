@@ -174,7 +174,7 @@ class AudioTranscriptsGeneration extends Feature {
 		$form_fields['retranscribe'] = [
 			'label'        => __( 'Transcribe audio', 'classifai' ),
 			'input'        => 'html',
-			'html'         => '<button class="button secondary" id="classifai-retranscribe" data-id="' . esc_attr( absint( $attachment->ID ) ) . '">' . esc_html( $text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+			'html'         => '<button class="button secondary" id="classifai-retranscribe" data-id="' . esc_attr( (string) absint( $attachment->ID ) ) . '">' . esc_html( $text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 			'show_in_edit' => false,
 		];
 
@@ -248,11 +248,11 @@ class AudioTranscriptsGeneration extends Feature {
 	 */
 	public function maybe_transcribe_audio( int $attachment_id ) {
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
-			return;
+			return null;
 		}
 
 		if ( empty( $_POST['classifai_audio_transcript_meta'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_audio_transcript_meta'] ) ), 'classifai_audio_transcript_meta_action' ) ) {
-			return;
+			return null;
 		}
 
 		if ( clean_input( 'retranscribe' ) ) {
@@ -261,6 +261,8 @@ class AudioTranscriptsGeneration extends Feature {
 
 			return $this->transcribe_audio( $attachment_id );
 		}
+
+		return null;
 	}
 
 	/**
@@ -296,12 +298,20 @@ class AudioTranscriptsGeneration extends Feature {
 		$provider_id       = $settings['provider'];
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
 
+		$file_formats  = [ 'mp3' ];
+		$max_file_size = 25 * MB_IN_BYTES;
+
+		if ( $provider_instance instanceof OpenAISpeechToText || $provider_instance instanceof ElevenLabsSpeechToText ) {
+			$file_formats  = $provider_instance->file_formats;
+			$max_file_size = $provider_instance->max_file_size;
+		}
+
 		$mime_type          = get_post_mime_type( $attachment_id );
 		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 		$process            = false;
 
 		foreach ( $matched_extensions as $ext ) {
-			if ( in_array( $ext, $provider_instance->file_formats ?? [ 'mp3' ], true ) ) {
+			if ( in_array( $ext, $file_formats, true ) ) {
 				$process = true;
 			}
 		}
@@ -309,7 +319,7 @@ class AudioTranscriptsGeneration extends Feature {
 		// If we have a proper file format, check the file size.
 		if ( $process ) {
 			$filesize = filesize( get_attached_file( $attachment_id ) );
-			if ( ! $filesize || $filesize > $provider_instance->max_file_size ?? 25 * MB_IN_BYTES ) {
+			if ( ! $filesize || $filesize > $max_file_size ) {
 				$process = false;
 			}
 		}

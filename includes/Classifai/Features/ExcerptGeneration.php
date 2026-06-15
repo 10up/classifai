@@ -188,7 +188,7 @@ class ExcerptGeneration extends Feature {
 			if ( empty( $author_name ) && $post_id ) {
 				$post = get_post( $post_id );
 				if ( $post ) {
-					$author_name = get_the_author_meta( 'display_name', $post->post_author );
+					$author_name = get_the_author_meta( 'display_name', (int) $post->post_author );
 				}
 			}
 
@@ -393,7 +393,7 @@ class ExcerptGeneration extends Feature {
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {

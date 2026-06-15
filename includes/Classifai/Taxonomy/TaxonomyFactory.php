@@ -59,7 +59,7 @@ class TaxonomyFactory {
 	 *
 	 * @param string $taxonomy            The taxonomy name.
 	 * @param array  $supported_post_types The supported post types.
-	 * @return BaseTaxonomy A base taxonomy subclass instance.
+	 * @return AbstractTaxonomy A base taxonomy subclass instance.
 	 */
 	public function build_if( string $taxonomy, array $supported_post_types = [] ) {
 		if ( ! $this->exists( $taxonomy ) ) {
@@ -83,7 +83,7 @@ class TaxonomyFactory {
 	 * An exception is thrown if an invalid taxonomy name was specified.
 	 *
 	 * @param string $taxonomy The taxonomy name
-	 * @return \Taxonomy\Taxonomy\BaseTaxonomy A base taxonomy subclass instance.
+	 * @return \Classifai\Taxonomy\AbstractTaxonomy A base taxonomy subclass instance.
 	 * @throws \Exception An exception.
 	 */
 	public function build( string $taxonomy ) {

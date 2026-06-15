@@ -328,7 +328,7 @@ class AmazonPolly extends Provider {
 			 */
 			$pre = apply_filters( 'classifai_' . self::ID . '_pre_connect_to_service', false );
 
-			if ( false !== $pre ) {
+			if ( is_array( $pre ) ) {
 				return $pre;
 			}
 
@@ -391,7 +391,7 @@ class AmazonPolly extends Provider {
 	 * Synthesizes speech from a post item.
 	 *
 	 * @param int $post_id Post ID.
-	 * @return string|WP_Error
+	 * @return int|string|bool|WP_Error
 	 */
 	public function synthesize_speech( int $post_id ) {
 		if ( empty( $post_id ) ) {
@@ -558,7 +558,7 @@ class AmazonPolly extends Provider {
 	 * Returns aws polly client.
 	 *
 	 * @param array $aws_config AWS configuration array.
-	 * @return \Aws\Polly\PollyClient|null
+	 * @return \ClassifaiVendor\Aws\Polly\PollyClient|null
 	 */
 	public function get_polly_client( array $aws_config = array() ) {
 		$credentials = $this->get_credentials( [ static::ID => $aws_config ] );
@@ -595,7 +595,6 @@ class AmazonPolly extends Provider {
 		if ( ! check_ajax_referer( 'classifai', 'nonce', false ) ) {
 			$error = new WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
 			wp_send_json_error( $error );
-			exit();
 		}
 
 		// Set the feature instance if it's not already set.
