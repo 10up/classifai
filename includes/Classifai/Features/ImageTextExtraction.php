@@ -424,7 +424,7 @@ class ImageTextExtraction extends Feature {
 			'label'        => __( 'Scan image for text', 'classifai' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
-			'html'         => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+			'html'         => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( (string) absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 		];
 
 		return $form_fields;

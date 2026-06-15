@@ -8,6 +8,7 @@
 namespace Classifai\Admin;
 
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+use YahnisElsts\PluginUpdateChecker\v5p1\Vcs\PluginUpdateChecker;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -56,11 +57,18 @@ class Update {
 	 * @return void
 	 */
 	public function init() {
-		$this->updater = PucFactory::buildUpdateChecker(
+		$updater = PucFactory::buildUpdateChecker(
 			self::$repo_url,
 			CLASSIFAI_PLUGIN,
 			'classifai'
 		);
+
+		// We build from a VCS (GitHub) URL, so this is always a VCS plugin update checker.
+		if ( ! $updater instanceof PluginUpdateChecker ) {
+			return;
+		}
+
+		$this->updater = $updater;
 
 		$vcs_api = $this->updater->getVcsApi();
 

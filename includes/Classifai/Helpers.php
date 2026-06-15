@@ -305,7 +305,7 @@ function attachment_is_pdf( $post ): bool {
  *
  * @param string $slug Asset slug as defined in build/webpack configuration.
  * @param string $attribute Optional attribute to get. Can be version or dependencies.
- * @return string|array
+ * @return string|array|null
  */
 function get_asset_info( string $slug, ?string $attribute = null ) {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {
@@ -362,8 +362,6 @@ function clean_input( string $key = '', bool $is_get = false, string $sanitize_c
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		return isset( $_POST[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_POST[ $key ] ) ) : '';
 	}
-
-	return false;
 }
 
 /**

@@ -165,7 +165,7 @@ class QuickDraftIntegration {
 	 * Handle Quick Draft content generation.
 	 *
 	 * @param WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function endpoint_callback( WP_REST_Request $request ) {
 		$title   = $request->get_param( 'title' );
