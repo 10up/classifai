@@ -54,8 +54,15 @@ class EmbeddingCalculations {
 			)
 		);
 
+		// Guard against a zero-magnitude vector.
+		$magnitude = sqrt( $source_value * $compare_value );
+
+		if ( 0.0 === $magnitude ) {
+			return false;
+		}
+
 		// Do the math.
-		$distance = 1.0 - ( $combined_value / sqrt( $source_value * $compare_value ) );
+		$distance = 1.0 - ( $combined_value / $magnitude );
 
 		// Ensure we are within the range of 0 to 1.0.
 		return max( 0, min( abs( (float) $distance ), 1.0 ) );

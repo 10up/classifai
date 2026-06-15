@@ -19,3 +19,6 @@ tests_add_filter(
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Shared base test case for the integration suite.
+require_once __DIR__ . '/Integration/TestCase.php';
