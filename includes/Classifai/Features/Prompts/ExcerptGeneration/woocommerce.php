@@ -8,6 +8,10 @@
  * @var string $article_title Provided by extract() of $data; falls back to a token.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $words         = $words ?? '{{WORDS}}';
 $article_title = $article_title ?? '{{TITLE}}';
 
