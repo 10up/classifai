@@ -36,7 +36,7 @@ class LanguageProcessing extends Service {
 		 */
 		return apply_filters(
 			'classifai_language_processing_service_providers',
-			[
+			array(
 				'Classifai\Providers\Azure\Speech',
 				'Classifai\Providers\OpenAI\TextToSpeech',
 				'Classifai\Providers\ElevenLabs\TextToSpeech',
@@ -54,7 +54,7 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\XAI\Grok',
 				'Classifai\Providers\Localhost\Ollama',
 				'Classifai\Providers\Localhost\OllamaEmbeddings',
-			]
+			)
 		);
 	}
 }

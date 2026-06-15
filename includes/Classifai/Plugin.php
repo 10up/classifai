@@ -15,12 +15,12 @@ class Plugin {
 	/**
 	 * @var array $services The known list of services.
 	 */
-	public $services = [];
+	public $services = array();
 
 	/**
 	 * @var array $admin_helpers Class instances providing features in the admin UI.
 	 */
-	public $admin_helpers = [];
+	public $admin_helpers = array();
 
 	/**
 	 * Lazy initialize the plugin
@@ -37,21 +37,21 @@ class Plugin {
 	 * Setup WP hooks
 	 */
 	public function enable() {
-		add_action( 'init', [ \Classifai\Embeddings\Schema::class, 'maybe_install' ], 1 );
-		add_filter( 'wpmu_drop_tables', [ \Classifai\Embeddings\Schema::class, 'add_to_drop_tables' ], 10, 2 );
-		add_action( 'before_delete_post', [ $this, 'delete_post_embeddings' ] );
-		add_action( 'delete_term', [ $this, 'delete_term_embeddings' ] );
-		add_action( 'init', [ $this, 'init' ], 20 );
-		add_action( 'init', [ $this, 'i18n' ] );
-		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
-		add_action( 'admin_init', [ $this, 'add_privacy_policy_content' ] );
-		add_action( 'admin_init', [ $this, 'maybe_migrate_to_v3' ] );
-		add_action( 'admin_init', [ $this, 'maybe_schedule_embeddings_migration' ] );
-		add_action( 'after_classifai_init', [ $this, 'register_embeddings_migration_hooks' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, [ $this, 'filter_plugin_action_links' ] );
-		add_filter( 'robots_txt', [ $this, 'maybe_block_ai_crawlers' ] );
-		add_action( 'after_classifai_init', [ $this, 'load_action_scheduler' ] );
+		add_action( 'init', array( \Classifai\Embeddings\Schema::class, 'maybe_install' ), 1 );
+		add_filter( 'wpmu_drop_tables', array( \Classifai\Embeddings\Schema::class, 'add_to_drop_tables' ), 10, 2 );
+		add_action( 'before_delete_post', array( $this, 'delete_post_embeddings' ) );
+		add_action( 'delete_term', array( $this, 'delete_term_embeddings' ) );
+		add_action( 'init', array( $this, 'init' ), 20 );
+		add_action( 'init', array( $this, 'i18n' ) );
+		add_action( 'admin_init', array( $this, 'init_admin_helpers' ) );
+		add_action( 'admin_init', array( $this, 'add_privacy_policy_content' ) );
+		add_action( 'admin_init', array( $this, 'maybe_migrate_to_v3' ) );
+		add_action( 'admin_init', array( $this, 'maybe_schedule_embeddings_migration' ) );
+		add_action( 'after_classifai_init', array( $this, 'register_embeddings_migration_hooks' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
+		add_filter( 'robots_txt', array( $this, 'maybe_block_ai_crawlers' ) ); // phpcs:ignore WordPressVIPMinimum.Hooks.RestrictedHooks.robots_txt
+		add_action( 'after_classifai_init', array( $this, 'load_action_scheduler' ) );
 	}
 
 	/**
@@ -155,17 +155,17 @@ class Plugin {
 		 */
 		$classifai_services = apply_filters(
 			'classifai_services',
-			[
+			array(
 				'language_processing'    => 'Classifai\Services\LanguageProcessing',
 				'image_processing'       => 'Classifai\Services\ImageProcessing',
 				'content_recommendation' => 'Classifai\Services\ContentRecommendation',
 				'usage_tracking'         => 'Classifai\Services\UsageTracking',
-			]
+			)
 		);
 
-		$this->services = [
+		$this->services = array(
 			'service_manager' => new Services\ServicesManager( $classifai_services ),
-		];
+		);
 
 		foreach ( $this->services as $service ) {
 			$service->register();
@@ -182,12 +182,12 @@ class Plugin {
 			return;
 		}
 
-		$this->admin_helpers = [
+		$this->admin_helpers = array(
 			'notifications' => new Admin\Notifications(),
 			'debug_info'    => new Admin\DebugInfo(),
 			'bulk_actions'  => new Admin\BulkActions(),
 			'updater'       => new Admin\Update(),
-		];
+		);
 
 		foreach ( $this->admin_helpers as $instance ) {
 			if ( $instance->can_register() ) {
@@ -238,7 +238,7 @@ class Plugin {
 			true
 		);
 
-		$localize_data = [
+		$localize_data = array(
 			'api_password'             => __( 'API Password', 'classifai' ),
 			'api_key'                  => __( 'API Key', 'classifai' ),
 			'use_key'                  => __( 'Use an API Key instead?', 'classifai' ),
@@ -247,7 +247,7 @@ class Plugin {
 			'opt_out_enabled_features' => array_keys( $allowed_features ),
 			'profile_url'              => esc_url( get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section' ),
 			'plugin_url'               => CLASSIFAI_PLUGIN_URL,
-		];
+		);
 
 		wp_localize_script(
 			'classifai-admin-script',
@@ -357,13 +357,13 @@ Disallow: /
 	 * Load the Action Scheduler library.
 	 */
 	public function load_action_scheduler() {
-		$features                 = [
+		$features                 = array(
 			new \Classifai\Features\Classification(),
 			new \Classifai\Features\TermCleanup(),
 			new \Classifai\Features\RecommendedContent(),
 			new \Classifai\Features\TextToSpeech(),
 			new \Classifai\Features\APIUsageTracking(),
-		];
+		);
 		$is_feature_being_enabled = false;
 
 		foreach ( $features as $feature ) {
@@ -415,13 +415,13 @@ Disallow: /
 		$features = array();
 
 		// Get the existing settings.
-		$nlu_settings        = get_option( 'classifai_watson_nlu', [] );
-		$embeddings_settings = get_option( 'classifai_openai_embeddings', [] );
-		$whisper_settings    = get_option( 'classifai_openai_whisper', [] );
-		$chatgpt_settings    = get_option( 'classifai_openai_chatgpt', [] );
-		$tts_settings        = get_option( 'classifai_azure_text_to_speech', [] );
-		$vision_settings     = get_option( 'classifai_computer_vision', [] );
-		$dalle_settings      = get_option( 'classifai_openai_dalle', [] );
+		$nlu_settings        = get_option( 'classifai_watson_nlu', array() );
+		$embeddings_settings = get_option( 'classifai_openai_embeddings', array() );
+		$whisper_settings    = get_option( 'classifai_openai_whisper', array() );
+		$chatgpt_settings    = get_option( 'classifai_openai_chatgpt', array() );
+		$tts_settings        = get_option( 'classifai_azure_text_to_speech', array() );
+		$vision_settings     = get_option( 'classifai_computer_vision', array() );
+		$dalle_settings      = get_option( 'classifai_openai_dalle', array() );
 
 		// If settings are there, migrate them.
 		if ( ! empty( $nlu_settings ) || ! empty( $embeddings_settings ) ) {

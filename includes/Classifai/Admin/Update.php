@@ -48,7 +48,7 @@ class Update {
 	public function register() {
 		$this->init();
 
-		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'maybe_update' ], 10, 1 );
+		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'maybe_update' ), 10, 1 );
 	}
 
 	/**

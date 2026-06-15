@@ -65,7 +65,7 @@ class Repository {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- writing to our own custom table.
 			$wpdb->insert(
 				$table,
-				[
+				array(
 					'object_type'  => $object_type,
 					'object_id'    => $object_id,
 					'feature'      => $feature,
@@ -77,8 +77,8 @@ class Repository {
 					'content_hash' => $content_hash,
 					'created_at'   => $created_at,
 					'updated_at'   => $now,
-				],
-				[ '%s', '%d', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s' ]
+				),
+				array( '%s', '%d', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s' )
 			);
 		}
 	}
@@ -111,10 +111,10 @@ class Repository {
 		// phpcs:enable
 
 		if ( empty( $rows ) ) {
-			return [];
+			return array();
 		}
 
-		$chunks = [];
+		$chunks = array();
 		foreach ( $rows as $blob ) {
 			$chunks[] = $this->codec->unpack_floats( $blob );
 		}
@@ -139,14 +139,14 @@ class Repository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- writing to our own custom table.
 		$deleted = $wpdb->delete(
 			$table,
-			[
+			array(
 				'object_type' => $object_type,
 				'object_id'   => $object_id,
 				'feature'     => $feature,
 				'provider'    => $provider,
 				'model'       => $model,
-			],
-			[ '%s', '%d', '%s', '%s', '%s' ]
+			),
+			array( '%s', '%d', '%s', '%s', '%s' )
 		);
 
 		return (int) $deleted;
@@ -170,11 +170,11 @@ class Repository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- writing to our own custom table.
 		$deleted = $wpdb->delete(
 			$table,
-			[
+			array(
 				'object_type' => $object_type,
 				'object_id'   => $object_id,
-			],
-			[ '%s', '%d' ]
+			),
+			array( '%s', '%d' )
 		);
 
 		return (int) $deleted;
@@ -327,17 +327,17 @@ class Repository {
 		$provider    = $opts['provider'] ?? '';
 		$model       = $opts['model'] ?? '';
 		$limit       = isset( $opts['limit'] ) ? (int) $opts['limit'] : 100;
-		$object_ids  = $opts['object_ids'] ?? [];
+		$object_ids  = $opts['object_ids'] ?? array();
 
 		if ( empty( $query_vector ) || '' === $feature || '' === $provider || '' === $model ) {
-			return [];
+			return array();
 		}
 
 		$query_normalized = $this->codec->normalize( $query_vector );
 		$query_packed     = $this->codec->pack_floats( $query_normalized );
 
 		$where        = 'object_type = %s AND feature = %s AND provider = %s AND model = %s';
-		$where_values = [ $object_type, $feature, $provider, $model ];
+		$where_values = array( $object_type, $feature, $provider, $model );
 
 		if ( ! empty( $object_ids ) ) {
 			$object_ids   = array_map( 'intval', $object_ids );
@@ -354,20 +354,20 @@ class Repository {
 		// phpcs:enable
 
 		if ( empty( $rows ) ) {
-			return [];
+			return array();
 		}
 
-		$by_object = [];
+		$by_object = array();
 		foreach ( $rows as $row ) {
 			$score     = $this->codec->dot_product( $query_packed, $row['vector'] );
 			$object_id = (int) $row['object_id'];
 
 			if ( ! isset( $by_object[ $object_id ] ) || $score > $by_object[ $object_id ]['similarity'] ) {
-				$by_object[ $object_id ] = [
+				$by_object[ $object_id ] = array(
 					'object_id'   => $object_id,
 					'chunk_index' => (int) $row['chunk_index'],
 					'similarity'  => $score,
-				];
+				);
 			}
 		}
 

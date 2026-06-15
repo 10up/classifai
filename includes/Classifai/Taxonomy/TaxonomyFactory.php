@@ -26,19 +26,19 @@ class TaxonomyFactory {
 	 *
 	 * @var array $mapping A map of Watson taxonomies.
 	 */
-	public $mapping = [
+	public $mapping = array(
 		WATSON_CATEGORY_TAXONOMY => 'CategoryTaxonomy',
 		WATSON_KEYWORD_TAXONOMY  => 'KeywordTaxonomy',
 		WATSON_CONCEPT_TAXONOMY  => 'ConceptTaxonomy',
 		WATSON_ENTITY_TAXONOMY   => 'EntityTaxonomy',
-	];
+	);
 
 	/**
 	 * Previously created taxonomies instances.
 	 *
 	 * @var array $taxonomies Taxonomies instances.
 	 */
-	public $taxonomies = [];
+	public $taxonomies = array();
 
 	/**
 	 * Builds all supported taxonomies.
@@ -61,7 +61,7 @@ class TaxonomyFactory {
 	 * @param array  $supported_post_types The supported post types.
 	 * @return AbstractTaxonomy A base taxonomy subclass instance.
 	 */
-	public function build_if( string $taxonomy, array $supported_post_types = [] ) {
+	public function build_if( string $taxonomy, array $supported_post_types = array() ) {
 		if ( ! $this->exists( $taxonomy ) ) {
 			$this->taxonomies[ $taxonomy ] = $this->build( $taxonomy );
 			$instance                      = $this->taxonomies[ $taxonomy ];

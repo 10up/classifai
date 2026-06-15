@@ -74,7 +74,7 @@ class Embeddings extends Provider {
 	 *
 	 * @var array
 	 */
-	public $nlu_features = [];
+	public $nlu_features = array();
 
 	/**
 	 * Scheduler instance.
@@ -131,17 +131,17 @@ class Embeddings extends Provider {
 			$this->feature_instance &&
 			method_exists( $this->feature_instance, 'get_supported_taxonomies' )
 		) {
-			$settings   = get_option( $this->feature_instance->get_option_name(), [] );
-			$post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : [ 'post' => 1 ];
+			$settings   = get_option( $this->feature_instance->get_option_name(), array() );
+			$post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : array( 'post' => 1 );
 
 			foreach ( $this->feature_instance->get_supported_taxonomies( $post_types ) as $tax => $label ) {
-				$this->nlu_features[ $tax ] = [
+				$this->nlu_features[ $tax ] = array(
 					'feature'           => $label,
 					'threshold'         => __( 'Threshold (%)', 'classifai' ),
 					'threshold_default' => 75,
 					'taxonomy'          => __( 'Taxonomy', 'classifai' ),
 					'taxonomy_default'  => $tax,
-				];
+				);
 			}
 		}
 	}
@@ -287,10 +287,10 @@ class Embeddings extends Provider {
 		add_settings_field(
 			static::ID . '_api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
@@ -302,16 +302,16 @@ class Embeddings extends Provider {
 						wp_kses(
 							/* translators: %1$s is replaced with the OpenAI sign up URL */
 							__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							]
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							)
 						),
 						esc_url( 'https://platform.openai.com/signup' )
 					),
-			]
+			)
 		);
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
@@ -323,18 +323,18 @@ class Embeddings extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'api_key'       => '',
 			'authenticated' => false,
-		];
+		);
 
 		switch ( $this->feature_instance::ID ) {
 			case RecommendedContent::ID:
 				return array_merge(
 					$common_settings,
-					[
+					array(
 						'embedding_threshold' => 75,
-					]
+					)
 				);
 		}
 
@@ -346,8 +346,8 @@ class Embeddings extends Provider {
 	 */
 	public function register() {
 		// Listen for Action Scheduler callbacks.
-		add_action( 'classifai_generate_term_embedding_job', [ $this, 'generate_term_embedding_job' ], 10, 4 );
-		add_action( 'classifai_generate_post_embedding_job', [ $this, 'generate_post_embedding_job' ], 10, 4 );
+		add_action( 'classifai_generate_term_embedding_job', array( $this, 'generate_term_embedding_job' ), 10, 4 );
+		add_action( 'classifai_generate_post_embedding_job', array( $this, 'generate_post_embedding_job' ), 10, 4 );
 
 		$classification_feature      = new Classification();
 		$recommended_content_feature = new RecommendedContent();
@@ -366,11 +366,11 @@ class Embeddings extends Provider {
 			self::$scheduler_instance->init();
 
 			// Register hooks.
-			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-			add_action( 'edited_term', [ $this, 'update_embeddings_for_term' ] );
+			add_action( 'created_term', array( $this, 'generate_embeddings_for_term' ) ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+			add_action( 'edited_term', array( $this, 'update_embeddings_for_term' ) );
 			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
-			add_action( 'admin_post_classifai_regen_embeddings', [ $this, 'classifai_regen_embeddings' ] );
-			add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10, 2 );
+			add_action( 'admin_post_classifai_regen_embeddings', array( $this, 'classifai_regen_embeddings' ) );
+			add_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_classification_feature_settings' ), 10, 2 );
 		}
 
 		// Register things needed for the Recommended Content Feature.
@@ -387,7 +387,7 @@ class Embeddings extends Provider {
 			self::$scheduler_instance->init();
 
 			// Register hooks.
-			add_action( 'wp_insert_post', [ $this, 'maybe_generated_embeddings_for_post' ], 999 );
+			add_action( 'wp_insert_post', array( $this, 'maybe_generated_embeddings_for_post' ), 999 );
 		}
 	}
 
@@ -399,15 +399,15 @@ class Embeddings extends Provider {
 	 * @return array
 	 */
 	public function modify_default_classification_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_classification_feature_settings' ), 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
 		}
 
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10, 2 );
+		add_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_classification_feature_settings' ), 10, 2 );
 
-		$defaults = [];
+		$defaults = array();
 
 		foreach ( array_keys( $feature_instance->get_supported_taxonomies() ) as $tax ) {
 			$enabled = 'category' === $tax ? true : false;
@@ -513,20 +513,20 @@ class Embeddings extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_openai_embeddings_request_body',
-			[
+			array(
 				'model'      => $this->get_model(),
 				'input'      => $text,
 				'dimensions' => $this->get_dimensions(),
-			],
+			),
 			$text
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->get_api_url(),
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		set_transient( 'classifai_openai_embeddings_latest_response', $response, DAY_IN_SECONDS * 30 );
@@ -542,7 +542,7 @@ class Embeddings extends Provider {
 			return new WP_Error( 'no_data', esc_html__( 'No data returned from OpenAI.', 'classifai' ) );
 		}
 
-		$return = [];
+		$return = array();
 
 		// Parse out the embeddings response.
 		foreach ( $response['data'] as $data ) {
@@ -565,7 +565,7 @@ class Embeddings extends Provider {
 	 * @param Feature|null $feature Feature instance.
 	 * @return array|boolean|WP_Error
 	 */
-	public function generate_embeddings( array $strings = [], $feature = null ) {
+	public function generate_embeddings( array $strings = array(), $feature = null ) {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
@@ -594,20 +594,20 @@ class Embeddings extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_openai_embeddings_request_body',
-			[
+			array(
 				'model'      => $this->get_model(),
 				'input'      => $strings,
 				'dimensions' => $this->get_dimensions(),
-			],
+			),
 			$strings
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->get_api_url(),
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		// Restore the existing Feature instance.
@@ -621,7 +621,7 @@ class Embeddings extends Provider {
 			return new WP_Error( 'no_data', esc_html__( 'No data returned from OpenAI.', 'classifai' ) );
 		}
 
-		$return = [];
+		$return = array();
 
 		// Parse out the embeddings response.
 		foreach ( $response['data'] as $data ) {
@@ -642,7 +642,7 @@ class Embeddings extends Provider {
 	 */
 	public function get_debug_information(): array {
 		$settings   = $this->feature_instance->get_settings();
-		$debug_info = [];
+		$debug_info = array();
 
 		if ( $this->feature_instance instanceof Classification ) {
 			foreach ( array_keys( $this->feature_instance->get_supported_taxonomies() ) as $tax ) {

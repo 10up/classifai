@@ -37,9 +37,9 @@ class UsageTracking extends Service {
 		 */
 		return apply_filters(
 			'classifai_usage_tracking_service_providers',
-			[
+			array(
 				'Classifai\Providers\OpenAI\UsageTracking',
-			]
+			)
 		);
 	}
 }

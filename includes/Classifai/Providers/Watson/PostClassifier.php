@@ -49,7 +49,7 @@ class PostClassifier {
 	 * @param array $opts The classification options
 	 * @return array|\WP_Error
 	 */
-	public function classify( int $post_id, array $opts = [] ) {
+	public function classify( int $post_id, array $opts = array() ) {
 		$classifier = $this->get_classifier();
 		$normalizer = $this->get_normalizer();
 
@@ -75,7 +75,7 @@ class PostClassifier {
 	 * @param bool  $link_terms Whether to link the terms or not.
 	 * @return array|bool|\WP_Error
 	 */
-	public function classify_and_link( int $post_id, array $opts = [], bool $link_terms = true ) {
+	public function classify_and_link( int $post_id, array $opts = array(), bool $link_terms = true ) {
 		$output = $this->classify( $post_id, $opts );
 
 		if ( is_wp_error( $output ) ) {
@@ -98,7 +98,7 @@ class PostClassifier {
 	 * @param bool  $link_terms Whether to link the terms or not.
 	 * @return array The linked output.
 	 */
-	public function link( int $post_id, array $output, array $opts = [], bool $link_terms = true ): array {
+	public function link( int $post_id, array $output, array $opts = array(), bool $link_terms = true ): array {
 		$linker = $this->get_linker();
 
 		return $linker->link( $post_id, $output, $opts, $link_terms );
@@ -168,26 +168,26 @@ class PostClassifier {
 	public function get_features(): array {
 		$classification = new Classification();
 		$settings       = $classification->get_settings();
-		$features       = [];
+		$features       = array();
 
 		if ( $settings['category'] ) {
-			$features['categories'] = (object) [];
+			$features['categories'] = (object) array();
 		}
 
 		if ( $settings['keyword'] ) {
-			$features['keywords'] = [
+			$features['keywords'] = array(
 				'emotion'   => false,
 				'sentiment' => false,
 				'limit'     => defined( 'WATSON_KEYWORD_LIMIT' ) ? WATSON_KEYWORD_LIMIT : 10,
-			];
+			);
 		}
 
 		if ( $settings['concept'] ) {
-			$features['concepts'] = (object) [];
+			$features['concepts'] = (object) array();
 		}
 
 		if ( $settings['entity'] ) {
-			$features['entities'] = (object) [];
+			$features['entities'] = (object) array();
 		}
 
 		return $features;

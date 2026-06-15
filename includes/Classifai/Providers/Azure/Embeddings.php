@@ -65,7 +65,7 @@ class Embeddings extends OpenAI {
 	 *
 	 * @var array
 	 */
-	public $nlu_features = [];
+	public $nlu_features = array();
 
 	/**
 	 * Scheduler instance.
@@ -124,17 +124,17 @@ class Embeddings extends OpenAI {
 			$this->feature_instance &&
 			method_exists( $this->feature_instance, 'get_supported_taxonomies' )
 		) {
-			$settings   = get_option( $this->feature_instance->get_option_name(), [] );
-			$post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : [ 'post' => 1 ];
+			$settings   = get_option( $this->feature_instance->get_option_name(), array() );
+			$post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : array( 'post' => 1 );
 
 			foreach ( $this->feature_instance->get_supported_taxonomies( $post_types ) as $tax => $label ) {
-				$this->nlu_features[ $tax ] = [
+				$this->nlu_features[ $tax ] = array(
 					'feature'           => $label,
 					'threshold'         => __( 'Threshold (%)', 'classifai' ),
 					'threshold_default' => 75,
 					'taxonomy'          => __( 'Taxonomy', 'classifai' ),
 					'taxonomy_default'  => $tax,
-				];
+				);
 			}
 		}
 	}
@@ -213,7 +213,7 @@ class Embeddings extends OpenAI {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		add_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_feature_settings' ), 10, 2 );
 
 		$feature = new Classification();
 
@@ -222,7 +222,7 @@ class Embeddings extends OpenAI {
 			__( 'Azure OpenAI Embeddings', 'classifai' )
 		);
 		self::$scheduler_instance->init();
-		add_action( 'classifai_schedule_generate_azure_embedding_job', [ $this, 'generate_term_embedding_job' ], 10, 4 );
+		add_action( 'classifai_schedule_generate_azure_embedding_job', array( $this, 'generate_term_embedding_job' ), 10, 4 );
 
 		if (
 			! $feature->is_feature_enabled() ||
@@ -231,8 +231,8 @@ class Embeddings extends OpenAI {
 			return;
 		}
 
-		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-		add_action( 'edited_term', [ $this, 'update_embeddings_for_term' ] );
+		add_action( 'created_term', array( $this, 'generate_embeddings_for_term' ) ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'edited_term', array( $this, 'update_embeddings_for_term' ) );
 		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 	}
 
@@ -244,15 +244,15 @@ class Embeddings extends OpenAI {
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_feature_settings' ), 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
 		}
 
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		add_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_feature_settings' ), 10, 2 );
 
-		$defaults = [];
+		$defaults = array();
 
 		foreach ( array_keys( $feature_instance->get_supported_taxonomies() ) as $tax ) {
 			$enabled = 'category' === $tax ? true : false;
@@ -293,7 +293,7 @@ class Embeddings extends OpenAI {
 	 * @return string
 	 */
 	protected function prep_api_url( ?Feature $feature = null ): string {
-		$credentials = $this->get_credentials( $feature->get_settings() ?? [] );
+		$credentials = $this->get_credentials( $feature->get_settings() ?? array() );
 		$endpoint    = $credentials['endpoint_url'] ?? '';
 		$deployment  = $credentials['deployment'] ?? '';
 
@@ -315,7 +315,7 @@ class Embeddings extends OpenAI {
 	 * @param array $settings Settings being saved
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	protected function authenticate_credentials( array $settings = array() ) {
 		$credentials = $this->get_credentials( $settings );
 		$rtn         = false;
 
@@ -326,19 +326,19 @@ class Embeddings extends OpenAI {
 
 		$request = safe_wp_remote_post(
 			$endpoint,
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'api-key'      => $credentials['api_key'] ?? '',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode(
-					[
+					array(
 						'input'      => 'This is a test',
 						'dimensions' => $this->get_dimensions(),
-					]
+					)
 				),
 				'use_vip' => true,
-			]
+			)
 		);
 
 		if ( ! is_wp_error( $request ) ) {
@@ -389,24 +389,24 @@ class Embeddings extends OpenAI {
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_embeddings_request_body',
-			[
+			array(
 				'input'      => $text,
 				'dimensions' => $this->get_dimensions(),
-			],
+			),
 			$text
 		);
 
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode( $body ),
 				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			]
+			)
 		);
 		$response = $this->get_result( $response );
 
@@ -423,7 +423,7 @@ class Embeddings extends OpenAI {
 			return new WP_Error( 'no_data', esc_html__( 'No data returned from Azure OpenAI.', 'classifai' ) );
 		}
 
-		$return = [];
+		$return = array();
 
 		// Parse out the embeddings response.
 		foreach ( $response['data'] as $data ) {
@@ -446,7 +446,7 @@ class Embeddings extends OpenAI {
 	 * @param Feature|null $feature Feature instance.
 	 * @return array|boolean|WP_Error
 	 */
-	public function generate_embeddings( array $strings = [], $feature = null ) {
+	public function generate_embeddings( array $strings = array(), $feature = null ) {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
@@ -473,24 +473,24 @@ class Embeddings extends OpenAI {
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_embeddings_request_body',
-			[
+			array(
 				'input'      => $strings,
 				'dimensions' => $this->get_dimensions(),
-			],
+			),
 			$strings
 		);
 
 		// Make our API request.
 		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'api-key'      => $this->get_credential( 'api_key' ) ?? '',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode( $body ),
 				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			]
+			)
 		);
 		$response = $this->get_result( $response );
 
@@ -505,7 +505,7 @@ class Embeddings extends OpenAI {
 			return new WP_Error( 'no_data', esc_html__( 'No data returned from OpenAI.', 'classifai' ) );
 		}
 
-		$return = [];
+		$return = array();
 
 		// Parse out the embeddings response.
 		foreach ( $response['data'] as $data ) {
@@ -526,7 +526,7 @@ class Embeddings extends OpenAI {
 	 */
 	public function get_debug_information(): array {
 		$settings   = $this->feature_instance->get_settings();
-		$debug_info = [];
+		$debug_info = array();
 
 		if ( $this->feature_instance instanceof Classification ) {
 			foreach ( array_keys( $this->feature_instance->get_supported_taxonomies() ) as $tax ) {

@@ -18,7 +18,7 @@ class VectorCodec {
 			return '';
 		}
 
-		$values = [];
+		$values = array();
 		foreach ( $floats as $value ) {
 			$values[] = (float) $value;
 		}
@@ -34,12 +34,12 @@ class VectorCodec {
 	 */
 	public function unpack_floats( string $blob ): array {
 		if ( '' === $blob ) {
-			return [];
+			return array();
 		}
 
 		$result = unpack( 'g*', $blob );
 		if ( false === $result ) {
-			return [];
+			return array();
 		}
 
 		return array_values( $result );
@@ -61,7 +61,7 @@ class VectorCodec {
 		}
 
 		if ( 0.0 === $sum_squares ) {
-			$zeros = [];
+			$zeros = array();
 			foreach ( $vector as $_ ) {
 				$zeros[] = 0.0;
 			}
@@ -69,7 +69,7 @@ class VectorCodec {
 		}
 
 		$magnitude  = sqrt( $sum_squares );
-		$normalized = [];
+		$normalized = array();
 		foreach ( $vector as $value ) {
 			$normalized[] = ( (float) $value ) / $magnitude;
 		}

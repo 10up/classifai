@@ -43,47 +43,47 @@ class OllamaEmbeddings extends Ollama {
 	 *
 	 * @var array
 	 */
-	protected $models = [
-		'all-minilm'              => [
+	protected $models = array(
+		'all-minilm'              => array(
 			'dims'   => 384,
 			'tokens' => 512,
-		],
-		'nomic-embed-text'        => [
+		),
+		'nomic-embed-text'        => array(
 			'dims'   => 768,
 			'tokens' => 2048,
-		],
-		'mxbai-embed-large'       => [
+		),
+		'mxbai-embed-large'       => array(
 			'dims'   => 1024,
 			'tokens' => 512,
-		],
-		'snowflake-arctic-embed'  => [
+		),
+		'snowflake-arctic-embed'  => array(
 			'dims'   => 1024,
 			'tokens' => 512,
-		],
-		'snowflake-arctic-embed2' => [
+		),
+		'snowflake-arctic-embed2' => array(
 			'dims'   => 1024,
 			'tokens' => 8192,
-		],
-		'bge-m3'                  => [
+		),
+		'bge-m3'                  => array(
 			'dims'   => 1024,
 			'tokens' => 8192,
-		],
-		'bge-large'               => [
+		),
+		'bge-large'               => array(
 			'dims'   => 1024,
 			'tokens' => 512,
-		],
-		'granite-embedding'       => [
+		),
+		'granite-embedding'       => array(
 			'dims'   => 384,
 			'tokens' => 512,
-		],
-	];
+		),
+	);
 
 	/**
 	 * NLU features that are supported by this provider.
 	 *
 	 * @var array
 	 */
-	public $nlu_features = [];
+	public $nlu_features = array();
 
 	/**
 	 * Scheduler instance.
@@ -162,17 +162,17 @@ class OllamaEmbeddings extends Ollama {
 			Classification::ID === $this->feature_instance::ID &&
 			method_exists( $this->feature_instance, 'get_supported_taxonomies' )
 		) {
-			$settings   = get_option( $this->feature_instance->get_option_name(), [] );
-			$post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : [ 'post' => 1 ];
+			$settings   = get_option( $this->feature_instance->get_option_name(), array() );
+			$post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : array( 'post' => 1 );
 
 			foreach ( $this->feature_instance->get_supported_taxonomies( $post_types ) as $tax => $label ) {
-				$this->nlu_features[ $tax ] = [
+				$this->nlu_features[ $tax ] = array(
 					'feature'           => $label,
 					'threshold'         => __( 'Threshold (%)', 'classifai' ),
 					'threshold_default' => 75,
 					'taxonomy'          => __( 'Taxonomy', 'classifai' ),
 					'taxonomy_default'  => $tax,
-				];
+				);
 			}
 		}
 	}
@@ -292,10 +292,10 @@ class OllamaEmbeddings extends Ollama {
 	 * @param array $args Overridable args.
 	 * @return array
 	 */
-	public function get_models( array $args = [] ): array {
+	public function get_models( array $args = array() ): array {
 		$models = parent::get_models( $args );
 
-		$supported_models = [
+		$supported_models = array(
 			'all-minilm',
 			'nomic-embed-text',
 			'mxbai-embed-large',
@@ -304,7 +304,7 @@ class OllamaEmbeddings extends Ollama {
 			'bge-m3',
 			'bge-large',
 			'granite-embedding',
-		];
+		);
 
 		// Ensure our model list only contains the ones we support.
 		foreach ( $models as $key => $model ) {
@@ -324,7 +324,7 @@ class OllamaEmbeddings extends Ollama {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		add_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_feature_settings' ), 10, 2 );
 
 		$feature = new Classification();
 
@@ -333,7 +333,7 @@ class OllamaEmbeddings extends Ollama {
 			__( 'Ollama Embeddings', 'classifai' )
 		);
 		self::$scheduler_instance->init();
-		add_action( 'classifai_schedule_generate_embedding_job', [ $this, 'generate_term_embedding_job' ], 10, 4 );
+		add_action( 'classifai_schedule_generate_embedding_job', array( $this, 'generate_term_embedding_job' ), 10, 4 );
 
 		if (
 			( $this->feature_instance && Classification::ID !== $this->feature_instance::ID ) ||
@@ -343,8 +343,8 @@ class OllamaEmbeddings extends Ollama {
 			return;
 		}
 
-		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-		add_action( 'edited_term', [ $this, 'update_embeddings_for_term' ] );
+		add_action( 'created_term', array( $this, 'generate_embeddings_for_term' ) ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'edited_term', array( $this, 'update_embeddings_for_term' ) );
 		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 	}
 
@@ -356,15 +356,15 @@ class OllamaEmbeddings extends Ollama {
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_feature_settings' ), 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
 		}
 
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		add_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_feature_settings' ), 10, 2 );
 
-		$defaults = [];
+		$defaults = array();
 
 		foreach ( array_keys( $feature_instance->get_supported_taxonomies() ) as $tax ) {
 			$enabled = 'category' === $tax ? true : false;
@@ -444,20 +444,20 @@ class OllamaEmbeddings extends Ollama {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_embeddings_request_body',
-			[
+			array(
 				'model'      => $settings[ static::ID ]['model'] ?? '',
 				'input'      => $text,
 				'dimensions' => $this->get_dimensions( $settings[ static::ID ]['model'] ?? '' ),
-			],
+			),
 			$text
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->get_api_embeddings_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		// Restore the existing Feature instance.
@@ -471,7 +471,7 @@ class OllamaEmbeddings extends Ollama {
 			return new WP_Error( 'no_data', esc_html__( 'No data returned from Ollama.', 'classifai' ) );
 		}
 
-		$return = [];
+		$return = array();
 
 		// Parse out the embeddings response.
 		foreach ( $response['embeddings'] as $embedding ) {
@@ -494,7 +494,7 @@ class OllamaEmbeddings extends Ollama {
 	 * @param Feature|null $feature Feature instance.
 	 * @return array|boolean|WP_Error
 	 */
-	public function generate_embeddings( array $strings = [], $feature = null ) {
+	public function generate_embeddings( array $strings = array(), $feature = null ) {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
@@ -525,20 +525,20 @@ class OllamaEmbeddings extends Ollama {
 		 */
 		$body = apply_filters(
 			'classifai_ollama_embeddings_request_body',
-			[
+			array(
 				'model'      => $settings[ static::ID ]['model'] ?? '',
 				'input'      => $strings,
 				'dimensions' => $this->get_dimensions( $settings[ static::ID ]['model'] ?? '' ),
-			],
+			),
 			$strings
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->get_api_embeddings_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		// Restore the existing Feature instance.
@@ -552,7 +552,7 @@ class OllamaEmbeddings extends Ollama {
 			return new WP_Error( 'no_data', esc_html__( 'No data returned from Ollama.', 'classifai' ) );
 		}
 
-		$return = [];
+		$return = array();
 
 		// Parse out the embeddings response.
 		foreach ( $response['embeddings'] as $embedding ) {

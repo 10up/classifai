@@ -24,7 +24,7 @@ $args       = array(
 );
 
 // Header
-require_once 'onboarding-header.php';
+require_once __DIR__ . '/onboarding-header.php';
 ?>
 
 <div class="classifai-setup-form">
@@ -35,4 +35,4 @@ require_once 'onboarding-header.php';
 
 <?php
 // Footer
-require_once 'onboarding-footer.php';
+require_once __DIR__ . 'onboarding-footer.php';

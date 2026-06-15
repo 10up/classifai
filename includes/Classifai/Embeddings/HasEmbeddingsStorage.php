@@ -107,7 +107,7 @@ trait HasEmbeddingsStorage {
 		}
 
 		if ( MigrationRunner::STATUS_COMPLETED === $this->embeddings_migration_runner()->status() ) {
-			return [];
+			return array();
 		}
 
 		$meta_key = $this->legacy_embedding_meta_key();
@@ -116,7 +116,7 @@ trait HasEmbeddingsStorage {
 			: get_term_meta( $object_id, $meta_key, true );
 
 		if ( empty( $legacy ) ) {
-			return [];
+			return array();
 		}
 
 		if ( 'post' === $object_type ) {

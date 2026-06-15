@@ -37,7 +37,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @var array
 	 */
-	private $image_types_to_process = [
+	private $image_types_to_process = array(
 		'bmp',
 		'gif',
 		'jpeg',
@@ -46,7 +46,7 @@ class ComputerVision extends Provider {
 		'ico',
 		'tiff',
 		'mpo',
-	];
+	);
 
 	/**
 	 * ComputerVision constructor.
@@ -66,10 +66,10 @@ class ComputerVision extends Provider {
 		add_settings_field(
 			static::ID . '_endpoint_url',
 			esc_html__( 'Endpoint URL', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
@@ -78,22 +78,22 @@ class ComputerVision extends Provider {
 					'' :
 					__( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 
 		switch ( $this->feature_instance::ID ) {
@@ -126,10 +126,10 @@ class ComputerVision extends Provider {
 		add_settings_field(
 			static::ID . '_descriptive_confidence_threshold',
 			esc_html__( 'Confidence threshold', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'descriptive_confidence_threshold',
 				'input_type'    => 'number',
@@ -139,7 +139,7 @@ class ComputerVision extends Provider {
 				'default_value' => $settings['descriptive_confidence_threshold'],
 				'description'   => esc_html__( 'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 	}
 
@@ -152,10 +152,10 @@ class ComputerVision extends Provider {
 		add_settings_field(
 			static::ID . '_tag_confidence_threshold',
 			esc_html__( 'Confidence threshold', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'tag_confidence_threshold',
 				'input_type'    => 'number',
@@ -165,7 +165,7 @@ class ComputerVision extends Provider {
 				'default_value' => $settings['tag_confidence_threshold'],
 				'description'   => esc_html__( 'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 	}
 
@@ -176,27 +176,27 @@ class ComputerVision extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'endpoint_url'  => '',
 			'api_key'       => '',
 			'authenticated' => false,
-		];
+		);
 
 		switch ( $this->feature_instance::ID ) {
 			case DescriptiveTextGenerator::ID:
 				return array_merge(
 					$common_settings,
-					[
+					array(
 						'descriptive_confidence_threshold' => 70,
-					]
+					)
 				);
 
 			case ImageTagsGenerator::ID:
 				return array_merge(
 					$common_settings,
-					[
+					array(
 						'tag_confidence_threshold' => 70,
-					]
+					)
 				);
 		}
 
@@ -244,10 +244,10 @@ class ComputerVision extends Provider {
 	 * Register the functionality.
 	 */
 	public function register() {
-		add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
-		add_action( 'wp_ajax_classifai_get_read_status', [ $this, 'get_read_status_ajax' ] );
-		add_filter( 'classifai_feature_pdf_to_text_generation_read_status', [ $this, 'get_read_status' ], 10, 2 );
-		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
+		add_action( 'classifai_retry_get_read_result', array( $this, 'do_read_cron' ), 10, 2 );
+		add_action( 'wp_ajax_classifai_get_read_status', array( $this, 'get_read_status_ajax' ) );
+		add_filter( 'classifai_feature_pdf_to_text_generation_read_status', array( $this, 'get_read_status' ), 10, 2 );
+		add_filter( 'posts_clauses', array( $this, 'filter_attachment_query_keywords' ), 10, 1 );
 	}
 
 	/**
@@ -277,7 +277,7 @@ class ComputerVision extends Provider {
 			wp_send_json_error( $error );
 		}
 
-		wp_send_json_success( self::get_read_status( [], (int) $attachment_id ) );
+		wp_send_json_success( self::get_read_status( array(), (int) $attachment_id ) );
 	}
 
 	/**
@@ -287,7 +287,7 @@ class ComputerVision extends Provider {
 	 * @param int   $attachment_id The attachment ID.
 	 * @return array Read and running status.
 	 */
-	public static function get_read_status( array $status = [], $attachment_id = null ) {
+	public static function get_read_status( array $status = array(), $attachment_id = null ) {
 		if ( empty( $attachment_id ) || ! is_numeric( $attachment_id ) ) {
 			return $status;
 		}
@@ -298,10 +298,10 @@ class ComputerVision extends Provider {
 		$status  = get_post_meta( $attachment_id, '_classifai_azure_read_status', true );
 		$running = ( ! empty( $status['status'] ) && 'running' === $status['status'] );
 
-		$resp = [
+		$resp = array(
 			'read'    => $read,
 			'running' => $running,
-		];
+		);
 
 		return $resp;
 	}
@@ -351,7 +351,7 @@ class ComputerVision extends Provider {
 		 * @return bool Whether to apply smart cropping.
 		 */
 		if ( ! apply_filters( 'classifai_should_smart_crop_image', $should_smart_crop, $metadata, $attachment_id ) ) {
-			return [];
+			return array();
 		}
 
 		// Direct file system access is required for the current implementation of this feature.
@@ -411,7 +411,7 @@ class ComputerVision extends Provider {
 		set_transient( 'classifai_azure_computer_vision_image_text_extraction_latest_response', $details, DAY_IN_SECONDS * 30 );
 
 		if ( isset( $details->readResult ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			$text = [];
+			$text = array();
 
 			// Iterate down the chain to find the text we want.
 			foreach ( $details->readResult as $result ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -470,7 +470,7 @@ class ComputerVision extends Provider {
 			return $details;
 		}
 
-		$caption = isset( $details->captionResult ) ? (array) $details->captionResult : []; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$caption = isset( $details->captionResult ) ? (array) $details->captionResult : array(); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		set_transient( 'classifai_azure_computer_vision_descriptive_text_latest_response', $details, DAY_IN_SECONDS * 30 );
 
@@ -560,7 +560,7 @@ class ComputerVision extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
 		}
 
-		$rtn      = [];
+		$rtn      = array();
 		$feature  = new ImageTagsGenerator();
 		$settings = $feature->get_settings( static::ID );
 
@@ -570,7 +570,7 @@ class ComputerVision extends Provider {
 			return $details;
 		}
 
-		$tags = $details->tagsResult->values ?? []; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$tags = $details->tagsResult->values ?? array(); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		set_transient( 'classifai_azure_computer_vision_image_tags_latest_response', $details, DAY_IN_SECONDS * 30 );
 
@@ -589,7 +589,7 @@ class ComputerVision extends Provider {
 		// Process the returned tags to see if they pass the threshold.
 		if ( is_array( $tags ) && ! empty( $tags ) ) {
 			$threshold   = $settings['tag_confidence_threshold'];
-			$custom_tags = [];
+			$custom_tags = array();
 
 			// Save each tag if it passes the threshold.
 			foreach ( $tags as $tag ) {
@@ -647,11 +647,11 @@ class ComputerVision extends Provider {
 
 		$response = safe_wp_remote_post(
 			$endpoint_url,
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 					'Content-Type'              => 'application/json',
-				],
+				),
 				/**
 				 * Filters the timeout for the image scan request.
 				 *
@@ -669,7 +669,7 @@ class ComputerVision extends Provider {
 					60
 				),
 				'body'    => '{"url":"' . $image_url . '"}',
-			]
+			)
 		);
 
 		if ( ! is_wp_error( $response ) ) {
@@ -701,7 +701,7 @@ class ComputerVision extends Provider {
 	 */
 	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
 		$credentials  = $this->get_credentials( $feature->get_settings() );
-		$api_features = [];
+		$api_features = array();
 
 		if ( $feature instanceof DescriptiveTextGenerator && $feature->is_feature_enabled() && ! empty( $feature->get_alt_text_settings() ) ) {
 			$api_features[] = 'caption';
@@ -726,19 +726,19 @@ class ComputerVision extends Provider {
 	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	protected function authenticate_credentials( array $settings = array() ) {
 		$credentials = $this->get_credentials( $settings );
 		$rtn         = false;
 		$request     = safe_wp_remote_post(
 			add_query_arg( 'features', 'caption', trailingslashit( $credentials['endpoint_url'] ?? '' ) . $this->analyze_url ),
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Ocp-Apim-Subscription-Key' => $credentials['api_key'] ?? '',
 					'Content-Type'              => 'application/json',
-				],
+				),
 				'body'    => '{"url":"https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/header.png"}',
 				'use_vip' => true,
-			]
+			)
 		);
 
 		if ( ! is_wp_error( $request ) ) {
@@ -763,11 +763,11 @@ class ComputerVision extends Provider {
 	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error|null
 	 */
-	public function rest_endpoint_callback( $attachment_id, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $attachment_id, string $route_to_call = '', array $args = array() ) {
 		// Check to be sure the post both exists and is an attachment.
 		if ( ! get_post( $attachment_id ) || 'attachment' !== get_post_type( $attachment_id ) ) {
 			/* translators: %1$s: the attachment ID */
-			return new WP_Error( 'incorrect_ID', sprintf( esc_html__( '%1$d is not found or is not an attachment', 'classifai' ), $attachment_id ), [ 'status' => 404 ] );
+			return new WP_Error( 'incorrect_ID', sprintf( esc_html__( '%1$d is not found or is not an attachment', 'classifai' ), $attachment_id ), array( 'status' => 404 ) );
 		}
 
 		if ( 'read_pdf' === $route_to_call ) {
@@ -808,8 +808,8 @@ class ComputerVision extends Provider {
 					get_attached_file( $attachment_id ),
 					wp_get_attachment_url( $attachment_id ),
 					$metadata,
-					[ 50, 16000 ],
-					[ 50, 16000 ],
+					array( 50, 16000 ),
+					array( 50, 16000 ),
 					computer_vision_max_filesize()
 				);
 			} else {
@@ -870,9 +870,9 @@ class ComputerVision extends Provider {
 	 * @return array
 	 */
 	public function get_debug_information(): array {
-		$settings          = [];
-		$provider_settings = [];
-		$debug_info        = [];
+		$settings          = array();
+		$provider_settings = array();
+		$debug_info        = array();
 
 		if ( $this->feature_instance ) {
 			$settings          = $this->feature_instance->get_settings();

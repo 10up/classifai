@@ -26,7 +26,7 @@ trait OpenAI {
 	 * @param array $settings     Current settings, if any.
 	 * @return array
 	 */
-	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
+	public function sanitize_api_key_settings( array $new_settings = array(), array $settings = array() ): array {
 		$authenticated = $this->authenticate_credentials( $new_settings );
 
 		if ( is_wp_error( $authenticated ) ) {
@@ -62,10 +62,10 @@ trait OpenAI {
 	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	protected function authenticate_credentials( array $settings = array() ) {
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
-		$response = $request->get( $this->model_url, [ 'use_vip' => true ] );
+		$response = $request->get( $this->model_url, array( 'use_vip' => true ) );
 
 		return ! is_wp_error( $response ) ? true : $response;
 	}
@@ -76,8 +76,8 @@ trait OpenAI {
 	 * @return array
 	 */
 	public function get_post_types_for_settings(): array {
-		$post_types     = [];
-		$post_type_objs = get_post_types( [], 'objects' );
+		$post_types     = array();
+		$post_type_objs = get_post_types( array(), 'objects' );
 		$post_type_objs = array_filter( $post_type_objs, 'is_post_type_viewable' );
 		unset( $post_type_objs['attachment'] );
 
@@ -127,9 +127,9 @@ trait OpenAI {
 	 * @return array
 	 */
 	public function get_taxonomies_for_settings(): array {
-		$taxonomies = get_taxonomies( [], 'objects' );
+		$taxonomies = get_taxonomies( array(), 'objects' );
 		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
-		$supported  = [];
+		$supported  = array();
 
 		foreach ( $taxonomies as $taxonomy ) {
 			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
@@ -158,7 +158,7 @@ trait OpenAI {
 	public function get_supported_taxonomies( \Classifai\Features\Feature $feature ): array {
 		$provider   = $feature->get_feature_provider_instance();
 		$settings   = $feature->get_settings( $provider::ID );
-		$taxonomies = [];
+		$taxonomies = array();
 
 		if ( ! empty( $settings ) && isset( $settings['taxonomies'] ) ) {
 			foreach ( $settings['taxonomies'] as $taxonomy => $enabled ) {

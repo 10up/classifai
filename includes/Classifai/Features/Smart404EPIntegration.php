@@ -89,10 +89,10 @@ class Smart404EPIntegration {
 			return;
 		}
 
-		add_filter( 'ep_post_mapping', [ $this, 'add_post_vector_field_mapping' ] );
-		add_filter( 'ep_prepare_meta_excluded_public_keys', [ $this, 'exclude_vector_meta' ] );
-		add_filter( 'ep_post_sync_args_post_prepare_meta', [ $this, 'add_vector_field_to_post_sync' ], 10, 2 );
-		add_filter( 'ep_retrieve_the_post', [ $this, 'add_score_field_to_document' ], 10, 2 );
+		add_filter( 'ep_post_mapping', array( $this, 'add_post_vector_field_mapping' ) );
+		add_filter( 'ep_prepare_meta_excluded_public_keys', array( $this, 'exclude_vector_meta' ) );
+		add_filter( 'ep_post_sync_args_post_prepare_meta', array( $this, 'add_vector_field_to_post_sync' ), 10, 2 );
+		add_filter( 'ep_retrieve_the_post', array( $this, 'add_score_field_to_document' ), 10, 2 );
 	}
 
 	/**
@@ -109,15 +109,15 @@ class Smart404EPIntegration {
 		}
 
 		// Add the default vector field mapping.
-		$mapping['mappings']['properties']['chunks'] = [
+		$mapping['mappings']['properties']['chunks'] = array(
 			'type'       => 'nested',
-			'properties' => [
-				'vector' => [
+			'properties' => array(
+				'vector' => array(
 					'type' => 'dense_vector',
 					'dims' => (int) $this->embeddings_handler->get_dimensions(),
-				],
-			],
-		];
+				),
+			),
+		);
 
 		// Add extra vector fields for newer versions of Elasticsearch.
 		if ( version_compare( $this->es_version, '8.0', '>=' ) ) {
@@ -125,10 +125,10 @@ class Smart404EPIntegration {
 			// were added in 8.0. The similarity field must be set if index is true.
 			$mapping['mappings']['properties']['chunks']['properties']['vector'] = array_merge(
 				$mapping['mappings']['properties']['chunks']['properties']['vector'],
-				[
+				array(
 					'index'      => true,
 					'similarity' => 'cosine',
-				]
+				)
 			);
 
 			// The element_type field was added in 8.6. This can be either float (default) or byte.
@@ -178,7 +178,7 @@ class Smart404EPIntegration {
 		// Try to use the stored embeddings first if content hasn't changed.
 		$embeddings   = method_exists( $this->embeddings_handler, 'read_object_embedding' )
 			? $this->embeddings_handler->read_object_embedding( 'post', $post_id )
-			: [];
+			: array();
 		$content_hash = get_post_meta( $post_id, $this->content_hash_meta_key, true );
 
 		// This will include the post title and post content combined.
@@ -189,7 +189,7 @@ class Smart404EPIntegration {
 
 		// If they don't exist or content has changed, make API requests to generate them.
 		if ( ! $embeddings || md5( $content ) !== $content_hash ) {
-			$embeddings = [];
+			$embeddings = array();
 
 			// Chunk the content into smaller pieces.
 			$content_chunks = $this->embeddings_handler->chunk_content( $content );
@@ -238,7 +238,7 @@ class Smart404EPIntegration {
 							);
 						}
 
-						$embeddings = [];
+						$embeddings = array();
 					}
 				}
 			}
@@ -268,12 +268,12 @@ class Smart404EPIntegration {
 		}
 
 		// Add the embeddings data to the sync args.
-		$args['chunks'] = [];
+		$args['chunks'] = array();
 
 		foreach ( $embeddings as $embedding ) {
-			$args['chunks'][] = [
+			$args['chunks'][] = array(
 				'vector' => array_map( 'floatval', $embedding ),
-			];
+			);
 		}
 
 		return $args;
@@ -360,7 +360,7 @@ class Smart404EPIntegration {
 	 * }
 	 * @return array|WP_Error
 	 */
-	public function exact_knn_search( string $query, array $args = [] ) {
+	public function exact_knn_search( string $query, array $args = array() ) {
 		$query_embedding = $this->get_embedding( $query, true );
 
 		if ( is_wp_error( $query_embedding ) ) {
@@ -370,12 +370,12 @@ class Smart404EPIntegration {
 		// Parse the arguments, setting our defaults.
 		$args = wp_parse_args(
 			$args,
-			[
+			array(
 				'index'          => 'post',
-				'post_type'      => [ 'post' ],
+				'post_type'      => array( 'post' ),
 				'num'            => 5,
 				'score_function' => 'cosine',
-			]
+			)
 		);
 
 		// Get the ElasticPress indexable.
@@ -386,49 +386,49 @@ class Smart404EPIntegration {
 		}
 
 		// Build our exact kNN query.
-		$knn_query = [
+		$knn_query = array(
 			'from'  => 0,
 			'size'  => (int) $args['num'],
-			'query' => [
-				'bool' => [
-					'must' => [
-						[
-							'terms' => [
+			'query' => array(
+				'bool' => array(
+					'must' => array(
+						array(
+							'terms' => array(
 								'post_type.raw' => $args['post_type'],
-							],
-						],
-						[
-							'terms' => [
-								'post_status' => [
+							),
+						),
+						array(
+							'terms' => array(
+								'post_status' => array(
 									'publish',
-								],
-							],
-						],
-						[
-							'nested' => [
+								),
+							),
+						),
+						array(
+							'nested' => array(
 								'path'  => 'chunks',
-								'query' => [
-									'script_score' => [
-										'query'  => [
-											'match_all' => (object) [],
-										],
-										'script' => [
+								'query' => array(
+									'script_score' => array(
+										'query'  => array(
+											'match_all' => (object) array(),
+										),
+										'script' => array(
 											'source' => $this->get_script_source( $args['score_function'] ),
-											'params' => [
+											'params' => array(
 												'query_vector' => array_map( 'floatval', $query_embedding ),
-											],
-										],
-									],
-								],
-							],
-						],
-					],
-				],
-			],
-		];
+											),
+										),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		);
 
 		// Run the query using the ElasticPress indexable.
-		$res = $indexable->query_es( $knn_query, [] );
+		$res = $indexable->query_es( $knn_query, array() );
 
 		if ( false === $res || ! isset( $res['documents'] ) ) {
 			return new WP_Error( 'es_error', esc_html__( 'Unable to query Elasticsearch', 'classifai' ) );
@@ -452,7 +452,7 @@ class Smart404EPIntegration {
 	 * }
 	 * @return array|WP_Error
 	 */
-	public function search_rescored_by_exact_knn( string $query, array $args = [] ) {
+	public function search_rescored_by_exact_knn( string $query, array $args = array() ) {
 		$query_embedding = $this->get_embedding( $query, true );
 
 		if ( is_wp_error( $query_embedding ) ) {
@@ -462,13 +462,13 @@ class Smart404EPIntegration {
 		// Parse the arguments, setting our defaults.
 		$args = wp_parse_args(
 			$args,
-			[
+			array(
 				'index'          => 'post',
-				'post_type'      => [ 'post' ],
+				'post_type'      => array( 'post' ),
 				'num'            => 5,
 				'num_candidates' => 50,
 				'score_function' => 'cosine',
-			]
+			)
 		);
 
 		// Get the ElasticPress indexable.
@@ -479,10 +479,10 @@ class Smart404EPIntegration {
 		}
 
 		// Build our default search query.
-		$default_es_query = [
+		$default_es_query = array(
 			'from' => 0,
 			'size' => (int) $args['num_candidates'],
-		];
+		);
 
 		// Expand our default search query depending on the indexable type.
 		switch ( $args['index'] ) {
@@ -495,7 +495,7 @@ class Smart404EPIntegration {
 					// Add the post_name field to the multi_match fields.
 					for ( $key = 0; $key < 3; $key++ ) {
 						if ( isset( $default_es_query['query']['function_score']['query']['bool']['should'][ $key ]['multi_match']['fields'] ) ) {
-							$default_es_query['query']['function_score']['query']['bool']['should'][ $key ]['multi_match']['fields'] = array_merge( $default_es_query['query']['function_score']['query']['bool']['should'][ $key ]['multi_match']['fields'], [ 'post_name' ] );
+							$default_es_query['query']['function_score']['query']['bool']['should'][ $key ]['multi_match']['fields'] = array_merge( $default_es_query['query']['function_score']['query']['bool']['should'][ $key ]['multi_match']['fields'], array( 'post_name' ) );
 						}
 					}
 
@@ -508,7 +508,7 @@ class Smart404EPIntegration {
 		}
 
 		// Run the query using the ElasticPress indexable.
-		$default_res = $indexable->query_es( $default_es_query, [] );
+		$default_res = $indexable->query_es( $default_es_query, array() );
 
 		if ( false === $default_res || ! isset( $default_res['documents'] ) ) {
 			return new WP_Error( 'es_error', esc_html__( 'Unable to query Elasticsearch', 'classifai' ) );
@@ -522,46 +522,46 @@ class Smart404EPIntegration {
 		}
 
 		// Build our exact kNN query.
-		$knn_query = [
+		$knn_query = array(
 			'from'  => 0,
 			'size'  => (int) $args['num'],
-			'query' => [
-				'bool' => [
-					'must' => [
-						[
-							'bool' => [
-								'must' => [
-									'terms' => [
+			'query' => array(
+				'bool' => array(
+					'must' => array(
+						array(
+							'bool' => array(
+								'must' => array(
+									'terms' => array(
 										'post_id' => $post_ids,
-									],
-								],
-							],
-						],
-						[
-							'nested' => [
+									),
+								),
+							),
+						),
+						array(
+							'nested' => array(
 								'path'  => 'chunks',
-								'query' => [
-									'script_score' => [
-										'query'  => [
-											'match_all' => (object) [],
-										],
-										'script' => [
+								'query' => array(
+									'script_score' => array(
+										'query'  => array(
+											'match_all' => (object) array(),
+										),
+										'script' => array(
 											'source' => $this->get_script_source( $args['score_function'] ),
-											'params' => [
+											'params' => array(
 												'query_vector' => array_map( 'floatval', $query_embedding ),
-											],
-										],
-									],
-								],
-							],
-						],
-					],
-				],
-			],
-		];
+											),
+										),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		);
 
 		// Run the query using the ElasticPress indexable.
-		$res = $indexable->query_es( $knn_query, [] );
+		$res = $indexable->query_es( $knn_query, array() );
 
 		if ( false === $res || ! isset( $res['documents'] ) ) {
 			return new WP_Error( 'es_error', esc_html__( 'Unable to query Elasticsearch', 'classifai' ) );
@@ -580,11 +580,11 @@ class Smart404EPIntegration {
 	 * @return array
 	 */
 	private function default_search_post_query( string $query, array $post_type, int $num, Indexable $indexable ): array {
-		$search_args = [
+		$search_args = array(
 			's'              => $query,
 			'post_type'      => ! empty( $post_type ) ? $post_type : 'any',
 			'posts_per_page' => (int) $num,
-		];
+		);
 
 		$search_query = new \WP_Query();
 
@@ -638,7 +638,7 @@ class Smart404EPIntegration {
 	 * @return array
 	 */
 	public function convert_es_results_to_post_objects( array $results ): array {
-		$new_posts = [];
+		$new_posts = array();
 
 		// Turn each ES result into a WP_Post object.
 		// Copied from ElasticPress\Indexable\Post\QueryIntegration::format_hits_as_posts.
@@ -658,7 +658,7 @@ class Smart404EPIntegration {
 				$post->site_id = $post_array['site_id'];
 			}
 
-			$post_return_args = [
+			$post_return_args = array(
 				'post_type',
 				'post_author',
 				'post_name',
@@ -669,7 +669,7 @@ class Smart404EPIntegration {
 				'post_date',
 				'post_date_gmt',
 				'permalink',
-			];
+			);
 
 			foreach ( $post_return_args as $key ) {
 				if ( 'post_author' === $key ) {

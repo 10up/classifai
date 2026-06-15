@@ -48,14 +48,14 @@ class UsageTracking extends UsageTrackingProvider {
 	 * @return array
 	 */
 	public static function get_provider_ids(): array {
-		return [
+		return array(
 			ChatGPT::ID,
 			Embeddings::ID,
 			Images::ID,
 			Moderation::ID,
 			SpeechToText::ID,
 			TextToSpeech::ID,
-		];
+		);
 	}
 
 	/**
@@ -71,19 +71,19 @@ class UsageTracking extends UsageTrackingProvider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		if ( $this->feature_instance instanceof APIUsageTracking ) {
-			$threshold_scope = [ 'current_month', 'year_to_date', 'all_time' ];
+			$threshold_scope = array( 'current_month', 'year_to_date', 'all_time' );
 
 			$new_settings[ static::ID ]['project_id'] = sanitize_text_field( $new_settings[ static::ID ]['project_id'] ?? '' );
 
 			$new_settings[ static::ID ]['refresh_interval_minutes'] = filter_var(
 				$new_settings[ static::ID ]['refresh_interval_minutes'] ?? false,
 				FILTER_VALIDATE_INT,
-				[
-					'options' => [
+				array(
+					'options' => array(
 						'min_range' => 5,
 						'default'   => 15,
-					],
-				]
+					),
+				)
 			);
 
 			$soft_threshold_enabled = filter_var( $new_settings[ static::ID ]['soft_threshold_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN );
@@ -107,12 +107,12 @@ class UsageTracking extends UsageTrackingProvider {
 				$new_settings[ static::ID ]['soft_threshold_amount']  = filter_var(
 					$new_settings[ static::ID ]['soft_threshold_amount'] ?? false,
 					FILTER_VALIDATE_FLOAT,
-					[
-						'options' => [
+					array(
+						'options' => array(
 							'min_range' => 1.00,
 							'default'   => 1.00,
-						],
-					]
+						),
+					)
 				);
 				$new_settings[ static::ID ]['soft_threshold_scope']   = $soft_threshold_scope;
 				$new_settings[ static::ID ]['soft_threshold_emails']  = $soft_threshold_emails;
@@ -141,12 +141,12 @@ class UsageTracking extends UsageTrackingProvider {
 				$new_settings[ static::ID ]['hard_threshold_amount']  = filter_var(
 					$new_settings[ static::ID ]['hard_threshold_amount'] ?? false,
 					FILTER_VALIDATE_FLOAT,
-					[
-						'options' => [
+					array(
+						'options' => array(
 							'min_range' => 1.00,
 							'default'   => 1.00,
-						],
-					]
+						),
+					)
 				);
 				$new_settings[ static::ID ]['hard_threshold_scope']   = $hard_threshold_scope;
 				$new_settings[ static::ID ]['hard_threshold_emails']  = $hard_threshold_emails;
@@ -172,7 +172,7 @@ class UsageTracking extends UsageTrackingProvider {
 
 			// Unschedule the cron job if the refresh interval is changed.
 			if ( $settings[ static::ID ]['refresh_interval_minutes'] !== $new_settings[ static::ID ]['refresh_interval_minutes'] && function_exists( 'as_unschedule_action' ) ) {
-				\as_unschedule_action( APIUsageTracking::CRON_HOOK, [], 'classifai' );
+				\as_unschedule_action( APIUsageTracking::CRON_HOOK, array(), 'classifai' );
 			}
 		}
 
@@ -185,12 +185,12 @@ class UsageTracking extends UsageTrackingProvider {
 	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	protected function authenticate_credentials( array $settings = array() ) {
 		$api_url = add_query_arg( 'limit', 1, $this->org_admin_api_key_url );
 
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
-		$response = $request->get( $api_url, [ 'use_vip' => true ] );
+		$response = $request->get( $api_url, array( 'use_vip' => true ) );
 
 		return ! is_wp_error( $response ) ? true : $response;
 	}
@@ -212,18 +212,18 @@ class UsageTracking extends UsageTrackingProvider {
 		// If the data is null, set the is_null_range flag to true.
 		// This means this api was not generated or used for the given time range.
 		if ( isset( $data['data'] ) && empty( $data['data'] ) ) {
-			return [
+			return array(
 				'is_null_range' => true,
 				'total_amount'  => 0.0,
 				'currency'      => 'USD',
 				'has_more'      => false,
 				'next_page'     => null,
-			];
+			);
 		}
 
 		$total_amount = 0.0;
 		$currency     = 'USD';
-		$buckets      = isset( $data['data'] ) && is_array( $data['data'] ) ? $data['data'] : [];
+		$buckets      = isset( $data['data'] ) && is_array( $data['data'] ) ? $data['data'] : array();
 
 		foreach ( $buckets as $bucket ) {
 			if ( empty( $bucket['results'] ) ) {
@@ -240,12 +240,12 @@ class UsageTracking extends UsageTrackingProvider {
 			}
 		}
 
-		return [
+		return array(
 			'is_null_range' => false,
 			'total_amount'  => $total_amount,
 			'currency'      => $currency,
 			'has_more'      => $data['has_more'],
 			'next_page'     => $data['next_page'],
-		];
+		);
 	}
 }

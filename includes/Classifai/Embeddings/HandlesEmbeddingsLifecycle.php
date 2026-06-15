@@ -58,7 +58,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @param Feature $feature Feature requesting the embeddings.
 	 * @return array|boolean|WP_Error
 	 */
-	abstract public function generate_embeddings( array $strings = [], $feature = null );
+	abstract public function generate_embeddings( array $strings = array(), $feature = null );
 
 	/**
 	 * Maximum tokens the provider's current configuration supports.
@@ -167,7 +167,7 @@ trait HandlesEmbeddingsLifecycle {
 		$content        = $this->get_normalized_content( $term_id, 'term' );
 		$content_chunks = $this->chunk_content( $content );
 
-		$embeddings = [];
+		$embeddings = array();
 		foreach ( $content_chunks as $chunk ) {
 			$embedding = $this->generate_embedding( $chunk, $feature );
 
@@ -204,7 +204,7 @@ trait HandlesEmbeddingsLifecycle {
 	 */
 	protected function generate_embeddings_for_chunks( array $content_chunks, string $content, $feature = null ) {
 		if ( empty( $content_chunks ) ) {
-			return [];
+			return array();
 		}
 
 		$max_tokens   = $this->get_max_tokens();
@@ -213,7 +213,7 @@ trait HandlesEmbeddingsLifecycle {
 
 		// Per-chunk pathway: content has too many tokens for a single batch request.
 		if ( $max_tokens < $total_tokens ) {
-			$embeddings = [];
+			$embeddings = array();
 			foreach ( $content_chunks as $chunk ) {
 				$embedding = $this->generate_embedding( $chunk, $feature );
 
@@ -233,7 +233,7 @@ trait HandlesEmbeddingsLifecycle {
 		}
 
 		if ( ! $all_embeddings ) {
-			return [];
+			return array();
 		}
 
 		return array_map(
@@ -274,7 +274,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @param bool  $link       Whether to call wp_set_object_terms.
 	 * @return array|WP_Error
 	 */
-	public function set_terms( int $post_id = 0, array $embeddings = [], bool $link = true ) {
+	public function set_terms( int $post_id = 0, array $embeddings = array(), bool $link = true ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
 		}
@@ -283,7 +283,7 @@ trait HandlesEmbeddingsLifecycle {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to set terms.', 'classifai' ) );
 		}
 
-		$embeddings_similarity = [];
+		$embeddings_similarity = array();
 		foreach ( $embeddings as $embedding ) {
 			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_term_embeddings_similarity( $embedding ) );
 		}
@@ -308,7 +308,7 @@ trait HandlesEmbeddingsLifecycle {
 		$uniques               = array_unique( array_column( $embeddings_similarity, 'term_id' ) );
 		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
 
-		$sorted_results = [];
+		$sorted_results = array();
 		foreach ( $embeddings_similarity as $item ) {
 			$sorted_results[ $item['taxonomy'] ][] = $item;
 		}
@@ -316,13 +316,13 @@ trait HandlesEmbeddingsLifecycle {
 		/** This action is documented in the trait. */
 		do_action( $prefix . '_post_sort_embeddings_similarity', $sorted_results, $embeddings_similarity, $post_id, $embeddings, $link );
 
-		$return = [];
+		$return = array();
 
 		foreach ( $sorted_results as $tax => $terms ) {
 			if ( $link ) {
 				wp_set_object_terms( $post_id, array_map( 'absint', array_column( $terms, 'term_id' ) ), $tax, false );
 			} else {
-				$terms_to_link = [];
+				$terms_to_link = array();
 				foreach ( $terms as $term ) {
 					$found_term = get_term( $term['term_id'] );
 					if ( $found_term && ! is_wp_error( $found_term ) ) {
@@ -342,12 +342,12 @@ trait HandlesEmbeddingsLifecycle {
 	 * @param array $embeddings Array of float[] chunks.
 	 * @return array|WP_Error
 	 */
-	public function get_terms( array $embeddings = [] ) {
+	public function get_terms( array $embeddings = array() ) {
 		if ( empty( $embeddings ) ) {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
 		}
 
-		$embeddings_similarity = [];
+		$embeddings_similarity = array();
 		foreach ( $embeddings as $embedding ) {
 			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_term_embeddings_similarity( $embedding, false ) );
 		}
@@ -366,28 +366,28 @@ trait HandlesEmbeddingsLifecycle {
 		$uniques               = array_unique( array_column( $embeddings_similarity, 'term_id' ) );
 		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
 
-		$sorted_results = [];
+		$sorted_results = array();
 		foreach ( $embeddings_similarity as $item ) {
 			$sorted_results[ $item['taxonomy'] ][] = $item;
 		}
 
-		$results = [];
+		$results = array();
 		foreach ( $sorted_results as $tax => $terms ) {
 			$taxonomy = get_taxonomy( $tax );
 			$tax_name = $taxonomy->labels->singular_name;
 
-			$results[ $tax ] = [
+			$results[ $tax ] = array(
 				'label' => $tax_name,
-				'data'  => [],
-			];
+				'data'  => array(),
+			);
 
 			foreach ( $terms as $term ) {
 				$similarity = round( ( 1 - $term['similarity'] ), 10 );
 
-				$results[ $tax ]['data'][] = [
+				$results[ $tax ]['data'][] = array(
 					'label' => get_term( $term['term_id'] )->name,
 					'score' => $similarity,
-				];
+				);
 			}
 		}
 
@@ -404,13 +404,13 @@ trait HandlesEmbeddingsLifecycle {
 	 */
 	public function get_term_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
 		$feature              = new Classification();
-		$embedding_similarity = [];
+		$embedding_similarity = array();
 		$taxonomies           = $feature->get_all_feature_taxonomies();
 		$calculations         = new EmbeddingCalculations();
 		$prefix               = $this->embeddings_filter_prefix();
 
 		foreach ( $taxonomies as $tax ) {
-			$exclude = [];
+			$exclude = array();
 
 			if ( is_numeric( $tax ) ) {
 				continue;
@@ -425,7 +425,7 @@ trait HandlesEmbeddingsLifecycle {
 
 				$uncat_term = get_term_by( 'name', 'Uncategorized', 'category' );
 				if ( $uncat_term ) {
-					$exclude = [ $uncat_term->term_id ];
+					$exclude = array( $uncat_term->term_id );
 				}
 			}
 
@@ -435,7 +435,7 @@ trait HandlesEmbeddingsLifecycle {
 			}
 
 			$terms = get_terms(
-				[
+				array(
 					'taxonomy'   => $tax,
 					'orderby'    => 'count',
 					'order'      => 'DESC',
@@ -444,7 +444,7 @@ trait HandlesEmbeddingsLifecycle {
 					'include'    => $term_ids_with_embeddings,
 					'number'     => $this->get_max_terms(),
 					'exclude'    => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-				]
+				)
 			);
 
 			if ( is_wp_error( $terms ) || empty( $terms ) ) {
@@ -470,11 +470,11 @@ trait HandlesEmbeddingsLifecycle {
 					do_action( $prefix . '_single_embedding_similarity', $similarity, $embedding, $chunk, $term_id, $tax, $consider_threshold );
 
 					if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
-						$embedding_similarity[] = [
+						$embedding_similarity[] = array(
 							'taxonomy'   => $tax,
 							'term_id'    => $term_id,
 							'similarity' => $similarity,
-						];
+						);
 					}
 				}
 			}
@@ -490,7 +490,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @param int   $post_id    Source post ID (used for cache key).
 	 * @return array|WP_Error
 	 */
-	public function get_posts( array $embeddings = [], int $post_id = 0 ) {
+	public function get_posts( array $embeddings = array(), int $post_id = 0 ) {
 		$cache_key = \Classifai\recommended_content_cache_key( $post_id );
 		$results   = wp_cache_get( $cache_key );
 
@@ -502,7 +502,7 @@ trait HandlesEmbeddingsLifecycle {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required.', 'classifai' ) );
 		}
 
-		$embeddings_similarity = [];
+		$embeddings_similarity = array();
 		foreach ( $embeddings as $embedding ) {
 			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_post_embeddings_similarity( $embedding ) );
 		}
@@ -521,13 +521,13 @@ trait HandlesEmbeddingsLifecycle {
 		$uniques               = array_unique( array_column( $embeddings_similarity, 'post_id' ) );
 		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
 
-		$results = [];
+		$results = array();
 		foreach ( $embeddings_similarity as $result ) {
 			$similarity = round( ( 1 - $result['similarity'] ), 10 );
-			$results[]  = [
+			$results[]  = array(
 				'post_id' => $result['post_id'],
 				'score'   => $similarity,
-			];
+			);
 		}
 
 		wp_cache_set( $cache_key, $results, '', 60 * MINUTE_IN_SECONDS );
@@ -544,7 +544,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @return array
 	 */
 	public function get_post_embeddings_similarity( array $embedding, string $post_type = 'post', bool $consider_threshold = true ): array {
-		$embedding_similarity = [];
+		$embedding_similarity = array();
 		$calculations         = new EmbeddingCalculations();
 		$prefix               = $this->embeddings_filter_prefix();
 
@@ -554,24 +554,24 @@ trait HandlesEmbeddingsLifecycle {
 		if ( null === $posts ) {
 			$post_ids_with_embeddings = $this->objects_with_embeddings( 'post' );
 			if ( empty( $post_ids_with_embeddings ) ) {
-				$posts = [];
+				$posts = array();
 			} else {
 				$query_posts_per_page = method_exists( $this, 'get_max_posts' ) ? $this->get_max_posts() : 5000;
 				$query                = new WP_Query(
-					[
+					array(
 						'post_type'      => $post_type,
 						'post_status'    => 'publish',
 						'posts_per_page' => $query_posts_per_page,
 						'fields'         => 'ids',
 						'post__in'       => $post_ids_with_embeddings,
-					]
+					)
 				);
 				$posts                = $query->get_posts();
 			}
 		}
 
 		if ( empty( $posts ) ) {
-			return [];
+			return array();
 		}
 
 		if ( null === $threshold ) {
@@ -593,10 +593,10 @@ trait HandlesEmbeddingsLifecycle {
 				do_action( $prefix . '_single_post_embedding_similarity', $similarity, $embedding, $chunk, $post_id, $consider_threshold );
 
 				if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
-					$embedding_similarity[] = [
+					$embedding_similarity[] = array(
 						'post_id'    => $post_id,
 						'similarity' => $similarity,
-					];
+					);
 				}
 			}
 		}
@@ -642,7 +642,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @param array  $args     Query overrides for get_terms().
 	 * @param int    $user_id  User to attribute the job to.
 	 */
-	public function trigger_taxonomy_update( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+	public function trigger_taxonomy_update( string $taxonomy = '', bool $all = false, array $args = array(), int $user_id = 0 ) {
 		$feature = new Classification();
 
 		if (
@@ -652,11 +652,11 @@ trait HandlesEmbeddingsLifecycle {
 			return;
 		}
 
-		$exclude = [];
+		$exclude = array();
 		if ( 'category' === $taxonomy ) {
 			$uncat_term = get_term_by( 'name', 'Uncategorized', 'category' );
 			if ( $uncat_term ) {
-				$exclude = [ $uncat_term->term_id ];
+				$exclude = array( $uncat_term->term_id );
 			}
 		}
 
@@ -680,7 +680,7 @@ trait HandlesEmbeddingsLifecycle {
 			);
 		}
 
-		$default_args = [
+		$default_args = array(
 			'taxonomy'   => $taxonomy,
 			'orderby'    => 'count',
 			'order'      => 'DESC',
@@ -689,7 +689,7 @@ trait HandlesEmbeddingsLifecycle {
 			'number'     => $number,
 			'offset'     => 0,
 			'exclude'    => $term_exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-		];
+		);
 
 		$default_args = array_merge( $default_args, $args );
 
@@ -701,12 +701,12 @@ trait HandlesEmbeddingsLifecycle {
 			$user_id = get_current_user_id();
 		}
 
-		$job_args = [
+		$job_args = array(
 			'taxonomy' => $taxonomy,
 			'all'      => $all,
 			'args'     => $default_args,
 			'user_id'  => $user_id,
-		];
+		);
 
 		$action = $this->embeddings_term_job_action();
 		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( $action, $job_args ) ) {
@@ -729,7 +729,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @param array  $args     get_terms() arguments.
 	 * @param int    $user_id  User to attribute the work to.
 	 */
-	public function generate_term_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+	public function generate_term_embedding_job( string $taxonomy = '', bool $all = false, array $args = array(), int $user_id = 0 ) {
 		if ( $user_id > 0 ) {
 			// current_user_can() fails when this function runs under the AS context.
 			wp_set_current_user( $user_id );
@@ -741,7 +741,7 @@ trait HandlesEmbeddingsLifecycle {
 		}
 
 		$terms   = array_values( $terms );
-		$exclude = [];
+		$exclude = array();
 
 		foreach ( $terms as $term_id ) {
 			$has_generated = $this->generate_embeddings_for_term( (int) $term_id, $all );
@@ -755,7 +755,7 @@ trait HandlesEmbeddingsLifecycle {
 		}
 
 		if ( ! empty( $exclude ) ) {
-			$args['exclude'] = array_merge( $args['exclude'] ?? [], $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+			$args['exclude'] = array_merge( $args['exclude'] ?? array(), $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		}
 
 		$this->trigger_taxonomy_update( $taxonomy, $all, $args, $user_id );
@@ -770,7 +770,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @param array  $args      Query overrides for WP_Query().
 	 * @param int    $user_id   User to attribute the job to.
 	 */
-	public function trigger_post_update( string $post_type = 'post', bool $all = false, array $args = [], int $user_id = 0 ) {
+	public function trigger_post_update( string $post_type = 'post', bool $all = false, array $args = array(), int $user_id = 0 ) {
 		$feature = new RecommendedContent();
 
 		if (
@@ -791,16 +791,16 @@ trait HandlesEmbeddingsLifecycle {
 		 */
 		$number = apply_filters( $this->embeddings_filter_prefix() . '_items_per_job', 100 );
 
-		$post_ids_with_embeddings = $all ? [] : $this->objects_with_embeddings( 'post' );
+		$post_ids_with_embeddings = $all ? array() : $this->objects_with_embeddings( 'post' );
 
-		$default_args = [
+		$default_args = array(
 			'post_type'      => $post_type,
 			'post_status'    => 'publish',
 			'posts_per_page' => $number,
 			'fields'         => 'ids',
 			'offset'         => 0,
-			'post__not_in'   => $post_ids_with_embeddings, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-		];
+			'post__not_in'   => $post_ids_with_embeddings, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
+		);
 
 		$default_args = array_merge( $default_args, $args );
 
@@ -814,12 +814,12 @@ trait HandlesEmbeddingsLifecycle {
 			$user_id = get_current_user_id();
 		}
 
-		$job_args = [
+		$job_args = array(
 			'post_type' => $post_type,
 			'all'       => $all,
 			'args'      => $default_args,
 			'user_id'   => $user_id,
-		];
+		);
 
 		$query = new WP_Query( $default_args );
 		$posts = $query->get_posts();
@@ -845,7 +845,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @param array  $args      WP_Query arguments.
 	 * @param int    $user_id   User to attribute the work to.
 	 */
-	public function generate_post_embedding_job( string $post_type = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+	public function generate_post_embedding_job( string $post_type = '', bool $all = false, array $args = array(), int $user_id = 0 ) {
 		if ( $user_id > 0 ) {
 			wp_set_current_user( $user_id );
 		}
@@ -857,7 +857,7 @@ trait HandlesEmbeddingsLifecycle {
 			return;
 		}
 
-		$exclude = [];
+		$exclude = array();
 		foreach ( $posts as $post_id ) {
 			$has_generated = $this->generate_embeddings_for_post( (int) $post_id, $all, new RecommendedContent() );
 			if ( is_wp_error( $has_generated ) ) {
@@ -870,7 +870,7 @@ trait HandlesEmbeddingsLifecycle {
 		}
 
 		if ( ! empty( $exclude ) ) {
-			$args['post__not_in'] = array_merge( $args['post__not_in'] ?? [], $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+			$args['post__not_in'] = array_merge( $args['post__not_in'] ?? array(), $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
 		}
 
 		$this->trigger_post_update( $post_type, $all, $args, $user_id );
@@ -928,7 +928,7 @@ trait HandlesEmbeddingsLifecycle {
 
 		$post_id          = (int) filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
 		$embeddings       = $this->generate_embeddings_for_post( $post_id, true );
-		$embeddings_terms = [];
+		$embeddings_terms = array();
 
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			$embeddings_terms = $this->get_terms( $embeddings );
@@ -953,7 +953,7 @@ trait HandlesEmbeddingsLifecycle {
 		$content = preg_replace( '/\s+/', ' ', $content );
 		$words   = explode( ' ', $content );
 
-		$chunks     = [];
+		$chunks     = array();
 		$text_count = count( $words );
 
 		for ( $i = 0; $i < $text_count; $i += $chunk_size ) {
@@ -1017,7 +1017,7 @@ trait HandlesEmbeddingsLifecycle {
 	 * @param array  $args          Optional arguments.
 	 * @return array|string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}

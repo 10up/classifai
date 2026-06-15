@@ -36,7 +36,7 @@ class Classifier {
 	public function get_endpoint(): string {
 		if ( empty( $this->endpoint ) ) {
 			$base_url       = trailingslashit( get_api_url() ) . 'v1/analyze';
-			$this->endpoint = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
+			$this->endpoint = esc_url( add_query_arg( array( 'version' => WATSON_NLU_VERSION ), $base_url ) );
 		}
 		return $this->endpoint;
 	}
@@ -51,7 +51,7 @@ class Classifier {
 	 * @param array  $request_options Extra options to pass to the underlying HTTP request
 	 * @return array|\WP_Error
 	 */
-	public function classify( string $text, array $options = [], array $request_options = [] ) {
+	public function classify( string $text, array $options = array(), array $request_options = array() ) {
 		$body = $this->get_body( $text, $options );
 
 		$request_options['body'] = $body;
@@ -101,7 +101,7 @@ class Classifier {
 	 * @param array  $options The NLU classification options
 	 * @return string|bool
 	 */
-	public function get_body( string $text, array $options = [] ) {
+	public function get_body( string $text, array $options = array() ) {
 		$options['text'] = $text;
 
 		if ( empty( $options['language'] ) ) {
@@ -109,16 +109,16 @@ class Classifier {
 		}
 
 		if ( empty( $options['features'] ) ) {
-			$options['features'] = [
-				'categories' => (object) [],
-				'keywords'   => [
+			$options['features'] = array(
+				'categories' => (object) array(),
+				'keywords'   => array(
 					'emotion'   => false,
 					'sentiment' => false,
 					'limit'     => defined( 'WATSON_KEYWORD_LIMIT' ) ? WATSON_KEYWORD_LIMIT : 10,
-				],
-				'concepts'   => (object) [],
-				'entities'   => (object) [],
-			];
+				),
+				'concepts'   => (object) array(),
+				'entities'   => (object) array(),
+			);
 		}
 
 		return wp_json_encode( $options );

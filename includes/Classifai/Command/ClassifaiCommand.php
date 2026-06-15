@@ -52,12 +52,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function post( $args = [], $opts = [] ) {
-		$defaults = [
+	public function post( $args = array(), $opts = array() ) {
+		$defaults = array(
 			'post_type' => false,
 			'limit'     => false,
 			'link'      => true,
-		];
+		);
 
 		$opts = wp_parse_args( $opts, $defaults );
 
@@ -86,7 +86,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				$limit_total = $total;
 			}
 
-			$errors       = [];
+			$errors       = array();
 			$message      = "Classifying $limit_total posts ...";
 			$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
 
@@ -155,15 +155,15 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function text( $args = [], $opts = [] ) {
-		$defaults = [
+	public function text( $args = array(), $opts = array() ) {
+		$defaults = array(
 			'category'       => true,
 			'keyword'        => true,
 			'concept'        => false,
 			'entity'         => false,
 			'input'          => false,
 			'only-normalize' => false,
-		];
+		);
 
 		$opts = wp_parse_args( $opts, $defaults );
 
@@ -188,28 +188,28 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::error( 'Please specify text to classify' );
 		}
 
-		$options = [
-			'features' => [],
-		];
+		$options = array(
+			'features' => array(),
+		);
 
 		if ( $opts['category'] ) {
-			$options['features']['categories'] = (object) [];
+			$options['features']['categories'] = (object) array();
 		}
 
 		if ( $opts['keyword'] ) {
-			$options['features']['keywords'] = [
+			$options['features']['keywords'] = array(
 				'emotion'   => false,
 				'sentiment' => false,
 				'limit'     => 10,
-			];
+			);
 		}
 
 		if ( $opts['concept'] ) {
-			$options['features']['concepts'] = (object) [];
+			$options['features']['concepts'] = (object) array();
 		}
 
 		if ( $opts['entity'] ) {
-			$options['features']['entities'] = (object) [];
+			$options['features']['entities'] = (object) array();
 		}
 
 		$normalizer = new Normalizer();
@@ -252,12 +252,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function text_to_speech( $args = [], $opts = [] ) {
-		$defaults = [
+	public function text_to_speech( $args = array(), $opts = array() ) {
+		$defaults = array(
 			'post_type'   => false,
 			'post_status' => 'publish',
 			'per_page'    => 100,
-		];
+		);
 
 		$feature_speech     = new TextToSpeech();
 		$allowed_post_types = $feature_speech->get_supported_post_types();
@@ -417,11 +417,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function transcribe_audio( $args = [], $opts = [] ) {
-		$defaults = [
+	public function transcribe_audio( $args = array(), $opts = array() ) {
+		$defaults = array(
 			'per_page' => 100,
 			'force'    => false,
-		];
+		);
 
 		$opts             = wp_parse_args( $opts, $defaults );
 		$opts['per_page'] = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
@@ -556,12 +556,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::log( sprintf( 'Starting processing of attachment items in batches of %d', $opts['per_page'] ) );
 
 			$paged      = 1;
-			$mime_types = [];
+			$mime_types = array();
 
 			// Get all the mime types for the file formats we support.
 			foreach ( wp_get_mime_types() as $extensions => $mime ) {
 				foreach ( explode( '|', $extensions ) as $ext ) {
-					if ( in_array( $ext, $provider_instance->file_formats ?? [ 'mp3' ], true ) ) {
+					if ( in_array( $ext, $provider_instance->file_formats ?? array( 'mp3' ), true ) ) {
 						$mime_types[] = $mime;
 					}
 				}
@@ -651,13 +651,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function generate_excerpt( $args = [], $opts = [] ) {
-		$defaults = [
+	public function generate_excerpt( $args = array(), $opts = array() ) {
+		$defaults = array(
 			'post_type'   => false,
 			'post_status' => 'publish',
 			'per_page'    => 100,
 			'force'       => false,
-		];
+		);
 
 		$opts             = wp_parse_args( $opts, $defaults );
 		$opts['per_page'] = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
@@ -834,7 +834,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$feature_settings  = $audio_transcription->get_settings();
 			$provider_instance = $audio_transcription->get_feature_provider_instance( $feature_settings['provider'] );
 
-			\WP_CLI::error( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $provider_instance->file_formats ?? [ 'mp3' ] ), $provider_instance->max_file_size ?? 25 * MB_IN_BYTES ), false );
+			\WP_CLI::error( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $provider_instance->file_formats ?? array( 'mp3' ) ), $provider_instance->max_file_size ?? 25 * MB_IN_BYTES ), false );
 			return false;
 		}
 
@@ -867,11 +867,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function image( $args = [], $opts = [] ) {
-		$default_opts = [
+	public function image( $args = array(), $opts = array() ) {
+		$default_opts = array(
 			'limit' => false,
 			'force' => false,
-		];
+		);
 
 		$opts = wp_parse_args( $opts, $default_opts );
 
@@ -892,7 +892,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$limit_total = min( $total, intval( $opts['limit'] ) );
 		}
 
-		$errors  = [];
+		$errors  = array();
 		$message = "Classifying $limit_total images ...";
 
 		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
@@ -951,7 +951,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function crop( $args = [], $opts = [] ) {
+	public function crop( $args = array(), $opts = array() ) {
 		$image_cropping = new ImageCropping();
 		$provider       = $image_cropping->get_feature_provider_instance();
 
@@ -960,16 +960,16 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		$settings     = $image_cropping->get_settings( $provider::ID );
-		$default_opts = [
+		$default_opts = array(
 			'limit' => false,
-		];
+		);
 
 		$opts = wp_parse_args( $opts, $default_opts );
 
 		if ( ! empty( $args[0] ) ) {
 			$attachment_ids = explode( ',', $args[0] );
 		} else {
-			$attachment_ids = $this->get_attachment_to_classify( array_merge( $opts, [ 'force' => true ] ) );
+			$attachment_ids = $this->get_attachment_to_classify( array_merge( $opts, array( 'force' => true ) ) );
 		}
 
 		$total = count( $attachment_ids );
@@ -983,7 +983,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$limit_total = min( $total, intval( $opts['limit'] ) );
 		}
 
-		$errors  = [];
+		$errors  = array();
 		$message = "Cropping $limit_total images ...";
 
 		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
@@ -1048,12 +1048,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function embeddings( $args = [], $opts = [] ) {
-		$defaults = [
+	public function embeddings( $args = array(), $opts = array() ) {
+		$defaults = array(
 			'post_type'   => false,
 			'post_status' => 'publish',
 			'per_page'    => 100,
-		];
+		);
 
 		$feature  = new Classification();
 		$provider = $feature->get_feature_provider_instance();
@@ -1204,7 +1204,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function auth( $args = [], $opts = [] ) {
+	public function auth( $args = array(), $opts = array() ) {
 		$username = get_username();
 		$password = get_password();
 
@@ -1231,7 +1231,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
-	public function reset( $args = [], $opts = [] ) {
+	public function reset( $args = array(), $opts = array() ) {
 		\WP_CLI::warning(
 			'This will restore the plugin to its default configuration.'
 		);
@@ -1257,16 +1257,16 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		global $wp_object_cache, $wpdb;
 
 		if ( is_object( $wp_object_cache ) ) {
-			$wp_object_cache->group_ops      = [];
-			$wp_object_cache->memcache_debug = [];
-			$wp_object_cache->cache          = [];
+			$wp_object_cache->group_ops      = array();
+			$wp_object_cache->memcache_debug = array();
+			$wp_object_cache->cache          = array();
 
 			if ( method_exists( $wp_object_cache, '__remoteset' ) ) {
 				$wp_object_cache->__remoteset();
 			}
 		}
 
-		$wpdb->queries = [];
+		$wpdb->queries = array();
 	}
 
 	/**
@@ -1275,13 +1275,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $opts Options from WP CLI.
 	 * @return array
 	 */
-	private function get_posts_to_classify( $opts = [] ) {
-		$query_params = [
+	private function get_posts_to_classify( $opts = array() ) {
+		$query_params = array(
 			'post_type'      => ! empty( $opts['post_type'] ) ? $opts['post_type'] : 'any',
 			'post_status'    => 'publish',
 			'fields'         => 'ids',
 			'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page
-		];
+		);
 
 		\WP_CLI::log( 'Fetching posts to classify ...' );
 
@@ -1299,35 +1299,35 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $opts Options from WP CLI.
 	 * @return array
 	 */
-	private function get_attachment_to_classify( $opts = [] ) {
+	private function get_attachment_to_classify( $opts = array() ) {
 		$limit = is_numeric( $opts['limit'] ) ? $opts['limit'] : 100;
 
-		$query_params = [
+		$query_params = array(
 			'post_type'      => 'attachment',
 			'post_mime_type' => array( 'image/jpeg', 'image/png', 'image/gif', 'image/bmp' ),
 			'post_status'    => 'any',
 			'fields'         => 'ids',
 			'posts_per_page' => $limit,
-		];
+		);
 
 		if ( ! empty( $opts['skip'] ) ) {
 			$query_params['offset'] = $opts['skip'];
 		}
 
 		if ( ! $opts['force'] ) {
-			$query_params['meta_query'] = [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$query_params['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				'relation' => 'OR',
-				[
+				array(
 					'key'     => '_wp_attachment_image_alt',
 					'compare' => 'NOT EXISTS',
 					'value'   => '',
-				],
-				[
+				),
+				array(
 					'key'     => '_wp_attachment_image_alt',
 					'compare' => '=',
 					'value'   => '',
-				],
-			];
+				),
+			);
 		}
 
 		\WP_CLI::log( 'Fetching images ...' );
@@ -1373,7 +1373,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Positional args (unused).
 	 * @param array $opts Associative options.
 	 */
-	public function migrate_embeddings( $args = [], $opts = [] ) {
+	public function migrate_embeddings( $args = array(), $opts = array() ) {
 		$batch_size = isset( $opts['batch-size'] ) ? max( 1, (int) $opts['batch-size'] ) : 100;
 
 		\Classifai\Embeddings\Schema::maybe_install();
@@ -1409,7 +1409,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $args Positional args (unused).
 	 * @param array $opts Associative options (unused).
 	 */
-	public function embeddings_status( $args = [], $opts = [] ) {
+	public function embeddings_status( $args = array(), $opts = array() ) {
 		unset( $args, $opts );
 		\Classifai\Embeddings\Schema::maybe_install();
 		$runner    = new \Classifai\Embeddings\MigrationRunner();

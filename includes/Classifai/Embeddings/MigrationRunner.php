@@ -23,22 +23,22 @@ class MigrationRunner {
 	 *
 	 * @var array<string,string>
 	 */
-	const LEGACY_KEYS = [
+	const LEGACY_KEYS = array(
 		'classifai_openai_embeddings'       => 'openai_embeddings',
 		'classifai_azure_openai_embeddings' => 'azure_openai_embeddings',
 		'classifai_ollama_embeddings'       => 'ollama_embeddings',
-	];
+	);
 
 	/**
 	 * Default model per provider (used when migrating legacy data that doesn't carry model info).
 	 *
 	 * @var array<string,string>
 	 */
-	const DEFAULT_MODELS = [
+	const DEFAULT_MODELS = array(
 		'openai_embeddings'       => 'text-embedding-3-small',
 		'azure_openai_embeddings' => 'text-embedding-3-small',
 		'ollama_embeddings'       => '',
-	];
+	);
 
 	/**
 	 * Repository for reading/writing the new table.
@@ -187,12 +187,12 @@ class MigrationRunner {
 	 */
 	protected function normalize_legacy_value( $value ): array {
 		if ( ! is_array( $value ) || empty( $value ) ) {
-			return [];
+			return array();
 		}
 
 		// Already array-of-arrays.
 		if ( is_array( reset( $value ) ) ) {
-			$chunks = [];
+			$chunks = array();
 			foreach ( $value as $chunk ) {
 				if ( is_array( $chunk ) && ! empty( $chunk ) ) {
 					$chunks[] = array_map( 'floatval', $chunk );
@@ -202,7 +202,7 @@ class MigrationRunner {
 		}
 
 		// Flat float array -> single chunk.
-		return [ array_map( 'floatval', $value ) ];
+		return array( array_map( 'floatval', $value ) );
 	}
 
 	/**
@@ -259,7 +259,7 @@ class MigrationRunner {
 		$post_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT post_id AS object_id, meta_key FROM {$wpdb->postmeta} WHERE meta_key IN ({$placeholders}) ORDER BY meta_id ASC LIMIT %d",
-				array_merge( $meta_keys, [ $batch_size ] )
+				array_merge( $meta_keys, array( $batch_size ) )
 			),
 			ARRAY_A
 		);
@@ -267,27 +267,27 @@ class MigrationRunner {
 		$term_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT term_id AS object_id, meta_key FROM {$wpdb->termmeta} WHERE meta_key IN ({$placeholders}) ORDER BY meta_id ASC LIMIT %d",
-				array_merge( $meta_keys, [ $batch_size ] )
+				array_merge( $meta_keys, array( $batch_size ) )
 			),
 			ARRAY_A
 		);
 		// phpcs:enable
 
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- 'meta_key' here is a return-array key, not a meta_query argument.
-		$results = [];
+		$results = array();
 		foreach ( $post_rows as $row ) {
-			$results[] = [
+			$results[] = array(
 				'object_type' => 'post',
 				'object_id'   => (int) $row['object_id'],
 				'meta_key'    => (string) $row['meta_key'],
-			];
+			);
 		}
 		foreach ( $term_rows as $row ) {
-			$results[] = [
+			$results[] = array(
 				'object_type' => 'term',
 				'object_id'   => (int) $row['object_id'],
 				'meta_key'    => (string) $row['meta_key'],
-			];
+			);
 		}
 		// phpcs:enable
 
@@ -350,8 +350,8 @@ class MigrationRunner {
 
 		$this->mark_running();
 
-		if ( ! as_next_scheduled_action( self::SCAN_ACTION, [], self::AS_GROUP ) ) {
-			as_enqueue_async_action( self::SCAN_ACTION, [], self::AS_GROUP );
+		if ( ! as_next_scheduled_action( self::SCAN_ACTION, array(), self::AS_GROUP ) ) {
+			as_enqueue_async_action( self::SCAN_ACTION, array(), self::AS_GROUP );
 		}
 	}
 
@@ -369,8 +369,8 @@ class MigrationRunner {
 		}
 
 		if ( function_exists( 'as_enqueue_async_action' ) ) {
-			as_enqueue_async_action( self::BATCH_ACTION, [ $batch ], self::AS_GROUP );
-			as_enqueue_async_action( self::SCAN_ACTION, [], self::AS_GROUP );
+			as_enqueue_async_action( self::BATCH_ACTION, array( $batch ), self::AS_GROUP );
+			as_enqueue_async_action( self::SCAN_ACTION, array(), self::AS_GROUP );
 		} else {
 			$this->process_batch( $batch );
 		}
@@ -389,9 +389,9 @@ class MigrationRunner {
 	 * Register Action Scheduler callbacks. Call from plugin bootstrap.
 	 */
 	public function register_hooks(): void {
-		add_action( self::SCAN_ACTION, [ $this, 'handle_scan' ] );
-		add_action( self::BATCH_ACTION, [ $this, 'handle_batch' ] );
-		add_action( 'admin_notices', [ $this, 'maybe_render_admin_notice' ] );
+		add_action( self::SCAN_ACTION, array( $this, 'handle_scan' ) );
+		add_action( self::BATCH_ACTION, array( $this, 'handle_batch' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_render_admin_notice' ) );
 	}
 
 	/**
