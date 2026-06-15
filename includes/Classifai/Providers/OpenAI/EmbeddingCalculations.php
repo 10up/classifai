@@ -52,6 +52,6 @@ class EmbeddingCalculations {
 		$distance = 1.0 - ( $dot / $denominator );
 
 		// Ensure we are within the range of 0 to 1.0.
-		return max( 0, min( abs( (float) $distance ), 1.0 ) );
+		return max( 0.0, min( abs( (float) $distance ), 1.0 ) );
 	}
 }

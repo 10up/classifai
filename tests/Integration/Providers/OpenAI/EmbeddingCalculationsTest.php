@@ -69,7 +69,7 @@ class EmbeddingCalculationsTest extends TestCase {
 	}
 
 	/**
-	 * Mismatched lengths degrade gracefully (shorter vector zero-padded).
+	 * Mismatched lengths degrade gracefully by comparing the shared prefix.
 	 *
 	 * @covers ::cosine_similarity
 	 */
