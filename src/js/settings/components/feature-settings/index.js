@@ -129,7 +129,7 @@ export const FeatureSettings = ( { onSaveSuccess = () => {} } ) => {
 						onClick={ () => navigate( -1 ) }
 						className="classifai-panel-header-close"
 						label={ __( 'Back to dashboard', 'classifai' ) }
-						showTooltip={ true }
+						showTooltip
 					/>
 				</PanelHeader>
 				<PanelBody>

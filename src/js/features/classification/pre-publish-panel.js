@@ -3,6 +3,9 @@
  */
 import { registerPlugin } from '@wordpress/plugins';
 import { useSelect, dispatch } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
+import { store as coreStore } from '@wordpress/core-data';
+import { store as noticesStore } from '@wordpress/notices';
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
@@ -25,7 +28,7 @@ const PrePublishClassificationContent = () => {
 	let [ taxTermsAI, setTaxTermsAI ] = useState( {} );
 	const { postType, postId, postTypeLabel } = useSelect( ( select ) => {
 		const { getCurrentPostType, getCurrentPostId, getPostTypeLabel } =
-			select( 'core/editor' );
+			select( editorStore );
 		const currentPostType = getCurrentPostType();
 		const currentPostId = getCurrentPostId();
 
@@ -50,7 +53,7 @@ const PrePublishClassificationContent = () => {
 
 			// get current terms of the post
 			const currentTerms = wp.data
-				.select( 'core' )
+				.select( coreStore )
 				.getEntityRecord( 'postType', postType, postId );
 
 			Object.keys( taxonomies ).forEach( ( taxonomy ) => {
@@ -134,7 +137,7 @@ const PrePublishClassificationContent = () => {
 			} )
 		);
 
-		await dispatch( 'core' ).editEntityRecord(
+		await dispatch( coreStore ).editEntityRecord(
 			'postType',
 			postType,
 			postId,
@@ -142,11 +145,9 @@ const PrePublishClassificationContent = () => {
 		);
 
 		// If no edited values in post trigger save.
-		const isDirty = await wp.data
-			.select( 'core/editor' )
-			.isEditedPostDirty();
+		const isDirty = await wp.data.select( editorStore ).isEditedPostDirty();
 		if ( ! isDirty ) {
-			await dispatch( 'core' ).saveEditedEntityRecord(
+			await dispatch( coreStore ).saveEditedEntityRecord(
 				'postType',
 				postType,
 				postId
@@ -154,7 +155,7 @@ const PrePublishClassificationContent = () => {
 		}
 
 		// Display success notice.
-		dispatch( 'core/notices' ).createSuccessNotice(
+		dispatch( noticesStore ).createSuccessNotice(
 			sprintf(
 				/** translators: %s is post type label. */
 				__( '%s classified successfully.', 'classifai' ),
@@ -223,7 +224,7 @@ const PrePublishClassificationContent = () => {
 					) }
 				</div>
 				<Button
-					variant={ 'secondary' }
+					variant="secondary"
 					onClick={ () => saveTerms( updatedTaxQuery ) }
 					disabled={ isSaved }
 				>

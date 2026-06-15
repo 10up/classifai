@@ -1,11 +1,12 @@
 /**
- * External dependencies.
+ * WordPress dependencies
  */
 import { useSelect } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
 import { registerPlugin } from '@wordpress/plugins';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { ClassificationToggle } from './classification-toggle';
 import { ClassificationButton } from './classification-button';
@@ -14,10 +15,10 @@ const { classifaiPostData, ClassifaiEditorSettingPanel } = window;
 
 const ClassificationPlugin = () => {
 	const postType = useSelect( ( select ) =>
-		select( 'core/editor' ).getCurrentPostType()
+		select( editorStore ).getCurrentPostType()
 	);
 	const postStatus = useSelect( ( select ) =>
-		select( 'core/editor' ).getCurrentPostAttribute( 'status' )
+		select( editorStore ).getCurrentPostAttribute( 'status' )
 	);
 
 	// Ensure we are on a supported post type, checking settings from all features.

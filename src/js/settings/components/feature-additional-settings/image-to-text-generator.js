@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { RadioControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 

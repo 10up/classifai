@@ -598,7 +598,7 @@ test.describe( 'OpenAI ChatGPT Image Tag and Text Generator Tests', () => {
 		).toContainText( 'Rescan for text' );
 
 		// Verify generated Data.
-		const tags = [ 'Hello there', 'how may I assist you today?' ];
+		const tags = [ 'cat', 'window', 'sunlight' ];
 		await expect( page.locator( '#attachment_content' ) ).toHaveValue(
 			'Hello there, how may I assist you today?'
 		);

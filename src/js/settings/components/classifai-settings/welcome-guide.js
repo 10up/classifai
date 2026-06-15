@@ -29,7 +29,7 @@ export const ClassifAIWelcomeGuide = ( { closeWelcomeGuide } ) => {
 						onClick={ () => closeWelcomeGuide() }
 						className="classifai-welcome-guide-close"
 						label={ __( 'Close welcome guide', 'classifai' ) }
-						showTooltip={ true }
+						showTooltip
 					/>
 				</FlexItem>
 			</Flex>

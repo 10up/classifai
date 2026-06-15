@@ -3,14 +3,14 @@
  */
 
 /**
- * External dependencies.
+ * WordPress dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
 import domReady from '@wordpress/dom-ready';
 import { __ } from '@wordpress/i18n';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import './index.scss';
 

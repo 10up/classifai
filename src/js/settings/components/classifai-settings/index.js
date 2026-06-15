@@ -227,7 +227,7 @@ export const ClassifAISettings = () => {
 				<Header />
 				<div className="classifai-settings-wrapper">
 					<div className="classifai-admin-notices wrap"></div>
-					<Notices feature={ 'generic-notices' } />
+					<Notices feature="generic-notices" />
 					<ServiceNavigation />
 					<Routes>
 						<Route

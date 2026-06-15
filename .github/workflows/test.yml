@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
           persist-credentials: false
@@ -91,7 +91,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
           persist-credentials: false
@@ -134,7 +134,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
           persist-credentials: false
@@ -165,7 +165,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
           persist-credentials: false
@@ -233,7 +233,7 @@ jobs:
           echo "PHP_FPM_GID=$(id -g)" >> "$GITHUB_ENV"
 
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
           persist-credentials: false
@@ -306,7 +306,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
           persist-credentials: false
@@ -336,6 +336,9 @@ jobs:
             npm run lint:js
           fi
 
+      - name: Run TypeScript type checking
+        run: npm run typecheck
+
   # Runs E2E tests.
   e2e:
     name: Run E2E tests on ${{ matrix.core.name }}
@@ -352,7 +355,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
           persist-credentials: false
@@ -411,13 +414,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
           persist-credentials: false
 
       - name: Spell Check
-        uses: crate-ci/typos@f8a58b6b53f2279f71eb605f03a4ae4d10608f45 # v1.47.0
+        uses: crate-ci/typos@37bb98842b0d8c4ffebdb75301a13db0267cef89 # v1.47.2
         with:
           files: ./
 
@@ -432,7 +435,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           show-progress: ${{ runner.debug == '1' && 'true' || 'false' }}
           persist-credentials: false

@@ -3,16 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { withSelect } from '@wordpress/data';
-import { PluginPrePublishPanel } from '@wordpress/editor';
+import { PluginPrePublishPanel, store as editorStore } from '@wordpress/editor';
 import { Component } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
 
 const ExcerptPrePublishPanel = ( { children } ) => {
 	const panelBodyTitle = [
-		__( 'Suggestion:' ),
+		__( 'Suggestion:', 'classifai' ),
 		<span className="editor-post-publish-panel__link" key="label">
 			{ __( 'Generate excerpt', 'classifai' ) }
 		</span>,
@@ -22,7 +18,7 @@ const ExcerptPrePublishPanel = ( { children } ) => {
 		<PluginPrePublishPanel
 			title={ panelBodyTitle }
 			icon="aside"
-			initialOpen={ true }
+			initialOpen
 		>
 			{ children }
 		</PluginPrePublishPanel>
@@ -68,7 +64,7 @@ class MaybeExcerptPrePublishPanel extends Component {
 
 export default withSelect( ( select ) => {
 	return {
-		excerpt: select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
-		isPublishPanelOpen: select( 'core/editor' ).isPublishSidebarOpened(),
+		excerpt: select( editorStore ).getEditedPostAttribute( 'excerpt' ),
+		isPublishPanelOpen: select( editorStore ).isPublishSidebarOpened(),
 	};
 } )( MaybeExcerptPrePublishPanel );

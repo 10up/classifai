@@ -23,6 +23,7 @@ import { ClassifAILogo } from '../../utils/icons';
  * @return {React.ReactElement} Header component.
  */
 export const Header = () => {
+	/* eslint-disable no-restricted-syntax -- these IDs are referenced by SCSS selectors and must stay static */
 	return (
 		<header id="classifai-header">
 			<div className="classifai-header-layout">
@@ -33,16 +34,16 @@ export const Header = () => {
 					<DropdownMenu
 						popoverProps={ { placement: 'bottom-end' } }
 						toggleProps={ { size: 'compact' } }
-						menuProps={ { 'aria-label': __( 'Help options' ) } }
+						menuProps={ {
+							'aria-label': __( 'Help options', 'classifai' ),
+						} }
 						icon={ help }
-						text={ __( 'Help' ) }
+						text={ __( 'Help', 'classifai' ) }
 					>
 						{ ( { onClose } ) => (
 							<MenuGroup>
 								<MenuItem
-									href={
-										'https://github.com/10up/classifai#frequently-asked-questions'
-									}
+									href="https://github.com/10up/classifai#frequently-asked-questions"
 									target="_blank"
 									rel="noopener noreferrer"
 									icon={ external }
@@ -60,9 +61,7 @@ export const Header = () => {
 									</VisuallyHidden>
 								</MenuItem>
 								<MenuItem
-									href={
-										'https://github.com/10up/classifai/issues/new/choose'
-									}
+									href="https://github.com/10up/classifai/issues/new/choose"
 									target="_blank"
 									rel="noopener noreferrer"
 									icon={ external }
@@ -89,4 +88,5 @@ export const Header = () => {
 			</div>
 		</header>
 	);
+	/* eslint-enable no-restricted-syntax */
 };

@@ -488,7 +488,7 @@ class GeminiAPI extends Provider {
 				'contents'         => [
 					[
 						'parts' => [
-							'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt . '\n"""' . esc_html( $args['content'] ) . '"""',
+							'text' => $prompt . ' You will be provided with content delimited by triple quotes.\n"""' . esc_html( $args['content'] ) . '"""',
 						],
 					],
 				],

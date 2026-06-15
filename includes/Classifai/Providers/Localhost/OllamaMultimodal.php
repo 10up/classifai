@@ -37,13 +37,39 @@ class OllamaMultimodal extends Ollama {
 		$models = parent::get_models( $args );
 
 		$supported_models = [
-			'llava',
 			'bakllava',
+			'deepseek-ocr',
+			'devstral-small-2',
+			'gemini-3-flash-preview',
+			'gemma3',
+			'gemma4',
+			'glm-ocr',
+			'granite3.2-vision',
+			'kimi-k2.5',
+			'kimi-k2.6',
 			'llama3.2-vision',
+			'llama4',
+			'llava',
 			'llava-llama3',
-			'moondream',
-			'minicpm-v',
 			'llava-phi3',
+			'medgemma',
+			'medgemma1.5',
+			'minicpm-v',
+			'minicpm-v4.5',
+			'minicpm-v4.6',
+			'minimax-m3',
+			'ministral-3',
+			'moondream',
+			'mistral-large-3',
+			'mistral-medium-3.5',
+			'mistral-small3.1',
+			'mistral-small3.2',
+			'nemotron3',
+			'qwen2.5vl',
+			'qwen3-vl',
+			'qwen3.5',
+			'qwen3.6',
+			'translategemma',
 		];
 
 		// Ensure our model list only contains the ones we support.
@@ -316,6 +342,21 @@ class OllamaMultimodal extends Ollama {
 				'model'  => $settings['model'] ?? '',
 				'prompt' => $prompt,
 				'images' => [ base64_encode( $image_data ) ], // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				'format' => [
+					'type'                 => 'object',
+					'properties'           => [
+						'tags' => [
+							'type'     => 'array',
+							'minItems' => 3,
+							'maxItems' => 5,
+							'items'    => [
+								'type' => 'string',
+							],
+						],
+					],
+					'required'             => [ 'tags' ],
+					'additionalProperties' => false,
+				],
 				'stream' => false,
 			],
 			$attachment_id
@@ -326,8 +367,19 @@ class OllamaMultimodal extends Ollama {
 
 		// If we have a response, clean it up.
 		if ( ! is_wp_error( $response ) ) {
-			$response = array_filter( explode( '- ', $response ) );
-			$response = array_map( 'trim', $response );
+			// We expect the response to be valid JSON since we requested that schema.
+			$image_tags = json_decode( $response, true );
+
+			if ( isset( $image_tags['tags'] ) && is_array( $image_tags['tags'] ) ) {
+				$response = array_filter(
+					array_map(
+						function ( $tag ) {
+							return sanitize_text_field( trim( $tag, ' "\'' ) );
+						},
+						$image_tags['tags']
+					)
+				);
+			}
 		}
 
 		// Ensure we have a valid response after processing.

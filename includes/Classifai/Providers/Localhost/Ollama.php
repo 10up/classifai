@@ -471,7 +471,7 @@ class Ollama extends Provider {
 				'messages' => [
 					[
 						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+						'content' => $prompt . ' You will be provided with content delimited by triple quotes',
 					],
 					[
 						'role'    => 'user',
@@ -621,14 +621,28 @@ class Ollama extends Provider {
 				'messages' => [
 					[
 						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. Ensure the response you return is valid JSON, in the structure {"takeaways":["first","second"]}. ' . $prompt,
+						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
 					],
 					[
 						'role'    => 'user',
 						'content' => '"""' . $content . '"""',
 					],
 				],
-				'format'   => 'json',
+				'format'   => [
+					'type'                 => 'object',
+					'properties'           => [
+						'takeaways' => [
+							'type'     => 'array',
+							'minItems' => 2,
+							'maxItems' => 4,
+							'items'    => [
+								'type' => 'string',
+							],
+						],
+					],
+					'required'             => [ 'takeaways' ],
+					'additionalProperties' => false,
+				],
 				'stream'   => false,
 			],
 			$post_id
