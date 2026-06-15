@@ -595,7 +595,6 @@ class AmazonPolly extends Provider {
 		if ( ! check_ajax_referer( 'classifai', 'nonce', false ) ) {
 			$error = new WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
 			wp_send_json_error( $error );
-			exit();
 		}
 
 		// Set the feature instance if it's not already set.

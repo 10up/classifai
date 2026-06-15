@@ -13,7 +13,7 @@ parameters:
 	reportWrongPhpDocTypeInVarTag: true
 
 	# Configuration
-	level: 3
+	level: 5
 	phpVersion:
 		min: 70400
 		max: 80400

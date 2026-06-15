@@ -194,7 +194,7 @@ class SpeechToText extends Provider {
 			case 'transcript':
 				if ( $this->feature_instance instanceof AudioTranscriptsGeneration ) {
 					if ( is_attachment( $audio_resource ) ) {
-						return $this->feature_instance->transcribe_from_attachment( $audio_resource, $args );
+						return $this->feature_instance->transcribe_from_attachment( (int) $audio_resource, $args );
 					} elseif ( is_remote_url( $audio_resource ) ) {
 						return $this->feature_instance->transcribe_from_path( $audio_resource );
 					}

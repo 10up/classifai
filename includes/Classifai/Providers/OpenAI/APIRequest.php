@@ -321,7 +321,7 @@ class APIRequest {
 			} elseif ( $content_type && false !== strpos( $content_type, 'audio/mpeg' ) ) {
 				return $response;
 			} else {
-				return new WP_Error( 'Invalid content type', $response );
+				return new WP_Error( 'invalid_content_type', esc_html__( 'Invalid content type.', 'classifai' ), $response );
 			}
 		} else {
 			return $response;
@@ -366,6 +366,6 @@ class APIRequest {
 			return $this->provider->get_credential( 'api_key', $this->settings ) ?? '';
 		}
 
-		return $this->api_key ?? '';
+		return $this->api_key;
 	}
 }

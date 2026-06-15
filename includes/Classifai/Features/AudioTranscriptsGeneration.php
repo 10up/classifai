@@ -174,7 +174,7 @@ class AudioTranscriptsGeneration extends Feature {
 		$form_fields['retranscribe'] = [
 			'label'        => __( 'Transcribe audio', 'classifai' ),
 			'input'        => 'html',
-			'html'         => '<button class="button secondary" id="classifai-retranscribe" data-id="' . esc_attr( absint( $attachment->ID ) ) . '">' . esc_html( $text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+			'html'         => '<button class="button secondary" id="classifai-retranscribe" data-id="' . esc_attr( (string) absint( $attachment->ID ) ) . '">' . esc_html( $text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 			'show_in_edit' => false,
 		];
 

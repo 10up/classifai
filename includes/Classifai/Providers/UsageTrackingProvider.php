@@ -28,7 +28,7 @@ abstract class UsageTrackingProvider extends Provider {
 	/**
 	 * Feature instance.
 	 *
-	 * @var \Classifai\Features\APIUsageTracking
+	 * @var \Classifai\Features\APIUsageTracking|null
 	 */
 	protected $feature_instance = null;
 

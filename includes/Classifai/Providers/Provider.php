@@ -19,7 +19,7 @@ abstract class Provider {
 	/**
 	 * Feature instance.
 	 *
-	 * @var \Classifai\Features\Feature
+	 * @var \Classifai\Features\Feature|null
 	 */
 	protected $feature_instance = null;
 

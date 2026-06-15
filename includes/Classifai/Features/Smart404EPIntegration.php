@@ -677,9 +677,7 @@ class Smart404EPIntegration {
 
 			$post->elasticsearch = true;
 
-			if ( $post ) {
-				$new_posts[] = $post;
-			}
+			$new_posts[] = $post;
 		}
 
 		return $new_posts;
