@@ -167,4 +167,25 @@ class MigrationRunnerTest extends \WP_UnitTestCase {
 		$this->assertTrue( $this->repo->exists( 'post', $post2, MigrationRunner::SHARED_FEATURE, 'ollama_embeddings', $this->runner->default_model_for( 'ollama_embeddings' ) ) );
 		$this->assertTrue( $this->repo->exists( 'term', $term1, MigrationRunner::SHARED_FEATURE, 'openai_embeddings', $this->runner->default_model_for( 'openai_embeddings' ) ) );
 	}
+
+	public function test_schedule_completes_immediately_when_nothing_to_migrate() {
+		// Fresh install: no legacy embedding meta anywhere.
+		$this->assertSame( [], $this->runner->scan( 1 ) );
+
+		$this->runner->schedule();
+
+		// Should short-circuit to completed rather than queue a no-op background
+		// scan that competes for Action Scheduler's single batch claim.
+		$this->assertSame( MigrationRunner::STATUS_COMPLETED, $this->runner->status() );
+	}
+
+	public function test_schedule_does_not_complete_when_legacy_data_present() {
+		$post_id = self::factory()->post->create();
+		update_post_meta( $post_id, 'classifai_openai_embeddings', [ [ 0.1 ] ] );
+
+		$this->runner->schedule();
+
+		// There is real work to do, so the migration must not be marked done.
+		$this->assertNotSame( MigrationRunner::STATUS_COMPLETED, $this->runner->status() );
+	}
 }

@@ -381,19 +381,6 @@ export class ClassifAIUtils {
 		} catch ( _ ) {
 			// already inactive
 		}
-		execFileSync(
-			'npx',
-			[
-				'wp-env',
-				'run',
-				'tests-cli',
-				'wp',
-				'plugin',
-				'deactivate',
-				'classic-editor',
-			],
-			{ stdio: 'inherit' }
-		);
 	}
 
 	async enableClassicEditor(): Promise< void > {
@@ -402,33 +389,6 @@ export class ClassifAIUtils {
 		} catch ( _ ) {
 			// already active
 		}
-		execFileSync(
-			'npx',
-			[
-				'wp-env',
-				'run',
-				'tests-cli',
-				'wp',
-				'plugin',
-				'activate',
-				'classic-editor',
-			],
-			{ stdio: 'inherit' }
-		);
-		execFileSync(
-			'npx',
-			[
-				'wp-env',
-				'run',
-				'tests-cli',
-				'wp',
-				'option',
-				'update',
-				'classic-editor-replace',
-				'classic',
-			],
-			{ stdio: 'inherit' }
-		);
 	}
 
 	async showClassicEditorExcerptMetabox(): Promise< void > {
@@ -800,6 +760,7 @@ export class ClassifAIUtils {
 					'action-scheduler',
 					'run',
 					'--hooks=classifai_schedule_text_to_speech_job',
+					'--force',
 				],
 				{ timeout: 20000, stdio: 'inherit' }
 			);

@@ -337,6 +337,13 @@ class MigrationRunner {
 			return;
 		}
 
+		// Nothing to migrate; Flip straight to "completed"
+		// instead of scheduling a no-op background job.
+		if ( empty( $this->scan( 1 ) ) ) {
+			$this->mark_completed();
+			return;
+		}
+
 		if ( ! function_exists( 'as_enqueue_async_action' ) || ! function_exists( 'as_next_scheduled_action' ) ) {
 			return;
 		}

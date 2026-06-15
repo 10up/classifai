@@ -122,6 +122,7 @@ test.describe( '[Language Processing] Text to Speech (Amazon Polly) Tests', () =
 				'action-scheduler',
 				'run',
 				'--hooks=classifai_schedule_text_to_speech_job',
+				'--force',
 			],
 			{ timeout: 20000, stdio: 'inherit' }
 		);
@@ -221,6 +222,7 @@ test.describe( '[Language Processing] Text to Speech (Amazon Polly) Tests', () =
 				'action-scheduler',
 				'run',
 				'--hooks=classifai_schedule_text_to_speech_job',
+				'--force',
 			],
 			{ timeout: 20000, stdio: 'inherit' }
 		);
