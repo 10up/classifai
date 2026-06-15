@@ -535,7 +535,7 @@ class Embeddings extends Provider {
 
 		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
 
-		$embeddings       = $this->generate_embeddings_for_post( $post_id, true );
+		$embeddings       = $this->generate_embeddings_for_post( (int) $post_id, true );
 		$embeddings_terms = [];
 
 		// Add terms to this item based on embedding data.

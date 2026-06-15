@@ -308,7 +308,7 @@ class DescriptiveTextGenerator extends Feature {
 			'label'        => __( 'Descriptive text', 'classifai' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
-			'html'         => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+			'html'         => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( (string) absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 		];
 
 		return $form_fields;
