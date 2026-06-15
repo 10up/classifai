@@ -148,8 +148,7 @@ test.describe( '[Language processing] Excerpt Generation Tests', () => {
 			.fill( 'Test GPT content.' );
 
 		// Ensure excerpt metabox is shown.
-		await page.locator( '#show-settings-link' ).click();
-		await page.locator( '#postexcerpt-hide' ).check( { force: true } );
+		await classifaiUtils.showClassicEditorExcerptMetabox();
 
 		// Verify button exists.
 		await expect(

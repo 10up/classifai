@@ -390,6 +390,48 @@ export class ClassifAIUtils {
 		}
 	}
 
+	async showClassicEditorExcerptMetabox(): Promise< void > {
+		const excerptMetabox = this.page.locator( '#postexcerpt' );
+		if ( await excerptMetabox.isVisible() ) {
+			return;
+		}
+
+		const screenOptions = this.page.locator( '#show-settings-link' );
+		if (
+			( await screenOptions.count() ) &&
+			( await screenOptions.getAttribute( 'aria-expanded' ) ) !== 'true'
+		) {
+			await screenOptions.click( { force: true } );
+		}
+
+		const excerptToggle = this.page.locator( '#postexcerpt-hide' );
+		if (
+			( await excerptToggle.count() ) &&
+			! ( await excerptToggle.isChecked() )
+		) {
+			await excerptToggle.click( { force: true } );
+		}
+
+		try {
+			await expect( excerptMetabox ).toBeVisible( { timeout: 1000 } );
+		} catch ( _ ) {
+			await this.page.evaluate( () => {
+				const postboxes = ( window as any ).postboxes;
+				if ( postboxes && typeof postboxes.pbshow === 'function' ) {
+					postboxes.pbshow( 'postexcerpt' );
+				}
+
+				const excerptToggle = document.querySelector< HTMLInputElement >(
+					'#postexcerpt-hide'
+				);
+				if ( excerptToggle ) {
+					excerptToggle.checked = true;
+				}
+			} );
+			await expect( excerptMetabox ).toBeVisible();
+		}
+	}
+
 	async enableElasticPress(): Promise< void > {
 		try {
 			await this.requestUtils.activatePlugin( 'elasticpress' );
