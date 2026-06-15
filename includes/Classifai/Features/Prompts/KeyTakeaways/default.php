@@ -7,6 +7,10 @@
  * @var string $article_title Provided by extract() of $data; falls back to a token.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $article_title = $article_title ?? '{{TITLE}}';
 
 // phpcs:disable Squiz.PHP.Heredoc.NotAllowed, PluginCheck.CodeAnalysis.Heredoc.NotAllowed
