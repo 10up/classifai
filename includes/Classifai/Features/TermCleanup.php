@@ -53,7 +53,7 @@ class TermCleanup extends Feature {
 	/**
 	 * EPIntegration instance.
 	 *
-	 * @var EPIntegration
+	 * @var TermCleanupEPIntegration
 	 */
 	private $ep_integration;
 
@@ -496,6 +496,14 @@ class TermCleanup extends Feature {
 		}
 
 		$provider = $this->get_feature_provider_instance();
+
+		if (
+			! $provider instanceof OpenAIEmbeddings
+			&& ! $provider instanceof AzureEmbeddings
+			&& ! $provider instanceof OllamaEmbeddings
+		) {
+			return false;
+		}
 
 		// Generate embedding data for each term.
 		foreach ( $terms as $term_id ) {

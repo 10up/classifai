@@ -241,7 +241,7 @@ class ServicesManager {
 	 * Setup fields
 	 */
 	public function setup_fields_sections() {
-		add_settings_section( 'classifai_settings', 'ClassifAI Settings', '', 'classifai_settings' );
+		add_settings_section( 'classifai_settings', 'ClassifAI Settings', '__return_null', 'classifai_settings' );
 
 		add_settings_field(
 			'email',

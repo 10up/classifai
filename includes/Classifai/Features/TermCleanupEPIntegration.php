@@ -5,6 +5,9 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
+use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
+use Classifai\Providers\Localhost\OllamaEmbeddings;
 use ElasticPress\Indexables;
 use ElasticPress\Elasticsearch;
 use WP_Error;
@@ -136,8 +139,15 @@ class TermCleanupEPIntegration {
 
 		// If they don't exist, make API requests to generate them.
 		if ( ! $embeddings ) {
-			$provider   = $this->term_cleanup->get_feature_provider_instance();
-			$embeddings = $provider->generate_embeddings_for_term( $term_id, false, $this->term_cleanup );
+			$provider = $this->term_cleanup->get_feature_provider_instance();
+
+			if (
+				$provider instanceof OpenAIEmbeddings
+				|| $provider instanceof AzureEmbeddings
+				|| $provider instanceof OllamaEmbeddings
+			) {
+				$embeddings = $provider->generate_embeddings_for_term( $term_id, false, $this->term_cleanup );
+			}
 		}
 
 		// If we still don't have embeddings, return early.
@@ -183,7 +193,16 @@ class TermCleanupEPIntegration {
 	 * @return array|WP_Error
 	 */
 	public function exact_knn_search( int $term_id, string $index = 'term', int $num = 1000, $threshold = 75 ) {
-		$provider        = $this->term_cleanup->get_feature_provider_instance();
+		$provider = $this->term_cleanup->get_feature_provider_instance();
+
+		if (
+			! $provider instanceof OpenAIEmbeddings
+			&& ! $provider instanceof AzureEmbeddings
+			&& ! $provider instanceof OllamaEmbeddings
+		) {
+			return new WP_Error( 'invalid_provider', esc_html__( 'The configured provider does not support embeddings.', 'classifai' ) );
+		}
+
 		$query_embedding = $provider->generate_embeddings_for_term( $term_id, false, $this->term_cleanup );
 		$min_score       = 1 + ( $threshold / 100 );
 

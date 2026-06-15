@@ -207,9 +207,9 @@ class ComputerVision extends Provider {
 	 * Sanitize the settings for this Provider.
 	 *
 	 * @param array $new_settings The settings being saved.
-	 * @return array|mixed
+	 * @return array
 	 */
-	public function sanitize_settings( array $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings      = $this->feature_instance->get_settings();
 		$authenticated = $this->authenticate_credentials( $new_settings );
 
@@ -262,7 +262,6 @@ class ComputerVision extends Provider {
 		if ( ! check_ajax_referer( 'classifai', 'nonce', false ) ) {
 			$error = new \WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
 			wp_send_json_error( $error );
-			exit();
 		}
 
 		// Attachment ID check.
@@ -270,17 +269,15 @@ class ComputerVision extends Provider {
 		if ( empty( $attachment_id ) ) {
 			$error = new \WP_Error( 'invalid_post', __( 'Invalid attachment ID.', 'classifai' ) );
 			wp_send_json_error( $error );
-			exit();
 		}
 
 		// User capability check.
 		if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
 			$error = new \WP_Error( 'unauthorized_access', __( 'Unauthorized access.', 'classifai' ) );
 			wp_send_json_error( $error );
-			exit();
 		}
 
-		wp_send_json_success( self::get_read_status( array(), $attachment_id ) );
+		wp_send_json_success( self::get_read_status( array(), (int) $attachment_id ) );
 	}
 
 	/**
@@ -338,10 +335,6 @@ class ComputerVision extends Provider {
 
 		$feature     = new ImageCropping();
 		$credentials = $this->get_credentials();
-
-		if ( ! is_array( $metadata ) || ! is_array( $credentials ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'Invalid data found. Please check your settings and try again.', 'classifai' ) );
-		}
 
 		$should_smart_crop = $feature->is_feature_enabled();
 
@@ -838,6 +831,8 @@ class ComputerVision extends Provider {
 			case 'tags':
 				return $this->generate_image_tags( $image_url, $attachment_id );
 		}
+
+		return null;
 	}
 
 	/**

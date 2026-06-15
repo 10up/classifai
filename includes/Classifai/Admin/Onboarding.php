@@ -548,10 +548,6 @@ class Onboarding {
 	 * @param array $options The options to update.
 	 */
 	public function update_onboarding_options( array $options ) {
-		if ( ! is_array( $options ) ) {
-			return;
-		}
-
 		$onboarding_options = $this->get_onboarding_options();
 		$onboarding_options = array_merge( $onboarding_options, $options );
 

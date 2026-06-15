@@ -272,7 +272,7 @@ class ContentResizing extends Feature {
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {

@@ -192,7 +192,7 @@ class SmartCropping {
 			);
 		}
 
-		if ( empty( $url ) || empty( $size_data ) || ! is_array( $size_data ) ) {
+		if ( empty( $url ) || empty( $size_data ) ) {
 			return new \WP_Error( 'classifai_smart_cropping_invalid_args', 'Invalid arguments for API request.' );
 		}
 

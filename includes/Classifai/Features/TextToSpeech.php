@@ -989,7 +989,7 @@ class TextToSpeech extends Feature {
 	 *
 	 * Fetch the initial state of audio generation prior to the audio existing for the post.
 	 *
-	 * @param  int|WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
+	 * @param  int|\WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
 	 *                                    return the current global post inside the loop. A numerically valid post ID that
 	 *                                    points to a non-existent post returns `null`. Defaults to global $post.
 	 * @return bool                     The initial state of audio generation. Default true.

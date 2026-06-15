@@ -17,7 +17,7 @@ class Classifier {
 	/**
 	 * The request object to make Watson API requests.
 	 *
-	 * @var APIRequest $request
+	 * @var APIRequest|null $request
 	 */
 	public $request;
 

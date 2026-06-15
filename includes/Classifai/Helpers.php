@@ -305,7 +305,7 @@ function attachment_is_pdf( $post ): bool {
  *
  * @param string $slug Asset slug as defined in build/webpack configuration.
  * @param string $attribute Optional attribute to get. Can be version or dependencies.
- * @return string|array
+ * @return string|array|null
  */
 function get_asset_info( string $slug, ?string $attribute = null ) {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {
@@ -362,8 +362,6 @@ function clean_input( string $key = '', bool $is_get = false, string $sanitize_c
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		return isset( $_POST[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_POST[ $key ] ) ) : '';
 	}
-
-	return false;
 }
 
 /**
@@ -497,8 +495,8 @@ function render_disable_feature_link( string $feature ) {
  *
  * @since 2.4.0
  *
- * @param array $prompt_key Prompt key.
- * @param array $new_settings   Settings data.
+ * @param string $prompt_key Prompt key.
+ * @param array  $new_settings   Settings data.
  * @return array Sanitized prompt data.
  */
 function sanitize_prompts( $prompt_key = '', array $new_settings = array() ): array {

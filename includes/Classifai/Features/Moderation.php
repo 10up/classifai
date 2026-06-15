@@ -238,7 +238,7 @@ class Moderation extends Feature {
 			$comment_id &&
 			wp_verify_nonce( $nonce, 'moderate_comment' )
 		) {
-			$this->moderate_comment( $comment_id );
+			$this->moderate_comment( (int) $comment_id );
 			wp_safe_redirect( '/wp-admin/edit-comments.php' );
 			exit;
 		}

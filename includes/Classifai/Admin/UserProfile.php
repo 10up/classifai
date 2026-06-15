@@ -126,7 +126,7 @@ class UserProfile {
 			return array();
 		}
 
-		$user_roles       = $user->roles ?? array();
+		$user_roles       = is_array( $user->roles ) ? $user->roles : array();
 		$allowed_features = array();
 
 		$services = get_plugin()->services;

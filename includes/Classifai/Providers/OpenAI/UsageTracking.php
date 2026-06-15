@@ -35,7 +35,9 @@ class UsageTracking extends UsageTrackingProvider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		$this->feature_instance = $feature_instance;
+		if ( $feature_instance instanceof APIUsageTracking ) {
+			$this->feature_instance = $feature_instance;
+		}
 	}
 
 	/**

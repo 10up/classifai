@@ -250,7 +250,7 @@ class APIUsageTracking extends Feature {
 	 *
 	 * @param WP_REST_Request $request The full request object.
 	 *
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function rest_endpoint_callback( WP_REST_Request $request ) {
 

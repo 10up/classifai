@@ -169,8 +169,8 @@ class PDFTextExtraction extends Feature {
 		 */
 		$status = apply_filters( 'classifai_' . static::ID . '_read_status', array(), $post->ID );
 
-		$read    = ! empty( $status['read'] ) && (bool) $status['read'] ? __( 'Rescan PDF for text', 'classifai' ) : __( 'Scan PDF for text', 'classifai' );
-		$running = ! empty( $status['running'] ) && (bool) $status['running'];
+		$read    = ! empty( $status['read'] ) ? __( 'Rescan PDF for text', 'classifai' ) : __( 'Scan PDF for text', 'classifai' );
+		$running = ! empty( $status['running'] );
 		?>
 
 		<div class="misc-publishing-actions">
@@ -248,10 +248,10 @@ class PDFTextExtraction extends Feature {
 		$read_text = empty( get_the_content( null, false, $post ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
 		$status    = apply_filters( 'classifai_' . static::ID . '_read_status', array(), $post->ID );
 
-		if ( ! empty( $status['running'] ) && (bool) $status['running'] ) {
+		if ( ! empty( $status['running'] ) ) {
 			$html = '<button class="button secondary" disabled>' . esc_html__( 'In progress!', 'classifai' ) . '</button>';
 		} else {
-			$html = '<button class="button secondary" id="classifai-rescan-pdf" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $read_text ) . '</button>';
+			$html = '<button class="button secondary" id="classifai-rescan-pdf" data-id="' . esc_attr( (string) absint( $post->ID ) ) . '">' . esc_html( $read_text ) . '</button>';
 		}
 
 		$form_fields['rescan_pdf'] = array(

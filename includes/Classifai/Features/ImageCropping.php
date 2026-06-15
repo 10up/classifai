@@ -30,7 +30,7 @@ class ImageCropping extends Feature {
 	 *
 	 * @since 1.5.0
 	 *
-	 * @var WP_Filesystem_Base
+	 * @var \WP_Filesystem_Base
 	 */
 	private $wp_filesystem;
 
@@ -355,7 +355,7 @@ class ImageCropping extends Feature {
 			'label'        => __( 'Smart thumbnail', 'classifai' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
-			'html'         => '<button class="button secondary" id="classifai-rescan-smart-crop" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $smart_crop_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+			'html'         => '<button class="button secondary" id="classifai-rescan-smart-crop" data-id="' . esc_attr( (string) absint( $post->ID ) ) . '">' . esc_html( $smart_crop_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 		);
 
 		return $form_fields;
@@ -399,7 +399,7 @@ class ImageCropping extends Feature {
 	/**
 	 * Provides the global WP_Filesystem_Base class instance.
 	 *
-	 * @return WP_Filesystem_Base
+	 * @return \WP_Filesystem_Base
 	 */
 	public function get_wp_filesystem() {
 		global $wp_filesystem;

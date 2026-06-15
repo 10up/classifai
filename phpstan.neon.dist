@@ -13,7 +13,7 @@ parameters:
 	reportWrongPhpDocTypeInVarTag: true
 
 	# Configuration
-	level: 1
+	level: 5
 	phpVersion:
 		min: 70400
 		max: 80400
@@ -32,12 +32,18 @@ parameters:
 		# See <https://github.com/php-stubs/wordpress-stubs/issues/100>.
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
+	scanDirectories:
+		# These libraries are loaded lazily at runtime (not via Composer autoload),
+		# so PHPStan needs them scanned explicitly to discover their symbols.
+		- vendor/woocommerce/action-scheduler/classes
+		- vendor/yahnis-elsts/plugin-update-checker/Puc
 	ignoreErrors:
 		# The JSDoc standard we use on hooks is not compatible with PHPStan.
+		# These hook docblocks use tokens such as `$this`, `$this->prop` and `{array}`
+		# that PHPStan's PHPDoc parser cannot tokenize.
 		- '#One or more @param tags has an invalid name or invalid syntax#'
-		# - '#PHPDoc tag @(.+) has invalid value \({(.+)}(.*)\): Unexpected token "{"#'
-		# Could look to fix this in the future.
 		- '#@param tag must not be named \$this. Choose a descriptive alias, for example \$instance#'
+		- '#PHPDoc tag @(param|return|var) has invalid value (.*): Unexpected token#s'
 		# Ignore ElasticPress for now, as we'll need to stub this.
 		- '#ElasticPress#'
 	excludePaths:

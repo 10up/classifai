@@ -83,11 +83,13 @@ class SimilarTermsListTable extends WP_List_Table {
 			)
 		);
 
+		$total = is_wp_error( $total ) ? 0 : (int) $total;
+
 		$this->set_pagination_args(
 			array(
 				'total_items' => $total,  // WE have to calculate the total number of items.
 				'per_page'    => $per_page, // WE have to determine how many items to show on a page.
-				'total_pages' => ceil( $total / $per_page ), // WE have to calculate the total number of pages.
+				'total_pages' => (int) ceil( $total / $per_page ), // WE have to calculate the total number of pages.
 			)
 		);
 
@@ -143,9 +145,9 @@ class SimilarTermsListTable extends WP_List_Table {
 	/**
 	 * Generate term html to show it in Similar terms list table
 	 *
-	 * @param WP_Term $term         Term Object.
-	 * @param WP_Term $similar_term Similar Term Object.
-	 * @param float   $score        Similarity score.
+	 * @param \WP_Term $term         Term Object.
+	 * @param \WP_Term $similar_term Similar Term Object.
+	 * @param float    $score        Similarity score.
 	 * @return string
 	 */
 	public function generate_term_html( $term, $similar_term, $score = null ) {
@@ -173,7 +175,7 @@ class SimilarTermsListTable extends WP_List_Table {
 			( $score ? __( '<span><strong>Similarity:</strong> %6$s</span><br/>', 'classifai' ) : '%6$s' ) .
 			'<a href="%7$s" class="button button-primary term-merge-button">%8$s</a>',
 			esc_html( $term->name ),
-			'<a href="' . esc_url( get_edit_term_link( $term->term_id, $term->taxonomy ) ) . '" target="_blank">' . esc_html( $term->term_id ) . '</a>',
+			'<a href="' . esc_url( get_edit_term_link( $term->term_id, $term->taxonomy ) ) . '" target="_blank">' . esc_html( (string) $term->term_id ) . '</a>',
 			esc_html( $term->slug ),
 			// translators: %d: Term count.
 			'<a href="' . esc_url( admin_url( 'edit.php?tag=' . $term->slug ) ) . '" target="_blank">' . esc_html( sprintf( _n( '%d time', '%d times', $term->count, 'classifai' ), $term->count ) ) . '</a>',

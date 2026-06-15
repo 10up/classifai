@@ -220,7 +220,7 @@ class Ollama extends Provider {
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}', '{{AUTHOR}}' );
-		$prompt_replace = array( $excerpt_length, $args['title'], $args['author'] );
+		$prompt_replace = array( (string) $excerpt_length, (string) $args['title'], (string) $args['author'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
 		/**
@@ -293,7 +293,7 @@ class Ollama extends Provider {
 	 *
 	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function generate_title( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -415,7 +415,7 @@ class Ollama extends Provider {
 	 *
 	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function resize_content( int $post_id, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -531,7 +531,7 @@ class Ollama extends Provider {
 	 *
 	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function generate_key_takeaways( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {

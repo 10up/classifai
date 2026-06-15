@@ -73,9 +73,28 @@ class Smart404 extends Feature {
 		parent::setup();
 
 		if ( $this->is_configured() && $this->is_enabled() ) {
-			$integration = new Smart404EPIntegration( $this->get_feature_provider_instance() );
+			$integration = new Smart404EPIntegration( $this->get_embeddings_provider() );
 			$integration->init();
 		}
+	}
+
+	/**
+	 * Returns the configured embeddings provider for this feature, if any.
+	 *
+	 * @return \Classifai\Providers\OpenAI\Embeddings|\Classifai\Providers\Azure\Embeddings|\Classifai\Providers\Localhost\OllamaEmbeddings|null
+	 */
+	private function get_embeddings_provider() {
+		$provider = $this->get_feature_provider_instance();
+
+		if (
+			$provider instanceof OpenAIEmbeddings
+			|| $provider instanceof AzureEmbeddings
+			|| $provider instanceof OllamaEmbeddings
+		) {
+			return $provider;
+		}
+
+		return null;
 	}
 
 	/**
@@ -289,7 +308,7 @@ class Smart404 extends Feature {
 			$args['post_type'] = array( $args['post_type'] );
 		}
 
-		$integration = new Smart404EPIntegration( $this->get_feature_provider_instance() );
+		$integration = new Smart404EPIntegration( $this->get_embeddings_provider() );
 
 		// Run our search. Note that this will take our query and generate embeddings for it.
 		if ( 'no' === $args['rescore'] || false === $args['rescore'] ) {
@@ -313,7 +332,7 @@ class Smart404 extends Feature {
 		$results = array_filter(
 			$results,
 			function ( $result ) use ( $settings ) {
-				return (float) $result['score'] >= $settings['threshold'] ?? 2.35;
+				return (float) $result['score'] >= ( $settings['threshold'] ?? 2.35 );
 			}
 		);
 

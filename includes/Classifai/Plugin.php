@@ -413,10 +413,8 @@ Disallow: /
 			$feature_instance = new $feature();
 			$feature_id       = $feature_instance->get_option_name();
 
-			if ( method_exists( $feature_instance, 'migrate_settings' ) ) {
-				$migrated_settings = $feature_instance->migrate_settings();
-				update_option( $feature_id, $migrated_settings );
-			}
+			$migrated_settings = $feature_instance->migrate_settings();
+			update_option( $feature_id, $migrated_settings );
 		}
 
 		// Mark the migration as completed.
