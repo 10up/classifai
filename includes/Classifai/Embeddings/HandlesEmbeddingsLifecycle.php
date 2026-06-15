@@ -211,8 +211,8 @@ trait HandlesEmbeddingsLifecycle {
 		$tokenizer    = new Tokenizer( $max_tokens );
 		$total_tokens = $tokenizer->tokens_in_content( $content );
 
-		// Per-chunk pathway: too many tokens, or provider doesn't expose a batch method.
-		if ( $max_tokens < $total_tokens || ! method_exists( $this, 'generate_embeddings' ) ) {
+		// Per-chunk pathway: content has too many tokens for a single batch request.
+		if ( $max_tokens < $total_tokens ) {
 			$embeddings = [];
 			foreach ( $content_chunks as $chunk ) {
 				$embedding = $this->generate_embedding( $chunk, $feature );
@@ -926,7 +926,7 @@ trait HandlesEmbeddingsLifecycle {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
-		$post_id          = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
+		$post_id          = (int) filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
 		$embeddings       = $this->generate_embeddings_for_post( $post_id, true );
 		$embeddings_terms = [];
 

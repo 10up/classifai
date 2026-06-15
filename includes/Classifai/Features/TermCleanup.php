@@ -53,7 +53,7 @@ class TermCleanup extends Feature {
 	/**
 	 * EPIntegration instance.
 	 *
-	 * @var EPIntegration
+	 * @var TermCleanupEPIntegration
 	 */
 	private $ep_integration;
 
@@ -496,6 +496,16 @@ class TermCleanup extends Feature {
 		$terms = get_terms( $args );
 
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return false;
+		}
+
+		$provider = $this->get_feature_provider_instance();
+
+		if (
+			! $provider instanceof OpenAIEmbeddings
+			&& ! $provider instanceof AzureEmbeddings
+			&& ! $provider instanceof OllamaEmbeddings
+		) {
 			return false;
 		}
 

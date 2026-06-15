@@ -151,7 +151,7 @@ class Images extends Provider {
 	 * @param string $prompt The prompt used to generate an image.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
-	 * @return string|WP_Error
+	 * @return string|array|WP_Error
 	 */
 	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = [] ) {
 		$route_to_call = strtolower( $route_to_call );
@@ -172,7 +172,7 @@ class Images extends Provider {
 	 *
 	 * @param string $prompt The prompt used to generate an image.
 	 * @param array  $args Optional arguments passed to endpoint.
-	 * @return string|WP_Error
+	 * @return array|WP_Error
 	 */
 	public function generate_image( string $prompt = '', array $args = [] ) {
 		if ( ! $prompt ) {

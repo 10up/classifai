@@ -394,8 +394,8 @@ class Embeddings extends Provider {
 	/**
 	 * Modify the default settings for the Classification Feature.
 	 *
-	 * @param array   $settings Current settings.
-	 * @param Feature $feature_instance The feature instance.
+	 * @param array          $settings Current settings.
+	 * @param Classification $feature_instance The feature instance.
 	 * @return array
 	 */
 	public function modify_default_classification_feature_settings( array $settings, $feature_instance ): array {
