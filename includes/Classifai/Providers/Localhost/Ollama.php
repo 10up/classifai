@@ -17,6 +17,7 @@ use WP_Error;
 
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
+use function Classifai\sanitize_generated_block_tree;
 
 /**
  * Ollama class
@@ -787,6 +788,7 @@ class Ollama extends Provider {
 				'model'    => $settings[ static::ID ]['model'] ?? '',
 				'messages' => $messages,
 				'stream'   => false,
+				'format'   => 'json',
 			),
 			$post_id
 		);
@@ -804,13 +806,22 @@ class Ollama extends Provider {
 			return $response;
 		}
 
-		// If we have a message, return it.
-		$return = '';
+		// Pull the message content out of the response.
+		$content = '';
 		if ( isset( $response['message'], $response['message']['content'] ) ) {
-			$return = wp_kses_post( trim( $response['message']['content'], ' "\'' ) );
+			$content = trim( $response['message']['content'] );
 		}
 
-		return $return;
+		// The response should be a JSON BlockTree; validate before returning.
+		$decoded = json_decode( $content, true );
+		if ( null === $decoded || JSON_ERROR_NONE !== json_last_error() ) {
+			return new WP_Error( 'invalid_content_response', esc_html__( 'The generated content was not in the expected format. Please try again.', 'classifai' ) );
+		}
+
+		// Sanitize the block tree's string values before they are rendered/saved.
+		$decoded = sanitize_generated_block_tree( $decoded );
+
+		return wp_json_encode( $decoded );
 	}
 
 	/**

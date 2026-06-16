@@ -22,6 +22,7 @@ use function Classifai\sanitize_number_of_responses_field;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\get_largest_size_and_dimensions_image_url;
 use function Classifai\get_temperature;
+use function Classifai\sanitize_generated_block_tree;
 
 class ChatGPT extends Provider {
 
@@ -1216,9 +1217,10 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_content_request_body',
 			array(
-				'model'       => $this->chatgpt_model,
-				'messages'    => $messages,
-				'temperature' => 0.9,
+				'model'           => $this->chatgpt_model,
+				'messages'        => $messages,
+				'temperature'     => 0.9,
+				'response_format' => array( 'type' => 'json_object' ),
 			),
 			$post_id
 		);
@@ -1235,17 +1237,26 @@ class ChatGPT extends Provider {
 			return $response;
 		}
 
-		// If we have a message, return it.
-		$return = '';
+		// Pull the message content out of the response.
+		$content = '';
 		if ( ! empty( $response['choices'] ) ) {
 			foreach ( $response['choices'] as $choice ) {
 				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
-					$return = wp_kses_post( trim( $choice['message']['content'], ' "\'' ) );
+					$content = trim( $choice['message']['content'] );
 				}
 			}
 		}
 
-		return $return;
+		// The response should be a JSON BlockTree; validate before returning.
+		$decoded = json_decode( $content, true );
+		if ( null === $decoded || JSON_ERROR_NONE !== json_last_error() ) {
+			return new WP_Error( 'invalid_content_response', esc_html__( 'The generated content was not in the expected format. Please try again.', 'classifai' ) );
+		}
+
+		// Sanitize the block tree's string values before they are rendered/saved.
+		$decoded = sanitize_generated_block_tree( $decoded );
+
+		return wp_json_encode( $decoded );
 	}
 
 	/**
