@@ -988,3 +988,36 @@ function get_temperature( float $temperature, int $results = 1 ): float {
 
 	return (float) min( 2.0, $temperature + ( $results / 10 ) );
 }
+
+/**
+ * Recursively sanitize the values of an AI-generated block tree.
+ *
+ * The Content Generation feature receives a JSON "block tree" from the model
+ * and renders its string props (paragraph and heading content, captions, list
+ * items, table cells, etc.) as HTML in the editor and saves them to post
+ * content. Sanitize every string value with wp_kses_post() and treat `url`
+ * props as URLs so untrusted markup (e.g. script tags or javascript: URLs)
+ * can't reach the browser.
+ *
+ * @param mixed $value Decoded block tree, or a nested value within it.
+ * @return mixed Sanitized value.
+ */
+function sanitize_generated_block_tree( $value ) {
+	if ( is_array( $value ) ) {
+		$sanitized = array();
+		foreach ( $value as $key => $item ) {
+			if ( 'url' === $key && is_string( $item ) ) {
+				$sanitized[ $key ] = esc_url_raw( $item );
+			} else {
+				$sanitized[ $key ] = sanitize_generated_block_tree( $item );
+			}
+		}
+		return $sanitized;
+	}
+
+	if ( is_string( $value ) ) {
+		return wp_kses_post( $value );
+	}
+
+	return $value;
+}
