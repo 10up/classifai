@@ -24,6 +24,7 @@ import { ChatHistory } from './chat-history';
 import { ErrorMessage } from './error-message';
 import { ChatInput } from './chat-input';
 import type { ConversationEntry } from './types';
+import { renderBlockTreeToMarkup } from '../utils/render-block-tree';
 
 // Define style objects outside of JSX
 const chatContainerStyles: CSSProperties = {
@@ -241,20 +242,24 @@ export const ChatUI: React.FC = () => {
 				content: '',
 			} )
 			.then( () => {
-				const contentWithEntities = decodeEntities( content );
-
-				const containsBlockMarkup =
-					contentWithEntities.includes( '<!-- wp:' );
+				// The response is a JSON BlockTree; render it to block markup.
+				const markup = renderBlockTreeToMarkup( content );
 
 				let blocks;
-				if ( containsBlockMarkup ) {
-					blocks = parse( contentWithEntities );
+				if ( markup !== null ) {
+					blocks = parse( markup );
 				} else {
-					blocks = pasteHandler( {
-						HTML: contentWithEntities,
-						plainText: contentWithEntities,
-						mode: 'BLOCKS',
-					} );
+					// Fallback: treat the response as raw HTML/block markup.
+					const contentWithEntities = decodeEntities( content );
+					if ( contentWithEntities.includes( '<!-- wp:' ) ) {
+						blocks = parse( contentWithEntities );
+					} else {
+						blocks = pasteHandler( {
+							HTML: contentWithEntities,
+							plainText: contentWithEntities,
+							mode: 'BLOCKS',
+						} );
+					}
 				}
 				dispatch( blockEditorStore ).insertBlocks( blocks );
 

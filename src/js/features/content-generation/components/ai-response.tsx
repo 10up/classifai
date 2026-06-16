@@ -10,6 +10,11 @@ import React from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
+ * Internal dependencies
+ */
+import { renderBlockTreeToMarkup } from '../utils/render-block-tree';
+
+/**
  * Props for the AIResponse component
  */
 export interface AIResponseProps {
@@ -32,10 +37,15 @@ const contentStyles: CSSProperties = {
  * @return {React.ReactElement} AI response container
  */
 export const AIResponse: React.FC< AIResponseProps > = ( { content } ) => {
+	// The response is a JSON BlockTree; render it to readable block markup for
+	// the preview, falling back to the raw response if it isn't valid JSON.
+	const markup = renderBlockTreeToMarkup( content );
+	const html = markup !== null ? markup : decodeEntities( content );
+
 	return (
 		<div
 			style={ contentStyles }
-			dangerouslySetInnerHTML={ { __html: decodeEntities( content ) } }
+			dangerouslySetInnerHTML={ { __html: html } }
 		/>
 	);
 };
