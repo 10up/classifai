@@ -670,4 +670,20 @@ class HelpersTest extends \WP_UnitTestCase {
 		$this->assertStringNotContainsString( '<script>', $cell['content'] );
 		$this->assertSame( 'td', $cell['tag'] );
 	}
+
+	/**
+	 * Mirrors how providers process a response: decode to objects, sanitize, and
+	 * re-encode. Empty objects such as "props":{} must survive (decoding to
+	 * arrays would turn them into "props":[], which the client schema rejects),
+	 * while nested string props are still sanitized.
+	 */
+	function test_sanitize_generated_block_tree_preserves_empty_objects_on_round_trip() {
+		$json = '{"root":"r","elements":{"r":{"key":"r","type":"fragment","props":{},"children":["p1"]},"p1":{"key":"p1","type":"core/paragraph","props":{"content":"Hi <script>alert(1)</script>"}}}}';
+
+		$encoded = wp_json_encode( sanitize_generated_block_tree( json_decode( $json ) ) );
+
+		$this->assertStringContainsString( '"props":{}', $encoded, 'Empty objects must remain objects.' );
+		$this->assertStringNotContainsString( '"props":[]', $encoded, 'Empty objects must not become arrays.' );
+		$this->assertStringNotContainsString( '<script>', $encoded, 'Nested string props must still be sanitized.' );
+	}
 }

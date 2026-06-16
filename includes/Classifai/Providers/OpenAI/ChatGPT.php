@@ -1248,7 +1248,9 @@ class ChatGPT extends Provider {
 		}
 
 		// The response should be a JSON BlockTree; validate before returning.
-		$decoded = json_decode( $content, true );
+		// Decode to objects (not arrays) so empty objects like "props":{} are
+		// preserved when re-encoded rather than becoming "props":[].
+		$decoded = json_decode( $content );
 		if ( null === $decoded || JSON_ERROR_NONE !== json_last_error() ) {
 			return new WP_Error( 'invalid_content_response', esc_html__( 'The generated content was not in the expected format. Please try again.', 'classifai' ) );
 		}

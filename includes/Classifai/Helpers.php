@@ -999,10 +999,26 @@ function get_temperature( float $temperature, int $results = 1 ): float {
  * props as URLs so untrusted markup (e.g. script tags or javascript: URLs)
  * can't reach the browser.
  *
+ * Decode the tree with json_decode( $json ) (objects, not associative arrays)
+ * so that empty objects such as `"props":{}` survive re-encoding; decoding to
+ * associative arrays would turn them into `[]`, which the client-side block
+ * tree schema rejects.
+ *
  * @param mixed $value Decoded block tree, or a nested value within it.
  * @return mixed Sanitized value.
  */
 function sanitize_generated_block_tree( $value ) {
+	if ( is_object( $value ) ) {
+		foreach ( get_object_vars( $value ) as $key => $item ) {
+			if ( 'url' === $key && is_string( $item ) ) {
+				$value->$key = esc_url_raw( $item );
+			} else {
+				$value->$key = sanitize_generated_block_tree( $item );
+			}
+		}
+		return $value;
+	}
+
 	if ( is_array( $value ) ) {
 		$sanitized = array();
 		foreach ( $value as $key => $item ) {
