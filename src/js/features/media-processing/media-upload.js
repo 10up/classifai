@@ -200,22 +200,223 @@ import { __ } from '@wordpress/i18n';
 		} );
 	};
 
+	/**
+	 * Map of async run type to its media-modal rescan button ID.
+	 */
+	const imageProcessButtons = {
+		descriptive_text: 'classifai-rescan-alt-tags',
+		tags: 'classifai-rescan-image-tags',
+		ocr: 'classifai-rescan-ocr',
+		crop: 'classifai-rescan-smart-crop',
+	};
+
+	let imageProcessInterval = null;
+	const imageProcessing = new Set();
+
+	/**
+	 * Set the value of the first matching attachment-details field.
+	 *
+	 * @param {string[]} ids   Candidate element IDs (two-column and single-column).
+	 * @param {string}   value Value to set.
+	 */
+	const setAttachmentField = ( ids, value ) => {
+		if ( ! value ) {
+			return;
+		}
+
+		const field = ids
+			.map( ( id ) => document.getElementById( id ) )
+			.find( Boolean );
+
+		if ( field ) {
+			field.value = value;
+		}
+	};
+
+	/**
+	 * Populate the media-modal fields once an async job completes.
+	 *
+	 * @param {string} type Run type that finished.
+	 * @param {Object} info Status payload for that type.
+	 */
+	const populateImageFields = ( type, info ) => {
+		if ( type === 'descriptive_text' && info.fields ) {
+			const { enabledAltTextFields = [] } = classifaiMediaVars;
+
+			if ( enabledAltTextFields.includes( 'alt' ) ) {
+				setAttachmentField(
+					[
+						'attachment-details-two-column-alt-text',
+						'attachment-details-alt-text',
+					],
+					info.fields.alt
+				);
+			}
+
+			if ( enabledAltTextFields.includes( 'caption' ) ) {
+				setAttachmentField(
+					[
+						'attachment-details-two-column-caption',
+						'attachment-details-caption',
+					],
+					info.fields.caption
+				);
+			}
+
+			if ( enabledAltTextFields.includes( 'description' ) ) {
+				setAttachmentField(
+					[
+						'attachment-details-two-column-description',
+						'attachment-details-description',
+					],
+					info.fields.description
+				);
+			}
+		} else if ( type === 'ocr' ) {
+			setAttachmentField(
+				[
+					'attachment-details-two-column-description',
+					'attachment-details-description',
+				],
+				info.description
+			);
+		}
+	};
+
+	/**
+	 * Poll the async processing status and reflect it in the media modal,
+	 * updating fields when a job finishes without requiring a page reload.
+	 */
+	const checkImageProcessStatus = () => {
+		let postId = null;
+
+		Object.values( imageProcessButtons ).some( ( id ) => {
+			const button = document.getElementById( id );
+
+			if ( button ) {
+				postId = button.getAttribute( 'data-id' );
+				return true;
+			}
+
+			return false;
+		} );
+
+		if ( ! postId ) {
+			return;
+		}
+
+		const processingLabel = __( 'ClassifAI is processing…', 'classifai' );
+
+		$.ajax( {
+			url: classifaiMediaVars.ajaxUrl || ajaxurl,
+			type: 'POST',
+			data: {
+				action: 'classifai_get_image_process_status',
+				attachment_id: postId,
+				nonce: classifaiMediaVars.nonce || ClassifAI.ajax_nonce,
+			},
+			success: ( resp ) => {
+				if ( ! resp?.success || ! resp?.data ) {
+					return;
+				}
+
+				let anyProcessing = false;
+
+				Object.keys( imageProcessButtons ).forEach( ( type ) => {
+					const button = document.getElementById(
+						imageProcessButtons[ type ]
+					);
+
+					if ( ! button ) {
+						return;
+					}
+
+					const info = resp.data[ type ] || {};
+					const status = info.status;
+					const [ spinner ] =
+						button.parentNode.getElementsByClassName( 'spinner' );
+
+					if ( status === 'scheduled' || status === 'running' ) {
+						anyProcessing = true;
+						imageProcessing.add( type );
+						button.setAttribute( 'disabled', 'disabled' );
+						button.textContent = processingLabel;
+
+						if ( spinner ) {
+							spinner.style.display = 'inline-block';
+							spinner.classList.add( 'is-active' );
+						}
+					} else {
+						// No longer processing: surface the result if tracked.
+						if ( imageProcessing.has( type ) ) {
+							imageProcessing.delete( type );
+
+							if ( status === 'error' ) {
+								const [ errorContainer ] =
+									button.parentNode.getElementsByClassName(
+										'error'
+									);
+
+								if ( errorContainer ) {
+									errorContainer.style.display =
+										'inline-block';
+									errorContainer.textContent =
+										info.message ||
+										__( 'Processing failed.', 'classifai' );
+								}
+							} else {
+								populateImageFields( type, info );
+							}
+						}
+
+						button.removeAttribute( 'disabled' );
+
+						if ( spinner ) {
+							spinner.style.display = 'none';
+							spinner.classList.remove( 'is-active' );
+						}
+
+						if ( button.textContent === processingLabel ) {
+							button.textContent = __( 'Rescan', 'classifai' );
+						}
+					}
+				} );
+
+				if ( anyProcessing && ! imageProcessInterval ) {
+					imageProcessInterval = setInterval(
+						checkImageProcessStatus,
+						5000
+					);
+				} else if ( ! anyProcessing && imageProcessInterval ) {
+					clearInterval( imageProcessInterval );
+					imageProcessInterval = null;
+				}
+			},
+		} );
+	};
+
 	$( document ).ready( function () {
 		if ( wp.media ) {
 			wp.media.view.Modal.prototype.on( 'open', function () {
 				wp.media.frame.on( 'selection:toggle', handleButtonsClick );
 				wp.media.frame.on( 'selection:toggle', checkPdfReadStatus );
+				wp.media.frame.on(
+					'selection:toggle',
+					checkImageProcessStatus
+				);
 			} );
 		}
 
 		if ( wp.media.frame ) {
 			wp.media.frame.on( 'edit:attachment', handleButtonsClick );
 			wp.media.frame.on( 'edit:attachment', checkPdfReadStatus );
+			wp.media.frame.on( 'edit:attachment', checkImageProcessStatus );
 		}
 
 		// For new uploaded media.
 		if ( wp.Uploader && wp.Uploader.queue ) {
 			wp.Uploader.queue.on( 'reset', handleButtonsClick );
+			wp.Uploader.queue.on( 'reset', checkImageProcessStatus );
 		}
 	} );
 } )( jQuery );
