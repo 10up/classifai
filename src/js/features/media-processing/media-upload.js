@@ -305,7 +305,7 @@ import { __ } from '@wordpress/i18n';
 			return;
 		}
 
-		const processingLabel = __( 'ClassifAI is processing…', 'classifai' );
+		const processingLabel = __( 'Processing…', 'classifai' );
 
 		$.ajax( {
 			url: classifaiMediaVars.ajaxUrl || ajaxurl,
