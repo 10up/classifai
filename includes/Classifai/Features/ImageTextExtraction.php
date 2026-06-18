@@ -22,6 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Class ImageTextExtraction
  */
 class ImageTextExtraction extends Feature {
+	use AsyncImageProcessing;
+
 	/**
 	 * ID of the current feature.
 	 *
@@ -54,6 +56,8 @@ class ImageTextExtraction extends Feature {
 	public function setup() {
 		parent::setup();
 		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
+		add_action( ImageProcessing::ASYNC_JOB_HOOK, array( $this, 'handle_async_image_job' ), 10, 4 );
+		$this->register_async_status_meta();
 	}
 
 	/**
@@ -181,10 +185,13 @@ class ImageTextExtraction extends Feature {
 	 * @return array
 	 */
 	public function generate_ocr_text( array $metadata, int $attachment_id ): array {
-		if (
-			! $this->is_feature_enabled() ||
-			'automatic' !== $this->get_processing_mode()
-		) {
+		$mode = $this->get_processing_mode();
+
+		if ( ! $this->is_feature_enabled() || 'manual' === $mode ) {
+			return $metadata;
+		}
+
+		if ( 'automatic_async' === $mode && $this->enqueue_async_image_job( $attachment_id, 'ocr' ) ) {
 			return $metadata;
 		}
 
@@ -460,7 +467,7 @@ class ImageTextExtraction extends Feature {
 	public function sanitize_default_feature_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
-		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
+		$new_settings['processing_mode'] = $this->sanitize_processing_mode( $new_settings['processing_mode'] ?? null, $settings['processing_mode'] );
 
 		return $new_settings;
 	}
