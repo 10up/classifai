@@ -125,4 +125,32 @@ class TextToSpeechTest extends TestCase {
 		$this->assertSame( $second, (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true ) );
 		$this->assertNull( get_post( $first ), 'The old audio attachment is deleted.' );
 	}
+
+	/**
+	 * When the provider returns a cached attachment ID (content unchanged), the
+	 * existing audio must be left intact rather than overwritten with the
+	 * numeric ID coerced to a string.
+	 *
+	 * @covers ::generate_text_to_speech_audio
+	 */
+	public function test_cached_audio_is_not_overwritten() {
+		$feature = new TextToSpeech();
+		$post_id = self::factory()->post->create( [ 'post_content' => 'Some content to read.' ] );
+		$this->as_user_with_role( 'administrator' );
+		$this->enable_feature();
+
+		// Seed a previously generated audio attachment.
+		$attachment_id = $feature->save( 'real-audio-bytes', $post_id );
+		$audio_file    = get_attached_file( $attachment_id );
+
+		// Mark the saved content hash so the provider's cached branch is taken.
+		update_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, md5( $feature->normalize_post_content( $post_id ) ) );
+
+		$feature->generate_text_to_speech_audio( $post_id );
+
+		// The attachment must be untouched: same ID, same file, same bytes.
+		$this->assertSame( $attachment_id, (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true ) );
+		$this->assertNotNull( get_post( $attachment_id ), 'The cached audio attachment is preserved.' );
+		$this->assertSame( 'real-audio-bytes', file_get_contents( $audio_file ) );
+	}
 }
