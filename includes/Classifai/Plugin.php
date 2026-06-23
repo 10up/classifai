@@ -228,16 +228,11 @@ class Plugin {
 			return $links;
 		}
 
-		$setup_url = admin_url( 'tools.php?welcome_guide=1&page=classifai#/language_processing' );
-		if ( should_use_legacy_settings_panel() ) {
-			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
-		}
-
 		return array_merge(
 			array(
 				'setup'    => sprintf(
 					'<a href="%s"> %s </a>',
-					esc_url( $setup_url ),
+					esc_url( admin_url( 'tools.php?welcome_guide=1&page=classifai#/language_processing' ) ),
 					esc_html__( 'Welcome', 'classifai' )
 				),
 				'settings' => sprintf(

@@ -199,14 +199,6 @@ export const ClassifAISettings = () => {
 
 	// Render admin notices after the header.
 	useEffect( () => {
-		const isWelcomePage =
-			document.location?.hash?.includes( 'classifai_setup' );
-
-		// Ignore showing notices on the welcome page.
-		if ( isWelcomePage ) {
-			return;
-		}
-
 		const notices = document.querySelectorAll(
 			'div.updated, div.error, div.notice'
 		);
