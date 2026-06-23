@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { CheckboxControl } from '@wordpress/components';
+import { CheckboxControl, SelectControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -26,33 +26,81 @@ export const TextToSpeechSettings = () => {
 	const { postTypes } = window.classifAISettings;
 
 	return (
-		<SettingsRow
-			label={ __( 'Allowed post types', 'classifai' ) }
-			description={ __(
-				'Choose which post types support this feature.',
-				'classifai'
-			) }
-			className="settings-allowed-post-types"
-		>
-			{ Object.keys( postTypes || {} ).map( ( key ) => {
-				return (
-					<CheckboxControl
-						id={ key }
-						key={ key }
-						checked={ featureSettings.post_types?.[ key ] === key }
-						label={ postTypes?.[ key ] }
-						onChange={ ( value ) => {
-							setFeatureSettings( {
-								post_types: {
-									...featureSettings.post_types,
-									[ key ]: value ? key : '0',
-								},
-							} );
-						} }
-						__nextHasNoMarginBottom
-					/>
-				);
-			} ) }
-		</SettingsRow>
+		<>
+			<SettingsRow
+				label={ __( 'Allowed post types', 'classifai' ) }
+				description={ __(
+					'Choose which post types support this feature.',
+					'classifai'
+				) }
+				className="settings-allowed-post-types"
+			>
+				{ Object.keys( postTypes || {} ).map( ( key ) => {
+					return (
+						<CheckboxControl
+							id={ key }
+							key={ key }
+							checked={
+								featureSettings.post_types?.[ key ] === key
+							}
+							label={ postTypes?.[ key ] }
+							onChange={ ( value ) => {
+								setFeatureSettings( {
+									post_types: {
+										...featureSettings.post_types,
+										[ key ]: value ? key : '0',
+									},
+								} );
+							} }
+							__nextHasNoMarginBottom
+						/>
+					);
+				} ) }
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Audio generation', 'classifai' ) }
+				description={ __(
+					'Choose when audio is generated. "On demand" skips generation until a visitor clicks to listen on the front-end, then stores the result for reuse.',
+					'classifai'
+				) }
+				className="settings-audio-generation-timing"
+			>
+				<SelectControl
+					// eslint-disable-next-line no-restricted-syntax
+					id="generation_timing"
+					value={ featureSettings.generation_timing || 'automatic' }
+					options={ [
+						{
+							label: __(
+								'Automatic (on publish or update)',
+								'classifai'
+							),
+							value: 'automatic',
+						},
+						{
+							label: __(
+								'Manual (generate from the admin)',
+								'classifai'
+							),
+							value: 'manual',
+						},
+						{
+							label: __(
+								'On demand (generate on first front-end listen)',
+								'classifai'
+							),
+							value: 'on_demand',
+						},
+					] }
+					onChange={ ( value ) => {
+						setFeatureSettings( {
+							generation_timing: value,
+						} );
+					} }
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+				/>
+			</SettingsRow>
+		</>
 	);
 };
