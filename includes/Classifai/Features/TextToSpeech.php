@@ -410,11 +410,11 @@ class TextToSpeech extends Feature {
 	 * Unlike {@see speech_synthesis_permissions_check()}, this route is reachable
 	 * by anonymous visitors, so it is gated on the feature being enabled and in
 	 * on-demand mode, the target being a published supported post, and a valid
-	 * nonce — rather than an `edit_post` capability check.
+	 * REST nonce — rather than an `edit_post` capability check.
 	 *
-	 * Note: nonces for logged-out users are shared and long-lived, so on heavily
-	 * page-cached sites they act as a CSRF / casual-bot deterrent rather than a
-	 * hard gate. Because audio is generated at most once per post, the cost
+	 * Note: the nonce for logged-out users is shared and long-lived, so
+	 * on heavily page-cached sites it acts as a CSRF / casual-bot deterrent rather
+	 * than a hard gate. Because audio is generated at most once per post, the cost
 	 * ceiling is one generation per published post. Site owners can tighten or
 	 * loosen this via the `classifai_tts_on_demand_permission` filter.
 	 *
@@ -431,7 +431,7 @@ class TextToSpeech extends Feature {
 			in_array( $post->post_type, $this->get_supported_post_types(), true ) &&
 			$this->is_enabled() &&
 			'on_demand' === $this->get_generation_timing() &&
-			false !== wp_verify_nonce( (string) $request->get_param( 'nonce' ), 'classifai_synthesize_speech_on_demand' )
+			false !== wp_verify_nonce( (string) $request->get_header( 'X-WP-Nonce' ), 'wp_rest' )
 		);
 
 		/**
@@ -1129,7 +1129,7 @@ class TextToSpeech extends Feature {
 						<?php if ( $generate_on_demand ) : ?>
 						data-post-id="<?php echo esc_attr( (string) $_post->ID ); ?>"
 						data-rest-url="<?php echo esc_url( rest_url( 'classifai/v1/synthesize-speech-on-demand/' . $_post->ID ) ); ?>"
-						data-nonce="<?php echo esc_attr( wp_create_nonce( 'classifai_synthesize_speech_on_demand' ) ); ?>"
+						data-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>"
 						data-generating-label="<?php esc_attr_e( 'Generating audio…', 'classifai' ); ?>"
 						data-error-label="<?php esc_attr_e( 'Audio could not be generated. Please try again.', 'classifai' ); ?>"
 						<?php endif; ?>

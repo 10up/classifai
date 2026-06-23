@@ -57,12 +57,12 @@ if ( audioControlEl ) {
 		}
 
 		try {
+			// Send the REST (`wp_rest`) nonce so logged-in users' requests
+			// authenticate; without it WordPress rejects the cookie with a 403
+			// before our permission callback runs.
 			const response = await fetch( audioControlEl.dataset.restUrl, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify( {
-					nonce: audioControlEl.dataset.nonce,
-				} ),
+				headers: { 'X-WP-Nonce': audioControlEl.dataset.nonce },
 			} );
 			const data = await response.json();
 

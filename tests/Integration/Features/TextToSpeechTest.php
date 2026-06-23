@@ -69,14 +69,14 @@ class TextToSpeechTest extends TestCase {
 	 * Build a request for the public on-demand synthesis route.
 	 *
 	 * @param mixed       $post_id Post ID param.
-	 * @param string|null $nonce   Nonce to send, or null to omit.
+	 * @param string|null $nonce   `wp_rest` nonce to send as X-WP-Nonce, or null to omit.
 	 * @return WP_REST_Request
 	 */
 	private function on_demand_request( $post_id, $nonce = null ): WP_REST_Request {
 		$request = new WP_REST_Request( 'POST', '/classifai/v1/synthesize-speech-on-demand/' . $post_id );
 		$request->set_param( 'id', $post_id );
 		if ( null !== $nonce ) {
-			$request->set_param( 'nonce', $nonce );
+			$request->set_header( 'X-WP-Nonce', $nonce );
 		}
 		return $request;
 	}
@@ -170,7 +170,7 @@ class TextToSpeechTest extends TestCase {
 		$this->enable_feature(); // Defaults to automatic mode.
 
 		$feature = new TextToSpeech();
-		$nonce   = wp_create_nonce( 'classifai_synthesize_speech_on_demand' );
+		$nonce   = wp_create_nonce( 'wp_rest' );
 
 		$this->assertFalse( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id, $nonce ) ) );
 	}
@@ -185,7 +185,7 @@ class TextToSpeechTest extends TestCase {
 		$this->enable_on_demand();
 
 		$feature = new TextToSpeech();
-		$nonce   = wp_create_nonce( 'classifai_synthesize_speech_on_demand' );
+		$nonce   = wp_create_nonce( 'wp_rest' );
 
 		$this->assertFalse( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id, $nonce ) ) );
 	}
@@ -215,7 +215,7 @@ class TextToSpeechTest extends TestCase {
 		wp_set_current_user( 0 ); // Anonymous visitor.
 
 		$feature = new TextToSpeech();
-		$nonce   = wp_create_nonce( 'classifai_synthesize_speech_on_demand' );
+		$nonce   = wp_create_nonce( 'wp_rest' );
 
 		$this->assertTrue( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id, $nonce ) ) );
 	}
