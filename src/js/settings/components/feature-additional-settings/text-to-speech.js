@@ -79,7 +79,7 @@ export const TextToSpeechSettings = () => {
 						},
 						{
 							label: __(
-								'Manual (generate from the admin)',
+								'Manual (generation needs to be manually turned on for each post)',
 								'classifai'
 							),
 							value: 'manual',

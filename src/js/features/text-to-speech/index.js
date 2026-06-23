@@ -23,6 +23,10 @@ import { store as postAudioStore } from './store';
 
 const { ClassifaiEditorSettingPanel } = window;
 
+// Localized data describing the configured audio generation timing mode.
+const { enableHelpText: ttsEnableHelpText } =
+	window.classifaiTextToSpeechData || {};
+
 /**
  * ClassifAI Text to Audio component.
  */
@@ -212,14 +216,17 @@ const TextToSpeechPlugin = () => {
 		<ClassifaiEditorSettingPanel>
 			<ToggleControl
 				label={ __( 'Enable audio generation', 'classifai' ) }
-				help={ sprintf(
-					/** translators: %s is post type label. */
-					__(
-						'ClassifAI will generate audio for this %s when it is published or updated.',
-						'classifai'
-					),
-					postTypeLabel
-				) }
+				help={
+					ttsEnableHelpText ||
+					sprintf(
+						/** translators: %s is post type label. */
+						__(
+							'ClassifAI will generate audio for this %s when it is published or updated.',
+							'classifai'
+						),
+						postTypeLabel
+					)
+				}
 				checked={ isSynthesizeSpeech }
 				onChange={ ( value ) => {
 					wp.data.dispatch( editorStore ).editPost( {

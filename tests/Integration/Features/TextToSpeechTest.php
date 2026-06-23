@@ -335,6 +335,88 @@ class TextToSpeechTest extends TestCase {
 	}
 
 	/**
+	 * The enable-toggle help text is worded for the configured timing mode.
+	 *
+	 * @covers ::get_audio_generation_help_text
+	 */
+	public function test_help_text_varies_by_mode() {
+		$feature = new TextToSpeech();
+
+		update_option( self::OPTION, [ 'generation_timing' => 'automatic' ] );
+		$this->assertStringContainsString( 'published or updated', $feature->get_audio_generation_help_text( 'Post' ) );
+
+		update_option( self::OPTION, [ 'generation_timing' => 'manual' ] );
+		$this->assertStringContainsString( "won't be generated", $feature->get_audio_generation_help_text( 'Post' ) );
+
+		update_option( self::OPTION, [ 'generation_timing' => 'on_demand' ] );
+		$this->assertStringContainsString( 'first time a visitor', $feature->get_audio_generation_help_text( 'Post' ) );
+	}
+
+	/**
+	 * The per-post toggle defaults on in on-demand mode and reflects the opt-out.
+	 *
+	 * @covers ::is_synthesize_speech_enabled
+	 */
+	public function test_on_demand_toggle_defaults_on_and_reflects_opt_out() {
+		$feature = new TextToSpeech();
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+
+		// No opt-out meta yet → toggle is on.
+		$this->assertTrue( $feature->is_synthesize_speech_enabled( $post_id ) );
+
+		update_post_meta( $post_id, TextToSpeech::DISABLE_ON_DEMAND_KEY, true );
+		$this->assertFalse( $feature->is_synthesize_speech_enabled( $post_id ) );
+	}
+
+	/**
+	 * Saving the classic meta box persists the opt-out without generating audio.
+	 *
+	 * @covers ::save_post_metadata
+	 */
+	public function test_on_demand_save_persists_opt_out() {
+		$feature = new TextToSpeech();
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->as_user_with_role( 'administrator' );
+		$this->enable_on_demand();
+
+		$_POST['classifai_text_to_speech_meta'] = wp_create_nonce( 'classifai_text_to_speech_meta_action' );
+
+		// Toggle off (checkbox not submitted) → opt-out persisted.
+		unset( $_POST['classifai_synthesize_speech'] );
+		$feature->save_post_metadata( $post_id );
+		$this->assertTrue( (bool) get_post_meta( $post_id, TextToSpeech::DISABLE_ON_DEMAND_KEY, true ) );
+		$this->assertEmpty( get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true ), 'No audio is generated on save in on-demand mode.' );
+
+		// Toggle back on → opt-out cleared.
+		$_POST['classifai_synthesize_speech'] = '1';
+		$feature->save_post_metadata( $post_id );
+		$this->assertEmpty( get_post_meta( $post_id, TextToSpeech::DISABLE_ON_DEMAND_KEY, true ) );
+
+		unset( $_POST['classifai_text_to_speech_meta'], $_POST['classifai_synthesize_speech'] );
+	}
+
+	/**
+	 * The front-end player is hidden for a post opted out of on-demand audio.
+	 *
+	 * @covers ::render_post_audio_controls
+	 */
+	public function test_on_demand_player_hidden_when_opted_out() {
+		$feature = new TextToSpeech();
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+
+		$this->go_to( get_permalink( $post_id ) );
+
+		// Opted in (default) → the player renders.
+		$this->assertStringContainsString( 'class-post-audio-controls', $feature->render_post_audio_controls( 'CONTENT' ) );
+
+		// Opted out → the content is returned untouched.
+		update_post_meta( $post_id, TextToSpeech::DISABLE_ON_DEMAND_KEY, true );
+		$this->assertSame( 'CONTENT', $feature->render_post_audio_controls( 'CONTENT' ) );
+	}
+
+	/**
 	 * Stored audio is kept when content is unchanged.
 	 *
 	 * @covers ::maybe_invalidate_on_demand_audio

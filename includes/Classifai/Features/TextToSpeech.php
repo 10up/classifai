@@ -60,6 +60,16 @@ class TextToSpeech extends Feature {
 	const AUDIO_HASH_KEY = '_classifai_post_audio_hash';
 
 	/**
+	 * Meta key to opt a single post out of on-demand audio generation.
+	 *
+	 * Only meaningful when the feature is in `on_demand` mode. When set, the
+	 * front-end "listen" player is not rendered for the post.
+	 *
+	 * @var string
+	 */
+	const DISABLE_ON_DEMAND_KEY = '_classifai_disable_on_demand_audio';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -172,6 +182,21 @@ class TextToSpeech extends Feature {
 			get_asset_info( 'classifai-plugin-text-to-speech', 'version' ),
 			true
 		);
+
+		$post_type_label = esc_html__( 'Post', 'classifai' );
+		$post_type_obj   = get_post_type_object( $post->post_type );
+		if ( $post_type_obj ) {
+			$post_type_label = $post_type_obj->labels->singular_name;
+		}
+
+		wp_localize_script(
+			'classifai-plugin-text-to-speech',
+			'classifaiTextToSpeechData',
+			array(
+				'generationTiming' => $this->get_generation_timing(),
+				'enableHelpText'   => $this->get_audio_generation_help_text( $post_type_label ),
+			)
+		);
 	}
 
 	/**
@@ -188,18 +213,23 @@ class TextToSpeech extends Feature {
 			$supported_post_types,
 			'classifai_synthesize_speech',
 			array(
-				'get_callback' => function ( $data ) {
-					$audio_id = get_post_meta( $data['id'], self::AUDIO_ID_KEY, true );
-					if (
-						( $this->get_audio_generation_initial_state( $data['id'] ) && ! $audio_id ) ||
-						( $this->get_audio_generation_subsequent_state( $data['id'] ) && $audio_id )
-					) {
-						return true;
+				'get_callback'    => function ( $data ) {
+					return $this->is_synthesize_speech_enabled( $data['id'] );
+				},
+				'update_callback' => function ( $value, $data ) {
+					// In on-demand mode this toggle is a per-post opt-out; in other
+					// modes it only signals save-time generation (handled elsewhere).
+					if ( 'on_demand' !== $this->get_generation_timing() ) {
+						return;
+					}
+
+					if ( $value ) {
+						delete_post_meta( $data->ID, self::DISABLE_ON_DEMAND_KEY );
 					} else {
-						return false;
+						update_post_meta( $data->ID, self::DISABLE_ON_DEMAND_KEY, true );
 					}
 				},
-				'schema'       => array(
+				'schema'          => array(
 					'type'    => 'boolean',
 					'context' => array( 'view', 'edit' ),
 				),
@@ -257,6 +287,12 @@ class TextToSpeech extends Feature {
 		$post_id = (int) $request->get_param( 'id' );
 
 		if ( ! $this->is_feature_enabled() ) {
+			return;
+		}
+
+		// In on-demand mode audio is generated from the front-end, never on save.
+		// The synthesize toggle is persisted as an opt-out via its REST field.
+		if ( 'on_demand' === $this->get_generation_timing() ) {
 			return;
 		}
 
@@ -701,13 +737,7 @@ class TextToSpeech extends Feature {
 			$source_url = wp_get_attachment_url( $audio_id );
 		}
 
-		$process_content = false;
-		if (
-			( $this->get_audio_generation_initial_state( $post ) && ! $audio_id ) ||
-			( $this->get_audio_generation_subsequent_state( $post ) && $audio_id )
-		) {
-			$process_content = true;
-		}
+		$process_content = $this->is_synthesize_speech_enabled( $post );
 
 		$display_audio = true;
 		if ( metadata_exists( 'post', $post->ID, self::DISPLAY_GENERATED_AUDIO ) &&
@@ -720,6 +750,7 @@ class TextToSpeech extends Feature {
 		if ( $post_type ) {
 			$post_type_label = $post_type->labels->singular_name;
 		}
+
 		?>
 		<p>
 			<label for="classifai_synthesize_speech">
@@ -727,10 +758,7 @@ class TextToSpeech extends Feature {
 				<?php esc_html_e( 'Enable audio generation', 'classifai' ); ?>
 			</label>
 			<span class="description">
-				<?php
-				/* translators: %s Post type label */
-				printf( esc_html__( 'ClassifAI will generate audio for this %s when it is published or updated.', 'classifai' ), esc_html( $post_type_label ) );
-				?>
+				<?php echo esc_html( $this->get_audio_generation_help_text( $post_type_label ) ); ?>
 			</span>
 		</p>
 
@@ -840,6 +868,17 @@ class TextToSpeech extends Feature {
 			update_post_meta( $post_id, self::DISPLAY_GENERATED_AUDIO, false );
 		} else {
 			delete_post_meta( $post_id, self::DISPLAY_GENERATED_AUDIO );
+		}
+
+		// In on-demand mode the synthesize toggle is a per-post opt-out and never
+		// triggers save-time generation.
+		if ( 'on_demand' === $this->get_generation_timing() ) {
+			if ( isset( $_POST['classifai_synthesize_speech'] ) ) {
+				delete_post_meta( $post_id, self::DISABLE_ON_DEMAND_KEY );
+			} else {
+				update_post_meta( $post_id, self::DISABLE_ON_DEMAND_KEY, true );
+			}
+			return;
 		}
 
 		$job_args = array(
@@ -1010,6 +1049,11 @@ class TextToSpeech extends Feature {
 		$on_demand            = 'on_demand' === $this->get_generation_timing();
 		$audio_attachment_id  = (int) get_post_meta( $_post->ID, self::AUDIO_ID_KEY, true );
 		$audio_attachment_url = $audio_attachment_id ? wp_get_attachment_url( $audio_attachment_id ) : '';
+
+		// Respect a per-post opt-out of on-demand generation.
+		if ( $on_demand && (bool) get_post_meta( $_post->ID, self::DISABLE_ON_DEMAND_KEY, true ) ) {
+			return $content;
+		}
 
 		// When audio hasn't been generated yet, only render the player if we're
 		// generating on demand. Otherwise there's nothing to play.
@@ -1195,7 +1239,7 @@ class TextToSpeech extends Feature {
 	 * Returns the supported audio generation timing modes.
 	 *
 	 * - `automatic`: generate audio when a post is published or updated.
-	 * - `manual`: only generate when explicitly triggered from the admin.
+	 * - `manual`: only generate when explicitly turned on for each post.
 	 * - `on_demand`: generate the first time a visitor listens on the front-end.
 	 *
 	 * @return array
@@ -1203,7 +1247,7 @@ class TextToSpeech extends Feature {
 	public function get_generation_timing_options(): array {
 		return array(
 			'automatic' => __( 'Automatic (on publish or update)', 'classifai' ),
-			'manual'    => __( 'Manual (generate from the admin)', 'classifai' ),
+			'manual'    => __( 'Manual (generation needs to be manually turned on for each post)', 'classifai' ),
 			'on_demand' => __( 'On demand (generate on first front-end listen)', 'classifai' ),
 		);
 	}
@@ -1220,6 +1264,55 @@ class TextToSpeech extends Feature {
 		$timing = $this->get_settings( 'generation_timing' );
 
 		return array_key_exists( $timing, $this->get_generation_timing_options() ) ? $timing : 'automatic';
+	}
+
+	/**
+	 * Help text for the "Enable" toggle, worded for the generation timing mode.
+	 *
+	 * @param string $post_type_label Singular label of the post type (e.g. "Post").
+	 * @return string
+	 */
+	public function get_audio_generation_help_text( string $post_type_label ): string {
+		switch ( $this->get_generation_timing() ) {
+			case 'manual':
+				/* translators: %s Post type label */
+				return sprintf( __( 'Audio won\'t be generated until you enable this and save the %s.', 'classifai' ), $post_type_label );
+
+			case 'on_demand':
+				/* translators: %s Post type label */
+				return sprintf( __( 'Audio is generated the first time a visitor chooses to listen on the front-end. Turn this off to disable audio for this %s.', 'classifai' ), $post_type_label );
+
+			case 'automatic':
+			default:
+				/* translators: %s Post type label */
+				return sprintf( __( 'ClassifAI will generate audio for this %s when it is published or updated.', 'classifai' ), $post_type_label );
+		}
+	}
+
+	/**
+	 * Whether the per-post "Enable audio generation" toggle should be on.
+	 *
+	 * In on-demand mode the toggle controls whether the post participates in
+	 * on-demand generation at all — it defaults on and is only off when the post
+	 * has been explicitly opted out. In other modes it reflects the existing
+	 * initial/subsequent generation state.
+	 *
+	 * @param int|\WP_Post $post Post ID or object.
+	 * @return bool
+	 */
+	public function is_synthesize_speech_enabled( $post ): bool {
+		$post_id = $post instanceof \WP_Post ? $post->ID : (int) $post;
+
+		if ( 'on_demand' === $this->get_generation_timing() ) {
+			return ! (bool) get_post_meta( $post_id, self::DISABLE_ON_DEMAND_KEY, true );
+		}
+
+		$audio_id = get_post_meta( $post_id, self::AUDIO_ID_KEY, true );
+
+		return (
+			( $this->get_audio_generation_initial_state( $post ) && ! $audio_id ) ||
+			( $this->get_audio_generation_subsequent_state( $post ) && $audio_id )
+		);
 	}
 
 	/**
