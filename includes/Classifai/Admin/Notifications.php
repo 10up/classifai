@@ -91,12 +91,6 @@ class Notifications {
 			return;
 		}
 
-		$onboarding = new Onboarding();
-		if ( $onboarding->is_onboarding_completed() ) {
-			delete_transient( 'classifai_activation_notice' );
-			return;
-		}
-
 		$setup_url = admin_url( 'tools.php?welcome_guide=1&page=classifai#/language_processing' );
 		if ( should_use_legacy_settings_panel() ) {
 			$setup_url = admin_url( 'admin.php?page=classifai_setup' );

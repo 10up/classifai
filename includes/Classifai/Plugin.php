@@ -67,10 +67,6 @@ class Plugin {
 			// Initialize the ClassifAI Settings.
 			$settings = new Admin\Settings();
 			$settings->init();
-		} else {
-			// Initialize the ClassifAI Onboarding. This is only used for the legacy settings panel.
-			$onboarding = new Admin\Onboarding();
-			$onboarding->init();
 		}
 
 		// Initialize the ClassifAI User Profile.
