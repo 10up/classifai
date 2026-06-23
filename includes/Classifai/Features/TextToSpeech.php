@@ -105,6 +105,7 @@ class TextToSpeech extends Feature {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'admin_notices', array( $this, 'show_error_if' ) );
 		add_action( 'save_post', array( $this, 'save_post_metadata' ), 5 );
+		add_action( 'save_post', array( $this, 'maybe_invalidate_on_demand_audio' ), 20 );
 		add_action( 'wp_ajax_classifai_get_tts_status', array( $this, 'ajax_get_audio_generation_status' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 	}
@@ -347,6 +348,215 @@ class TextToSpeech extends Feature {
 				'permission_callback' => array( $this, 'speech_synthesis_permissions_check' ),
 			)
 		);
+
+		register_rest_route(
+			'classifai/v1',
+			'synthesize-speech-on-demand/(?P<id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'synthesize_speech_on_demand' ),
+				'args'                => array(
+					'id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'ID of the published post to generate audio for.', 'classifai' ),
+					),
+				),
+				'permission_callback' => array( $this, 'on_demand_synthesis_permissions_check' ),
+			)
+		);
+	}
+
+	/**
+	 * Permission check for the public, front-end on-demand synthesis route.
+	 *
+	 * Unlike {@see speech_synthesis_permissions_check()}, this route is reachable
+	 * by anonymous visitors, so it is gated on the feature being enabled and in
+	 * on-demand mode, the target being a published supported post, and a valid
+	 * nonce — rather than an `edit_post` capability check.
+	 *
+	 * Note: nonces for logged-out users are shared and long-lived, so on heavily
+	 * page-cached sites they act as a CSRF / casual-bot deterrent rather than a
+	 * hard gate. Because audio is generated at most once per post, the cost
+	 * ceiling is one generation per published post. Site owners can tighten or
+	 * loosen this via the `classifai_tts_on_demand_permission` filter.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return bool|WP_Error
+	 */
+	public function on_demand_synthesis_permissions_check( WP_REST_Request $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+		$post    = $post_id ? get_post( $post_id ) : null;
+
+		$allowed = (
+			$post instanceof \WP_Post &&
+			'publish' === $post->post_status &&
+			in_array( $post->post_type, $this->get_supported_post_types(), true ) &&
+			$this->is_enabled() &&
+			'on_demand' === $this->get_generation_timing() &&
+			false !== wp_verify_nonce( (string) $request->get_param( 'nonce' ), 'classifai_synthesize_speech_on_demand' )
+		);
+
+		/**
+		 * Filter the permission check for on-demand front-end audio generation.
+		 *
+		 * Return true to allow, or false / a WP_Error to deny. Use this to, for
+		 * example, restrict generation to logged-in users only.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_tts_on_demand_permission
+		 *
+		 * @param bool            $allowed Whether the request is allowed.
+		 * @param int             $post_id The post ID audio is being generated for.
+		 * @param WP_REST_Request $request The REST request.
+		 *
+		 * @return bool|WP_Error Whether the request is allowed.
+		 */
+		return apply_filters( 'classifai_tts_on_demand_permission', $allowed, $post_id, $request );
+	}
+
+	/**
+	 * Handle a front-end on-demand audio generation request.
+	 *
+	 * Generates audio synchronously (under the post author's context so the
+	 * Provider capability checks pass), stores it as an attachment for reuse, and
+	 * returns the playable URL. A short-lived per-post lock collapses concurrent
+	 * first-clicks into a single generation.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return \WP_REST_Response
+	 */
+	public function synthesize_speech_on_demand( WP_REST_Request $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+		$post    = get_post( $post_id );
+
+		// Audio may already exist (e.g. a concurrent request just finished, or it
+		// was generated in the admin) — serve it without regenerating.
+		$existing = $this->get_on_demand_audio_response( $post_id );
+		if ( false !== $existing ) {
+			return rest_ensure_response( $existing );
+		}
+
+		$lock_key = 'classifai_tts_on_demand_lock_' . $post_id;
+
+		// Collapse concurrent first-clicks: only one request generates at a time.
+		if ( get_transient( $lock_key ) ) {
+			return rest_ensure_response(
+				array(
+					'success'    => false,
+					'inProgress' => true,
+					'code'       => 'generation_in_progress',
+					'message'    => esc_html__( 'Audio is already being generated. Please try again in a moment.', 'classifai' ),
+				)
+			);
+		}
+
+		set_transient( $lock_key, 1, 5 * MINUTE_IN_SECONDS );
+
+		// Generate as the post author so the Provider's `edit_post` capability
+		// check passes for anonymous front-end visitors.
+		$this->generate_text_to_speech_audio( $post_id, $post ? (int) $post->post_author : null );
+
+		delete_transient( $lock_key );
+
+		$response = $this->get_on_demand_audio_response( $post_id );
+		if ( false !== $response ) {
+			return rest_ensure_response( $response );
+		}
+
+		// Surface any error recorded during generation.
+		$message = esc_html__( 'Audio generation failed.', 'classifai' );
+		$raw     = get_post_meta( $post_id, '_classifai_text_to_speech_error', true );
+
+		if ( ! empty( $raw ) ) {
+			$decoded = (array) json_decode( (string) $raw );
+			if ( ! empty( $decoded['message'] ) ) {
+				$message = (string) $decoded['message'];
+			}
+		}
+
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'code'    => 'generation_failed',
+				'message' => $message,
+			)
+		);
+	}
+
+	/**
+	 * Build the success response for an existing generated audio file.
+	 *
+	 * @param int $post_id The post ID.
+	 * @return array|false The response array, or false if no playable audio exists.
+	 */
+	protected function get_on_demand_audio_response( int $post_id ) {
+		$audio_id = (int) get_post_meta( $post_id, self::AUDIO_ID_KEY, true );
+
+		if ( ! $audio_id ) {
+			return false;
+		}
+
+		$url = wp_get_attachment_url( $audio_id );
+
+		if ( ! $url ) {
+			return false;
+		}
+
+		$timestamp = (int) get_post_meta( $post_id, self::AUDIO_TIMESTAMP_KEY, true );
+
+		if ( $timestamp ) {
+			$url = add_query_arg( 'ver', $timestamp, $url );
+		}
+
+		return array(
+			'success'  => true,
+			'audio_id' => $audio_id,
+			'url'      => $url,
+		);
+	}
+
+	/**
+	 * Clear stored audio when an on-demand post's content changes.
+	 *
+	 * In on-demand mode audio isn't regenerated on save, so without this an edit
+	 * would leave stale audio in place forever. Deleting the stored audio makes
+	 * the next front-end "listen" regenerate it.
+	 *
+	 * @param int $post_id The post ID being saved.
+	 */
+	public function maybe_invalidate_on_demand_audio( int $post_id ) {
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || 'revision' === get_post_type( $post_id ) ) {
+			return;
+		}
+
+		if (
+			'on_demand' !== $this->get_generation_timing() ||
+			! in_array( get_post_type( $post_id ), $this->get_supported_post_types(), true ) ||
+			! $this->is_enabled()
+		) {
+			return;
+		}
+
+		$audio_id = (int) get_post_meta( $post_id, self::AUDIO_ID_KEY, true );
+
+		if ( ! $audio_id ) {
+			return;
+		}
+
+		$stored_hash  = get_post_meta( $post_id, self::AUDIO_HASH_KEY, true );
+		$current_hash = md5( $this->normalize_post_content( $post_id ) );
+
+		// Content unchanged — keep the existing audio.
+		if ( ! empty( $stored_hash ) && $stored_hash === $current_hash ) {
+			return;
+		}
+
+		wp_delete_attachment( $audio_id, true );
+		delete_post_meta( $post_id, self::AUDIO_ID_KEY );
+		delete_post_meta( $post_id, self::AUDIO_TIMESTAMP_KEY );
+		delete_post_meta( $post_id, self::AUDIO_HASH_KEY );
 	}
 
 	/**
@@ -797,21 +1007,19 @@ class TextToSpeech extends Feature {
 			return $content;
 		}
 
-		$audio_attachment_id = (int) get_post_meta( $_post->ID, self::AUDIO_ID_KEY, true );
+		$on_demand            = 'on_demand' === $this->get_generation_timing();
+		$audio_attachment_id  = (int) get_post_meta( $_post->ID, self::AUDIO_ID_KEY, true );
+		$audio_attachment_url = $audio_attachment_id ? wp_get_attachment_url( $audio_attachment_id ) : '';
 
-		if ( ! $audio_attachment_id ) {
-			return $content;
-		}
-
-		$audio_attachment_url = wp_get_attachment_url( $audio_attachment_id );
-
-		if ( ! $audio_attachment_url ) {
+		// When audio hasn't been generated yet, only render the player if we're
+		// generating on demand. Otherwise there's nothing to play.
+		if ( ! $audio_attachment_url && ! ( $on_demand && 'publish' === $_post->post_status ) ) {
 			return $content;
 		}
 
 		$audio_timestamp = (int) get_post_meta( $_post->ID, self::AUDIO_TIMESTAMP_KEY, true );
 
-		if ( $audio_timestamp ) {
+		if ( $audio_attachment_url && $audio_timestamp ) {
 			$audio_attachment_url = add_query_arg( 'ver', filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT ), $audio_attachment_url );
 		}
 
@@ -859,14 +1067,32 @@ class TextToSpeech extends Feature {
 			'all'
 		);
 
+		// Generate-on-demand only applies when no audio exists yet.
+		$generate_on_demand = $on_demand && ! $audio_attachment_url;
+
 		ob_start();
 
 		?>
 			<div>
 				<div class='classifai-listen-to-post-wrapper'>
-					<div class="class-post-audio-controls" tabindex="0" role="button" aria-label="<?php esc_attr_e( 'Play audio', 'classifai' ); ?>" data-aria-pause-audio="<?php esc_attr_e( 'Pause audio', 'classifai' ); ?>">
+					<div
+						class="class-post-audio-controls"
+						tabindex="0"
+						role="button"
+						aria-label="<?php esc_attr_e( 'Play audio', 'classifai' ); ?>"
+						data-aria-pause-audio="<?php esc_attr_e( 'Pause audio', 'classifai' ); ?>"
+						data-has-audio="<?php echo $audio_attachment_url ? '1' : '0'; ?>"
+						<?php if ( $generate_on_demand ) : ?>
+						data-post-id="<?php echo esc_attr( (string) $_post->ID ); ?>"
+						data-rest-url="<?php echo esc_url( rest_url( 'classifai/v1/synthesize-speech-on-demand/' . $_post->ID ) ); ?>"
+						data-nonce="<?php echo esc_attr( wp_create_nonce( 'classifai_synthesize_speech_on_demand' ) ); ?>"
+						data-generating-label="<?php esc_attr_e( 'Generating audio…', 'classifai' ); ?>"
+						data-error-label="<?php esc_attr_e( 'Audio could not be generated. Please try again.', 'classifai' ); ?>"
+						<?php endif; ?>
+					>
 						<span class="dashicons dashicons-controls-play"></span>
 						<span class="dashicons dashicons-controls-pause"></span>
+						<span class="classifai-tts-spinner" aria-hidden="true"></span>
 					</div>
 					<div class='classifai-post-audio-heading'>
 						<?php
@@ -891,7 +1117,7 @@ class TextToSpeech extends Feature {
 						?>
 					</div>
 				</div>
-				<audio id="classifai-post-audio-player" src="<?php echo esc_url( $audio_attachment_url ); ?>"></audio>
+				<audio id="classifai-post-audio-player"<?php echo $audio_attachment_url ? ' src="' . esc_url( $audio_attachment_url ) . '"' : ''; ?>></audio>
 			</div>
 		<?php
 
@@ -957,11 +1183,43 @@ class TextToSpeech extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return array(
-			'post_types' => array(
+			'post_types'        => array(
 				'post' => 'post',
 			),
-			'provider'   => Speech::ID,
+			'generation_timing' => 'automatic',
+			'provider'          => Speech::ID,
 		);
+	}
+
+	/**
+	 * Returns the supported audio generation timing modes.
+	 *
+	 * - `automatic`: generate audio when a post is published or updated.
+	 * - `manual`: only generate when explicitly triggered from the admin.
+	 * - `on_demand`: generate the first time a visitor listens on the front-end.
+	 *
+	 * @return array
+	 */
+	public function get_generation_timing_options(): array {
+		return array(
+			'automatic' => __( 'Automatic (on publish or update)', 'classifai' ),
+			'manual'    => __( 'Manual (generate from the admin)', 'classifai' ),
+			'on_demand' => __( 'On demand (generate on first front-end listen)', 'classifai' ),
+		);
+	}
+
+	/**
+	 * Returns the configured audio generation timing mode.
+	 *
+	 * Falls back to `automatic` for back-compat with installs saved before this
+	 * setting existed.
+	 *
+	 * @return string One of `automatic`, `manual`, `on_demand`.
+	 */
+	public function get_generation_timing(): string {
+		$timing = $this->get_settings( 'generation_timing' );
+
+		return array_key_exists( $timing, $this->get_generation_timing_options() ) ? $timing : 'automatic';
 	}
 
 	/**
@@ -980,6 +1238,9 @@ class TextToSpeech extends Feature {
 				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			}
 		}
+
+		$timing                            = $new_settings['generation_timing'] ?? 'automatic';
+		$new_settings['generation_timing'] = array_key_exists( $timing, $this->get_generation_timing_options() ) ? $timing : 'automatic';
 
 		return $new_settings;
 	}
@@ -1006,7 +1267,7 @@ class TextToSpeech extends Feature {
 		 *
 		 * @return bool            Initial state the audio generation toggle should be set to when no audio exists.
 		 */
-		return apply_filters( 'classifai_audio_generation_initial_state', true, get_post( $post ) );
+		return apply_filters( 'classifai_audio_generation_initial_state', 'automatic' === $this->get_generation_timing(), get_post( $post ) );
 	}
 
 	/**
