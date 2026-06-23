@@ -39,12 +39,45 @@ class TextToSpeechTest extends TestCase {
 	}
 
 	/**
+	 * Configure and enable the feature in on-demand (front-end) generation mode.
+	 */
+	private function enable_on_demand() {
+		update_option(
+			self::OPTION,
+			[
+				'status'                  => '1',
+				'provider'                => 'ms_azure_text_to_speech',
+				'ms_azure_text_to_speech' => [ 'authenticated' => true ],
+				'roles'                   => [ 'administrator' => 'administrator' ],
+				'post_types'              => [ 'post' => 'post' ],
+				'generation_timing'       => 'on_demand',
+			]
+		);
+	}
+
+	/**
 	 * @param mixed $post_id Post ID param.
 	 * @return WP_REST_Request
 	 */
 	private function request( $post_id ): WP_REST_Request {
 		$request = new WP_REST_Request( 'GET', '/classifai/v1/synthesize-speech/' . $post_id );
 		$request->set_param( 'id', $post_id );
+		return $request;
+	}
+
+	/**
+	 * Build a request for the public on-demand synthesis route.
+	 *
+	 * @param mixed       $post_id Post ID param.
+	 * @param string|null $nonce   Nonce to send, or null to omit.
+	 * @return WP_REST_Request
+	 */
+	private function on_demand_request( $post_id, $nonce = null ): WP_REST_Request {
+		$request = new WP_REST_Request( 'POST', '/classifai/v1/synthesize-speech-on-demand/' . $post_id );
+		$request->set_param( 'id', $post_id );
+		if ( null !== $nonce ) {
+			$request->set_param( 'nonce', $nonce );
+		}
 		return $request;
 	}
 
@@ -124,5 +157,198 @@ class TextToSpeechTest extends TestCase {
 		$this->assertNotSame( $first, $second );
 		$this->assertSame( $second, (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true ) );
 		$this->assertNull( get_post( $first ), 'The old audio attachment is deleted.' );
+	}
+
+	/**
+	 * On-demand generation is denied when the feature is not in on-demand mode.
+	 *
+	 * @covers ::on_demand_synthesis_permissions_check
+	 */
+	public function test_on_demand_denied_when_not_on_demand_mode() {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->as_user_with_role( 'administrator' );
+		$this->enable_feature(); // Defaults to automatic mode.
+
+		$feature = new TextToSpeech();
+		$nonce   = wp_create_nonce( 'classifai_synthesize_speech_on_demand' );
+
+		$this->assertFalse( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id, $nonce ) ) );
+	}
+
+	/**
+	 * On-demand generation is denied for posts that aren't published.
+	 *
+	 * @covers ::on_demand_synthesis_permissions_check
+	 */
+	public function test_on_demand_denied_for_unpublished_post() {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'draft' ] );
+		$this->enable_on_demand();
+
+		$feature = new TextToSpeech();
+		$nonce   = wp_create_nonce( 'classifai_synthesize_speech_on_demand' );
+
+		$this->assertFalse( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id, $nonce ) ) );
+	}
+
+	/**
+	 * On-demand generation is denied without a valid nonce.
+	 *
+	 * @covers ::on_demand_synthesis_permissions_check
+	 */
+	public function test_on_demand_denied_with_invalid_nonce() {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+
+		$feature = new TextToSpeech();
+
+		$this->assertFalse( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id, 'bogus-nonce' ) ) );
+	}
+
+	/**
+	 * On-demand generation is allowed for an anonymous visitor with a valid nonce.
+	 *
+	 * @covers ::on_demand_synthesis_permissions_check
+	 */
+	public function test_on_demand_allows_anonymous_with_valid_nonce() {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+		wp_set_current_user( 0 ); // Anonymous visitor.
+
+		$feature = new TextToSpeech();
+		$nonce   = wp_create_nonce( 'classifai_synthesize_speech_on_demand' );
+
+		$this->assertTrue( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id, $nonce ) ) );
+	}
+
+	/**
+	 * The permission filter can override the default decision.
+	 *
+	 * @covers ::on_demand_synthesis_permissions_check
+	 */
+	public function test_on_demand_permission_filter_override() {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+
+		$feature = new TextToSpeech();
+
+		// Without a nonce the default decision is false; the filter forces true.
+		add_filter( 'classifai_tts_on_demand_permission', '__return_true' );
+		$this->assertTrue( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id ) ) );
+	}
+
+	/**
+	 * The handler generates, stores and returns a playable URL on first listen.
+	 *
+	 * @covers ::synthesize_speech_on_demand
+	 */
+	public function test_on_demand_handler_generates_and_returns_url() {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+
+		// Bypass the provider HTTP call with canned audio bytes.
+		add_filter( 'classifai_pre_fetch_feature_response', fn() => 'fake-audio-bytes' );
+
+		$response = ( new TextToSpeech() )->synthesize_speech_on_demand( $this->on_demand_request( $post_id ) );
+		$data     = $response->get_data();
+
+		$this->assertTrue( $data['success'] );
+		$this->assertNotEmpty( $data['url'] );
+		$this->assertSame( $data['audio_id'], (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true ) );
+	}
+
+	/**
+	 * The handler returns existing audio without regenerating.
+	 *
+	 * @covers ::synthesize_speech_on_demand
+	 */
+	public function test_on_demand_handler_reuses_existing_audio() {
+		$feature = new TextToSpeech();
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+
+		$existing_id = $feature->save( 'existing-audio', $post_id );
+
+		// If generation runs, this counter increments — it must not.
+		$called = 0;
+		add_filter(
+			'classifai_pre_fetch_feature_response',
+			function () use ( &$called ) {
+				$called++;
+				return 'should-not-run';
+			}
+		);
+
+		$response = $feature->synthesize_speech_on_demand( $this->on_demand_request( $post_id ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 0, $called, 'Generation should not run when audio already exists.' );
+		$this->assertTrue( $data['success'] );
+		$this->assertSame( $existing_id, $data['audio_id'] );
+	}
+
+	/**
+	 * A per-post lock prevents a second concurrent generation.
+	 *
+	 * @covers ::synthesize_speech_on_demand
+	 */
+	public function test_on_demand_handler_respects_lock() {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+
+		set_transient( 'classifai_tts_on_demand_lock_' . $post_id, 1, MINUTE_IN_SECONDS );
+
+		$called = 0;
+		add_filter(
+			'classifai_pre_fetch_feature_response',
+			function () use ( &$called ) {
+				$called++;
+				return 'should-not-run';
+			}
+		);
+
+		$response = ( new TextToSpeech() )->synthesize_speech_on_demand( $this->on_demand_request( $post_id ) );
+		$data     = $response->get_data();
+
+		$this->assertFalse( $data['success'] );
+		$this->assertTrue( $data['inProgress'] );
+		$this->assertSame( 0, $called, 'Generation should be skipped while locked.' );
+		$this->assertEmpty( get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true ) );
+	}
+
+	/**
+	 * Stored audio is cleared when an on-demand post's content changes.
+	 *
+	 * @covers ::maybe_invalidate_on_demand_audio
+	 */
+	public function test_invalidate_clears_audio_on_content_change() {
+		$feature = new TextToSpeech();
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+
+		$feature->save( 'audio-bytes', $post_id );
+		update_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, 'stale-hash' );
+
+		$feature->maybe_invalidate_on_demand_audio( $post_id );
+
+		$this->assertEmpty( get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true ) );
+		$this->assertEmpty( get_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, true ) );
+	}
+
+	/**
+	 * Stored audio is kept when content is unchanged.
+	 *
+	 * @covers ::maybe_invalidate_on_demand_audio
+	 */
+	public function test_invalidate_keeps_audio_when_unchanged() {
+		$feature = new TextToSpeech();
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+
+		$audio_id = $feature->save( 'audio-bytes', $post_id );
+		update_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, md5( $feature->normalize_post_content( $post_id ) ) );
+
+		$feature->maybe_invalidate_on_demand_audio( $post_id );
+
+		$this->assertSame( $audio_id, (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true ) );
 	}
 }
