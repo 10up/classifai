@@ -425,12 +425,23 @@ class TextToSpeech extends Feature {
 		$post_id = (int) $request->get_param( 'id' );
 		$post    = $post_id ? get_post( $post_id ) : null;
 
+		// Audio controls hidden via the "Display audio controls" setting.
+		$display_hidden = (
+			metadata_exists( 'post', $post_id, self::DISPLAY_GENERATED_AUDIO ) &&
+			! (bool) get_post_meta( $post_id, self::DISPLAY_GENERATED_AUDIO, true )
+		);
+
+		// Opted out via the per-post "Enable audio generation" toggle.
+		$opted_out = (bool) get_post_meta( $post_id, self::DISABLE_ON_DEMAND_KEY, true );
+
 		$allowed = (
 			$post instanceof \WP_Post &&
 			'publish' === $post->post_status &&
 			in_array( $post->post_type, $this->get_supported_post_types(), true ) &&
 			$this->is_enabled() &&
 			'on_demand' === $this->get_generation_timing() &&
+			! $display_hidden &&
+			! $opted_out &&
 			false !== wp_verify_nonce( (string) $request->get_header( 'X-WP-Nonce' ), 'wp_rest' )
 		);
 

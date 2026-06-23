@@ -221,6 +221,39 @@ class TextToSpeechTest extends TestCase {
 	}
 
 	/**
+	 * Generation is denied for a post opted out at the post level, even with a
+	 * valid (global) nonce borrowed from another page.
+	 *
+	 * @covers ::on_demand_synthesis_permissions_check
+	 */
+	public function test_on_demand_denied_when_post_opted_out() {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+		update_post_meta( $post_id, TextToSpeech::DISABLE_ON_DEMAND_KEY, true );
+
+		$feature = new TextToSpeech();
+		$nonce   = wp_create_nonce( 'wp_rest' );
+
+		$this->assertFalse( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id, $nonce ) ) );
+	}
+
+	/**
+	 * Generation is denied when audio controls are hidden for the post.
+	 *
+	 * @covers ::on_demand_synthesis_permissions_check
+	 */
+	public function test_on_demand_denied_when_audio_display_hidden() {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$this->enable_on_demand();
+		update_post_meta( $post_id, TextToSpeech::DISPLAY_GENERATED_AUDIO, false );
+
+		$feature = new TextToSpeech();
+		$nonce   = wp_create_nonce( 'wp_rest' );
+
+		$this->assertFalse( $feature->on_demand_synthesis_permissions_check( $this->on_demand_request( $post_id, $nonce ) ) );
+	}
+
+	/**
 	 * The permission filter can override the default decision.
 	 *
 	 * @covers ::on_demand_synthesis_permissions_check
