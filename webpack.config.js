@@ -27,6 +27,7 @@ module.exports = {
 		'classifai-plugin-text-to-speech': './src/js/features/text-to-speech/index.js',
 		'classifai-plugin-classic-text-to-speech': './src/js/features/text-to-speech/classic/index.js',
 		'classifai-plugin-text-to-speech-frontend': './src/js/features/text-to-speech/frontend/index.js',
+		'classifai-plugin-key-takeaways-frontend': './src/js/features/key-takeaways/frontend/index.js',
 		'classifai-plugin-content-resizing': './src/js/features/content-resizing/index.js',
 		'classifai-plugin-title-generation': './src/js/features/title-generation/index.js',
 		'classifai-plugin-classic-title-generation': './src/js/features/title-generation/classic/index.js',

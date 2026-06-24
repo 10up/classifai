@@ -1,0 +1,43 @@
+.classifai-key-takeaways-wrapper {
+	margin: 0 0 1.5em;
+
+	.classifai-key-takeaways-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5em;
+		cursor: pointer;
+
+		&.is-generating {
+			cursor: progress;
+
+			.classifai-key-takeaways-spinner {
+				display: inline-block;
+			}
+		}
+
+		&.has-error .classifai-key-takeaways-toggle__label {
+			color: #cc1818;
+		}
+	}
+
+	.classifai-key-takeaways-spinner {
+		display: none;
+		width: 1em;
+		height: 1em;
+		border: 2px solid rgba(0, 0, 0, 0.2);
+		border-top-color: currentColor;
+		border-radius: 50%;
+		animation: classifai-key-takeaways-spin 0.8s linear infinite;
+	}
+
+	.classifai-key-takeaways-panel {
+		font-style: italic;
+		margin-top: 0.75em;
+	}
+}
+
+@keyframes classifai-key-takeaways-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
