@@ -483,6 +483,7 @@ class KeyTakeaways extends Feature {
 				data-error-label="<?php esc_attr_e( 'Key takeaways could not be generated. Please try again.', 'classifai' ); ?>"
 			>
 				<span class="classifai-key-takeaways-toggle__label"><?php echo esc_html( $label ); ?></span>
+				<span class="classifai-key-takeaways-toggle__chevron" aria-hidden="true"></span>
 				<span class="classifai-key-takeaways-spinner" aria-hidden="true"></span>
 			</button>
 			<div id="<?php echo esc_attr( $panel_id ); ?>" class="classifai-key-takeaways-panel" hidden>
