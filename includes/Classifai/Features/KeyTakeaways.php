@@ -335,8 +335,7 @@ class KeyTakeaways extends Feature {
 			);
 		}
 
-		update_post_meta( $post_id, self::TAKEAWAYS_META_KEY, $takeaways );
-		update_post_meta( $post_id, self::TAKEAWAYS_HASH_KEY, $this->get_content_hash( $post_id ) );
+		$this->store_takeaways( $post_id, $takeaways );
 
 		return rest_ensure_response(
 			array(
@@ -397,6 +396,17 @@ class KeyTakeaways extends Feature {
 		}
 
 		return md5( $post->post_content . '|' . $post->post_title );
+	}
+
+	/**
+	 * Persist generated takeaways (and the content hash) to post meta.
+	 *
+	 * @param int   $post_id   The post ID.
+	 * @param array $takeaways Array of takeaway strings.
+	 */
+	public function store_takeaways( int $post_id, array $takeaways ) {
+		update_post_meta( $post_id, self::TAKEAWAYS_META_KEY, $takeaways );
+		update_post_meta( $post_id, self::TAKEAWAYS_HASH_KEY, $this->get_content_hash( $post_id ) );
 	}
 
 	/**
@@ -574,18 +584,34 @@ class KeyTakeaways extends Feature {
 		$route = $request->get_route();
 
 		if ( strpos( $route, '/classifai/v1/key-takeaways' ) === 0 ) {
-			return rest_ensure_response(
-				$this->run(
-					$request->get_param( 'id' ),
-					'key_takeaways',
-					array(
-						'content' => $request->get_param( 'content' ),
-						'title'   => $request->get_param( 'title' ),
-						'render'  => $request->get_param( 'render' ),
-						'run'     => $request->get_param( 'run' ),
-					)
+			$post_id = $request->get_param( 'id' );
+			$run     = $request->get_param( 'run' );
+
+			// Reuse previously generated takeaways unless manually requested.
+			if ( 'manual' !== $run ) {
+				$stored = get_post_meta( $post_id, self::TAKEAWAYS_META_KEY, true );
+
+				if ( ! empty( $stored ) && is_array( $stored ) ) {
+					return rest_ensure_response( $stored );
+				}
+			}
+
+			$result = $this->run(
+				$post_id,
+				'key_takeaways',
+				array(
+					'content' => $request->get_param( 'content' ),
+					'title'   => $request->get_param( 'title' ),
+					'render'  => $request->get_param( 'render' ),
+					'run'     => $run,
 				)
 			);
+
+			if ( ! is_wp_error( $result ) && is_array( $result ) && ! empty( $result ) ) {
+				$this->store_takeaways( $post_id, $result );
+			}
+
+			return rest_ensure_response( $result );
 		}
 
 		return parent::rest_endpoint_callback( $request );

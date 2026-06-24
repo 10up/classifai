@@ -116,6 +116,7 @@ export const KeyTakeawaysSettings = () => {
 							'Text shown on the front-end button.',
 							'classifai'
 						) }
+						className="settings-key-takeaways-button-label"
 					>
 						<TextControl
 							value={ featureSettings.button_label || '' }
@@ -136,6 +137,7 @@ export const KeyTakeawaysSettings = () => {
 							'How takeaways are rendered in the front-end panel.',
 							'classifai'
 						) }
+						className="settings-key-takeaways-render"
 					>
 						<SelectControl
 							value={ featureSettings.render || 'list' }
