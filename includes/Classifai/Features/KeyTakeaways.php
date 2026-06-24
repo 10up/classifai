@@ -447,6 +447,12 @@ class KeyTakeaways extends Feature {
 			return $content;
 		}
 
+		// If the post already includes the Key Takeaways block, it renders its
+		// own takeaways inline, so the on-demand button would be redundant.
+		if ( has_block( 'classifai/key-takeaways', $post ) ) {
+			return $content;
+		}
+
 		$render = $this->get_settings( 'render' );
 		$render = in_array( $render, array( 'list', 'paragraph' ), true ) ? $render : 'list';
 
