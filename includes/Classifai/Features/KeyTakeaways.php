@@ -30,6 +30,22 @@ class KeyTakeaways extends Feature {
 	const ID = 'feature_key_takeaways';
 
 	/**
+	 * Meta key storing the generated takeaways.
+	 *
+	 * @var string
+	 */
+	const TAKEAWAYS_META_KEY = '_classifai_key_takeaways';
+
+	/**
+	 * Meta key storing the content hash at the time takeaways were generated.
+	 *
+	 * Used to invalidate stored takeaways when a post is edited.
+	 *
+	 * @var string
+	 */
+	const TAKEAWAYS_HASH_KEY = '_classifai_key_takeaways_hash';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -60,6 +76,11 @@ class KeyTakeaways extends Feature {
 		if ( $this->is_configured() && $this->is_enabled() ) {
 			add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_assets' ) );
 			$this->register_block();
+
+			if ( 'on_demand' === $this->get_generation_timing() ) {
+				add_filter( 'the_content', array( $this, 'render_takeaways_button' ) );
+				add_action( 'save_post', array( $this, 'maybe_invalidate_on_demand_takeaways' ), 20 );
+			}
 		}
 	}
 
@@ -164,6 +185,341 @@ class KeyTakeaways extends Feature {
 					'permission_callback' => array( $this, 'generate_key_takeaways_permissions_check' ),
 				),
 			)
+		);
+
+		// Public, front-end on-demand generation route.
+		register_rest_route(
+			'classifai/v1',
+			'key-takeaways-on-demand/(?P<id>\d+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'generate_key_takeaways_on_demand' ),
+					'args'                => array(
+						'id' => array(
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'description'       => esc_html__( 'ID of the published post to generate key takeaways for.', 'classifai' ),
+						),
+					),
+					'permission_callback' => array( $this, 'on_demand_takeaways_permissions_check' ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Permission check for the public, front-end on-demand generation route.
+	 *
+	 * Unlike {@see generate_key_takeaways_permissions_check()}, this route is
+	 * reachable by anonymous visitors, so it is gated on the feature being
+	 * enabled and in on-demand mode, the target being a published supported
+	 * post, and a valid REST nonce.
+	 *
+	 * Because takeaways are generated at most once per post, the cost ceiling is
+	 * one generation per published post. Site owners can tighten or loosen this
+	 * via the `classifai_key_takeaways_on_demand_permission` filter.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return bool|WP_Error
+	 */
+	public function on_demand_takeaways_permissions_check( WP_REST_Request $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+		$post    = $post_id ? get_post( $post_id ) : null;
+
+		$allowed = (
+			$post instanceof \WP_Post &&
+			'publish' === $post->post_status &&
+			in_array( $post->post_type, $this->get_supported_post_types(), true ) &&
+			$this->is_enabled() &&
+			'on_demand' === $this->get_generation_timing() &&
+			false !== wp_verify_nonce( (string) $request->get_header( 'X-WP-Nonce' ), 'wp_rest' )
+		);
+
+		/**
+		 * Filter the permission check for on-demand front-end key takeaways generation.
+		 *
+		 * Return true to allow, or false / a WP_Error to deny. Use this to, for
+		 * example, restrict generation to logged-in users only.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_key_takeaways_on_demand_permission
+		 *
+		 * @param bool            $allowed Whether the request is allowed.
+		 * @param int             $post_id The post ID takeaways are being generated for.
+		 * @param WP_REST_Request $request The REST request.
+		 *
+		 * @return bool|WP_Error Whether the request is allowed.
+		 */
+		return apply_filters( 'classifai_key_takeaways_on_demand_permission', $allowed, $post_id, $request );
+	}
+
+	/**
+	 * Handle a front-end on-demand key takeaways generation request.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return \WP_REST_Response
+	 */
+	public function generate_key_takeaways_on_demand( WP_REST_Request $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+		$render  = $this->get_settings( 'render' );
+		$render  = in_array( $render, array( 'list', 'paragraph' ), true ) ? $render : 'list';
+
+		// Takeaways may already exist, serve them without regenerating.
+		$stored = get_post_meta( $post_id, self::TAKEAWAYS_META_KEY, true );
+		if ( ! empty( $stored ) && is_array( $stored ) ) {
+			return rest_ensure_response(
+				array(
+					'success'   => true,
+					'takeaways' => $stored,
+					'html'      => $this->render_takeaways_html( $stored, $render ),
+				)
+			);
+		}
+
+		$lock_key = 'classifai_key_takeaways_on_demand_lock_' . $post_id;
+
+		// Only allow one request to generate at a time.
+		if ( get_transient( $lock_key ) ) {
+			return rest_ensure_response(
+				array(
+					'success'    => false,
+					'inProgress' => true,
+					'code'       => 'generation_in_progress',
+					'message'    => esc_html__( 'Key takeaways are already being generated. Please try again in a moment.', 'classifai' ),
+				)
+			);
+		}
+
+		set_transient( $lock_key, 1, 5 * MINUTE_IN_SECONDS );
+
+		// Generate as the post author so the feature's per-user access
+		// check passes for anonymous front-end visitors.
+		$post             = get_post( $post_id );
+		$original_user_id = get_current_user_id();
+		wp_set_current_user( $post ? (int) $post->post_author : $original_user_id );
+
+		$result = $this->run(
+			$post_id,
+			'key_takeaways',
+			array(
+				'render' => $render,
+				'run'    => 'manual',
+			)
+		);
+
+		wp_set_current_user( $original_user_id );
+
+		delete_transient( $lock_key );
+
+		if ( is_wp_error( $result ) ) {
+			return rest_ensure_response(
+				array(
+					'success' => false,
+					'code'    => 'generation_failed',
+					'message' => $result->get_error_message(),
+				)
+			);
+		}
+
+		$takeaways = (array) $result;
+
+		if ( empty( $takeaways ) ) {
+			return rest_ensure_response(
+				array(
+					'success' => false,
+					'code'    => 'generation_failed',
+					'message' => esc_html__( 'Key takeaways could not be generated.', 'classifai' ),
+				)
+			);
+		}
+
+		update_post_meta( $post_id, self::TAKEAWAYS_META_KEY, $takeaways );
+		update_post_meta( $post_id, self::TAKEAWAYS_HASH_KEY, $this->get_content_hash( $post_id ) );
+
+		return rest_ensure_response(
+			array(
+				'success'   => true,
+				'takeaways' => $takeaways,
+				'html'      => $this->render_takeaways_html( $takeaways, $render ),
+			)
+		);
+	}
+
+	/**
+	 * Clear stored takeaways when an on-demand post's content changes.
+	 *
+	 * @param int $post_id The post ID being saved.
+	 */
+	public function maybe_invalidate_on_demand_takeaways( int $post_id ) {
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || 'revision' === get_post_type( $post_id ) ) {
+			return;
+		}
+
+		if (
+			'on_demand' !== $this->get_generation_timing() ||
+			! in_array( get_post_type( $post_id ), $this->get_supported_post_types(), true ) ||
+			! $this->is_enabled()
+		) {
+			return;
+		}
+
+		$stored = get_post_meta( $post_id, self::TAKEAWAYS_META_KEY, true );
+
+		if ( empty( $stored ) ) {
+			return;
+		}
+
+		$stored_hash  = get_post_meta( $post_id, self::TAKEAWAYS_HASH_KEY, true );
+		$current_hash = $this->get_content_hash( $post_id );
+
+		// Content unchanged, keep the existing takeaways.
+		if ( ! empty( $stored_hash ) && $stored_hash === $current_hash ) {
+			return;
+		}
+
+		delete_post_meta( $post_id, self::TAKEAWAYS_META_KEY );
+		delete_post_meta( $post_id, self::TAKEAWAYS_HASH_KEY );
+	}
+
+	/**
+	 * Returns a hash of the post content and title, used to detect edits.
+	 *
+	 * @param int $post_id The post ID.
+	 * @return string
+	 */
+	public function get_content_hash( int $post_id ): string {
+		$post = get_post( $post_id );
+
+		if ( ! $post instanceof \WP_Post ) {
+			return '';
+		}
+
+		return md5( $post->post_content . '|' . $post->post_title );
+	}
+
+	/**
+	 * Render the inner markup for a set of takeaways.
+	 *
+	 * @param array  $takeaways Array of takeaway strings.
+	 * @param string $render    Either `list` or `paragraph`.
+	 * @return string
+	 */
+	public function render_takeaways_html( array $takeaways, string $render = 'list' ): string {
+		if ( empty( $takeaways ) ) {
+			return '';
+		}
+
+		ob_start();
+
+		if ( 'list' === $render ) {
+			echo '<ul>';
+			foreach ( $takeaways as $takeaway ) {
+				printf( '<li>%s</li>', esc_html( $takeaway ) );
+			}
+			echo '</ul>';
+		} else {
+			foreach ( $takeaways as $takeaway ) {
+				printf( '<p>%s</p>', esc_html( $takeaway ) );
+			}
+		}
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the on-demand "Key Takeaways" button on the front-end of singular posts.
+	 *
+	 * @param string $content The post content.
+	 * @return string
+	 */
+	public function render_takeaways_button( string $content ): string {
+		$post = get_post();
+
+		if (
+			! $post instanceof \WP_Post ||
+			! is_singular( $post->post_type ) ||
+			! in_array( $post->post_type, $this->get_supported_post_types(), true ) ||
+			! in_the_loop() ||
+			! is_main_query()
+		) {
+			return $content;
+		}
+
+		$render = $this->get_settings( 'render' );
+		$render = in_array( $render, array( 'list', 'paragraph' ), true ) ? $render : 'list';
+
+		$label = $this->get_settings( 'button_label' );
+		$label = is_string( $label ) && '' !== $label ? $label : esc_html__( 'Key Takeaways', 'classifai' );
+
+		$stored      = get_post_meta( $post->ID, self::TAKEAWAYS_META_KEY, true );
+		$has_results = ! empty( $stored ) && is_array( $stored );
+		$panel_html  = $has_results ? $this->render_takeaways_html( $stored, $render ) : '';
+
+		$this->enqueue_frontend_assets();
+
+		$panel_id = 'classifai-key-takeaways-panel-' . $post->ID;
+
+		ob_start();
+		?>
+		<div class="classifai-key-takeaways-wrapper">
+			<button
+				type="button"
+				class="classifai-key-takeaways-toggle"
+				aria-expanded="false"
+				aria-controls="<?php echo esc_attr( $panel_id ); ?>"
+				data-has-takeaways="<?php echo $has_results ? '1' : '0'; ?>"
+				data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>"
+				data-rest-url="<?php echo esc_url( rest_url( 'classifai/v1/key-takeaways-on-demand/' . $post->ID ) ); ?>"
+				data-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>"
+				data-generating-label="<?php esc_attr_e( 'Generating…', 'classifai' ); ?>"
+				data-error-label="<?php esc_attr_e( 'Key takeaways could not be generated. Please try again.', 'classifai' ); ?>"
+			>
+				<span class="classifai-key-takeaways-toggle__label"><?php echo esc_html( $label ); ?></span>
+				<span class="classifai-key-takeaways-spinner" aria-hidden="true"></span>
+			</button>
+			<div id="<?php echo esc_attr( $panel_id ); ?>" class="classifai-key-takeaways-panel" hidden>
+				<?php echo wp_kses_post( $panel_html ); ?>
+			</div>
+		</div>
+		<?php
+		$button = (string) ob_get_clean();
+
+		/**
+		 * Filter where the on-demand button is placed relative to the content.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_key_takeaways_button_position
+		 *
+		 * @param string $position One of `top` or `bottom`.
+		 * @param int    $post_id  The post ID.
+		 *
+		 * @return string Either `top` or `bottom`.
+		 */
+		$position = apply_filters( 'classifai_key_takeaways_button_position', 'top', $post->ID );
+
+		return 'bottom' === $position ? $content . $button : $button . $content;
+	}
+
+	/**
+	 * Enqueue the front-end script and style for the on-demand button.
+	 */
+	public function enqueue_frontend_assets() {
+		wp_enqueue_script(
+			'classifai-plugin-key-takeaways-frontend-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-key-takeaways-frontend.js',
+			get_asset_info( 'classifai-plugin-key-takeaways-frontend', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-key-takeaways-frontend', 'version' ),
+			true
+		);
+
+		wp_enqueue_style(
+			'classifai-plugin-key-takeaways-frontend-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-key-takeaways-frontend.css',
+			array(),
+			get_asset_info( 'classifai-plugin-key-takeaways-frontend', 'version' ),
+			'all'
 		);
 	}
 
@@ -270,7 +626,40 @@ class KeyTakeaways extends Feature {
 					'original' => 1,
 				),
 			),
+			'generation_timing'    => 'manual',
+			'post_types'           => array(
+				'post' => 'post',
+			),
+			'render'               => 'list',
+			'button_label'         => esc_html__( 'Key Takeaways', 'classifai' ),
 			'provider'             => ChatGPT::ID,
+		);
+	}
+
+	/**
+	 * Returns the configured generation timing mode.
+	 *
+	 * @return string One of `manual`, `on_demand`.
+	 */
+	public function get_generation_timing(): string {
+		$timing = $this->get_settings( 'generation_timing' );
+
+		return array_key_exists( $timing, $this->get_generation_timing_options() ) ? $timing : 'manual';
+	}
+
+	/**
+	 * Returns the supported generation timing modes.
+	 *
+	 * - `manual`: editors add the Key Takeaways block to generate takeaways.
+	 * - `on_demand`: a front-end button generates takeaways the first time a
+	 *   visitor requests them, then stores the result for reuse.
+	 *
+	 * @return array
+	 */
+	public function get_generation_timing_options(): array {
+		return array(
+			'manual'    => __( 'Manual (add the Key Takeaways block to a post)', 'classifai' ),
+			'on_demand' => __( 'On demand (generate on first front-end request)', 'classifai' ),
 		);
 	}
 
@@ -304,6 +693,24 @@ class KeyTakeaways extends Feature {
 	 */
 	public function sanitize_default_feature_settings( array $new_settings ): array {
 		$new_settings['key_takeaways_prompt'] = sanitize_prompts( 'key_takeaways_prompt', $new_settings );
+
+		$timing                            = $new_settings['generation_timing'] ?? 'manual';
+		$new_settings['generation_timing'] = array_key_exists( $timing, $this->get_generation_timing_options() ) ? $timing : 'manual';
+
+		$render                 = $new_settings['render'] ?? 'list';
+		$new_settings['render'] = in_array( $render, array( 'list', 'paragraph' ), true ) ? $render : 'list';
+
+		$label                        = isset( $new_settings['button_label'] ) ? sanitize_text_field( $new_settings['button_label'] ) : '';
+		$new_settings['button_label'] = '' !== $label ? $label : esc_html__( 'Key Takeaways', 'classifai' );
+
+		$post_types = \Classifai\get_post_types_for_language_settings();
+		foreach ( $post_types as $post_type ) {
+			if ( ! isset( $new_settings['post_types'][ $post_type->name ] ) ) {
+				$new_settings['post_types'][ $post_type->name ] = '';
+			} else {
+				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
+			}
+		}
 
 		return $new_settings;
 	}
