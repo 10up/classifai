@@ -38,7 +38,7 @@ class Settings {
 	}
 
 	/**
-	 * Registers a hidden sub menu page for the onboarding wizard.
+	 * Register the settings page.
 	 */
 	public function register_settings_page() {
 		$registration_settings = get_option( 'classifai_settings' );

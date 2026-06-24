@@ -18,7 +18,7 @@ import { ClassifAILogo } from '../../utils/icons';
 /**
  * Header component for the ClassifAI settings.
  *
- * This component renders the header for the ClassifAI settings page and the onboarding process.
+ * This component renders the header for the ClassifAI settings page.
  *
  * @return {React.ReactElement} Header component.
  */

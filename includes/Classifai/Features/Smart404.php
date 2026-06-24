@@ -66,7 +66,6 @@ class Smart404 extends Feature {
 				<?php
 			};
 			add_action( 'classifai_before_feature_settings_form', $warning_notice_func );
-			add_action( 'classifai_before_onboarding_feature_settings_form', $warning_notice_func );
 			return;
 		}
 
