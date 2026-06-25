@@ -91,17 +91,6 @@ class Notifications {
 			return;
 		}
 
-		$onboarding = new Onboarding();
-		if ( $onboarding->is_onboarding_completed() ) {
-			delete_transient( 'classifai_activation_notice' );
-			return;
-		}
-
-		$setup_url = admin_url( 'tools.php?welcome_guide=1&page=classifai#/language_processing' );
-		if ( should_use_legacy_settings_panel() ) {
-			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
-		}
-
 		// Prevent showing the default WordPress "Plugin Activated" notice.
 		unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification
 		?>
@@ -115,7 +104,7 @@ class Notifications {
 					<p><?php esc_html_e( 'Thanks for downloading ClassifAI.', 'classifai' ); ?></p>
 					<p><?php esc_html_e( 'Choose your Features, connect your AI Provider accounts, and you’re ready to go.', 'classifai' ); ?></p>
 				</div>
-				<a class="components-button is-primary" href="<?php echo esc_url( $setup_url ); ?>">
+				<a class="components-button is-primary" href="<?php echo esc_url( admin_url( 'tools.php?welcome_guide=1&page=classifai#/language_processing' ) ); ?>">
 					<?php esc_html_e( 'Get started', 'classifai' ); ?>
 				</a>
 			</div>
