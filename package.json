@@ -37,13 +37,13 @@
     "role": "developer"
   },
   "devDependencies": {
-    "@playwright/test": "^1.61.0",
+    "@playwright/test": "^1.61.1",
     "@types/wordpress__blocks": "^15.17.0",
-    "@wordpress/e2e-test-utils-playwright": "^1.48.1",
-    "@wordpress/env": "^11.8.1",
-    "@wordpress/scripts": "^32.4.1",
+    "@wordpress/e2e-test-utils-playwright": "^1.49.0",
+    "@wordpress/env": "^11.9.0",
+    "@wordpress/scripts": "^32.5.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.7",
+    "lint-staged": "^17.0.8",
     "node-wp-i18n": "^1.2.8",
     "wp-hooks-documentor": "github:10up/wp-hooks-documentor#build"
   },
