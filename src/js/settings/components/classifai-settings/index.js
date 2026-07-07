@@ -31,7 +31,7 @@ import { ClassifAIRegistration } from '../classifai-registration';
 import { ClassifAIWelcomeGuide } from './welcome-guide';
 import { Notices } from '../feature-settings/notices';
 
-const { services, features } = window.classifAISettings;
+const { services = {}, features = {} } = window.classifAISettings || {};
 
 /**
  * FeatureSettingsWrapper component to render the feature settings.
