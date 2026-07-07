@@ -31,7 +31,7 @@ import { ClassifAIRegistration } from '../classifai-registration';
 import { ClassifAIWelcomeGuide } from './welcome-guide';
 import { Notices } from '../feature-settings/notices';
 
-const { services, features } = window.classifAISettings;
+const { services = {}, features = {} } = window.classifAISettings || {};
 
 /**
  * FeatureSettingsWrapper component to render the feature settings.
@@ -42,6 +42,13 @@ const { services, features } = window.classifAISettings;
 const FeatureSettingsWrapper = () => {
 	const { service, feature } = useParams();
 	const serviceFeatures = Object.keys( features[ service ] || {} );
+
+	// When the settings data is unavailable (for example the global was
+	// missing) there is no feature to route to, so render nothing rather than
+	// navigating to an undefined path.
+	if ( ! serviceFeatures.length ) {
+		return null;
+	}
 
 	if ( ! serviceFeatures.includes( feature ) ) {
 		return <Navigate to={ serviceFeatures[ 0 ] } replace />;

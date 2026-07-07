@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+### Fixed
+
+- Settings page no longer crashes to a blank screen when `window.classifAISettings` is undefined (for example when a caching or optimization plugin changes script order); the settings data is now read defensively (props [@thisismyurl](https://github.com/thisismyurl) via [#1135](https://github.com/10up/classifai/pull/1135)).
+
 ## [3.8.0] - 2026-03-20
 
 ### Added
