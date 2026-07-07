@@ -43,6 +43,13 @@ const FeatureSettingsWrapper = () => {
 	const { service, feature } = useParams();
 	const serviceFeatures = Object.keys( features[ service ] || {} );
 
+	// When the settings data is unavailable (for example the global was
+	// missing) there is no feature to route to, so render nothing rather than
+	// navigating to an undefined path.
+	if ( ! serviceFeatures.length ) {
+		return null;
+	}
+
 	if ( ! serviceFeatures.includes( feature ) ) {
 		return <Navigate to={ serviceFeatures[ 0 ] } replace />;
 	}
