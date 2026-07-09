@@ -30,7 +30,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: 10up/action-repo-automator@280f5dc0b4ed1b5c50c816e08623bdefce55cdce # v2.1.3
+      - uses: 10up/action-repo-automator@ffe5293adff3ebf042156b2290d63f22bef5d7d4 # v2.2.0
         with:
           fail-label: needs:feedback
           pass-label: needs:code-review
