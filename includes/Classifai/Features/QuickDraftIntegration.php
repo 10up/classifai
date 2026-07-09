@@ -206,19 +206,9 @@ class QuickDraftIntegration {
 			return $result;
 		}
 
-		// Update the post with generated content.
-		$updated_post = array(
-			'ID'           => $post_id,
-			'post_content' => $result,
-			'post_status'  => 'draft',
-		);
-
-		$update_result = wp_update_post( $updated_post );
-
-		if ( is_wp_error( $update_result ) ) {
-			return new WP_Error( 'post_update_failed', esc_html__( 'Failed to update post with generated content.', 'classifai' ) );
-		}
-
+		// $result is a JSON BlockTree. The draft is left empty here; the client
+		// renders it to block markup (using the editor's block registry) and
+		// saves it back via the core REST API before redirecting the user.
 		return rest_ensure_response(
 			array(
 				'post_id'  => $post_id,

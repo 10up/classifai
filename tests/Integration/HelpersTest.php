@@ -564,4 +564,126 @@ class HelpersTest extends \WP_UnitTestCase {
 		$this->assertSame( 'local-body', safe_file_get_contents( $tmp ) );
 		unlink( $tmp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
 	}
+
+	/**
+	 * sanitize_generated_block_tree() strips disallowed markup (e.g. scripts and
+	 * event-handler attributes) from string props while preserving allowed
+	 * inline HTML.
+	 */
+	function test_sanitize_generated_block_tree_strips_unsafe_html() {
+		$tree = array(
+			'root'     => 'p1',
+			'elements' => array(
+				'p1' => array(
+					'key'   => 'p1',
+					'type'  => 'core/paragraph',
+					'props' => array(
+						'content' => 'Hello <strong>world</strong><script>alert(1)</script><img src="x" onerror="alert(2)">',
+					),
+				),
+			),
+		);
+
+		$sanitized = sanitize_generated_block_tree( $tree );
+		$content   = $sanitized['elements']['p1']['props']['content'];
+
+		$this->assertStringContainsString( '<strong>world</strong>', $content, 'Allowed inline HTML should be preserved.' );
+		$this->assertStringNotContainsString( '<script>', $content, 'Script tags should be removed.' );
+		$this->assertStringNotContainsString( 'onerror', $content, 'Event-handler attributes should be removed.' );
+	}
+
+	/**
+	 * sanitize_generated_block_tree() treats `url` props as URLs, dropping unsafe
+	 * protocols such as javascript:.
+	 */
+	function test_sanitize_generated_block_tree_sanitizes_url_props() {
+		$tree = array(
+			'root'     => 'img1',
+			'elements' => array(
+				'img1' => array(
+					'key'   => 'img1',
+					'type'  => 'core/image',
+					'props' => array(
+						'url' => 'javascript:alert(1)',
+						'alt' => 'safe text',
+					),
+				),
+			),
+		);
+
+		$sanitized = sanitize_generated_block_tree( $tree );
+
+		$this->assertStringNotContainsString( 'javascript:', $sanitized['elements']['img1']['props']['url'], 'Unsafe URL protocols should be stripped.' );
+		$this->assertSame( 'safe text', $sanitized['elements']['img1']['props']['alt'] );
+	}
+
+	/**
+	 * sanitize_generated_block_tree() recurses into nested structures (e.g. table
+	 * cells) and leaves non-string scalars untouched.
+	 */
+	function test_sanitize_generated_block_tree_recurses_and_preserves_scalars() {
+		$tree = array(
+			'root'     => 'h1',
+			'elements' => array(
+				'h1' => array(
+					'key'      => 'h1',
+					'type'     => 'core/heading',
+					'props'    => array(
+						'content' => 'Heading',
+						'level'   => 2,
+					),
+				),
+				't1' => array(
+					'key'   => 't1',
+					'type'  => 'core/table',
+					'props' => array(
+						'body' => array(
+							array(
+								'cells' => array(
+									array(
+										'content' => 'Cell <script>alert(1)</script>',
+										'tag'     => 'td',
+									),
+								),
+							),
+						),
+					),
+				),
+				'l1' => array(
+					'key'   => 'l1',
+					'type'  => 'core/list',
+					'props' => array(
+						'ordered' => true,
+					),
+				),
+			),
+		);
+
+		$sanitized = sanitize_generated_block_tree( $tree );
+
+		// Non-string scalars are preserved as-is.
+		$this->assertSame( 2, $sanitized['elements']['h1']['props']['level'] );
+		$this->assertTrue( $sanitized['elements']['l1']['props']['ordered'] );
+
+		// Nested string values are sanitized.
+		$cell = $sanitized['elements']['t1']['props']['body'][0]['cells'][0];
+		$this->assertStringNotContainsString( '<script>', $cell['content'] );
+		$this->assertSame( 'td', $cell['tag'] );
+	}
+
+	/**
+	 * Mirrors how providers process a response: decode to objects, sanitize, and
+	 * re-encode. Empty objects such as "props":{} must survive (decoding to
+	 * arrays would turn them into "props":[], which the client schema rejects),
+	 * while nested string props are still sanitized.
+	 */
+	function test_sanitize_generated_block_tree_preserves_empty_objects_on_round_trip() {
+		$json = '{"root":"r","elements":{"r":{"key":"r","type":"fragment","props":{},"children":["p1"]},"p1":{"key":"p1","type":"core/paragraph","props":{"content":"Hi <script>alert(1)</script>"}}}}';
+
+		$encoded = wp_json_encode( sanitize_generated_block_tree( json_decode( $json ) ) );
+
+		$this->assertStringContainsString( '"props":{}', $encoded, 'Empty objects must remain objects.' );
+		$this->assertStringNotContainsString( '"props":[]', $encoded, 'Empty objects must not become arrays.' );
+		$this->assertStringNotContainsString( '<script>', $encoded, 'Nested string props must still be sanitized.' );
+	}
 }

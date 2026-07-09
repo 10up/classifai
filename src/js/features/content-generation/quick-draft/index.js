@@ -7,12 +7,28 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import domReady from '@wordpress/dom-ready';
+import { registerCoreBlocks } from '@wordpress/block-library';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import './index.scss';
+import { renderBlockTreeToMarkup } from '../utils/render-block-tree';
+
+// Core blocks aren't registered on the dashboard, so register them once before
+// we render an AI-generated BlockTree to markup.
+let coreBlocksRegistered = false;
+
+/**
+ * Ensure core block types are registered before rendering.
+ */
+function ensureCoreBlocksRegistered() {
+	if ( ! coreBlocksRegistered ) {
+		registerCoreBlocks();
+		coreBlocksRegistered = true;
+	}
+}
 
 /**
  * Initialize Quick Draft content generation.
@@ -160,18 +176,37 @@ domReady( () => {
 			},
 		} )
 			.then( function ( response ) {
-				if ( response.success ) {
-					// Clear the form.
-					titleField.value = '';
-					contentField.value = '';
-
-					// Show success message.
-					showSuccessMessage( response );
-				} else {
+				if ( ! response.success ) {
 					throw new Error(
 						response.message || window.classifaiQuickDraft.error
 					);
 				}
+
+				// The response is a JSON BlockTree; render it to block markup
+				// and save it to the draft via the core REST API.
+				ensureCoreBlocksRegistered();
+				const markup =
+					renderBlockTreeToMarkup( response.content ) ??
+					response.content;
+
+				return apiFetch( {
+					path: `/wp/v2/posts/${ response.post_id }`,
+					method: 'POST',
+					data: {
+						content: markup,
+						status: 'draft',
+					},
+				} ).then( function () {
+					return response;
+				} );
+			} )
+			.then( function ( response ) {
+				// Clear the form.
+				titleField.value = '';
+				contentField.value = '';
+
+				// Show success message.
+				showSuccessMessage( response );
 			} )
 			.catch( function ( error ) {
 				showErrorMessage(

@@ -28,6 +28,8 @@ declare module '@wordpress/blocks' {
 	export const pasteHandler: any;
 	export const parse: any;
 	export const registerBlockType: any;
+	export const createBlock: any;
+	export const serialize: any;
 }
 
 declare module '@wordpress/commands' {
