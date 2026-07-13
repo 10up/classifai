@@ -308,12 +308,34 @@ Disallow: /
 			new \Classifai\Features\RecommendedContent(),
 			new \Classifai\Features\TextToSpeech(),
 			new \Classifai\Features\APIUsageTracking(),
+			new \Classifai\Features\DescriptiveTextGenerator(),
+			new \Classifai\Features\ImageTagsGenerator(),
+			new \Classifai\Features\ImageTextExtraction(),
+			new \Classifai\Features\ImageCropping(),
 		);
 		$is_feature_being_enabled = false;
 
 		foreach ( $features as $feature ) {
 			if ( ! $feature->get_feature_provider_instance() ) {
 				// Skip if the feature does not have a Provider instance.
+				continue;
+			}
+
+			// Image Processing features only need Action Scheduler when set to
+			// process asynchronously, and may use any of several providers, so
+			// gate them on their processing mode rather than the provider ID.
+			if ( method_exists( $feature, 'get_processing_mode' ) ) {
+				$option_name         = $feature->get_option_name();
+				$async_being_enabled = isset( $_POST[ $option_name ]['processing_mode'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+					&& 'automatic_async' === sanitize_text_field( wp_unslash( $_POST[ $option_name ]['processing_mode'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+				if (
+					( 'automatic_async' === $feature->get_processing_mode() && $feature->is_enabled() ) ||
+					$async_being_enabled
+				) {
+					require_once CLASSIFAI_PLUGIN_DIR . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
+				}
+
 				continue;
 			}
 

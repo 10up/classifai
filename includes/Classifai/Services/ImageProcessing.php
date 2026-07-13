@@ -6,6 +6,9 @@
 namespace Classifai\Services;
 
 use Classifai\Features\DescriptiveTextGenerator;
+use Classifai\Features\ImageTagsGenerator;
+use Classifai\Features\ImageTextExtraction;
+use Classifai\Features\ImageCropping;
 use Classifai\Taxonomy\ImageTagTaxonomy;
 
 use function Classifai\get_asset_info;
@@ -15,6 +18,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class ImageProcessing extends Service {
+
+	/**
+	 * Action Scheduler hook shared by the async image processing jobs.
+	 *
+	 * @var string
+	 */
+	const ASYNC_JOB_HOOK = 'classifai_schedule_image_process_job';
+
+	/**
+	 * Attachment meta key holding async processing status, keyed by Feature ID.
+	 *
+	 * @var string
+	 */
+	const STATUS_META = '_classifai_image_process_status';
+
+	/**
+	 * Map of Feature ID => run type for the async-capable image features.
+	 *
+	 * @var array
+	 */
+	const ASYNC_FEATURES = array(
+		DescriptiveTextGenerator::ID => 'descriptive_text',
+		ImageTagsGenerator::ID       => 'tags',
+		ImageTextExtraction::ID      => 'ocr',
+		ImageCropping::ID            => 'crop',
+	);
 
 	/**
 	 * ImageProcessing constructor.
@@ -37,6 +66,68 @@ class ImageProcessing extends Service {
 
 		add_filter( 'attachment_fields_to_edit', array( $this, 'custom_fields_edit' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_media_scripts' ) );
+		add_action( 'wp_ajax_classifai_get_image_process_status', array( $this, 'get_image_process_status_ajax' ) );
+	}
+
+	/**
+	 * AJAX callback returning the async processing status for an attachment.
+	 *
+	 * Powers the media-modal polling that updates fields without a page reload.
+	 * Returns, per run type, the current status plus the canonical saved values
+	 * so the UI can populate fields when a job completes.
+	 */
+	public function get_image_process_status_ajax() {
+		if ( ! wp_doing_ajax() ) {
+			return;
+		}
+
+		if ( ! check_ajax_referer( 'classifai', 'nonce', false ) ) {
+			wp_send_json_error( new \WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) ) );
+		}
+
+		$attachment_id = (int) filter_input( INPUT_POST, 'attachment_id', FILTER_SANITIZE_NUMBER_INT );
+
+		if ( empty( $attachment_id ) || 'attachment' !== get_post_type( $attachment_id ) ) {
+			wp_send_json_error( new \WP_Error( 'invalid_post', __( 'Invalid attachment ID.', 'classifai' ) ) );
+		}
+
+		if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
+			wp_send_json_error( new \WP_Error( 'unauthorized_access', __( 'Unauthorized access.', 'classifai' ) ) );
+		}
+
+		$statuses = get_post_meta( $attachment_id, self::STATUS_META, true );
+		$statuses = is_array( $statuses ) ? $statuses : array();
+		$response = array();
+
+		foreach ( self::ASYNC_FEATURES as $feature_id => $type ) {
+			$entry = $statuses[ $feature_id ] ?? array();
+			$data  = array(
+				'status' => $entry['status'] ?? 'done',
+			);
+
+			if ( ! empty( $entry['message'] ) ) {
+				$data['message'] = $entry['message'];
+			}
+
+			// Surface the current saved values so the UI can update on completion.
+			switch ( $type ) {
+				case 'descriptive_text':
+					$data['fields'] = array(
+						'alt'         => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+						'caption'     => get_the_excerpt( $attachment_id ),
+						'description' => get_the_content( null, false, $attachment_id ),
+					);
+					break;
+
+				case 'ocr':
+					$data['description'] = get_the_content( null, false, $attachment_id );
+					break;
+			}
+
+			$response[ $type ] = $data;
+		}
+
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -90,6 +181,8 @@ class ImageProcessing extends Service {
 			'const classifaiMediaVars = ' . wp_json_encode(
 				array(
 					'enabledAltTextFields' => $feature->get_alt_text_settings() ? $feature->get_alt_text_settings() : array(),
+					'ajaxUrl'              => admin_url( 'admin-ajax.php' ),
+					'nonce'                => wp_create_nonce( 'classifai' ),
 				)
 			),
 			'before'
