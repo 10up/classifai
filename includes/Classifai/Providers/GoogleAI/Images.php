@@ -301,7 +301,7 @@ class Images extends Provider {
 		$body = apply_filters(
 			'classifai_googleai_images_request_body',
 			array(
-				'contents'  => array(
+				'contents'         => array(
 					array(
 						'parts' => array(
 							array(
