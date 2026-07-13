@@ -36,7 +36,7 @@ class Images extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $model = 'imagen-4.0-generate-preview-06-06';
+	protected $model = 'gemini-3.1-flash-image';
 
 	/**
 	 * Maximum number of characters a prompt can have.
@@ -100,7 +100,7 @@ class Images extends Provider {
 		 * Filter the model name.
 		 *
 		 * Useful if you want to use a different model, like
-		 * imagen-4.0-ultra.
+		 * gemini-3-pro-image.
 		 *
 		 * @since 3.5.0
 		 * @hook classifai_googleai_images_model
@@ -286,6 +286,8 @@ class Images extends Provider {
 
 		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
+		$num = absint( $args['num'] );
+
 		/**
 		 * Filter the request body before sending to Google AI.
 		 *
@@ -299,37 +301,69 @@ class Images extends Provider {
 		$body = apply_filters(
 			'classifai_googleai_images_request_body',
 			array(
-				'instances'  => array(
+				'contents'  => array(
 					array(
-						'prompt' => sanitize_text_field( $prompt ),
+						'parts' => array(
+							array(
+								'text' => sanitize_text_field( $prompt ),
+							),
+						),
 					),
 				),
-				'parameters' => array(
-					'sampleCount' => absint( $args['num'] ),
-					'aspectRatio' => sanitize_text_field( $args['aspect_ratio'] ),
+				'generationConfig' => array(
+					'responseModalities' => array( 'TEXT', 'IMAGE' ),
+					'imageConfig'        => array(
+						'aspectRatio' => sanitize_text_field( $args['aspect_ratio'] ),
+					),
 				),
-			),
-		);
-
-		// Make our API request.
-		$response = $request->post(
-			trailingslashit( $this->get_api_url() ) . 'models/' . $this->get_model() . ':predict',
-			array(
-				'body' => wp_json_encode( $body ),
 			)
 		);
 
+		$endpoint  = trailingslashit( $this->get_api_url() ) . 'models/' . $this->get_model() . ':generateContent';
+		$responses = array();
+
+		// Gemini image models do not support multiple candidates per request.
+		for ( $i = 0; $i < $num; $i++ ) {
+			$responses[] = $request->post(
+				$endpoint,
+				array(
+					'body' => wp_json_encode( $body ),
+				)
+			);
+		}
+
 		$cleaned_responses = array();
 
-		// Extract out the image responses, if they exist.
-		if ( ! is_wp_error( $response ) && ! empty( $response['predictions'] ) ) {
-			foreach ( $response['predictions'] as $candidate ) {
-				if ( isset( $candidate['bytesBase64Encoded'] ) ) {
-					$cleaned_responses[] = array( 'url' => sanitize_text_field( trim( $candidate['bytesBase64Encoded'] ) ) );
+		foreach ( $responses as $response ) {
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+
+			// Extract image responses from generateContent candidates.
+			if ( ! empty( $response['candidates'] ) ) {
+				foreach ( $response['candidates'] as $candidate ) {
+					if ( empty( $candidate['content']['parts'] ) ) {
+						continue;
+					}
+
+					foreach ( $candidate['content']['parts'] as $part ) {
+						if ( ! empty( $part['inlineData']['data'] ) ) {
+							$cleaned_responses[] = array(
+								'url' => trim( $part['inlineData']['data'] ),
+							);
+						}
+					}
+				}
+			} elseif ( ! empty( $response['predictions'] ) ) {
+				// Legacy Imagen predict response format.
+				foreach ( $response['predictions'] as $candidate ) {
+					if ( ! empty( $candidate['bytesBase64Encoded'] ) ) {
+						$cleaned_responses[] = array(
+							'url' => trim( $candidate['bytesBase64Encoded'] ),
+						);
+					}
 				}
 			}
-		} elseif ( is_wp_error( $response ) ) {
-			return $response;
 		}
 
 		return $cleaned_responses;
