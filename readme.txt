@@ -54,6 +54,9 @@ Please report security bugs found in the source code of the undefined plugin thr
 
 == Upgrade Notice ==
 
+= 3.9.0 =
+**Note that this release bumps the WordPress minimum from 6.8 to 6.9.**
+
 = 3.8.0 =
 **Note that the legacy settings screen (enabled via the `classifai_use_legacy_settings_panel` filter) is now formally deprecated and scheduled for removal in a future release. Please migrate to the new React-based settings experience.**
 

@@ -4,9 +4,80 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.9.0] - 2026-07-15
+**Note that this release bumps the WordPress minimum from 6.8 to 6.9.**
+
+### Added
+
+- Implement dependency prefixing for the AWS SDK to prevent conflicts with other plugins using the same package (props [@lakrisgubben](https://github.com/lakrisgubben), [@sksaju](https://github.com/sksaju), [@ivan-ivanic-cm](https://github.com/ivan-ivanic-cm), [@sanketio](https://github.com/sanketio), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#965](https://github.com/10up/classifai/pull/965)).
+- Better styling and a notice for terms in the previewer that don't meet the configured threshold (props [@petenelson](https://github.com/petenelson), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#1058](https://github.com/10up/classifai/pull/1058)).
+- New `get_prompt` method that is used to get prompts for any Feature that needs it (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1083](https://github.com/10up/classifai/pull/1083)).
+- New processing mode for Image Processing Features that will run the Feature automatically but on a background process (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1122](https://github.com/10up/classifai/pull/1122)).
+
+### Changed
+
+- Update all of our default prompts to be more robust and better suited for the task at hand (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1084](https://github.com/10up/classifai/pull/1084)).
+- Update from `gemini-2.5-flash` to `gemini-3.5-flash` as our default Gemini text generation model (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1082](https://github.com/10up/classifai/pull/1082)).
+- Update from `imagen-4.0-generate-preview-06-06` to `gemini-3.1-flash-image` (Nano Banana 2) as our default image generation model when using Google. Note: this changes the request body that is passed through the `classifai_googleai_images_request_body` filter. If using this filter, ensure you update your code accordingly (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1143](https://github.com/10up/classifai/pull/1143)).
+- Update from `gpt-4o-mini` to `gpt-5.4-mini`, `gpt-4.1-mini` to `gpt-5.4-mini` and `gpt-image-1` to `gpt-image-2` as our default OpenAI text generation, vision generation and image generation models, respectively (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1082](https://github.com/10up/classifai/pull/1082)).
+- Update from `grok-2` to `grok-4.3` as our default xAI text and vision generation models (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1082](https://github.com/10up/classifai/pull/1082)).
+- Integrate excerpt generation into the new excerpt panel (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1085](https://github.com/10up/classifai/pull/1085)).
+- Move all prompts to their own files so they can be pulled in via the new `get_prompt` method (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1083](https://github.com/10up/classifai/pull/1083)).
+- Use the `response_format` parameter to ensure the response we get matches what we expect for Key Takeaways and Image Tags Generator (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1109](https://github.com/10up/classifai/pull/1109)).
+- Bump WordPress "tested up to" version to 7.0 (props [@zamanq](https://github.com/zamanq), [@dkotter](https://github.com/dkotter) via [#1076](https://github.com/10up/classifai/pull/1076)).
+- Bump WordPress minimum from 6.8 to 6.9 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1081](https://github.com/10up/classifai/pull/1081)).
+- Upgrade the Plugin Update Checker library from 5.1 to 5.7 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1118](https://github.com/10up/classifai/pull/1118)).
+
 ### Fixed
 
-- Settings page no longer crashes to a blank screen when `window.classifAISettings` is undefined (for example when a caching or optimization plugin changes script order); the settings data is now read defensively (props [@thisismyurl](https://github.com/thisismyurl) via [#1135](https://github.com/10up/classifai/pull/1135)).
+- Add polling to the Classic Editor integration of Text to Speech to show completed state without a page reload (props [@CacheMeOwside](https://github.com/CacheMeOwside), [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#1074](https://github.com/10up/classifai/pull/1074)).
+- Better handling of user roles to avoid a potential fatal error (props [@gthayer](https://github.com/gthayer), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1080](https://github.com/10up/classifai/pull/1080)).
+- Ensure our default prompts render with line breaks in the settings screen (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1084](https://github.com/10up/classifai/pull/1084)).
+- Switch from the deprecated `max_tokens` parameter to `max_completion_tokens` in the OpenAI API requests (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1084](https://github.com/10up/classifai/pull/1084)).
+- Update the Title Generation modal styling (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1100](https://github.com/10up/classifai/pull/1100)).
+- Admin style issues for Key Takeaways and Text to Speech (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1101](https://github.com/10up/classifai/pull/1101), [#1102](https://github.com/10up/classifai/pull/1102)).
+- Ensure we don't overwrite a valid audio file when data already exists and content hasn't changed (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1123](https://github.com/10up/classifai/pull/1123)).
+- Settings page no longer crashes to a blank screen when `window.classifAISettings` is undefined; the settings data is now read defensively (props [@thisismyurl](https://github.com/thisismyurl), [@dkotter](https://github.com/dkotter) via [#1135](https://github.com/10up/classifai/pull/1135)).
+
+### Removed
+
+- New user onboarding experience that has only been accessible to those that are using the `classifai_use_legacy_settings_panel` filter set to `true` (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1124](https://github.com/10up/classifai/pull/1124)).
+
+### Developer
+
+- Migrate from Cypress to Playwright for our E2E tests (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1099](https://github.com/10up/classifai/pull/1099)).
+- Bump `flatted` from 3.3.3 to 3.4.2 and `simple-git` from 3.30.0 to 3.33.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1067](https://github.com/10up/classifai/pull/1067)).
+- Bump `picomatch` from 2.3.1 to 2.3.2 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1068](https://github.com/10up/classifai/pull/1068)).
+- Bump `node-forge` from 1.3.3 to 1.4.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1070](https://github.com/10up/classifai/pull/1070)).
+- Bump `@babel/plugin-transform-modules-systemjs` from 7.28.5 to 7.29.4, `axios` from 1.13.2 to 1.16.1
+, `basic-ftp` from 5.2.0 to 5.3.1, `fast-uri` from 3.1.0 to 3.1.2, `follow-redirects` from 1.15.11 to 1.16.0, `ip-address` from 10.1.0 to 10.2.0, `lodash` from 4.17.23 to 4.18.1, `lodash-es` from 4.17.23 to 4.18.1, `postcss` from 8.5.6 to 8.5.14, `sanitize-html` from 2.17.0 to 2.17.4 and `simple-git` from 3.33.0 to 3.36.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1077](https://github.com/10up/classifai/pull/1077)).
+- Bump `tmp` from 0.2.5 to 0.2.7 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1079](https://github.com/10up/classifai/pull/1079)).
+- Bump `woocommerce/action-scheduler` from 3.8.1 to 3.9.3 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1087](https://github.com/10up/classifai/pull/1087)).
+- Bump `cypress` from 15.8.2 to 15.16.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1088](https://github.com/10up/classifai/pull/1088)).
+- Bump `choices.js` from 11.1.0 to 11.2.3, `motion` from 12.24.7 to 12.42.2 and `react-router-dom` from 7.12.0 to 7.15.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1090](https://github.com/10up/classifai/pull/1090), [#1133](https://github.com/10up/classifai/pull/1133), [#1137](https://github.com/10up/classifai/pull/1137)).
+- Bump `@types/wordpress__blocks` from 12.5.18 to 15.17.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1091](https://github.com/10up/classifai/pull/1091)).
+- Bump `cypress-plugin-tab` from 1.0.5 to 2.0.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1092](https://github.com/10up/classifai/pull/1092)).
+- Bump `@wordpress/env` from 10.38.0 to 11.5.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1093](https://github.com/10up/classifai/pull/1093)).
+- Bump `@wordpress/scripts` from 31.3.0 to 32.4.0 and replace `classnames` with `clsx` (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1095](https://github.com/10up/classifai/pull/1095)).
+- Update eslint config to the new flat file required by eslint v10; Fix all newly flagged eslint errors (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1095](https://github.com/10up/classifai/pull/1095)).
+- Bump `actions/checkout` from 6.0.2 to 7.0.0, `actions/stale` from 10.2.0 to 10.3.0, `github/codeql-action` from 4.35.5 to 4.36.2 and `crate-ci/typos` from 1.46.2 to 1.47.2 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1094](https://github.com/10up/classifai/pull/1094), [#1098](https://github.com/10up/classifai/pull/1098), [#1107](https://github.com/10up/classifai/pull/1107), [#1131](https://github.com/10up/classifai/pull/1131)).
+- Bump `@wordpress/icons` from 11.4.0 to 13.0.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1096](https://github.com/10up/classifai/pull/1096)).
+- Bump `shell-quote` from 1.8.3 to 1.8.4 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1103](https://github.com/10up/classifai/pull/1103)).
+- Bump `@wordpress/icons` from 13.0.0 to 13.3.0 and `react-router-dom` from 7.15.1 to 7.18.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1104](https://github.com/10up/classifai/pull/1104), [#1130](https://github.com/10up/classifai/pull/1130), [#1137](https://github.com/10up/classifai/pull/1137)).
+- Bump `lint-staged` from 16.4.0 to 17.0.4 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1106](https://github.com/10up/classifai/pull/1106)).
+- Added additional PHPUnit tests to cover areas that were missing test coverage (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1110](https://github.com/10up/classifai/pull/1110)).
+- Increase PHPStan from level 1 to level 5 and fix all new errors (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1111](https://github.com/10up/classifai/pull/1111)).
+- Switch to directly using the WordPress Coding Standards and fix all errors and warnings that was flagging (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#1115](https://github.com/10up/classifai/pull/1115)).
+- Bump `form-data` from 4.0.5 to 4.0.6 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1116](https://github.com/10up/classifai/pull/1116)).
+- Bump `launch-editor` from 2.12.0 to 2.14.1 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1117](https://github.com/10up/classifai/pull/1117)).
+- Bump `shivammathur/setup-php` from 2.37.1 to 2.37.2 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1121](https://github.com/10up/classifai/pull/1121)).
+- Bump `wp-phpunit/wp-phpunit` from 6.9.4 to 7.0.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1128](https://github.com/10up/classifai/pull/1128)).
+- Bump `@playwright/test` from 1.60.0 to 1.61.0, `@wordpress/e2e-test-utils-playwright` from 1.46.0 to 1.48.1, `@wordpress/env` from 11.5.0 to 11.8.1, `@wordpress/scripts` from 32.4.0 to 32.4.1 and `lint-staged` from 17.0.4 to 17.0.7 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1129](https://github.com/10up/classifai/pull/1129)).
+- Bump `@playwright/test` from 1.61.0 to 1.61.1, `@wordpress/e2e-test-utils-playwright` from 1.48.1 to 1.49.0, `@wordpress/env` from 11.8.1 to 11.9.0, `@wordpress/scripts` from 32.4.1 to 32.5.0 and `lint-staged` from 17.0.7 to 17.0.8 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1132](https://github.com/10up/classifai/pull/1132)).
+- Bump `actions/cache` from 5.0.5 to 6.1.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1134](https://github.com/10up/classifai/pull/1134)).
+- Bump `@wordpress/e2e-test-utils-playwright` from 1.49.0 to 1.50.0, `@wordpress/env` from 11.9.0 to 11.10.0 and `@wordpress/scripts` from 32.5.0 to 32.6.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1136](https://github.com/10up/classifai/pull/1136)).
+- Bump `github/codeql-action/init` from 4.36.2 to 4.36.3, `github/codeql-action/autobuild` from 4.36.2 to 4.36.3, `github/codeql-action/analyze` from 4.36.2 to 4.36.3, `10up/action-repo-automator` from 2.1.3 to 2.2.0 and `crate-ci/typos` from 1.47.2 to 1.48.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1138](https://github.com/10up/classifai/pull/1138)).
+- Bump `ws` from 8.19.0 to 8.21.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#1140](https://github.com/10up/classifai/pull/1140)).
 
 ## [3.8.0] - 2026-03-20
 
@@ -941,6 +1012,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.9.0]: https://github.com/10up/classifai/compare/3.8.0...3.9.0
 [3.8.0]: https://github.com/10up/classifai/compare/3.7.1...3.8.0
 [3.7.1]: https://github.com/10up/classifai/compare/3.7.0...3.7.1
 [3.7.0]: https://github.com/10up/classifai/compare/3.6.0...3.7.0
