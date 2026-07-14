@@ -398,7 +398,8 @@ class TextToSpeech extends Feature {
 			$results = $this->run( $request->get_param( 'id' ), 'synthesize' );
 
 			if ( $results && ! is_wp_error( $results ) ) {
-				$attachment_id = $this->save( $results, $request->get_param( 'id' ) );
+				// An integer result means the provider returned a cached attachment ID
+				$attachment_id = is_int( $results ) ? $results : $this->save( $results, $request->get_param( 'id' ) );
 
 				if ( ! is_wp_error( $attachment_id ) ) {
 					return rest_ensure_response(
@@ -676,7 +677,10 @@ class TextToSpeech extends Feature {
 		$results = $this->run( $post_id, 'synthesize' );
 
 		if ( $results && ! is_wp_error( $results ) ) {
-			$this->save( $results, $post_id );
+			// An integer result means the provider returned a cached attachment ID
+			if ( ! is_int( $results ) ) {
+				$this->save( $results, $post_id );
+			}
 			delete_post_meta( $post_id, '_classifai_text_to_speech_error' );
 		} elseif ( is_wp_error( $results ) ) {
 			update_post_meta(
