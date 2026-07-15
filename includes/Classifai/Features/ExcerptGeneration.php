@@ -41,14 +41,14 @@ class ExcerptGeneration extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
 			Grok::ID      => __( 'xAI Grok', 'classifai' ),
 			ChromeAI::ID  => __( 'Chrome AI (experimental)', 'classifai' ),
 			Ollama::ID    => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -58,7 +58,7 @@ class ExcerptGeneration extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 		add_action(
 			'admin_footer',
 			static function () {
@@ -80,8 +80,8 @@ class ExcerptGeneration extends Feature {
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 	}
 
 	/**
@@ -91,47 +91,47 @@ class ExcerptGeneration extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'generate-excerpt(?:/(?P<id>\d+))?',
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'rest_endpoint_callback' ],
-					'args'                => [
-						'id' => [
+					'callback'            => array( $this, 'rest_endpoint_callback' ),
+					'args'                => array(
+						'id' => array(
 							'required'          => true,
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 							'description'       => esc_html__( 'Post ID to generate excerpt for.', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_excerpt_permissions_check' ],
-				],
-				[
+						),
+					),
+					'permission_callback' => array( $this, 'generate_excerpt_permissions_check' ),
+				),
+				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'rest_endpoint_callback' ],
-					'args'                => [
-						'content' => [
+					'callback'            => array( $this, 'rest_endpoint_callback' ),
+					'args'                => array(
+						'content' => array(
 							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Content to summarize into an excerpt.', 'classifai' ),
-						],
-						'title'   => [
+						),
+						'title'   => array(
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Title of content we want a summary for.', 'classifai' ),
-						],
-						'author'  => [
+						),
+						'author'  => array(
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Author name for context in excerpt generation.', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_excerpt_permissions_check' ],
-				],
-			]
+						),
+					),
+					'permission_callback' => array( $this, 'generate_excerpt_permissions_check' ),
+				),
+			)
 		);
 	}
 
@@ -188,7 +188,7 @@ class ExcerptGeneration extends Feature {
 			if ( empty( $author_name ) && $post_id ) {
 				$post = get_post( $post_id );
 				if ( $post ) {
-					$author_name = get_the_author_meta( 'display_name', $post->post_author );
+					$author_name = get_the_author_meta( 'display_name', (int) $post->post_author );
 				}
 			}
 
@@ -209,11 +209,11 @@ class ExcerptGeneration extends Feature {
 				$this->run(
 					$post_id,
 					'excerpt',
-					[
+					array(
 						'content' => $request->get_param( 'content' ),
 						'title'   => $request->get_param( 'title' ),
 						'author'  => $author_name,
-					]
+					)
 				)
 			);
 		}
@@ -246,7 +246,7 @@ class ExcerptGeneration extends Feature {
 		wp_enqueue_script(
 			'classifai-plugin-excerpt-generation-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-excerpt-generation.js',
-			array_merge( get_asset_info( 'classifai-plugin-excerpt-generation', 'dependencies' ), [ 'lodash' ] ),
+			array_merge( get_asset_info( 'classifai-plugin-excerpt-generation', 'dependencies' ), array( 'lodash' ) ),
 			get_asset_info( 'classifai-plugin-excerpt-generation', 'version' ),
 			true
 		);
@@ -268,7 +268,7 @@ class ExcerptGeneration extends Feature {
 					wp_enqueue_style(
 						'classifai-plugin-classic-excerpt-generation-css',
 						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-excerpt-generation.css',
-						[],
+						array(),
 						get_asset_info( 'classifai-plugin-classic-excerpt-generation', 'version' ),
 						'all'
 					);
@@ -286,11 +286,11 @@ class ExcerptGeneration extends Feature {
 						sprintf(
 							'var classifaiGenerateExcerpt = %s;',
 							wp_json_encode(
-								[
+								array(
 									'path'           => '/classifai/v1/generate-excerpt/',
 									'buttonText'     => __( 'Generate excerpt', 'classifai' ),
 									'regenerateText' => __( 'Re-generate excerpt', 'classifai' ),
-								]
+								)
 							)
 						),
 						'before'
@@ -326,45 +326,45 @@ class ExcerptGeneration extends Feature {
 		add_settings_field(
 			'generate_excerpt_prompt',
 			esc_html__( 'Prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
+			array( $this, 'render_prompt_repeater_field' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'generate_excerpt_prompt',
 				'placeholder'   => $this->get_prompt( 'default' ),
 				'default_value' => $settings['generate_excerpt_prompt'],
 				'description'   => esc_html__( "Add a custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title. {{AUTHOR}} will be replaced with the post author's display name.", 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'post_types',
 			esc_html__( 'Allowed post types', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
+			array( $this, 'render_checkbox_group' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'      => 'post_types',
 				'options'        => $post_type_options,
 				'default_values' => $settings['post_types'],
 				'description'    => __( 'Choose which post types support this feature.', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'length',
 			esc_html__( 'Excerpt length', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'length',
 				'input_type'    => 'number',
 				'min'           => 1,
 				'step'          => 1,
 				'default_value' => $settings['length'],
 				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this, it often tends to exceed this number by 10-15 words.', 'classifai' ),
-			]
+			)
 		);
 	}
 
@@ -374,26 +374,26 @@ class ExcerptGeneration extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
-			'generate_excerpt_prompt' => [
-				[
+		return array(
+			'generate_excerpt_prompt' => array(
+				array(
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->get_prompt( 'default' ),
 					'original' => 1,
-				],
-			],
-			'post_types'              => [
+				),
+			),
+			'post_types'              => array(
 				'post' => 'post',
-			],
+			),
 			'length'                  => absint( apply_filters( 'excerpt_length', 55 ) ),
 			'provider'                => ChatGPT::ID,
-		];
+		);
 	}
 
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {

@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import Choices from 'choices.js';
+
+/**
+ * Internal dependencies
+ */
 import './previewer.scss';
 
 ( () => {

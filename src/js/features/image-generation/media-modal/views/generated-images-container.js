@@ -1,5 +1,8 @@
 /* eslint object-shorthand: 0 */
 
+/**
+ * Internal dependencies
+ */
 import Images from '../collections/images';
 import GeneratedImage from './generated-image';
 

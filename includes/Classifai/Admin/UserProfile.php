@@ -126,7 +126,7 @@ class UserProfile {
 			return array();
 		}
 
-		$user_roles       = $user->roles ?? [];
+		$user_roles       = is_array( $user->roles ) ? $user->roles : array();
 		$allowed_features = array();
 
 		$services = get_plugin()->services;
@@ -159,10 +159,10 @@ class UserProfile {
 				}
 
 				// Check if user has access to the feature by role.
-				$allowed_roles = $settings['roles'] ?? [];
+				$allowed_roles = $settings['roles'] ?? array();
 				// For super admins that don't have a specific role on a site, treat them as admins.
 				if ( is_multisite() && is_super_admin( $user_id ) && empty( $user_roles ) ) {
-					$user_roles = [ 'administrator' ];
+					$user_roles = array( 'administrator' );
 				}
 
 				if (
@@ -174,7 +174,7 @@ class UserProfile {
 				}
 
 				// Check if user has access to the feature.
-				$allowed_users = $settings['users'] ?? [];
+				$allowed_users = $settings['users'] ?? array();
 				if (
 					! empty( $allowed_users ) &&
 					in_array( $user_id, $allowed_users, true )

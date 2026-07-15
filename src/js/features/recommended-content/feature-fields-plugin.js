@@ -1,13 +1,19 @@
+/**
+ * WordPress dependencies
+ */
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { registerCoreBlocks } from '@wordpress/block-library';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/blocks';
-
 import { Fill, Flex, FlexItem, Icon } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../../settings/components/settings-row';
+import { store as classifaiSettingsStore } from '../../settings/data/store';
 
 // To access core/query details.
 registerCoreBlocks();
@@ -19,10 +25,10 @@ registerPlugin( 'classifai-plugin-recommended-content-feature-fields', {
 
 function AdditionalFeatureFields() {
 	const featureSettings = useSelect( ( select ) =>
-		select( 'classifai-settings' ).getFeatureSettings()
+		select( classifaiSettingsStore ).getFeatureSettings()
 	);
 
-	const { setFeatureSettings } = useDispatch( 'classifai-settings' );
+	const { setFeatureSettings } = useDispatch( classifaiSettingsStore );
 
 	const defaultTemplate = featureSettings.default_template;
 	const blockVariations = useSelect( ( select ) =>

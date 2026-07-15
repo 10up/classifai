@@ -21,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Class DescriptiveTextGenerator
  */
 class DescriptiveTextGenerator extends Feature {
+	use AsyncImageProcessing;
+
 	/**
 	 * ID of the current feature.
 	 *
@@ -38,12 +40,12 @@ class DescriptiveTextGenerator extends Feature {
 		$this->provider_instances = $this->get_provider_instances( ImageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
 			ChatGPT::ID        => __( 'OpenAI', 'classifai' ),
 			Grok::ID           => __( 'xAI Grok', 'classifai' ),
 			OllamaMM::ID       => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -53,18 +55,20 @@ class DescriptiveTextGenerator extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
+		add_action( ImageProcessing::ASYNC_JOB_HOOK, array( $this, 'handle_async_image_job' ), 10, 4 );
+		$this->register_async_status_meta();
 	}
 
 	/**
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
+		add_action( 'add_meta_boxes_attachment', array( $this, 'setup_attachment_meta_box' ) );
+		add_action( 'edit_attachment', array( $this, 'maybe_rescan_image' ) );
 
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
+		add_filter( 'attachment_fields_to_edit', array( $this, 'add_rescan_button_to_media_modal' ), 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', array( $this, 'generate_image_alt_tags' ), 8, 2 );
 	}
 
 	/**
@@ -74,19 +78,19 @@ class DescriptiveTextGenerator extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'alt-tags/(?P<id>\d+)',
-			[
+			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
-				'args'                => [
-					'id' => [
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
+				'args'                => array(
+					'id' => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Image ID to generate alt text for.', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'descriptive_text_generator_permissions_check' ],
-			]
+					),
+				),
+				'permission_callback' => array( $this, 'descriptive_text_generator_permissions_check' ),
+			)
 		);
 	}
 
@@ -147,10 +151,13 @@ class DescriptiveTextGenerator extends Feature {
 	 * @return array
 	 */
 	public function generate_image_alt_tags( array $metadata, int $attachment_id ): array {
-		if (
-			! $this->is_feature_enabled() ||
-			'automatic' !== $this->get_processing_mode()
-		) {
+		$mode = $this->get_processing_mode();
+
+		if ( ! $this->is_feature_enabled() || 'manual' === $mode ) {
+			return $metadata;
+		}
+
+		if ( 'automatic_async' === $mode && $this->enqueue_async_image_job( $attachment_id, 'descriptive_text' ) ) {
 			return $metadata;
 		}
 
@@ -212,7 +219,7 @@ class DescriptiveTextGenerator extends Feature {
 		}
 
 		// Add our content to the metabox.
-		add_action( 'classifai_render_attachment_metabox', [ $this, 'attachment_data_meta_box_content' ] );
+		add_action( 'classifai_render_attachment_metabox', array( $this, 'attachment_data_meta_box_content' ) );
 
 		// If the metabox was already registered, don't add it again.
 		if ( isset( $wp_meta_boxes['attachment']['side']['high']['classifai_image_processing'] ) ) {
@@ -223,7 +230,7 @@ class DescriptiveTextGenerator extends Feature {
 		add_meta_box(
 			'classifai_image_processing',
 			__( 'ClassifAI Image Processing', 'classifai' ),
-			[ $this, 'attachment_data_meta_box' ],
+			array( $this, 'attachment_data_meta_box' ),
 			'attachment',
 			'side',
 			'high'
@@ -279,7 +286,7 @@ class DescriptiveTextGenerator extends Feature {
 
 			if ( $result && ! is_wp_error( $result ) ) {
 				// Ensure we don't re-run this when the attachment is updated.
-				remove_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
+				remove_action( 'edit_attachment', array( $this, 'maybe_rescan_image' ) );
 				$this->save( $result, $attachment_id );
 			}
 		}
@@ -304,12 +311,12 @@ class DescriptiveTextGenerator extends Feature {
 
 		$alt_tags_text = empty( get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 
-		$form_fields['rescan_alt_tags'] = [
+		$form_fields['rescan_alt_tags'] = array(
 			'label'        => __( 'Descriptive text', 'classifai' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
-			'html'         => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-		];
+			'html'         => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( (string) absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+		);
 
 		return $form_fields;
 	}
@@ -379,15 +386,15 @@ class DescriptiveTextGenerator extends Feature {
 		add_settings_field(
 			'descriptive_text_fields',
 			esc_html__( 'Descriptive text fields', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
+			array( $this, 'render_checkbox_group' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'      => 'descriptive_text_fields',
 				'options'        => $checkbox_options,
 				'default_values' => $settings['descriptive_text_fields'],
 				'description'    => __( 'Choose image fields where the generated text should be applied.', 'classifai' ),
-			]
+			)
 		);
 	}
 
@@ -397,21 +404,21 @@ class DescriptiveTextGenerator extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
-			'descriptive_text_fields' => [
+		return array(
+			'descriptive_text_fields' => array(
 				'alt'         => 'alt',
 				'caption'     => 0,
 				'description' => 0,
-			],
+			),
 			'processing_mode'         => 'automatic',
 			'provider'                => ComputerVision::ID,
-		];
+		);
 	}
 
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -459,7 +466,7 @@ class DescriptiveTextGenerator extends Feature {
 
 		$new_settings['descriptive_text_fields'] = array_map( 'sanitize_text_field', $new_settings['descriptive_text_fields'] ?? $settings['descriptive_text_fields'] );
 
-		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
+		$new_settings['processing_mode'] = $this->sanitize_processing_mode( $new_settings['processing_mode'] ?? null, $settings['processing_mode'] );
 
 		return $new_settings;
 	}

@@ -1,7 +1,8 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 /* eslint-disable no-shadow */
+
 /**
- * External Dependencies.
+ * WordPress dependencies
  */
 import { registerPlugin } from '@wordpress/plugins';
 import {
@@ -9,6 +10,7 @@ import {
 	BlockControls,
 } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
+import { store as coreStore } from '@wordpress/core-data';
 import {
 	select,
 	dispatch,
@@ -27,7 +29,7 @@ import {
 import { __, _nx } from '@wordpress/i18n';
 
 /**
- * Internal Dependencies.
+ * Internal dependencies
  */
 import { DisableFeatureButton } from '../../components';
 import { browserAITextGeneration } from '../../helpers';
@@ -298,9 +300,9 @@ const WritingToolsPlugin = () => {
 	 * @param {string} updateWith The content that will be used to replace the selection.
 	 */
 	async function updateContent( updateWith ) {
-		const isDirty = await select( 'core/editor' ).isEditedPostDirty();
-		const postId = select( 'core/editor' ).getCurrentPostId();
-		const postType = select( 'core/editor' ).getCurrentPostType();
+		const isDirty = await select( editorStore ).isEditedPostDirty();
+		const postId = select( editorStore ).getCurrentPostId();
+		const postType = select( editorStore ).getCurrentPostType();
 
 		dispatch( blockEditorStore ).updateBlockAttributes(
 			selectedBlock.clientId,
@@ -319,7 +321,7 @@ const WritingToolsPlugin = () => {
 
 		// If no edited values in post trigger save.
 		if ( ! isDirty ) {
-			await dispatch( 'core' ).saveEditedEntityRecord(
+			await dispatch( coreStore ).saveEditedEntityRecord(
 				'postType',
 				postType,
 				postId
@@ -508,6 +510,7 @@ function processAnimation( content = '', wrapperRef ) {
 	);
 	const formattedCharArray = charArray.map( ( char, index ) => {
 		if ( randomWordIndexes.includes( index ) ) {
+			// eslint-disable-next-line no-restricted-syntax -- not generating IDs; random color for animation.
 			const randomColorIndex = Math.floor( Math.random() * 5 );
 			return `<span class="classifai-content-resize__blot" style="background-color: ${ colorsArray[ randomColorIndex ] }">${ char }</span>`;
 		}
@@ -527,6 +530,7 @@ function getRandomIndexesFromArray( arr = [], maxIndexes = 10 ) {
 	const randomIndexes = [];
 
 	while ( randomIndexes.length < maxIndexes ) {
+		// eslint-disable-next-line no-restricted-syntax -- not generating IDs; random index selection.
 		const randomIndex = Math.floor( Math.random() * indexes.length );
 
 		if ( ! randomIndexes.includes( randomIndex ) ) {
@@ -575,6 +579,7 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 						</div>
 					</div>
 					<div
+						// eslint-disable-next-line no-restricted-syntax
 						id="classifai-content-resize__mock-content"
 						ref={ mockWrapper }
 					>

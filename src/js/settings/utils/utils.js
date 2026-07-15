@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
+import { store as preferencesStore } from '@wordpress/preferences';
 import { Icon, Popover } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { info } from '@wordpress/icons';
@@ -127,8 +128,7 @@ export const isProviderConfigured = ( featureSettings ) => {
  */
 export const useUserPermissionsPreferences = () => {
 	let cache;
-	const { set, setPersistenceLayer } =
-		useDispatch( 'core/preferences' ) || {};
+	const { set, setPersistenceLayer } = useDispatch( preferencesStore ) || {};
 	if ( setPersistenceLayer ) {
 		setPersistenceLayer( {
 			async get() {
@@ -159,7 +159,7 @@ export const useUserPermissionsPreferences = () => {
 	}
 
 	const isOpen = useSelect( ( select ) => {
-		const { get } = select( 'core/preferences' ) || {};
+		const { get } = select( preferencesStore ) || {};
 		if ( ! get ) {
 			return false;
 		}

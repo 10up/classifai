@@ -41,14 +41,14 @@ class TitleGeneration extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
 			Grok::ID      => __( 'xAI Grok', 'classifai' ),
 			ChromeAI::ID  => __( 'Chrome AI (experimental)', 'classifai' ),
 			Ollama::ID    => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -58,7 +58,7 @@ class TitleGeneration extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 		add_action(
 			'admin_footer',
 			static function () {
@@ -80,9 +80,9 @@ class TitleGeneration extends Feature {
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'edit_form_before_permalink', array( $this, 'register_generated_titles_template' ) );
 	}
 
 	/**
@@ -92,43 +92,43 @@ class TitleGeneration extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'generate-title(?:/(?P<id>\d+))?',
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'rest_endpoint_callback' ],
-					'args'                => [
-						'id' => [
+					'callback'            => array( $this, 'rest_endpoint_callback' ),
+					'args'                => array(
+						'id' => array(
 							'required'          => true,
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 							'description'       => esc_html__( 'Post ID to generate title for.', 'classifai' ),
-						],
-						'n'  => [
+						),
+						'n'  => array(
 							'type'              => 'integer',
 							'minimum'           => 1,
 							'maximum'           => 10,
 							'sanitize_callback' => 'absint',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_title_permissions_check' ],
-				],
-				[
+						),
+					),
+					'permission_callback' => array( $this, 'generate_title_permissions_check' ),
+				),
+				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'rest_endpoint_callback' ],
-					'args'                => [
-						'content' => [
+					'callback'            => array( $this, 'rest_endpoint_callback' ),
+					'args'                => array(
+						'content' => array(
 							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Content to generate a title for', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_title_permissions_check' ],
-				],
-			]
+						),
+					),
+					'permission_callback' => array( $this, 'generate_title_permissions_check' ),
+				),
+			)
 		);
 	}
 
@@ -181,10 +181,10 @@ class TitleGeneration extends Feature {
 				$this->run(
 					$request->get_param( 'id' ),
 					'title',
-					[
+					array(
 						'num'     => $request->get_param( 'n' ),
 						'content' => $request->get_param( 'content' ),
-					]
+					)
 				)
 			);
 		}
@@ -205,7 +205,7 @@ class TitleGeneration extends Feature {
 		wp_enqueue_script(
 			'classifai-plugin-title-generation-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-title-generation.js',
-			array_merge( get_asset_info( 'classifai-plugin-title-generation', 'dependencies' ), [ 'lodash' ] ),
+			array_merge( get_asset_info( 'classifai-plugin-title-generation', 'dependencies' ), array( 'lodash' ) ),
 			get_asset_info( 'classifai-plugin-title-generation', 'version' ),
 			true
 		);
@@ -241,7 +241,7 @@ class TitleGeneration extends Feature {
 		// Load the assets only if the post type supports titles and is not an attachment.
 		if (
 			! post_type_supports( $screen->post_type, 'title' ) ||
-			in_array( $screen->post_type, [ 'attachment' ], true )
+			in_array( $screen->post_type, array( 'attachment' ), true )
 		) {
 			return;
 		}
@@ -249,7 +249,7 @@ class TitleGeneration extends Feature {
 		wp_enqueue_style(
 			'classifai-plugin-classic-title-generation-css',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.css',
-			[],
+			array(),
 			get_asset_info( 'classifai-plugin-classic-title-generation', 'version' ),
 			'all'
 		);
@@ -295,18 +295,18 @@ class TitleGeneration extends Feature {
 	public function get_localised_vars() {
 		global $post;
 
-		return [
-			'enabledFeatures' => [
-				0 => [
+		return array(
+			'enabledFeatures' => array(
+				0 => array(
 					'feature'       => 'title',
 					'path'          => '/classifai/v1/generate-title/',
 					'buttonText'    => __( 'Generate titles', 'classifai' ),
 					'modalTitle'    => __( 'Select a title', 'classifai' ),
 					'selectBtnText' => __( 'Select', 'classifai' ),
-				],
-			],
+				),
+			),
 			'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-		];
+		);
 	}
 
 	/**
@@ -327,15 +327,15 @@ class TitleGeneration extends Feature {
 		add_settings_field(
 			'generate_title_prompt',
 			esc_html__( 'Prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
+			array( $this, 'render_prompt_repeater_field' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'generate_title_prompt',
 				'placeholder'   => $this->get_prompt( 'default' ),
 				'default_value' => $settings['generate_title_prompt'],
 				'description'   => esc_html__( 'Add a custom prompt, if desired.', 'classifai' ),
-			]
+			)
 		);
 	}
 
@@ -345,22 +345,22 @@ class TitleGeneration extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
-			'generate_title_prompt' => [
-				[
+		return array(
+			'generate_title_prompt' => array(
+				array(
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->get_prompt( 'default' ),
 					'original' => 1,
-				],
-			],
+				),
+			),
 			'provider'              => ChatGPT::ID,
-		];
+		);
 	}
 
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {

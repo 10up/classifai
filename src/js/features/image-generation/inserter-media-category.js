@@ -2,15 +2,25 @@
  * Some code here was copied from Jetpack's implementation of the inserter media category.
  * See https://github.com/Automattic/jetpack/pull/31914
  */
+/**
+ * WordPress dependencies
+ */
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch, select, subscribe } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 
 const { classifaiDalleData } = window;
 
 const isInserterOpened = () =>
-	select( 'core/editor' )?.isInserterOpened() ||
+	select( editorStore )?.isInserterOpened() ||
+	// The edit-widgets store is referenced by string literal on purpose: a
+	// static `@wordpress/edit-widgets` import would add `wp-edit-widgets` as a
+	// script dependency, which triggers a `_doing_it_wrong` notice when this
+	// script is enqueued in the post editor alongside `wp-editor`.
+	// eslint-disable-next-line @wordpress/data-no-store-string-literals
 	select( 'core/edit-widgets' )?.isInserterOpened?.();
 
 const waitFor = async ( selector ) =>
@@ -24,7 +34,7 @@ const waitFor = async ( selector ) =>
 	} );
 
 waitFor( isInserterOpened ).then( () =>
-	dispatch( 'core/block-editor' )?.registerInserterMediaCategory?.(
+	dispatch( blockEditorStore )?.registerInserterMediaCategory?.(
 		registerGenerateImageMediaCategory()
 	)
 );

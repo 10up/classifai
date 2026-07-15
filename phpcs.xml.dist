@@ -1,22 +1,120 @@
 <?xml version="1.0"?>
-<ruleset name="Classifai">
-	<description>Extension of the 10up-Default</description>
-	<rule ref="10up-Default">
-		<!-- All of the files are missing comments -->
-		<exclude name="Squiz.Commenting.FileComment.Missing" />
-		<exclude name="Squiz.Commenting.ClassComment.Missing" />
-		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
-		<!-- Class properties don't need this -->
-		<exclude name="Generic.Commenting.DocComment.MissingShort" />
+<ruleset
+	name="Classifai"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/PHPCSStandards/PHP_CodeSniffer/master/phpcs.xsd"
+>
+	<description>Sniffs for ClassifAI</description>
 
-		<!-- For CI, also fail on warnings -->
-		<config name="ignore_warnings_on_exit" value="0"/>
+	<!-- What to scan: include any root-level PHP files, and the /inc folder -->
+	<file>./includes/</file>
+	<file>./classifai.php</file>
+	<file>./config.php</file>
+
+	<!-- These are excluded from the above paths.-->
+	<exclude-pattern>**/dist/**</exclude-pattern>
+	<exclude-pattern>**/node_modules/**</exclude-pattern>
+	<exclude-pattern>**/tests/**</exclude-pattern>
+	<exclude-pattern>**/vendor/**</exclude-pattern>
+	<exclude-pattern>**/vendor-prefixed/**</exclude-pattern>
+	<exclude-pattern>**/wp-hooks-docs/**</exclude-pattern>
+
+	<!-- How to scan: include CLI args so you don't need to pass them manually -->
+	<!-- Usage instructions: https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki/Usage -->
+	<!-- Annotated ruleset:
+	https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki/Annotated-ruleset.xml -->
+	<!-- Show sniff and progress -->
+	<arg value="sp" />
+	<!-- Strip the file paths down to the relevant bit -->
+	<arg name="basepath" value="./" />
+	<!-- Enable colors in report -->
+	<arg name="colors" />
+	<!-- Only lint php files by default -->
+	<arg name="extensions" value="php" />
+	<!-- Whenever possible, cache the scan results and re-use those for unchanged files on the next
+	scan. -->
+	<arg name="cache" value="tests/_output/phpcs-cache.json" />
+	<!-- Enables parallel processing when available for faster results. -->
+	<arg name="parallel" value="20" />
+	<!-- Set severity to 1 to see everything that isn't effectively turned off. -->
+	<arg name="severity" value="1" />
+
+	<!-- Ruleset Config: set these to match your project constraints. -->
+
+	<!--
+		Tests for PHP version compatibility.
+	https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards#Recomended-additional-rulesets
+	-->
+	<config name="testVersion" value="7.4-" />
+
+	<!--
+		Tests for WordPress version compatibility.
+	https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties
+	-->
+	<config name="minimum_wp_version" value="6.9" />
+
+	<!-- For CI, also fail on warnings -->
+	<config name="ignore_warnings_on_exit" value="0"/>
+
+	<!--
+		Load WordPress VIP Go standards
+		We do this first, since we don't trust them to disable rules that we want to use.
+		@see: https://docs.wpvip.com/technical-references/vip-code-analysis-bot/phpcs-report/
+	-->
+	<rule ref="WordPress-VIP-Go">
+		<!-- Deprecated: @todo remove in PHPCS 4.0 -->
+		<exclude name="WordPressVIPMinimum.JS" />
+
+		<!-- Caching warning is very out of date -->
+		<exclude name="WordPressVIPMinimum.Functions.RestrictedFunctions.get_posts_get_posts"/>
+	</rule>
+	<rule ref="WordPress-Core">
+		<exclude name="Generic.Files.OneObjectStructurePerFile"/>
+		<exclude name="Universal.Files.SeparateFunctionsFromOO"/>
+	</rule>
+	<rule ref="WordPress.DB"/>
+	<rule ref="WordPress.Security"/>
+	<rule ref="WordPress-Extra">
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound" />
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed" />
+		<exclude name="WordPress.Files.FileName"/>
+		<exclude name="WordPress.WP.I18n.MissingArgDomain" />
+
+		<!-- Needed to typehint, see: https://github.com/WordPress/WordPress-Coding-Standards/issues/403 -->
+		<exclude name="Generic.Commenting.DocComment.MissingShort" />
 	</rule>
 
-	<exclude-pattern>*/tests/*</exclude-pattern>
+	<!-- Check for superfluous whitespace - These get suppressed in VIP-GO.-->
+	<rule ref="Squiz.WhiteSpace.SuperfluousWhitespace">
+		<severity>5</severity>
+	</rule>
+	<rule ref="Squiz.WhiteSpace.SuperfluousWhitespace.EmptyLines">
+		<severity>5</severity>
+	</rule>
+	<rule ref="Squiz.WhiteSpace.SuperfluousWhitespace.EndLine">
+		<severity>5</severity>
+	</rule>
+	<rule ref="WordPress.WhiteSpace.ControlStructureSpacing">
+		<properties>
+			<property name="blank_line_check" value="true" />
+		</properties>
+	</rule>
 
-	<config name="minimum_supported_wp_version" value="6.9"/>
-	<config name="testVersion" value="7.4-"/>
+	<!-- Do not apply filename rules for unit tests -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="classifai" />
+			</property>
+		</properties>
+	</rule>
 
 	<!-- Exclude the PHPCompatibilityWP ruleset -->
 	<rule ref="PHPCompatibilityWP">

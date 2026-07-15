@@ -4,8 +4,7 @@
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-// @ts-expect-error The package export points to missing src files, so load the published build.
-import type { Admin, Editor, RequestUtils } from '../../../node_modules/@wordpress/e2e-test-utils-playwright/build/index.js';
+import type { Admin, Editor, RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 
 import { getNLUData } from './test-data';
 

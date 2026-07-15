@@ -56,5 +56,8 @@ config.local.php
 /artifacts
 /flaky-tests
 
+# Strauss
+bin/strauss.phar
+
 # docs
 wp-hooks-docs/docs/01.get-started/05.CHANGELOG.md

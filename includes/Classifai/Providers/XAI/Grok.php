@@ -128,12 +128,12 @@ class Grok extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'api_key'       => '',
 			'authenticated' => false,
 			'model'         => $this->default_model,
-			'models'        => [],
-		];
+			'models'        => array(),
+		);
 
 		/**
 		 * Default values for feature specific settings.
@@ -146,14 +146,14 @@ class Grok extends Provider {
 
 			case DescriptiveTextGenerator::ID:
 				$common_settings['model']  = $this->default_vision_model;
-				$common_settings['prompt'] = [
-					[
+				$common_settings['prompt'] = array(
+					array(
 						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 						'prompt'   => $this->feature_instance->get_prompt( 'default' ),
 						'original' => 1,
 						'default'  => 1,
-					],
-				];
+					),
+				);
 				break;
 		}
 
@@ -197,11 +197,11 @@ class Grok extends Provider {
 	 * @param array $settings     Current settings, if any.
 	 * @return array
 	 */
-	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
+	public function sanitize_api_key_settings( array $new_settings = array(), array $settings = array() ): array {
 		$models = $this->authenticate_credentials( $new_settings );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
-		$new_settings[ static::ID ]['models']        = $settings[ static::ID ]['models'] ?? [];
+		$new_settings[ static::ID ]['models']        = $settings[ static::ID ]['models'] ?? array();
 
 		if ( is_wp_error( $models ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
@@ -254,16 +254,16 @@ class Grok extends Provider {
 	 * @param array $settings Settings being saved.
 	 * @return array|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	protected function authenticate_credentials( array $settings = array() ) {
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
-		$response = $request->get( $this->models_url, [ 'use_vip' => true ] );
+		$response = $request->get( $this->models_url, array( 'use_vip' => true ) );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 
-		$models = $response['models'] ?? [];
+		$models = $response['models'] ?? array();
 
 		/**
 		 * Filter the models returned by the xAI Grok API.
@@ -284,9 +284,9 @@ class Grok extends Provider {
 	 * @param int    $post_id The Post ID we're processing.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
-	 * @return string|WP_Error
+	 * @return string|array|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid ID is required.', 'classifai' ) );
 		}
@@ -320,7 +320,7 @@ class Grok extends Provider {
 	 * @param array $args Optional arguments.
 	 * @return string|WP_Error
 	 */
-	public function generate_descriptive_text( int $post_id = 0, array $args = [] ) {
+	public function generate_descriptive_text( int $post_id = 0, array $args = array() ) {
 		// Check to be sure the attachment exists and is an image.
 		if ( ! wp_attachment_is_image( $post_id ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
@@ -340,8 +340,8 @@ class Grok extends Provider {
 					get_attached_file( $post_id ),
 					wp_get_attachment_url( $post_id ),
 					$metadata,
-					[ 28, 16000 ],
-					[ 28, 16000 ],
+					array( 28, 16000 ),
+					array( 28, 16000 ),
 					10 * MB_IN_BYTES
 				);
 			} else {
@@ -375,7 +375,7 @@ class Grok extends Provider {
 		 *
 		 * @return string Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_xai_grok_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->get_prompt( 'default' ), $post_id );
+		$prompt = apply_filters( 'classifai_xai_grok_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? array() ) ?? $feature->get_prompt( 'default' ), $post_id );
 
 		/**
 		 * Filter the request body before sending to xAI Grok.
@@ -390,38 +390,38 @@ class Grok extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_descriptive_text_request_body',
-			[
+			array(
 				'model'       => $this->get_vision_model(),
-				'messages'    => [
-					[
+				'messages'    => array(
+					array(
 						'role'    => 'system',
 						'content' => $prompt,
-					],
-					[
+					),
+					array(
 						'role'    => 'user',
-						'content' => [
-							[
+						'content' => array(
+							array(
 								'type'      => 'image_url',
-								'image_url' => [
+								'image_url' => array(
 									'url'    => $image_url,
 									'detail' => 'auto',
-								],
-							],
-						],
-					],
-				],
+								),
+							),
+						),
+					),
+				),
 				'temperature' => 0.2,
 				'max_tokens'  => 300,
-			],
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->completions_url,
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		// Extract out the text response, if it exists.
@@ -443,7 +443,7 @@ class Grok extends Provider {
 	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_excerpt( int $post_id = 0, array $args = [] ) {
+	public function generate_excerpt( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
@@ -452,11 +452,11 @@ class Grok extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'author'  => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -479,7 +479,7 @@ class Grok extends Provider {
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}', '{{AUTHOR}}' );
-		$prompt_replace = array( $excerpt_length, $args['title'], $args['author'] );
+		$prompt_replace = array( (string) $excerpt_length, (string) $args['title'], (string) $args['author'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
 		/**
@@ -517,21 +517,21 @@ class Grok extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_excerpt_request_body',
-			[
+			array(
 				'model'       => $this->get_model(),
 				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'stream'      => false,
 				'temperature' => 0.9,
-			],
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->completions_url,
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		set_transient( 'classifai_xai_grok_excerpt_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
@@ -553,9 +553,9 @@ class Grok extends Provider {
 	 *
 	 * @param int   $post_id The Post Id we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
-	public function generate_titles( int $post_id = 0, array $args = [] ) {
+	public function generate_titles( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
@@ -564,10 +564,10 @@ class Grok extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num'     => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
 				'content' => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -621,22 +621,22 @@ class Grok extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_title_request_body',
-			[
+			array(
 				'model'       => $this->get_model(),
 				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'stream'      => false,
 				'n'           => absint( $args['num'] ),
-			],
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->completions_url,
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		set_transient( 'classifai_xai_grok_title_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
@@ -650,7 +650,7 @@ class Grok extends Provider {
 		}
 
 		// Extract out the text response.
-		$return = [];
+		$return = array();
 		foreach ( $response['choices'] as $choice ) {
 			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
 				$return[] = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
@@ -665,7 +665,7 @@ class Grok extends Provider {
 	 *
 	 * @param int   $post_id The Post Id we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function resize_content( int $post_id, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -677,9 +677,9 @@ class Grok extends Provider {
 
 		$args = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num' => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
-			]
+			)
 		);
 
 		$request = new APIRequest( '', $this->feature_instance::ID, $this );
@@ -719,31 +719,31 @@ class Grok extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_resize_content_request_body',
-			[
+			array(
 				'model'       => $this->get_model(),
-				'messages'    => [
-					[
+				'messages'    => array(
+					array(
 						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
-					],
-					[
+						'content' => $prompt . ' You will be provided with content delimited by triple quotes',
+					),
+					array(
 						'role'    => 'user',
 						'content' => '"""' . esc_html( $args['content'] ) . '"""',
-					],
-				],
+					),
+				),
 				'temperature' => get_temperature( 0.9, absint( $args['num'] ) ),
 				'stream'      => false,
 				'n'           => absint( $args['num'] ),
-			],
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->completions_url,
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		set_transient( 'classifai_xai_grok_writing_tools_latest_response', $response, DAY_IN_SECONDS * 30 );
@@ -757,7 +757,7 @@ class Grok extends Provider {
 		}
 
 		// Extract out the text response.
-		$return = [];
+		$return = array();
 
 		foreach ( $response['choices'] as $choice ) {
 			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
@@ -839,16 +839,16 @@ class Grok extends Provider {
 	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$debug_info        = array();
 
 		$debug_info[ __( 'Model', 'classifai' ) ] = $this->get_model();
 		if ( $this->feature_instance instanceof TitleGeneration ) {
 			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_suggestions'] ?? 1;
-			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? [] );
+			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]       = $this->get_formatted_latest_response( get_transient( 'classifai_xai_grok_title_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
-			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? [] );
+			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_xai_grok_excerpt_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof WritingTools ) {
 			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]       = $provider_settings['number_of_suggestions'] ?? 1;

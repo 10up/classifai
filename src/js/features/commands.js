@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { useCommandLoader } from '@wordpress/commands';
 import { pencil, image, settings } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';

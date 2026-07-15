@@ -53,9 +53,9 @@ class ChromeAI extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'authenticated' => true,
-		];
+		);
 
 		return $common_settings;
 	}
@@ -76,9 +76,9 @@ class ChromeAI extends Provider {
 	 * @param int    $post_id The Post ID we're processing.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
-	 * @return string|WP_Error
+	 * @return string|array|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
@@ -107,9 +107,9 @@ class ChromeAI extends Provider {
 	 *
 	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args    Arguments passed in.
-	 * @return string|WP_Error
+	 * @return array|WP_Error
 	 */
-	public function generate_excerpt( int $post_id = 0, array $args = [] ) {
+	public function generate_excerpt( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
@@ -118,11 +118,11 @@ class ChromeAI extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'author'  => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -143,7 +143,7 @@ class ChromeAI extends Provider {
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}', '{{AUTHOR}}' );
-		$prompt_replace = array( $excerpt_length, $args['title'], $args['author'] );
+		$prompt_replace = array( (string) $excerpt_length, (string) $args['title'], (string) $args['author'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
 		/**
@@ -180,11 +180,11 @@ class ChromeAI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_chrome_ai_excerpt_request_body',
-			[
+			array(
 				'prompt'  => $system_prompt . ' ' . $prompt,
 				'content' => $this->get_content( $post_id, $excerpt_length, false, $args['content'] ),
 				'func'    => static::ID,
-			],
+			),
 			$post_id
 		);
 
@@ -196,9 +196,9 @@ class ChromeAI extends Provider {
 	 *
 	 * @param int   $post_id The Post Id we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return array|WP_Error
 	 */
-	public function generate_title( int $post_id = 0, array $args = [] ) {
+	public function generate_title( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
@@ -207,9 +207,9 @@ class ChromeAI extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'content' => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -260,11 +260,11 @@ class ChromeAI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_chrome_ai_title_request_body',
-			[
+			array(
 				'prompt'  => $system_prompt . ' ' . $prompt,
 				'content' => $this->get_content( $post_id, 15, false, $args['content'] ),
 				'func'    => static::ID,
-			],
+			),
 			$post_id
 		);
 
@@ -276,7 +276,7 @@ class ChromeAI extends Provider {
 	 *
 	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return array|WP_Error
 	 */
 	public function resize_content( int $post_id, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -321,11 +321,11 @@ class ChromeAI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_chrome_ai_resize_content_request_body',
-			[
-				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+			array(
+				'prompt'  => $prompt . ' You will be provided with content delimited by triple quotes',
 				'content' => esc_html( $args['content'] ),
 				'func'    => static::ID,
-			],
+			),
 			$post_id
 		);
 

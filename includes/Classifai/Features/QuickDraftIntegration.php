@@ -48,8 +48,8 @@ class QuickDraftIntegration {
 			return;
 		}
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 	}
 
 	/**
@@ -89,17 +89,17 @@ class QuickDraftIntegration {
 		wp_localize_script(
 			'classifai-quick-draft-js',
 			'classifaiQuickDraft',
-			[
+			array(
 				'createContent' => __( 'Create Draft from Prompt', 'classifai' ),
 				'generating'    => __( 'Generating...', 'classifai' ),
 				'error'         => __( 'Error generating content. Please try again.', 'classifai' ),
-			]
+			)
 		);
 
 		wp_enqueue_style(
 			'classifai-quick-draft-css',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-quick-draft.css',
-			[],
+			array(),
 			get_asset_info( 'classifai-quick-draft', 'version' ),
 		);
 	}
@@ -111,27 +111,27 @@ class QuickDraftIntegration {
 		register_rest_route(
 			'classifai/v1',
 			'quick-draft-generate',
-			[
+			array(
 				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'endpoint_callback' ],
-				'permission_callback' => [ $this, 'permissions_check' ],
-				'args'                => [
-					'title'   => [
+				'callback'            => array( $this, 'endpoint_callback' ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+				'args'                => array(
+					'title'   => array(
 						'required'          => true,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The title of the post.', 'classifai' ),
-					],
-					'content' => [
+					),
+					'content' => array(
 						'required'          => true,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_textarea_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The prompt to use for content generation.', 'classifai' ),
-					],
-				],
-			]
+					),
+				),
+			)
 		);
 	}
 
@@ -165,7 +165,7 @@ class QuickDraftIntegration {
 	 * Handle Quick Draft content generation.
 	 *
 	 * @param WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function endpoint_callback( WP_REST_Request $request ) {
 		$title   = $request->get_param( 'title' );
@@ -176,13 +176,13 @@ class QuickDraftIntegration {
 		}
 
 		// Create a new auto-draft post.
-		$post_data = [
+		$post_data = array(
 			'post_title'   => $title,
 			'post_content' => '',
 			'post_status'  => 'auto-draft',
 			'post_type'    => 'post',
 			'post_author'  => get_current_user_id(),
-		];
+		);
 
 		$post_id = wp_insert_post( $post_data, true );
 
@@ -194,10 +194,10 @@ class QuickDraftIntegration {
 		$result = $this->content_generation->run(
 			$post_id,
 			'create_content',
-			[
+			array(
 				'title'   => $title,
 				'summary' => $content,
-			]
+			)
 		);
 
 		if ( is_wp_error( $result ) ) {
@@ -207,11 +207,11 @@ class QuickDraftIntegration {
 		}
 
 		// Update the post with generated content.
-		$updated_post = [
+		$updated_post = array(
 			'ID'           => $post_id,
 			'post_content' => $result,
 			'post_status'  => 'draft',
-		];
+		);
 
 		$update_result = wp_update_post( $updated_post );
 
@@ -220,13 +220,13 @@ class QuickDraftIntegration {
 		}
 
 		return rest_ensure_response(
-			[
+			array(
 				'post_id'  => $post_id,
 				'edit_url' => admin_url( "post.php?post={$post_id}&action=edit" ),
 				'content'  => $result,
 				'title'    => $title,
 				'success'  => true,
-			]
+			)
 		);
 	}
 }

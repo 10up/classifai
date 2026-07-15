@@ -41,14 +41,14 @@ class WritingTools extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
 			Grok::ID      => __( 'xAI Grok', 'classifai' ),
 			ChromeAI::ID  => __( 'Chrome AI (experimental)', 'classifai' ),
 			Ollama::ID    => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -58,7 +58,7 @@ class WritingTools extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 		add_action(
 			'admin_footer',
 			static function () {
@@ -80,7 +80,7 @@ class WritingTools extends Feature {
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_assets' ) );
 	}
 
 	/**
@@ -90,31 +90,31 @@ class WritingTools extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'resize-content',
-			[
+			array(
 				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
-				'permission_callback' => [ $this, 'resize_content_permissions_check' ],
-				'args'                => [
-					'id'          => [
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
+				'permission_callback' => array( $this, 'resize_content_permissions_check' ),
+				'args'                => array(
+					'id'          => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID to resize the content for.', 'classifai' ),
-					],
-					'content'     => [
+					),
+					'content'     => array(
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The content to resize.', 'classifai' ),
-					],
-					'resize_type' => [
+					),
+					'resize_type' => array(
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The type of resize operation. "expand", "condense", or "fix_grammar".', 'classifai' ),
-					],
-				],
-			]
+					),
+				),
+			)
 		);
 	}
 
@@ -162,10 +162,10 @@ class WritingTools extends Feature {
 				$this->run(
 					$request->get_param( 'id' ),
 					'resize_content',
-					[
+					array(
 						'content'     => $request->get_param( 'content' ),
 						'resize_type' => $request->get_param( 'resize_type' ),
-					]
+					)
 				)
 			);
 		}
@@ -218,29 +218,29 @@ class WritingTools extends Feature {
 		add_settings_field(
 			'condense_text_prompt',
 			esc_html__( 'Condense text prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
+			array( $this, 'render_prompt_repeater_field' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'condense_text_prompt',
 				'placeholder'   => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
 				'default_value' => $settings['condense_text_prompt'],
 				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
 			'expand_text_prompt',
 			esc_html__( 'Expand text prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
+			array( $this, 'render_prompt_repeater_field' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'expand_text_prompt',
 				'placeholder'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
 				'default_value' => $settings['expand_text_prompt'],
 				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
-			]
+			)
 		);
 
 		add_settings_field(
@@ -293,7 +293,7 @@ class WritingTools extends Feature {
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {

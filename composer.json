@@ -12,8 +12,8 @@
   "require": {
     "aws/aws-sdk-php": "3.337.3",
     "php": ">=7.4",
-    "woocommerce/action-scheduler": "3.8.1",
-    "yahnis-elsts/plugin-update-checker": "5.1"
+    "woocommerce/action-scheduler": "3.9.3",
+    "yahnis-elsts/plugin-update-checker": "5.7"
   },
   "autoload": {
     "psr-4": {
@@ -25,11 +25,11 @@
     ]
   },
   "require-dev": {
-    "10up/phpcs-composer": "3.0.1",
+    "automattic/vipwpcs": "^3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "^1.2.1",
     "johnbillion/wp-compat": "^1.4.0",
     "php-stubs/wp-cli-stubs": "^2.12",
-    "phpcompatibility/php-compatibility": "10.0.0-alpha2 as 9.99.99",
+    "phpcompatibility/phpcompatibility-wp": "^3.0@dev",
     "phpstan/extension-installer": "^1.3",
     "phpstan/php-8-stubs": "^0.4.35",
     "phpstan/phpstan-deprecation-rules": "^2.0.4",
@@ -37,14 +37,26 @@
     "phpstan/phpstan": "^2.1.55",
     "sirbrillig/phpcs-changed": "^2.12.0",
     "szepeviktor/phpstan-wordpress": "^2.0.3",
-    "wp-phpunit/wp-phpunit": "^6.9",
+    "wp-coding-standards/wpcs": "^3.3.0",
+    "wp-phpunit/wp-phpunit": "^7.0",
     "yoast/phpunit-polyfills": "^4.0"
   },
   "scripts": {
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",
     "lint-fix": "phpcbf .",
     "phpstan": "phpstan analyse --memory-limit=2048M -v",
-    "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices"
+    "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices",
+    "prefix-namespaces": [
+        "sh -c 'test -f ./bin/strauss.phar || curl -o bin/strauss.phar -L -C - https://github.com/BrianHenryIE/strauss/releases/latest/download/strauss.phar'",
+        "php -d memory_limit=2048M -d max_execution_time=300 bin/strauss.phar",
+        "@composer dump-autoload"
+    ],
+    "post-install-cmd": [
+        "@prefix-namespaces"
+    ],
+    "post-update-cmd": [
+        "@prefix-namespaces"
+    ]
   },
   "minimum-stability": "dev",
   "config": {
@@ -61,12 +73,23 @@
   },
   "archive": {
     "exclude": [
-      "!/vendor/"
+      "!/vendor/",
+      "!/vendor-prefixed/"
     ]
   },
   "extra": {
     "aws/aws-sdk-php": [
         "Polly"
-    ]
+    ],
+    "strauss": {
+      "target_directory": "vendor-prefixed",
+      "namespace_prefix": "ClassifaiVendor\\",
+      "classmap_prefix": "ClassifaiVendor_",
+      "packages": [
+        "aws/aws-sdk-php"
+      ],
+      "delete_vendor_packages": true,
+      "update_call_sites": false
+    }
   }
 }

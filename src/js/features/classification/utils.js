@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { store as coreStore } from '@wordpress/core-data';
@@ -48,7 +51,6 @@ export const usePostTypes = () => {
 			return;
 		}
 
-		// eslint-disable-next-line consistent-return
 		return postTypes.reduce( ( accumulator, type ) => {
 			accumulator[ type.slug ] = type.taxonomies;
 			return accumulator;

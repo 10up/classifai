@@ -28,7 +28,7 @@ abstract class UsageTrackingProvider extends Provider {
 	/**
 	 * Feature instance.
 	 *
-	 * @var \Classifai\Features\APIUsageTracking
+	 * @var \Classifai\Features\APIUsageTracking|null
 	 */
 	protected $feature_instance = null;
 
@@ -40,15 +40,6 @@ abstract class UsageTrackingProvider extends Provider {
 	 * @return array
 	 */
 	abstract public static function get_provider_ids(): array;
-
-	/**
-	 * Sanitization for the options being saved.
-	 *
-	 * @param array $new_settings Array of settings about to be saved.
-	 *
-	 * @return array The sanitized settings to be saved.
-	 */
-	abstract public function sanitize_settings( array $new_settings ): array;
 
 	/**
 	 * Process the data from the API.
@@ -71,7 +62,7 @@ abstract class UsageTrackingProvider extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		return [
+		return array(
 			'api_key'                  => '',
 			'authenticated'            => false,
 			'project_id'               => '',
@@ -84,7 +75,7 @@ abstract class UsageTrackingProvider extends Provider {
 			'hard_threshold_amount'    => 20,
 			'hard_threshold_scope'     => 'current_month',
 			'hard_threshold_emails'    => '',
-		];
+		);
 	}
 
 	/**
@@ -97,12 +88,12 @@ abstract class UsageTrackingProvider extends Provider {
 	 * @return array
 	 */
 	public function usage_api_args( int $start_ts, int $end_ts, string $page = '1' ): array {
-		return [
+		return array(
 			'start_time' => $start_ts,
 			'end_time'   => $end_ts,
 			'limit'      => static::PAGE_LIMIT,
 			'page'       => '1' !== $page ? rawurlencode( $page ) : '',
-		];
+		);
 	}
 
 	/**
@@ -147,9 +138,9 @@ abstract class UsageTrackingProvider extends Provider {
 				$url = add_query_arg( 'project_ids', $project_id, $url );
 			}
 
-			$options = [
+			$options = array(
 				'timeout' => 90, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			];
+			);
 
 			$request = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
 			$data    = $request->get( $url, $options );
@@ -158,12 +149,12 @@ abstract class UsageTrackingProvider extends Provider {
 				break;
 			}
 
-			$proceed_data = [
+			$proceed_data = array(
 				'total_amount' => $total_amount,
 				'currency'     => $currency,
 				'has_more'     => false,
 				'next_page'    => null,
-			];
+			);
 
 			$proceed_data = $this->process_api_response_data( $data );
 
@@ -174,11 +165,11 @@ abstract class UsageTrackingProvider extends Provider {
 			$is_null_data  = $proceed_data['is_null_range'] ?? false;
 		}
 
-		return [
+		return array(
 			'is_null_range' => $is_null_data,
 			'amount'        => round( $total_amount, 2 ),
 			'currency'      => $currency,
-		];
+		);
 	}
 
 	/**
@@ -229,12 +220,12 @@ abstract class UsageTrackingProvider extends Provider {
 		$last_month_date   = $now->modify( '-1 month' );
 		$last_month        = (int) $last_month_date->format( 'm' );
 		$last_month_year   = (int) $last_month_date->format( 'Y' );
-		$all_month_pricing = [];
+		$all_month_pricing = array();
 		$usage_currency    = 'USD';
 
 		// Year changed and current month is January, so no past months to fetch. It will be handled by the past years costs fetch.
 		if ( $current_year !== $last_month_year ) {
-			$cached_data['months']       = [];
+			$cached_data['months']       = array();
 			$cached_data['months_total'] = 0.0;
 			$cached_data['currency']     = $usage_currency;
 			$cached_data['last_updated'] = time();
@@ -304,7 +295,7 @@ abstract class UsageTrackingProvider extends Provider {
 		$tz               = wp_timezone();
 		$now              = new \DateTimeImmutable( 'now', $tz );
 		$current_year     = (int) $now->format( 'Y' );
-		$all_year_pricing = [];
+		$all_year_pricing = array();
 		$usage_currency   = 'USD';
 		$start_year       = isset( $cached_data['start_year'] ) ? (int) $cached_data['start_year'] : $default_settings['api_start_year'];
 
@@ -362,10 +353,10 @@ abstract class UsageTrackingProvider extends Provider {
 		$past_years_costs          = $this->fetch_past_years_costs( $force_all_time );
 		$current_year_months_costs = $this->fetch_past_months_costs( $force_ytd );
 
-		return [
+		return array(
 			'mtd'      => $current_mtd_costs,
 			'ytd'      => $current_year_months_costs + $current_mtd_costs,
 			'all_time' => $past_years_costs + $current_year_months_costs + $current_mtd_costs,
-		];
+		);
 	}
 }

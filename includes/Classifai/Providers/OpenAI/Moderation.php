@@ -75,10 +75,10 @@ class Moderation extends Provider {
 		add_settings_field(
 			static::ID . '_api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
@@ -90,16 +90,16 @@ class Moderation extends Provider {
 						wp_kses(
 							/* translators: %1$s is replaced with the OpenAI sign up URL */
 							__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							]
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							)
 						),
 						esc_url( 'https://platform.openai.com/signup' )
 					),
-			]
+			)
 		);
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
@@ -111,10 +111,10 @@ class Moderation extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'api_key'       => '',
 			'authenticated' => false,
-		];
+		);
 
 		return $common_settings;
 	}
@@ -154,9 +154,9 @@ class Moderation extends Provider {
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return array|WP_Error
 	 */
-	public function rest_endpoint_callback( $item_id = 0, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $item_id = 0, string $route_to_call = '', array $args = array() ) {
 		$route_to_call = strtolower( $route_to_call );
-		$return        = [];
+		$return        = array();
 
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
@@ -164,7 +164,7 @@ class Moderation extends Provider {
 				$return = $this->moderate_comment( $item_id );
 				break;
 			case 'post':
-				$return = [];
+				$return = array();
 				break;
 		}
 
@@ -217,19 +217,19 @@ class Moderation extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_openai_moderation_request_body',
-			[
+			array(
 				'input' => $comment->comment_content,
 				'model' => $this->get_model(),
-			],
+			),
 			$comment_id
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->moderation_url,
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		set_transient( 'classifai_openai_moderation_latest_response', $response, DAY_IN_SECONDS * 30 );
@@ -249,10 +249,10 @@ class Moderation extends Provider {
 	public function get_debug_information() {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$debug_info        = array();
 
 		if ( $this->feature_instance instanceof ModerationFeature ) {
-			$debug_info[ __( 'Content to Moderate', 'classifai' ) ] = implode( ', ', $provider_settings['content_types'] ?? [] );
+			$debug_info[ __( 'Content to Moderate', 'classifai' ) ] = implode( ', ', $provider_settings['content_types'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]     = $this->get_formatted_latest_response( get_transient( 'classifai_openai_moderation_latest_response' ) );
 		}
 

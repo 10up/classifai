@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -17,7 +17,7 @@ import { TooltipPopover } from '../../utils/utils';
  */
 export const SettingsRow = ( props ) => {
 	return (
-		<div className={ classNames( 'settings-row', props?.className ) }>
+		<div className={ clsx( 'settings-row', props?.className ) }>
 			<div className="settings-label">
 				{ props.label }
 				{ props.helperText && (
