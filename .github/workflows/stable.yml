@@ -1,0 +1,50 @@
+name: Release to Stable
+
+on:
+  push:
+    branches:
+    - trunk
+
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
+jobs:
+  release:
+    name: Push (merge) to trunk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+    - name: Setup node
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      with:
+        node-version-file: .nvmrc
+
+    - name: Install dependencies and build assets
+      run: |
+        npm install
+        npm run build
+        npm run makepot
+
+    - name: Install Composer dependencies
+      uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # v4.0.0
+      with:
+        composer-options: '--no-dev -o'
+
+    - name: Build release asset
+      run: |
+        npm run archive
+
+    - name: Release to Stable
+      uses: s0/git-publish-subdir-action@ac113f6bfe8896e85a373534242c949a7ea74c98 # develop
+      env:
+        REPO: self
+        BRANCH: stable
+        FOLDER: release
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MESSAGE: 'Release: ({sha}) {msg}'
