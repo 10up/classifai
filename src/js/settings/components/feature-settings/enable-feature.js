@@ -70,7 +70,7 @@ export const EnableToggleControl = ( { children } ) => {
 				// Show credential reuse modal only if there are reusable credentials
 				setShowCredentialModal( true );
 			}
-		} catch ( error ) {
+		} catch {
 			// Error handled gracefully
 		}
 	};

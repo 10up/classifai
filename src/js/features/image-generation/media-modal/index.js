@@ -1,5 +1,8 @@
 /* eslint object-shorthand: 0 */
 
+/**
+ * Internal dependencies
+ */
 import Prompt from './views/prompt';
 import './index.scss';
 

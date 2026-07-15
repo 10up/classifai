@@ -1,7 +1,18 @@
+/**
+ * External dependencies
+ */
 import React, { useEffect } from 'react';
+
+/**
+ * WordPress dependencies
+ */
 import { createRoot } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { registerPlugin } from '@wordpress/plugins';
+
+/**
+ * Internal dependencies
+ */
 import { ChatUI } from './components/chat-ui';
 
 /**

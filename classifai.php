@@ -4,8 +4,8 @@
  * Plugin URI:        https://github.com/10up/classifai
  * Update URI:        https://classifaiplugin.com
  * Description:       Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
- * Version:           3.8.0
- * Requires at least: 6.8
+ * Version:           3.9.0
+ * Requires at least: 6.9
  * Requires PHP:      7.4
  * Author:            10up
  * Author URI:        https://10up.com
@@ -86,10 +86,20 @@ require_once __DIR__ . '/config.php';
  * @return bool True or false if autoloading was successful.
  */
 function classifai_autoload() {
-	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
-		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php';
+	// Track if the autoloader was loaded.
+	$loaded = false;
 
-		return true;
+	// Load the prefixed vendor autoloader (contains AWS SDK and all other dependencies)
+	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php' ) ) {
+		require_once CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php';
+
+		// Set the loaded flag to true.
+		$loaded = true;
+	}
+
+	// Load the main vendor autoloader (contains plugin classes and other dependencies)
+	if ( $loaded && file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
+		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php';
 	} else {
 		error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			sprintf( 'Warning: Composer not setup in %s', CLASSIFAI_PLUGIN_DIR )
@@ -97,6 +107,8 @@ function classifai_autoload() {
 
 		return false;
 	}
+
+	return $loaded;
 }
 
 /**

@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import './index.scss';
 
 const audioControlEl = document.querySelector( '.class-post-audio-controls' );

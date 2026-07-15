@@ -26,19 +26,19 @@ class TaxonomyFactory {
 	 *
 	 * @var array $mapping A map of Watson taxonomies.
 	 */
-	public $mapping = [
+	public $mapping = array(
 		WATSON_CATEGORY_TAXONOMY => 'CategoryTaxonomy',
 		WATSON_KEYWORD_TAXONOMY  => 'KeywordTaxonomy',
 		WATSON_CONCEPT_TAXONOMY  => 'ConceptTaxonomy',
 		WATSON_ENTITY_TAXONOMY   => 'EntityTaxonomy',
-	];
+	);
 
 	/**
 	 * Previously created taxonomies instances.
 	 *
 	 * @var array $taxonomies Taxonomies instances.
 	 */
-	public $taxonomies = [];
+	public $taxonomies = array();
 
 	/**
 	 * Builds all supported taxonomies.
@@ -59,9 +59,9 @@ class TaxonomyFactory {
 	 *
 	 * @param string $taxonomy            The taxonomy name.
 	 * @param array  $supported_post_types The supported post types.
-	 * @return BaseTaxonomy A base taxonomy subclass instance.
+	 * @return AbstractTaxonomy A base taxonomy subclass instance.
 	 */
-	public function build_if( string $taxonomy, array $supported_post_types = [] ) {
+	public function build_if( string $taxonomy, array $supported_post_types = array() ) {
 		if ( ! $this->exists( $taxonomy ) ) {
 			$this->taxonomies[ $taxonomy ] = $this->build( $taxonomy );
 			$instance                      = $this->taxonomies[ $taxonomy ];
@@ -83,7 +83,7 @@ class TaxonomyFactory {
 	 * An exception is thrown if an invalid taxonomy name was specified.
 	 *
 	 * @param string $taxonomy The taxonomy name
-	 * @return \Taxonomy\Taxonomy\BaseTaxonomy A base taxonomy subclass instance.
+	 * @return \Classifai\Taxonomy\AbstractTaxonomy A base taxonomy subclass instance.
 	 * @throws \Exception An exception.
 	 */
 	public function build( string $taxonomy ) {

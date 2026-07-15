@@ -37,7 +37,7 @@ class GeminiAPI extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $default_model = 'models/gemini-2.5-flash-preview-05-20';
+	protected $default_model = 'models/gemini-3.5-flash';
 
 	/**
 	 * GeminiAPI constructor.
@@ -82,10 +82,10 @@ class GeminiAPI extends Provider {
 		add_settings_field(
 			static::ID . '_api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
@@ -97,16 +97,16 @@ class GeminiAPI extends Provider {
 						wp_kses(
 							/* translators: %1$s is replaced with the OpenAI sign up URL */
 							__( 'Don\'t have an Google AI (Gemini API) key? <a title="Get an API key" href="%1$s">Get an API key</a> now.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							]
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							)
 						),
 						esc_url( 'https://makersuite.google.com/app/apikey' )
 					),
-			]
+			)
 		);
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
@@ -118,12 +118,12 @@ class GeminiAPI extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'api_key'       => '',
 			'authenticated' => false,
 			'model'         => $this->default_model,
-			'models'        => [],
-		];
+			'models'        => array(),
+		);
 
 		return $common_settings;
 	}
@@ -143,7 +143,7 @@ class GeminiAPI extends Provider {
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 		$new_settings[ static::ID ]['model']         = $model;
-		$new_settings[ static::ID ]['models']        = is_wp_error( $models ) ? [] : $models;
+		$new_settings[ static::ID ]['models']        = is_wp_error( $models ) ? array() : $models;
 
 		return $new_settings;
 	}
@@ -154,9 +154,9 @@ class GeminiAPI extends Provider {
 	 * @param int    $post_id The Post ID we're processing.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
-	 * @return string|WP_Error
+	 * @return string|array|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
@@ -187,7 +187,7 @@ class GeminiAPI extends Provider {
 	 * @param array $args    Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_excerpt( int $post_id = 0, array $args = [] ) {
+	public function generate_excerpt( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
@@ -196,11 +196,11 @@ class GeminiAPI extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'author'  => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -216,14 +216,14 @@ class GeminiAPI extends Provider {
 
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
-			$excerpt_prompt = $feature->woo_prompt;
+			$excerpt_prompt = $feature->get_prompt( 'woocommerce' );
 		} else {
-			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->get_prompt( 'default' ) );
 		}
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}', '{{AUTHOR}}' );
-		$prompt_replace = array( $excerpt_length, $args['title'], $args['author'] );
+		$prompt_replace = array( (string) $excerpt_length, (string) $args['title'], (string) $args['author'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
 		/**
@@ -263,30 +263,30 @@ class GeminiAPI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_googleai_gemini_api_excerpt_request_body',
-			[
-				'contents'         => [
-					[
-						'parts' => [
+			array(
+				'contents'         => array(
+					array(
+						'parts' => array(
 							'text' => $system_prompt . ' ' . $prompt . ' \n """' . $message_content . '"""',
-						],
-					],
-				],
-				'generationConfig' => [
+						),
+					),
+				),
+				'generationConfig' => array(
 					'temperature'     => 0.9,
 					'topK'            => 1,
 					'topP'            => 1,
 					'maxOutputTokens' => 2048,
-				],
-			],
+				),
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->googleai_url . '/' . $this->get_model() . ':generateContent',
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		set_transient( 'classifai_googleai_gemini_api_excerpt_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
@@ -309,9 +309,9 @@ class GeminiAPI extends Provider {
 	 *
 	 * @param int   $post_id The Post Id we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
-	public function generate_titles( int $post_id = 0, array $args = [] ) {
+	public function generate_titles( int $post_id = 0, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
@@ -320,10 +320,10 @@ class GeminiAPI extends Provider {
 		$settings  = $feature->get_settings();
 		$args      = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num'     => 1, // Gemini API only returns 1 title.
 				'content' => '',
-			]
+			)
 		);
 		$post_type = get_post_type( $post_id );
 
@@ -337,9 +337,9 @@ class GeminiAPI extends Provider {
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
-			$prompt = $feature->woo_prompt;
+			$prompt = $feature->get_prompt( 'woocommerce' );
 		} else {
-			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->get_prompt( 'default' ) );
 		}
 
 		/**
@@ -379,30 +379,30 @@ class GeminiAPI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_googleai_gemini_api_title_request_body',
-			[
-				'contents'         => [
-					[
-						'parts' => [
+			array(
+				'contents'         => array(
+					array(
+						'parts' => array(
 							'text' => $system_prompt . ' ' . $prompt . '\n"""' . $message_content . '"""',
-						],
-					],
-				],
-				'generationConfig' => [
+						),
+					),
+				),
+				'generationConfig' => array(
 					'temperature'     => 0.9,
 					'topK'            => 1,
 					'topP'            => 1,
 					'maxOutputTokens' => 2048,
-				],
-			],
+				),
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->googleai_url . '/' . $this->get_model() . ':generateContent',
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		set_transient( 'classifai_googleai_gemini_api_title_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
@@ -416,7 +416,7 @@ class GeminiAPI extends Provider {
 		}
 
 		// Extract out the text response.
-		$return = [];
+		$return = array();
 		foreach ( $response['candidates'] as $candidate ) {
 			if ( isset( $candidate['content'], $candidate['content']['parts'] ) ) {
 				$parts    = $candidate['content']['parts'];
@@ -432,7 +432,7 @@ class GeminiAPI extends Provider {
 	 *
 	 * @param int   $post_id The Post Id we're processing
 	 * @param array $args Arguments passed in.
-	 * @return string|WP_Error
+	 * @return string[]|WP_Error
 	 */
 	public function resize_content( int $post_id, array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -444,17 +444,17 @@ class GeminiAPI extends Provider {
 
 		$args = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num' => 1, // Gemini API only returns 1 variation as of now.
-			]
+			)
 		);
 
 		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->get_prompt( 'condense' ) );
 		} else {
-			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->get_prompt( 'expand' ) );
 		}
 
 		/**
@@ -484,30 +484,30 @@ class GeminiAPI extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_googleai_gemini_api_resize_content_request_body',
-			[
-				'contents'         => [
-					[
-						'parts' => [
-							'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt . '\n"""' . esc_html( $args['content'] ) . '"""',
-						],
-					],
-				],
-				'generationConfig' => [
+			array(
+				'contents'         => array(
+					array(
+						'parts' => array(
+							'text' => $prompt . ' You will be provided with content delimited by triple quotes.\n"""' . esc_html( $args['content'] ) . '"""',
+						),
+					),
+				),
+				'generationConfig' => array(
 					'temperature'     => 0.9,
 					'topK'            => 1,
 					'topP'            => 1,
 					'maxOutputTokens' => 2048,
-				],
-			],
+				),
+			),
 			$post_id
 		);
 
 		// Make our API request.
 		$response = $request->post(
 			$this->googleai_url . '/' . $this->get_model() . ':generateContent',
-			[
+			array(
 				'body' => wp_json_encode( $body ),
-			]
+			)
 		);
 
 		set_transient( 'classifai_googleai_gemini_api_content_resizing_latest_response', $response, DAY_IN_SECONDS * 30 );
@@ -521,7 +521,7 @@ class GeminiAPI extends Provider {
 		}
 
 		// Extract out the text response.
-		$return = [];
+		$return = array();
 		foreach ( $response['candidates'] as $candidate ) {
 			if ( isset( $candidate['content'], $candidate['content']['parts'] ) ) {
 				$parts    = $candidate['content']['parts'];
@@ -584,21 +584,21 @@ class GeminiAPI extends Provider {
 	 */
 	public function get_debug_information(): array {
 		$settings   = $this->feature_instance->get_settings();
-		$debug_info = [];
+		$debug_info = array();
 
 		$debug_info[ __( 'Model', 'classifai' ) ] = $this->get_model();
 		if ( $this->feature_instance instanceof TitleGeneration ) {
 			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = 1;
-			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? [] );
+			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]       = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_title_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
-			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? [] );
+			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_excerpt_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ContentResizing ) {
 			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = 1;
-			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
-			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? array() );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_content_resizing_latest_response' ) );
 		}
 

@@ -126,7 +126,7 @@ class SmartCropping {
 	 * @return array|\WP_Error
 	 */
 	public function generate_cropped_images( array $metadata, int $attachment_id ) {
-		$cropped_images = [];
+		$cropped_images = array();
 
 		if ( ! isset( $metadata['sizes'] ) || empty( $metadata['sizes'] ) ) {
 			return $cropped_images;
@@ -137,10 +137,10 @@ class SmartCropping {
 				continue;
 			}
 
-			$data = [
+			$data = array(
 				'width'  => $size_data['width'],
 				'height' => $size_data['height'],
-			];
+			);
 
 			$data = $this->get_cropped_thumbnail( $attachment_id, $size_data );
 
@@ -148,11 +148,11 @@ class SmartCropping {
 				return $data;
 			}
 
-			$cropped_images[ $size ] = [
+			$cropped_images[ $size ] = array(
 				'width'  => $size_data['width'],
 				'height' => $size_data['height'],
 				'data'   => $data,
-			];
+			);
 		}
 
 		return $cropped_images;
@@ -192,15 +192,15 @@ class SmartCropping {
 			);
 		}
 
-		if ( empty( $url ) || empty( $size_data ) || ! is_array( $size_data ) ) {
+		if ( empty( $url ) || empty( $size_data ) ) {
 			return new \WP_Error( 'classifai_smart_cropping_invalid_args', 'Invalid arguments for API request.' );
 		}
 
-		$data = [
+		$data = array(
 			'width'  => $size_data['width'],
 			'height' => $size_data['height'],
 			'url'    => $url,
-		];
+		);
 
 		$new_thumb_image = $this->request_cropped_thumbnail( $data );
 
@@ -230,27 +230,27 @@ class SmartCropping {
 	 */
 	public function request_cropped_thumbnail( array $data ) {
 		$url = add_query_arg(
-			[
+			array(
 				'height'        => $data['height'],
 				'width'         => $data['width'],
 				'smartCropping' => 'true',
-			],
+			),
 			$this->get_api_url()
 		);
 
 		$response = safe_wp_remote_post(
 			$url,
-			[
+			array(
 				'body'    => wp_json_encode(
-					[
+					array(
 						'url' => $data['url'],
-					]
+					)
 				),
-				'headers' => [
+				'headers' => array(
 					'Content-Type'              => 'application/json',
 					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'] ?? '',
-				],
-			]
+				),
+			)
 		);
 
 		/**

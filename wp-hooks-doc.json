@@ -4,6 +4,7 @@
   "ignoreFiles": [
     "/tests/",
     "/vendor/",
+    "/vendor-prefixed/",
     "/node_modules/"
   ],
   "templatesDir": "./wp-hooks-docs",

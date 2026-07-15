@@ -186,7 +186,7 @@ abstract class AbstractTaxonomy {
 	 * Get rewrite options
 	 * register_taxonomy.
 	 *
-	 * @return array|string
+	 * @return false
 	 */
 	public function get_rewrite_option() {
 		return false;

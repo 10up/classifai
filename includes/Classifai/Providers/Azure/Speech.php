@@ -51,10 +51,10 @@ class Speech extends Provider {
 		add_settings_field(
 			'endpoint_url',
 			esc_html__( 'Endpoint URL', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
@@ -63,22 +63,22 @@ class Speech extends Provider {
 					'' :
 					__( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 
 		add_settings_field(
 			'api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
+			)
 		);
 
 		$voices_options = $this->get_voices_select_options();
@@ -87,16 +87,16 @@ class Speech extends Provider {
 			add_settings_field(
 				'voice',
 				esc_html__( 'Voice', 'classifai' ),
-				[ $this->feature_instance, 'render_select' ],
+				array( $this->feature_instance, 'render_select' ),
 				$this->feature_instance->get_option_name(),
 				$this->feature_instance->get_option_name() . '_section',
-				[
+				array(
 					'option_index'  => static::ID,
 					'label_for'     => 'voice',
 					'options'       => $voices_options,
 					'default_value' => $settings['voice'],
 					'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				]
+				)
 			);
 		}
 
@@ -109,20 +109,20 @@ class Speech extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'api_key'       => '',
 			'endpoint_url'  => '',
 			'authenticated' => false,
-			'voices'        => [],
+			'voices'        => array(),
 			'voice'         => '',
-		];
+		);
 
 		switch ( $this->feature_instance::ID ) {
 			case TextToSpeech::ID:
 				return $common_settings;
 		}
 
-		return [];
+		return array();
 	}
 
 	/**
@@ -164,7 +164,7 @@ class Speech extends Provider {
 		if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
 			$new_settings[ static::ID ]['authenticated'] = true;
 		} else {
-			$new_settings[ static::ID ]['voices']        = [];
+			$new_settings[ static::ID ]['voices']        = array();
 			$new_settings[ static::ID ]['authenticated'] = false;
 		}
 
@@ -179,7 +179,7 @@ class Speech extends Provider {
 	 * @param array $settings Settings being saved.
 	 * @return bool|WP_Error
 	 */
-	public function authenticate_credentials( array $settings = [] ) {
+	public function authenticate_credentials( array $settings = array() ) {
 		$credentials = $this->get_credentials( $settings );
 
 		// Create request arguments.
@@ -217,7 +217,7 @@ class Speech extends Provider {
 		);
 
 		$default     = wp_parse_args( $args, $default );
-		$credentials = $this->get_credentials( [ static::ID => $default ] );
+		$credentials = $this->get_credentials( array( static::ID => $default ) );
 
 		// Return if credentials don't exist.
 		if ( empty( $credentials['endpoint_url'] ) || empty( $credentials['api_key'] ) ) {
@@ -323,7 +323,7 @@ class Speech extends Provider {
 	 * Synthesizes speech from a post item.
 	 *
 	 * @param int $post_id Post ID.
-	 * @return string|WP_Error
+	 * @return int|string|WP_Error
 	 */
 	public function synthesize_speech( int $post_id ) {
 		if ( empty( $post_id ) ) {
@@ -432,7 +432,7 @@ class Speech extends Provider {
 	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
@@ -458,7 +458,7 @@ class Speech extends Provider {
 	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$debug_info        = array();
 
 		if ( $this->feature_instance instanceof TextToSpeech ) {
 			$post_types = array_filter(

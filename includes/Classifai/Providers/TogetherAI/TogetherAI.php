@@ -52,7 +52,7 @@ trait TogetherAI {
 	 * @param array $settings     Current settings, if any.
 	 * @return array
 	 */
-	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
+	public function sanitize_api_key_settings( array $new_settings = array(), array $settings = array() ): array {
 		$models = $this->authenticate_credentials( $new_settings );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
@@ -60,7 +60,7 @@ trait TogetherAI {
 
 		if ( is_wp_error( $models ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
-			$new_settings[ static::ID ]['models']        = [];
+			$new_settings[ static::ID ]['models']        = array();
 			$error_message                               = $models->get_error_message();
 
 			// For response code 429, credentials are valid but rate limit is reached.
@@ -91,9 +91,9 @@ trait TogetherAI {
 	 * @param array $settings Settings being saved.
 	 * @return array|WP_Error
 	 */
-	protected function authenticate_credentials( array $settings = [] ) {
+	protected function authenticate_credentials( array $settings = array() ) {
 		$request  = new APIRequest( '', $this->feature_instance::ID, $this, $settings );
-		$response = $request->get( $this->get_api_url( $this->model_path ), [ 'use_vip' => true ] );
+		$response = $request->get( $this->get_api_url( $this->model_path ), array( 'use_vip' => true ) );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -101,12 +101,12 @@ trait TogetherAI {
 
 		// Get the model data we need.
 		$models = array_map(
-			fn( $model ) => [
+			fn( $model ) => array(
 				'id'             => $model['id'] ?? '',
 				'type'           => $model['type'] ?? '',
 				'display_name'   => $model['display_name'] ?? '',
 				'context_length' => $model['context_length'] ?? '',
-			],
+			),
 			$response
 		);
 

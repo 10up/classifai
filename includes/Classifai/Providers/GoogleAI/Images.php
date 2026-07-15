@@ -36,7 +36,7 @@ class Images extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $model = 'imagen-4.0-generate-preview-06-06';
+	protected $model = 'gemini-3.1-flash-image';
 
 	/**
 	 * Maximum number of characters a prompt can have.
@@ -67,8 +67,8 @@ class Images extends Provider {
 			return;
 		}
 
-		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
-		add_filter( 'classifai_dalle_caption', [ $this, 'modify_default_caption' ] );
+		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', array( $this, 'register_rest_args' ) );
+		add_filter( 'classifai_dalle_caption', array( $this, 'modify_default_caption' ) );
 	}
 
 	/**
@@ -100,7 +100,7 @@ class Images extends Provider {
 		 * Filter the model name.
 		 *
 		 * Useful if you want to use a different model, like
-		 * imagen-4.0-ultra.
+		 * gemini-3-pro-image.
 		 *
 		 * @since 3.5.0
 		 * @hook classifai_googleai_images_model
@@ -140,13 +140,13 @@ class Images extends Provider {
 	 * @return array
 	 */
 	public static function get_image_aspect_ratio_options(): array {
-		$options = [
+		$options = array(
 			'1:1'  => __( '1:1 (square)', 'classifai' ),
 			'3:4'  => __( '3:4 (portrait)', 'classifai' ),
 			'4:3'  => __( '4:3 (landscape)', 'classifai' ),
 			'9:16' => __( '9:16 (portrait)', 'classifai' ),
 			'16:9' => __( '16:9 (landscape)', 'classifai' ),
-		];
+		);
 
 		/**
 		 * Filter the image aspect ratio options that are available.
@@ -170,20 +170,20 @@ class Images extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'api_key'       => '',
 			'authenticated' => false,
-		];
+		);
 
 		switch ( $this->feature_instance::ID ) {
 			case ImageGeneration::ID:
 				return array_merge(
 					$common_settings,
-					[
+					array(
 						'number_of_images'   => 1,
 						'aspect_ratio'       => '1:1',
 						'per_image_settings' => false,
-					]
+					)
 				);
 		}
 
@@ -222,9 +222,9 @@ class Images extends Provider {
 	 * @param string $prompt The prompt used to generate an image.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
-	 * @return string|WP_Error
+	 * @return string|array|WP_Error
 	 */
-	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = array() ) {
 		$route_to_call = strtolower( $route_to_call );
 		$return        = '';
 
@@ -243,9 +243,9 @@ class Images extends Provider {
 	 *
 	 * @param string $prompt The prompt used to generate an image.
 	 * @param array  $args Optional arguments passed to endpoint.
-	 * @return string|WP_Error
+	 * @return array|WP_Error
 	 */
-	public function generate_image( string $prompt = '', array $args = [] ) {
+	public function generate_image( string $prompt = '', array $args = array() ) {
 		if ( ! $prompt ) {
 			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
 		}
@@ -254,10 +254,10 @@ class Images extends Provider {
 		$settings         = $image_generation->get_settings( static::ID );
 		$args             = wp_parse_args(
 			array_filter( $args ),
-			[
+			array(
 				'num'          => $settings['number_of_images'] ?? 1,
 				'aspect_ratio' => $settings['aspect_ratio'] ?? '1:1',
-			]
+			)
 		);
 
 		if ( ! $image_generation->is_feature_enabled() ) {
@@ -286,6 +286,8 @@ class Images extends Provider {
 
 		$request = new APIRequest( '', $this->feature_instance::ID, $this );
 
+		$num = absint( $args['num'] );
+
 		/**
 		 * Filter the request body before sending to Google AI.
 		 *
@@ -298,38 +300,70 @@ class Images extends Provider {
 		 */
 		$body = apply_filters(
 			'classifai_googleai_images_request_body',
-			[
-				'instances'  => [
-					[
-						'prompt' => sanitize_text_field( $prompt ),
-					],
-				],
-				'parameters' => [
-					'sampleCount' => absint( $args['num'] ),
-					'aspectRatio' => sanitize_text_field( $args['aspect_ratio'] ),
-				],
-			],
+			array(
+				'contents'         => array(
+					array(
+						'parts' => array(
+							array(
+								'text' => sanitize_text_field( $prompt ),
+							),
+						),
+					),
+				),
+				'generationConfig' => array(
+					'responseModalities' => array( 'TEXT', 'IMAGE' ),
+					'imageConfig'        => array(
+						'aspectRatio' => sanitize_text_field( $args['aspect_ratio'] ),
+					),
+				),
+			)
 		);
 
-		// Make our API request.
-		$response = $request->post(
-			trailingslashit( $this->get_api_url() ) . 'models/' . $this->get_model() . ':predict',
-			[
-				'body' => wp_json_encode( $body ),
-			]
-		);
+		$endpoint  = trailingslashit( $this->get_api_url() ) . 'models/' . $this->get_model() . ':generateContent';
+		$responses = array();
 
-		$cleaned_responses = [];
+		// Gemini image models do not support multiple candidates per request.
+		for ( $i = 0; $i < $num; $i++ ) {
+			$responses[] = $request->post(
+				$endpoint,
+				array(
+					'body' => wp_json_encode( $body ),
+				)
+			);
+		}
 
-		// Extract out the image responses, if they exist.
-		if ( ! is_wp_error( $response ) && ! empty( $response['predictions'] ) ) {
-			foreach ( $response['predictions'] as $candidate ) {
-				if ( isset( $candidate['bytesBase64Encoded'] ) ) {
-					$cleaned_responses[] = [ 'url' => sanitize_text_field( trim( $candidate['bytesBase64Encoded'] ) ) ];
+		$cleaned_responses = array();
+
+		foreach ( $responses as $response ) {
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+
+			// Extract image responses from generateContent candidates.
+			if ( ! empty( $response['candidates'] ) ) {
+				foreach ( $response['candidates'] as $candidate ) {
+					if ( empty( $candidate['content']['parts'] ) ) {
+						continue;
+					}
+
+					foreach ( $candidate['content']['parts'] as $part ) {
+						if ( ! empty( $part['inlineData']['data'] ) ) {
+							$cleaned_responses[] = array(
+								'url' => trim( $part['inlineData']['data'] ),
+							);
+						}
+					}
+				}
+			} elseif ( ! empty( $response['predictions'] ) ) {
+				// Legacy Imagen predict response format.
+				foreach ( $response['predictions'] as $candidate ) {
+					if ( ! empty( $candidate['bytesBase64Encoded'] ) ) {
+						$cleaned_responses[] = array(
+							'url' => trim( $candidate['bytesBase64Encoded'] ),
+						);
+					}
 				}
 			}
-		} elseif ( is_wp_error( $response ) ) {
-			return $response;
 		}
 
 		return $cleaned_responses;
@@ -343,24 +377,24 @@ class Images extends Provider {
 	 * @param array $args Existing REST arguments.
 	 * @return array
 	 */
-	public function register_rest_args( array $args = [] ): array {
-		$provider_args = [
-			'n'            => [
+	public function register_rest_args( array $args = array() ): array {
+		$provider_args = array(
+			'n'            => array(
 				'type'              => 'integer',
 				'minimum'           => 1,
 				'maximum'           => 4,
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
-			],
-			'aspect_ratio' => [
+			),
+			'aspect_ratio' => array(
 				'type'              => 'string',
 				'enum'              => array_keys( $this->get_image_aspect_ratio_options() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Aspect ratio of generated image', 'classifai' ),
-			],
-		];
+			),
+		);
 
 		// Merge the provider args with the existing args.
 		$args['args'] = array_merge( $args['args'], $provider_args );

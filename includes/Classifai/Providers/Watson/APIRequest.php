@@ -45,7 +45,7 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|\WP_Error
 	 */
-	public function request( string $url, array $options = [] ) {
+	public function request( string $url, array $options = array() ) {
 		$this->add_headers( $options );
 
 		$method = strtoupper( $options['method'] ?? 'GET' );
@@ -70,7 +70,7 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|\WP_Error
 	 */
-	public function get( string $url, array $options = [] ) {
+	public function get( string $url, array $options = array() ) {
 		$this->add_headers( $options );
 		return $this->get_result( safe_wp_remote_get( $url, $options ) );
 	}
@@ -83,7 +83,7 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|\WP_Error
 	 */
-	public function post( string $url, array $options = [] ) {
+	public function post( string $url, array $options = array() ) {
 		$this->add_headers( $options );
 		return $this->get_result( safe_wp_remote_post( $url, $options ) );
 	}
@@ -167,7 +167,7 @@ class APIRequest {
 	 */
 	public function add_headers( array &$options ) {
 		if ( empty( $options['headers'] ) ) {
-			$options['headers'] = [];
+			$options['headers'] = array();
 		}
 
 		$options['headers']['Authorization'] = $this->get_auth_header();
