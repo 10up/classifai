@@ -4,7 +4,7 @@ Tags:              AI, Artificial Intelligence, ML, Machine Learning, Microsoft 
 Requires at least: 6.9
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        3.8.0
+Stable tag:        3.9.0
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,9 @@ For a full list of frequently asked questions, please refer to the [ClassifAI do
 Please report security bugs found in the source code of the undefined plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/f298c330-8d56-4af5-8a69-736281841ce1).  The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == Upgrade Notice ==
+
+= 3.9.0 =
+**Note that this release bumps the WordPress minimum from 6.8 to 6.9.**
 
 = 3.8.0 =
 **Note that the legacy settings screen (enabled via the `classifai_use_legacy_settings_panel` filter) is now formally deprecated and scheduled for removal in a future release. Please migrate to the new React-based settings experience.**
