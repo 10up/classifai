@@ -21,8 +21,12 @@ describe( '[Usage Tracking] API Usage Tracking (OpenAI) Tests', () => {
 
 		cy.enableFeature();
 		cy.selectProvider( 'openai_usage_tracking' );
-		cy.get( '#openai_usage_tracking_api_key' ).clear().type( 'sk-admin-password' );
-		cy.get( '#openai_usage_tracking_project_id' ).clear().type( 'proj_cypress_openai_1' );
+		cy.get( '#openai_usage_tracking_api_key' )
+			.clear()
+			.type( 'sk-admin-password' );
+		cy.get( '#openai_usage_tracking_project_id' )
+			.clear()
+			.type( 'proj_cypress_openai_1' );
 
 		cy.allowFeatureToAdmin();
 		cy.saveFeatureSettings();
@@ -31,17 +35,33 @@ describe( '[Usage Tracking] API Usage Tracking (OpenAI) Tests', () => {
 	it( 'Can see "AI Usage Tracking" Widget on WP Dashboard', () => {
 		cy.visit( `/wp-admin/index.php` );
 
-		const aiUsageWidget = cy.get( '#dashboard-widgets #classifai_api_usage' );
+		const aiUsageWidget = cy.get(
+			'#dashboard-widgets #classifai_api_usage'
+		);
 
 		aiUsageWidget.should( 'exist' );
 		aiUsageWidget.get( 'h2' ).should( 'contain', 'AI Usage Tracking' );
-		aiUsageWidget.get( '.classifai-api-usage-list li:first-child' ).should( 'contain', 'This month:' );
-		aiUsageWidget.get( '.classifai-api-usage-list li:first-child' ).should( 'contain', 'Updating…' );
-		aiUsageWidget.get( '.classifai-api-usage-list li:nth-child(2)' ).should( 'contain', 'Year to date:' );
-		aiUsageWidget.get( '.classifai-api-usage-list li:nth-child(2)' ).should( 'contain', 'Updating…' );
-		aiUsageWidget.get( '.classifai-api-usage-list li:nth-child(3)' ).should( 'contain', 'All time:' );
-		aiUsageWidget.get( '.classifai-api-usage-list li:nth-child(3)' ).should( 'contain', 'Updating…' );
-		aiUsageWidget.get( '.classifai-api-usage-updated' ).should( 'not.exist' );
+		aiUsageWidget
+			.get( '.classifai-api-usage-list li:first-child' )
+			.should( 'contain', 'This month:' );
+		aiUsageWidget
+			.get( '.classifai-api-usage-list li:first-child' )
+			.should( 'contain', 'Updating…' );
+		aiUsageWidget
+			.get( '.classifai-api-usage-list li:nth-child(2)' )
+			.should( 'contain', 'Year to date:' );
+		aiUsageWidget
+			.get( '.classifai-api-usage-list li:nth-child(2)' )
+			.should( 'contain', 'Updating…' );
+		aiUsageWidget
+			.get( '.classifai-api-usage-list li:nth-child(3)' )
+			.should( 'contain', 'All time:' );
+		aiUsageWidget
+			.get( '.classifai-api-usage-list li:nth-child(3)' )
+			.should( 'contain', 'Updating…' );
+		aiUsageWidget
+			.get( '.classifai-api-usage-updated' )
+			.should( 'not.exist' );
 	} );
 
 	it( 'Can run cron job and verify usage data is updated from mock data', () => {
@@ -51,16 +71,21 @@ describe( '[Usage Tracking] API Usage Tracking (OpenAI) Tests', () => {
 				expect( response.status ).to.eq( 200 );
 				expect( response.body.success ).to.be.true;
 				expect( response.body.data.mtd ).to.be.greaterThan( 0 );
-				expect( response.body.data.last_updated ).to.be.greaterThan( 0 );
+				expect( response.body.data.last_updated ).to.be.greaterThan(
+					0
+				);
 			}
 		);
 
 		// The dashboard widget should now show real values instead of "Updating…".
 		cy.visit( '/wp-admin/index.php' );
 
-		cy.get( '#dashboard-widgets #classifai_api_usage .classifai-api-usage-list li:first-child' )
-			.should( 'not.contain', 'Updating…' );
-		cy.get( '#dashboard-widgets #classifai_api_usage .classifai-api-usage-updated' )
+		cy.get(
+			'#dashboard-widgets #classifai_api_usage .classifai-api-usage-list li:first-child'
+		).should( 'not.contain', 'Updating…' );
+		cy.get(
+			'#dashboard-widgets #classifai_api_usage .classifai-api-usage-updated'
+		)
 			.should( 'exist' )
 			.should( 'contain', 'Last updated:' );
 	} );
@@ -89,23 +114,32 @@ describe( '[Usage Tracking] API Usage Tracking (OpenAI) Tests', () => {
 		cy.visit( '/wp-admin/index.php' );
 
 		// Use independent cy.get() calls to avoid Cypress chaining off a saved variable.
-		cy.get( '#dashboard-widgets #classifai_api_usage .classifai-api-usage-list li:first-child' )
-			.should( 'contain', '$5.50 USD' );
-		cy.get( '#dashboard-widgets #classifai_api_usage .classifai-api-usage-list li:nth-child(2)' )
-			.should( 'contain', '$38.50 USD' );
-		cy.get( '#dashboard-widgets #classifai_api_usage .classifai-api-usage-list li:nth-child(3)' )
-			.should( 'contain', '$71.50 USD' );
-		cy.get( '#dashboard-widgets #classifai_api_usage .classifai-api-usage-updated' )
+		cy.get(
+			'#dashboard-widgets #classifai_api_usage .classifai-api-usage-list li:first-child'
+		).should( 'contain', '$5.50 USD' );
+		cy.get(
+			'#dashboard-widgets #classifai_api_usage .classifai-api-usage-list li:nth-child(2)'
+		).should( 'contain', '$38.50 USD' );
+		cy.get(
+			'#dashboard-widgets #classifai_api_usage .classifai-api-usage-list li:nth-child(3)'
+		).should( 'contain', '$71.50 USD' );
+		cy.get(
+			'#dashboard-widgets #classifai_api_usage .classifai-api-usage-updated'
+		)
 			.should( 'exist' )
 			.should( 'contain', 'Last updated:' );
 	} );
 
 	it( 'Verify force refresh button works', () => {
 		// apiFetch appends ?_locale=user to all requests, so use a glob wildcard.
-		cy.intercept( 'POST', '/wp-json/classifai/v1/api-usage-tracking/force-refresh*', {
-			statusCode: 200,
-			body: { success: true },
-		} ).as( 'forceRefresh' );
+		cy.intercept(
+			'POST',
+			'/wp-json/classifai/v1/api-usage-tracking/force-refresh*',
+			{
+				statusCode: 200,
+				body: { success: true },
+			}
+		).as( 'forceRefresh' );
 
 		cy.visit( '/wp-admin/index.php' );
 
@@ -114,7 +148,9 @@ describe( '[Usage Tracking] API Usage Tracking (OpenAI) Tests', () => {
 			.should( 'not.be.disabled' )
 			.click();
 
-		cy.wait( '@forceRefresh' ).its( 'response.statusCode' ).should( 'eq', 200 );
+		cy.wait( '@forceRefresh' )
+			.its( 'response.statusCode' )
+			.should( 'eq', 200 );
 	} );
 
 	it( 'Enable soft/hard limit and confirm notice', () => {
@@ -202,7 +238,7 @@ describe( '[Usage Tracking] API Usage Tracking (OpenAI) Tests', () => {
 		} );
 	} );
 
-	it( 'Verify tts feature can\'t be used when hard limit reached', () => {
+	it( "Verify tts feature can't be used when hard limit reached", () => {
 		// Mark the hard limit as reached.
 		cy.request( {
 			method: 'POST',
@@ -218,7 +254,9 @@ describe( '[Usage Tracking] API Usage Tracking (OpenAI) Tests', () => {
 			failOnStatusCode: false,
 		} ).then( ( response ) => {
 			expect( response.body.success ).to.be.false;
-			expect( response.body.code ).to.eq( 'classifai_hard_limit_reached' );
+			expect( response.body.code ).to.eq(
+				'classifai_hard_limit_reached'
+			);
 		} );
 
 		// Clean up: clear the hard limit.
