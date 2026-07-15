@@ -30,13 +30,6 @@ class KeyTakeaways extends Feature {
 	const ID = 'feature_key_takeaways';
 
 	/**
-	 * Prompt for generating the key takeaways.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'The content you will be provided with is from an already written article. This article has the title of: {{TITLE}}. Your task is to carefully read through this article and provide a summary that captures all the important points. This summary should be concise and limited to about 2-4 points but should also be detailed enough to allow someone to quickly grasp the full article. Read the article a few times before providing the summary and trim each point down to be as concise as possible.';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -46,11 +39,11 @@ class KeyTakeaways extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ChatGPT::ID => __( 'OpenAI ChatGPT', 'classifai' ),
 			OpenAI::ID  => __( 'Azure OpenAI', 'classifai' ),
 			Ollama::ID  => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -62,10 +55,10 @@ class KeyTakeaways extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 
 		if ( $this->is_configured() && $this->is_enabled() ) {
-			add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
+			add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_assets' ) );
 			$this->register_block();
 		}
 	}
@@ -94,83 +87,83 @@ class KeyTakeaways extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'key-takeaways(?:/(?P<id>\d+))?',
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'rest_endpoint_callback' ],
-					'args'                => [
-						'id'     => [
+					'callback'            => array( $this, 'rest_endpoint_callback' ),
+					'args'                => array(
+						'id'     => array(
 							'required'          => true,
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 							'description'       => esc_html__( 'Post ID to generate key takeaways for.', 'classifai' ),
-						],
-						'render' => [
+						),
+						'render' => array(
 							'type'              => 'string',
-							'enum'              => [
+							'enum'              => array(
 								'list',
 								'paragraph',
-							],
+							),
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'How the key takeaways should be rendered.', 'classifai' ),
-						],
-						'run'    => [
+						),
+						'run'    => array(
 							'type'              => 'string',
-							'enum'              => [
+							'enum'              => array(
 								'auto',
 								'manual',
-							],
+							),
 							'default'           => 'auto',
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Whether the key takeaways were generated automatically or manually.', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_key_takeaways_permissions_check' ],
-				],
-				[
+						),
+					),
+					'permission_callback' => array( $this, 'generate_key_takeaways_permissions_check' ),
+				),
+				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'rest_endpoint_callback' ],
-					'args'                => [
-						'content' => [
+					'callback'            => array( $this, 'rest_endpoint_callback' ),
+					'args'                => array(
+						'content' => array(
 							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Content to generate key takeaways from.', 'classifai' ),
-						],
-						'title'   => [
+						),
+						'title'   => array(
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Title of content to generate key takeaways from.', 'classifai' ),
-						],
-						'render'  => [
+						),
+						'render'  => array(
 							'type'              => 'string',
-							'enum'              => [
+							'enum'              => array(
 								'list',
 								'paragraph',
-							],
+							),
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'How the key takeaways should be rendered.', 'classifai' ),
-						],
-						'run'     => [
+						),
+						'run'     => array(
 							'type'              => 'string',
-							'enum'              => [
+							'enum'              => array(
 								'auto',
 								'manual',
-							],
+							),
 							'default'           => 'auto',
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Whether the key takeaways were generated automatically or manually.', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_key_takeaways_permissions_check' ],
-				],
-			]
+						),
+					),
+					'permission_callback' => array( $this, 'generate_key_takeaways_permissions_check' ),
+				),
+			)
 		);
 	}
 
@@ -222,12 +215,12 @@ class KeyTakeaways extends Feature {
 				$this->run(
 					$request->get_param( 'id' ),
 					'key_takeaways',
-					[
+					array(
 						'content' => $request->get_param( 'content' ),
 						'title'   => $request->get_param( 'title' ),
 						'render'  => $request->get_param( 'render' ),
 						'run'     => $request->get_param( 'run' ),
-					]
+					)
 				)
 			);
 		}
@@ -269,22 +262,22 @@ class KeyTakeaways extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
-			'key_takeaways_prompt' => [
-				[
+		return array(
+			'key_takeaways_prompt' => array(
+				array(
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->prompt,
+					'prompt'   => $this->get_prompt( 'default' ),
 					'original' => 1,
-				],
-			],
+				),
+			),
 			'provider'             => ChatGPT::ID,
-		];
+		);
 	}
 
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -294,7 +287,7 @@ class KeyTakeaways extends Feature {
 		if ( $settings && ! empty( $settings['key_takeaways_prompt'] ) ) {
 			foreach ( $settings['key_takeaways_prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['key_takeaways_prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings['key_takeaways_prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}

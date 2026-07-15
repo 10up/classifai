@@ -1,6 +1,13 @@
+/**
+ * WordPress dependencies
+ */
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { __experimentalInputControl as InputControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../../settings-row';
 
 /**
@@ -37,6 +44,7 @@ export const ElevenLabsSettings = ( { providerSettings, onChange } ) => {
 				description={ <Description /> }
 			>
 				<InputControl
+					// eslint-disable-next-line no-restricted-syntax
 					id="elevenlabs_api_key"
 					type="password"
 					value={ providerSettings.api_key || '' }

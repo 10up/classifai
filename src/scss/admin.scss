@@ -232,10 +232,6 @@ input.classifai-button {
 			}
 		}
 	}
-
-	.admin_page_classifai_setup & {
-		box-shadow: none;
-	}
 }
 
 .classifai-content {
@@ -971,6 +967,10 @@ input.classifai-button {
 	td {
 		padding: 10px 10px;
 	}
+}
+
+.classifai-excerpt-generation {
+	flex-wrap: wrap;
 }
 
 a.components-button.classifai-disable-feature-link {

@@ -35,6 +35,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Scan PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 * Modification of your `robots.txt` file to block the most common AI data scraping bots from indexing your site
+* Use [built-in filters to override AI credentials](https://10up.github.io/classifai/advanced-docs/programmatic-credentials), allowing management of credentials outside of the database, such as by using environment variables or a specific secret management service
 
 ### Language Processing
 
@@ -59,7 +60,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 ## Requirements
 
 * PHP 7.4+
-* [WordPress](http://wordpress.org) 6.8+
+* [WordPress](http://wordpress.org) 6.9+
 * Each individual Feature may have its own requirements, please refer to the [ClassifAI documentation site](https://10up.github.io/classifai/get-started/#requirements) for detailed requirements.
 
 ## Pricing
@@ -79,6 +80,8 @@ For detailed instructions on how to register for a ClassifAI account, please ref
 ## Set up Features
 
 ClassifAI implements a variety of Features that can be configured and used to augment your WordPress-powered websites. For detailed instructions on how to set up each Feature, please refer to the [ClassifAI documentation site](https://10up.github.io/classifai/feature-configuration).
+
+If you want to more securely manage credentials for a specific Feature, you can use the [built-in filters to override AI credentials](https://10up.github.io/classifai/advanced-docs/programmatic-credentials).
 
 ## Run locally hosted LLMs
 

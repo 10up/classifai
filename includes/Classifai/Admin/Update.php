@@ -8,6 +8,7 @@
 namespace Classifai\Admin;
 
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+use YahnisElsts\PluginUpdateChecker\v5p7\Vcs\PluginUpdateChecker;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -28,7 +29,7 @@ class Update {
 	/**
 	 * The update checker object.
 	 *
-	 * @var YahnisElsts\PluginUpdateChecker\v5p1\Vcs\PluginUpdateChecker
+	 * @var \YahnisElsts\PluginUpdateChecker\v5p7\Vcs\PluginUpdateChecker
 	 */
 	protected $updater;
 
@@ -47,7 +48,7 @@ class Update {
 	public function register() {
 		$this->init();
 
-		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'maybe_update' ], 10, 1 );
+		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'maybe_update' ), 10, 1 );
 	}
 
 	/**
@@ -56,13 +57,25 @@ class Update {
 	 * @return void
 	 */
 	public function init() {
-		$this->updater = PucFactory::buildUpdateChecker(
+		$updater = PucFactory::buildUpdateChecker(
 			self::$repo_url,
 			CLASSIFAI_PLUGIN,
 			'classifai'
 		);
 
-		$this->updater->getVcsApi()->enableReleaseAssets();
+		// We build from a VCS (GitHub) URL, so this is always a VCS plugin update checker.
+		if ( ! $updater instanceof PluginUpdateChecker ) {
+			return;
+		}
+
+		$this->updater = $updater;
+
+		$vcs_api = $this->updater->getVcsApi();
+
+		// Release assets are only supported by the GitHub/GitLab VCS APIs.
+		if ( method_exists( $vcs_api, 'enableReleaseAssets' ) ) {
+			$vcs_api->enableReleaseAssets();
+		}
 
 		$this->updater->addResultFilter(
 			function ( $plugin_info ) {
@@ -93,7 +106,7 @@ class Update {
 
 			// Adding the plugin info to the `no_update` property is required
 			// for the enable/disable auto-update links to appear correctly in the UI.
-			if ( $update ) {
+			if ( $update && property_exists( $update, 'filename' ) ) {
 				$transient->no_update[ $update->filename ] = $update;
 			}
 		}

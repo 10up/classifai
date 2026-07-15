@@ -22,19 +22,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Class ImageTextExtraction
  */
 class ImageTextExtraction extends Feature {
+	use AsyncImageProcessing;
+
 	/**
 	 * ID of the current feature.
 	 *
 	 * @var string
 	 */
 	const ID = 'feature_image_to_text_generator';
-
-	/**
-	 * Prompt for extracting text.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'You are an assistant that extracts text from images. You will be provided with an image and will return whatever text is in the image. Return only the text, nothing else. If there is no text present, return the word none.';
 
 	/**
 	 * Constructor.
@@ -46,11 +41,11 @@ class ImageTextExtraction extends Feature {
 		$this->provider_instances = $this->get_provider_instances( ImageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
 			ChatGPT::ID        => __( 'OpenAI ChatGPT', 'classifai' ),
 			OllamaMM::ID       => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -60,13 +55,15 @@ class ImageTextExtraction extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
+		add_action( ImageProcessing::ASYNC_JOB_HOOK, array( $this, 'handle_async_image_job' ), 10, 4 );
+		$this->register_async_status_meta();
 	}
 
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -76,7 +73,7 @@ class ImageTextExtraction extends Feature {
 		if ( $settings && ! empty( $settings[ ChatGPT::ID ]['prompt'] ) ) {
 			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}
@@ -85,7 +82,7 @@ class ImageTextExtraction extends Feature {
 		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
 			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}
@@ -98,14 +95,14 @@ class ImageTextExtraction extends Feature {
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'rest_api_init', [ $this, 'add_ocr_data_to_api_response' ] );
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
+		add_action( 'rest_api_init', array( $this, 'add_ocr_data_to_api_response' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_action( 'add_meta_boxes_attachment', array( $this, 'setup_attachment_meta_box' ) );
+		add_action( 'edit_attachment', array( $this, 'maybe_rescan_image' ) );
 
-		add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_ocr_text' ], 9, 2 );
+		add_filter( 'the_content', array( $this, 'add_ocr_aria_describedby' ) );
+		add_filter( 'attachment_fields_to_edit', array( $this, 'add_rescan_button_to_media_modal' ), 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', array( $this, 'generate_ocr_text' ), 9, 2 );
 	}
 
 	/**
@@ -115,19 +112,19 @@ class ImageTextExtraction extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'ocr/(?P<id>\d+)',
-			[
+			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
-				'args'                => [
-					'id' => [
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
+				'args'                => array(
+					'id' => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Image ID to read text from.', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'image_text_extractor_permissions_check' ],
-			]
+					),
+				),
+				'permission_callback' => array( $this, 'image_text_extractor_permissions_check' ),
+			)
 		);
 	}
 
@@ -188,10 +185,13 @@ class ImageTextExtraction extends Feature {
 	 * @return array
 	 */
 	public function generate_ocr_text( array $metadata, int $attachment_id ): array {
-		if (
-			! $this->is_feature_enabled() ||
-			'automatic' !== $this->get_processing_mode()
-		) {
+		$mode = $this->get_processing_mode();
+
+		if ( ! $this->is_feature_enabled() || 'manual' === $mode ) {
+			return $metadata;
+		}
+
+		if ( 'automatic_async' === $mode && $this->enqueue_async_image_job( $attachment_id, 'ocr' ) ) {
 			return $metadata;
 		}
 
@@ -213,10 +213,10 @@ class ImageTextExtraction extends Feature {
 	public function save( string $result, int $attachment_id ) {
 		$content = get_the_content( null, false, $attachment_id );
 
-		$post_args = [
+		$post_args = array(
 			'ID'           => $attachment_id,
 			'post_content' => sanitize_text_field( $result ),
-		];
+		);
 
 		/**
 		 * Filter the post arguments before saving the text to post_content.
@@ -247,15 +247,15 @@ class ImageTextExtraction extends Feature {
 		register_rest_field(
 			'attachment',
 			'classifai_has_ocr',
-			[
+			array(
 				'get_callback' => function ( $params ) {
 					return ! empty( get_post_meta( $params['id'], 'classifai_computer_vision_ocr', true ) );
 				},
-				'schema'       => [
+				'schema'       => array(
 					'type'    => 'boolean',
-					'context' => [ 'view' ],
-				],
-			]
+					'context' => array( 'view' ),
+				),
+			)
 		);
 	}
 
@@ -285,7 +285,7 @@ class ImageTextExtraction extends Feature {
 		}
 
 		// Add our content to the metabox.
-		add_action( 'classifai_render_attachment_metabox', [ $this, 'attachment_data_meta_box_content' ] );
+		add_action( 'classifai_render_attachment_metabox', array( $this, 'attachment_data_meta_box_content' ) );
 
 		// If the metabox was already registered, don't add it again.
 		if ( isset( $wp_meta_boxes['attachment']['side']['high']['classifai_image_processing'] ) ) {
@@ -296,7 +296,7 @@ class ImageTextExtraction extends Feature {
 		add_meta_box(
 			'classifai_image_processing',
 			__( 'ClassifAI Image Processing', 'classifai' ),
-			[ $this, 'attachment_data_meta_box' ],
+			array( $this, 'attachment_data_meta_box' ),
 			'attachment',
 			'side',
 			'high'
@@ -352,7 +352,7 @@ class ImageTextExtraction extends Feature {
 
 			if ( $result && ! is_wp_error( $result ) ) {
 				// Ensure we don't re-run this when the attachment is updated.
-				remove_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
+				remove_action( 'edit_attachment', array( $this, 'maybe_rescan_image' ) );
 				$this->save( $result, $attachment_id );
 			}
 		}
@@ -427,12 +427,12 @@ class ImageTextExtraction extends Feature {
 
 		$ocr_text = empty( get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
 
-		$form_fields['rescan_ocr'] = [
+		$form_fields['rescan_ocr'] = array(
 			'label'        => __( 'Scan image for text', 'classifai' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
-			'html'         => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-		];
+			'html'         => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( (string) absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+		);
 
 		return $form_fields;
 	}
@@ -452,10 +452,10 @@ class ImageTextExtraction extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
+		return array(
 			'processing_mode' => 'automatic',
 			'provider'        => ComputerVision::ID,
-		];
+		);
 	}
 
 	/**
@@ -467,7 +467,7 @@ class ImageTextExtraction extends Feature {
 	public function sanitize_default_feature_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
-		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
+		$new_settings['processing_mode'] = $this->sanitize_processing_mode( $new_settings['processing_mode'] ?? null, $settings['processing_mode'] );
 
 		return $new_settings;
 	}

@@ -28,14 +28,14 @@ class BulkActions {
 	 *
 	 * @var \Classifai\Features\Feature[]
 	 */
-	private $language_processing_features = [];
+	private $language_processing_features = array();
 
 	/**
 	 * Array of media processing features.
 	 *
 	 * @var \Classifai\Features\Feature[]
 	 */
-	private $media_processing_features = [];
+	private $media_processing_features = array();
 
 	/**
 	 * Check to see if we can register this class.
@@ -53,19 +53,19 @@ class BulkActions {
 		$this->register_language_processing_hooks();
 		$this->register_image_processing_hooks();
 
-		add_action( 'admin_notices', [ $this, 'bulk_action_admin_notice' ] );
+		add_action( 'admin_notices', array( $this, 'bulk_action_admin_notice' ) );
 	}
 
 	/**
 	 * Register hooks for the features.
 	 */
 	public function register_language_processing_hooks() {
-		$this->language_processing_features = [
+		$this->language_processing_features = array(
 			new Classification(),
 			new ExcerptGeneration(),
 			new TextToSpeech(),
 			new Moderation(),
-		];
+		);
 
 		foreach ( $this->language_processing_features as $feature ) {
 			if ( ! $feature->is_feature_enabled() ) {
@@ -78,8 +78,8 @@ class BulkActions {
 				Moderation::ID === $feature::ID &&
 				in_array( 'comments', $feature->get_moderation_content_settings(), true )
 			) {
-				add_filter( 'bulk_actions-edit-comments', [ $this, 'register_bulk_actions_comments' ] );
-				add_filter( 'handle_bulk_actions-edit-comments', [ $this, 'bulk_action_handler_comments' ], 10, 3 );
+				add_filter( 'bulk_actions-edit-comments', array( $this, 'register_bulk_actions_comments' ) );
+				add_filter( 'handle_bulk_actions-edit-comments', array( $this, 'bulk_action_handler_comments' ), 10, 3 );
 			}
 
 			if ( ! isset( $settings['post_types'] ) ) {
@@ -91,13 +91,13 @@ class BulkActions {
 					continue;
 				}
 
-				add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_language_processing_actions' ] );
-				add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'language_processing_actions_handler' ], 10, 3 );
+				add_filter( "bulk_actions-edit-$post_type", array( $this, 'register_language_processing_actions' ) );
+				add_filter( "handle_bulk_actions-edit-$post_type", array( $this, 'language_processing_actions_handler' ), 10, 3 );
 
 				if ( is_post_type_hierarchical( $post_type ) ) {
-					add_filter( 'page_row_actions', [ $this, 'register_language_processing_row_action' ], 10, 2 );
+					add_filter( 'page_row_actions', array( $this, 'register_language_processing_row_action' ), 10, 2 );
 				} else {
-					add_filter( 'post_row_actions', [ $this, 'register_language_processing_row_action' ], 10, 2 );
+					add_filter( 'post_row_actions', array( $this, 'register_language_processing_row_action' ), 10, 2 );
 				}
 			}
 		}
@@ -195,10 +195,10 @@ class BulkActions {
 
 					if ( ! is_wp_error( $excerpt ) ) {
 						wp_update_post(
-							[
+							array(
 								'ID'           => $post_id,
 								'post_excerpt' => $excerpt,
-							]
+							)
 						);
 					}
 					break;
@@ -362,18 +362,18 @@ class BulkActions {
 	 * Register Image Processing hooks.
 	 */
 	public function register_image_processing_hooks() {
-		$this->media_processing_features = [
+		$this->media_processing_features = array(
 			new DescriptiveTextGenerator(),
 			new ImageTagsGenerator(),
 			new ImageCropping(),
 			new ImageTextExtraction(),
 			new PDFTextExtraction(),
 			new AudioTranscriptsGeneration(),
-		];
+		);
 
-		add_filter( 'bulk_actions-upload', [ $this, 'register_media_processing_media_bulk_actions' ] );
-		add_filter( 'handle_bulk_actions-upload', [ $this, 'media_processing_bulk_action_handler' ], 10, 3 );
-		add_filter( 'media_row_actions', [ $this, 'register_media_processing_row_action' ], 10, 2 );
+		add_filter( 'bulk_actions-upload', array( $this, 'register_media_processing_media_bulk_actions' ) );
+		add_filter( 'handle_bulk_actions-upload', array( $this, 'media_processing_bulk_action_handler' ), 10, 3 );
+		add_filter( 'media_row_actions', array( $this, 'register_media_processing_row_action' ), 10, 2 );
 	}
 
 	/**
@@ -593,6 +593,7 @@ class BulkActions {
 			},
 			array_merge( $this->language_processing_features, $this->media_processing_features )
 		);
+		$feature_id      = '';
 
 		if ( empty( $all_feature_ids ) ) {
 			return;
@@ -676,13 +677,13 @@ class BulkActions {
 
 		echo wp_kses(
 			$output,
-			[
-				'div' => [
-					'class' => [],
-					'id'    => [],
-				],
-				'p'   => [],
-			]
+			array(
+				'div' => array(
+					'class' => array(),
+					'id'    => array(),
+				),
+				'p'   => array(),
+			)
 		);
 	}
 }

@@ -28,7 +28,7 @@ class UsageTracking extends Service {
 		/**
 		 * Filter the service providers for Usage Tracking service.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 * @hook classifai_usage_tracking_service_providers
 		 *
 		 * @param array $providers Array of available providers for the service.
@@ -37,9 +37,9 @@ class UsageTracking extends Service {
 		 */
 		return apply_filters(
 			'classifai_usage_tracking_service_providers',
-			[
+			array(
 				'Classifai\Providers\OpenAI\UsageTracking',
-			]
+			)
 		);
 	}
 }

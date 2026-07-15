@@ -86,6 +86,40 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		$this->assertNotFalse( $meta );
 	}
 
+	/**
+	 * Tests the function providing debug information.
+	 *
+	 * Merged from the former tests/Integration/Azure/ComputerVisionTest.php.
+	 */
+	public function test_get_debug_information() {
+		$provider = new ComputerVision( new \Classifai\Features\DescriptiveTextGenerator() );
+
+		$this->assertEquals(
+			[
+				'Generate descriptive text',
+				'Confidence threshold',
+				'Latest response:',
+			],
+			array_keys( $provider->get_debug_information() )
+		);
+
+		$this->assertEquals(
+			[
+				'Generate descriptive text' => '0, 0, 0',
+				'Confidence threshold'      => 70,
+				'Latest response:'          => 'N/A',
+			],
+			$provider->get_debug_information(
+				[
+					'url'               => 'my-azure-url.com',
+					'caption_threshold' => 77,
+					'authenticated'     => true,
+				],
+				true
+			)
+		);
+	}
+
 	public function test_alt_text_option_reformatting() {
 		add_option( 'classifai_feature_descriptive_text_generator', array() );
 

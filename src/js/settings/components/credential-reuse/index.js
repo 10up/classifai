@@ -63,7 +63,7 @@ export const CredentialReuseModal = ( {
 			if ( providerIds.length > 0 ) {
 				setSelectedProvider( providerIds[ 0 ] );
 			}
-		} catch ( error ) {
+		} catch {
 			// Error handled gracefully
 		} finally {
 			setIsLoadingCredentials( false );
@@ -103,7 +103,7 @@ export const CredentialReuseModal = ( {
 
 			onCredentialsReused( selectedProvider );
 			onClose();
-		} catch ( error ) {
+		} catch {
 			// Error handled gracefully
 		} finally {
 			setIsLoading( false );

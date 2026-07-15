@@ -6,7 +6,7 @@
  * Feature-level config. Used at runtime when Providers need
  * api_key, endpoint_url, etc.
  *
- * @since x.x.x
+ * @since 3.8.0
  */
 
 namespace Classifai\Providers;
@@ -32,7 +32,7 @@ class CredentialResolver {
 	 * @param array  $feature_provider_settings The Provider specific Feature settings.
 	 * @return array Effective credentials for the Provider.
 	 */
-	public static function resolve( string $provider_id, array $feature_provider_settings = [] ): array {
+	public static function resolve( string $provider_id, array $feature_provider_settings = array() ): array {
 		$profile_id = ProviderProfiles::get_profile_for_provider( $provider_id );
 		if ( null === $profile_id ) {
 			return $feature_provider_settings;

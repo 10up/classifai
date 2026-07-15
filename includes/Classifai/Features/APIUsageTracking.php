@@ -74,18 +74,18 @@ class APIUsageTracking extends Feature {
 	 *
 	 * @var array
 	 */
-	public $usage_data = [
+	public $usage_data = array(
 		'mtd'          => 0, // Current month to date usage.
 		'ytd'          => 0, // Year to date usage.
 		'all_time'     => 0, // All time usage.
-		'years'        => [], // Yearly usage by year.
+		'years'        => array(), // Yearly usage by year.
 		'years_total'  => 0, // Total usage for all past years.
-		'months'       => [], // Monthly usage by month for current year.
+		'months'       => array(), // Monthly usage by month for current year.
 		'months_total' => 0, // Total usage for all past months.
 		'currency'     => 'USD', // Currency of the usage.
 		'last_updated' => null, // Last updated timestamp.
 		'start_year'   => 2020, // Start year of the usage.
-	];
+	);
 
 	/**
 	 * Constructor.
@@ -97,9 +97,9 @@ class APIUsageTracking extends Feature {
 		$this->provider_instances = $this->get_provider_instances( UsageTrackingService::get_service_providers() );
 
 		// Contains just the Providers this Feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			OpenAIUsageTracking::ID => __( 'OpenAI', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -111,12 +111,12 @@ class APIUsageTracking extends Feature {
 		$settings = parent::get_default_settings();
 
 		if ( empty( $settings['roles'] ) ) {
-			$settings['roles'] = [];
+			$settings['roles'] = array();
 		}
 
-		$settings['roles'] = [
+		$settings['roles'] = array(
 			'administrator' => 'administrator',
-		];
+		);
 
 		return $settings;
 	}
@@ -136,7 +136,7 @@ class APIUsageTracking extends Feature {
 	 * @return array
 	 */
 	public function get_usage_data(): array {
-		return get_option( self::USAGE_DATA_KEY, [] );
+		return get_option( self::USAGE_DATA_KEY, array() );
 	}
 
 	/**
@@ -156,11 +156,11 @@ class APIUsageTracking extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
+		return array(
 			'provider'       => OpenAIUsageTracking::ID,
 			'api_start_year' => 2020,
-			'usage_data'     => [],
-		];
+			'usage_data'     => array(),
+		);
 	}
 
 	/**
@@ -168,15 +168,15 @@ class APIUsageTracking extends Feature {
 	 */
 	public function feature_setup() {
 
-		add_filter( 'classifai_pre_fetch_feature_response', [ $this, 'pre_fetch_feature_response' ], 10, 2 );
+		add_filter( 'classifai_pre_fetch_feature_response', array( $this, 'pre_fetch_feature_response' ), 10, 2 );
 
-		add_action( 'rest_api_init', [ $this, 'rest_api_init' ] );
-		add_action( 'admin_init', [ $this, 'maybe_schedule_cron' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
-		add_action( 'wp_dashboard_setup', [ $this, 'register_dashboard_widget' ] );
+		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
+		add_action( 'admin_init', array( $this, 'maybe_schedule_cron' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
+		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 
-		add_action( self::FORCE_CRON_HOOK, [ $this, 'run_usage_force_refresh' ] );
-		add_action( self::CRON_HOOK, [ $this, 'run_usage_refresh' ] );
+		add_action( self::FORCE_CRON_HOOK, array( $this, 'run_usage_force_refresh' ) );
+		add_action( self::CRON_HOOK, array( $this, 'run_usage_refresh' ) );
 	}
 
 	/**
@@ -189,7 +189,7 @@ class APIUsageTracking extends Feature {
 	 */
 	public function pre_fetch_feature_response( $response, $provider_instance ) {
 		$usage_tracking_provider = $this->get_feature_provider_instance();
-		$provider_ids            = [];
+		$provider_ids            = array();
 
 		if ( ! empty( $usage_tracking_provider ) && $usage_tracking_provider instanceof UsageTrackingProvider ) {
 			$provider_ids = $usage_tracking_provider->get_provider_ids();
@@ -209,9 +209,9 @@ class APIUsageTracking extends Feature {
 			return new WP_Error(
 				'classifai_hard_limit_reached',
 				__( 'Usage has reached the configured hard limit. Re-enable in ClassifAI -> Usage Tracking -> AI usage tracking.', 'classifai' ),
-				[
+				array(
 					'status' => 403,
-				]
+				)
 			);
 		}
 
@@ -226,22 +226,22 @@ class APIUsageTracking extends Feature {
 		register_setting(
 			$this->get_option_name(),
 			self::FORCE_REFRESH_KEY,
-			[
+			array(
 				'show_in_rest' => true,
 				'type'         => 'boolean',
 				'description'  => __( 'Whether to force refresh the usage data.', 'classifai' ),
 				'default'      => false,
-			]
+			)
 		);
 
 		register_rest_route(
 			'classifai/v1',
 			'/api-usage-tracking/force-refresh',
-			[
+			array(
 				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
-				'permission_callback' => [ $this, 'rest_endpoint_permissions_check' ],
-			]
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
+				'permission_callback' => array( $this, 'rest_endpoint_permissions_check' ),
+			)
 		);
 	}
 
@@ -250,7 +250,7 @@ class APIUsageTracking extends Feature {
 	 *
 	 * @param WP_REST_Request $request The full request object.
 	 *
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function rest_endpoint_callback( WP_REST_Request $request ) {
 
@@ -266,13 +266,13 @@ class APIUsageTracking extends Feature {
 			);
 		}
 
-		if ( function_exists( 'as_has_scheduled_action' ) && \as_has_scheduled_action( self::FORCE_CRON_HOOK, [], 'classifai' ) ) {
+		if ( function_exists( 'as_has_scheduled_action' ) && \as_has_scheduled_action( self::FORCE_CRON_HOOK, array(), 'classifai' ) ) {
 			return rest_ensure_response(
 				new WP_Error( 'cron_already_scheduled', __( 'Cron job already scheduled.', 'classifai' ) )
 			);
 		}
 
-		$cron_scheduled = \as_enqueue_async_action( self::FORCE_CRON_HOOK, [], 'classifai' );
+		$cron_scheduled = \as_enqueue_async_action( self::FORCE_CRON_HOOK, array(), 'classifai' );
 
 		if ( empty( $cron_scheduled ) ) {
 			return rest_ensure_response(
@@ -283,9 +283,9 @@ class APIUsageTracking extends Feature {
 		update_option( self::FORCE_REFRESH_KEY, true );
 
 		return rest_ensure_response(
-			[
+			array(
 				'success' => true,
-			]
+			)
 		);
 	}
 
@@ -335,7 +335,7 @@ class APIUsageTracking extends Feature {
 		/**
 		 * Filter the refresh interval for the AI API usage tracking.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 * @hook classifai_api_usage_refresh_interval
 		 *
 		 * @param int $interval The refresh interval in seconds.
@@ -344,8 +344,8 @@ class APIUsageTracking extends Feature {
 		 */
 		$interval = apply_filters( 'classifai_api_usage_refresh_interval', $interval );
 
-		if ( ! \as_has_scheduled_action( self::CRON_HOOK, [], 'classifai' ) ) {
-			\as_schedule_recurring_action( time(), $interval, self::CRON_HOOK, [], 'classifai' );
+		if ( ! \as_has_scheduled_action( self::CRON_HOOK, array(), 'classifai' ) ) {
+			\as_schedule_recurring_action( time(), $interval, self::CRON_HOOK, array(), 'classifai' );
 		}
 	}
 
@@ -378,7 +378,7 @@ class APIUsageTracking extends Feature {
 		wp_add_dashboard_widget(
 			'classifai_api_usage',
 			__( 'AI Usage Tracking', 'classifai' ),
-			[ $this, 'render_dashboard_widget' ],
+			array( $this, 'render_dashboard_widget' ),
 			null,
 			null,
 			'normal'
@@ -435,7 +435,7 @@ class APIUsageTracking extends Feature {
 					?>
 				</li>
 			</ul>
-			<?php if ( 0 < $usage['last_updated'] ) { ?>
+			<?php if ( ! empty( $usage['last_updated'] ) && 0 < $usage['last_updated'] ) { ?>
 				<p class="classifai-api-usage-updated">
 					<?php
 					/* translators: %s: human-readable time */
@@ -494,7 +494,7 @@ class APIUsageTracking extends Feature {
 		/**
 		 * Fires after AI usage has been updated from the API.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 *
 		 * @hook classifai_api_usage_updated
 		 *
@@ -502,7 +502,7 @@ class APIUsageTracking extends Feature {
 		 * @param array $settings Settings.
 		 * @param bool  $force_refresh Whether to force the refresh of the usage data.
 		 */
-		do_action( 'classifai_api_usage_updated', $usage_data, $settings ?? [], $force_refresh );
+		do_action( 'classifai_api_usage_updated', $usage_data, $settings ?? array(), $force_refresh );
 
 		$this->check_hard_threshold( $usage_data, $settings, $provider );
 		$this->check_soft_threshold( $usage_data, $settings, $provider );
@@ -570,7 +570,7 @@ class APIUsageTracking extends Feature {
 		if ( empty( $settings['soft_threshold_enabled'] ) || empty( $settings['soft_threshold_amount'] ) ) {
 			// Remove the sent key from the pricing option if already set.
 			unset( $settings[ $sent_key ] );
-			$this->update_settings( [ $provider::ID => $settings ] );
+			$this->update_settings( array( $provider::ID => $settings ) );
 			return;
 		}
 
@@ -581,14 +581,14 @@ class APIUsageTracking extends Feature {
 		if ( $amount < $threshold ) {
 			// Remove the sent key from the pricing option if already set.
 			unset( $settings[ $sent_key ] );
-			$this->update_settings( [ $provider::ID => $settings ] );
+			$this->update_settings( array( $provider::ID => $settings ) );
 			return;
 		}
 
 		/**
 		 * Fires when the soft threshold is exceeded.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 *
 		 * @hook classifai_api_soft_threshold_exceeded
 		 *
@@ -622,15 +622,15 @@ class APIUsageTracking extends Feature {
 			$period_label
 		);
 
-		$headers    = [];
+		$headers    = array();
 		$bcc_emails = array_slice( $emails, 1 );
 		if ( ! empty( $bcc_emails ) ) {
 			$headers[] = 'Bcc: ' . implode( ', ', $bcc_emails );
 		}
-		wp_mail( $emails[0], $subject, $message, $headers );
+		wp_mail( $emails[0], $subject, $message, $headers ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_mail_wp_mail
 
 		$settings[ $sent_key ] = $period_key;
-		$this->update_settings( [ $provider::ID => $settings ] );
+		$this->update_settings( array( $provider::ID => $settings ) );
 	}
 
 	/**
@@ -648,7 +648,7 @@ class APIUsageTracking extends Feature {
 
 			// Remove the sent key from the pricing option.
 			unset( $settings[ $sent_key ] );
-			$this->update_settings( [ $provider::ID => $settings ] );
+			$this->update_settings( array( $provider::ID => $settings ) );
 			return;
 		}
 
@@ -661,7 +661,7 @@ class APIUsageTracking extends Feature {
 
 			// Remove the sent key from the pricing option.
 			unset( $settings[ $sent_key ] );
-			$this->update_settings( [ $provider::ID => $settings ] );
+			$this->update_settings( array( $provider::ID => $settings ) );
 			return;
 		}
 
@@ -670,7 +670,7 @@ class APIUsageTracking extends Feature {
 		/**
 		 * Fires when the hard threshold is exceeded.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 *
 		 * @hook classifai_api_hard_threshold_exceeded
 		 *
@@ -704,15 +704,15 @@ class APIUsageTracking extends Feature {
 			$period_label
 		);
 
-		$headers    = [];
+		$headers    = array();
 		$bcc_emails = array_slice( $emails, 1 );
 		if ( ! empty( $bcc_emails ) ) {
 			$headers[] = 'Bcc: ' . implode( ', ', $bcc_emails );
 		}
-		wp_mail( $emails[0], $subject, $message, $headers );
+		wp_mail( $emails[0], $subject, $message, $headers ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_mail_wp_mail
 
 		$settings[ $sent_key ] = $period_key;
-		$this->update_settings( [ $provider::ID => $settings ] );
+		$this->update_settings( array( $provider::ID => $settings ) );
 	}
 
 	/**
@@ -744,9 +744,9 @@ class APIUsageTracking extends Feature {
 				break;
 		}
 
-		return [
+		return array(
 			'period_key'   => $period_key,
 			'period_label' => $period_label,
-		];
+		);
 	}
 }

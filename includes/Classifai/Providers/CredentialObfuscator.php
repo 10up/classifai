@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Handles obfuscation of sensitive credentials when displayed in the admin UI
  * and preserves original values when obfuscated values are submitted.
  *
- * @since x.x.x
+ * @since 3.8.0
  */
 class CredentialObfuscator {
 
@@ -43,7 +43,7 @@ class CredentialObfuscator {
 	 * Returns first N characters followed by asterisks.
 	 * Example: "sk-abc123xyz789" becomes "sk-abc************"
 	 *
-	 * @since x.x.x
+	 * @since 3.8.0
 	 *
 	 * @param string $value The credential value to obfuscate.
 	 * @return string The obfuscated value, or original if too short.
@@ -78,7 +78,7 @@ class CredentialObfuscator {
 	 *
 	 * Detects values containing 3 or more consecutive asterisks.
 	 *
-	 * @since x.x.x
+	 * @since 3.8.0
 	 *
 	 * @param string $value The value to check.
 	 * @return bool True if the value appears to be obfuscated.
@@ -97,7 +97,7 @@ class CredentialObfuscator {
 	 *
 	 * Returns false for non-sensitive fields like authenticated, endpoint_url, etc.
 	 *
-	 * @since x.x.x
+	 * @since 3.8.0
 	 *
 	 * @param string $field The field name to check.
 	 * @param string $profile_id The profile ID.
@@ -113,7 +113,7 @@ class CredentialObfuscator {
 	 *
 	 * Uses ProviderProfiles to determine which fields are credentials.
 	 *
-	 * @since x.x.x
+	 * @since 3.8.0
 	 *
 	 * @param string $provider_id The Provider ID (e.g., 'openai_chatgpt').
 	 * @param array  $settings    The Provider settings array.
@@ -147,7 +147,7 @@ class CredentialObfuscator {
 	 * Iterates through all Provider settings in the Feature and obfuscates
 	 * their credential fields.
 	 *
-	 * @since x.x.x
+	 * @since 3.8.0
 	 *
 	 * @param array $settings The complete Feature settings array.
 	 * @return array The settings with all Provider credentials obfuscated.
@@ -156,7 +156,7 @@ class CredentialObfuscator {
 		$profiles = ProviderProfiles::get_all_profiles();
 
 		// Get all Provider IDs from profiles.
-		$all_provider_ids = [];
+		$all_provider_ids = array();
 		foreach ( $profiles as $profile ) {
 			$all_provider_ids = array_merge( $all_provider_ids, $profile['provider_ids'] );
 		}
@@ -177,7 +177,7 @@ class CredentialObfuscator {
 	 * If a new value is obfuscated, use the existing value instead.
 	 * This prevents obfuscated placeholder values from being saved to the database.
 	 *
-	 * @since x.x.x
+	 * @since 3.8.0
 	 *
 	 * @param array  $new_settings      The new settings being saved.
 	 * @param array  $existing_settings The current saved settings.
@@ -220,7 +220,7 @@ class CredentialObfuscator {
 	 * when obfuscated values are submitted. This ensures switching Providers
 	 * doesn't save obfuscated values for inactive Providers.
 	 *
-	 * @since x.x.x
+	 * @since 3.8.0
 	 *
 	 * @param array $new_settings      The new Feature settings being saved.
 	 * @param array $existing_settings The current saved Feature settings.
@@ -230,7 +230,7 @@ class CredentialObfuscator {
 		$profiles = ProviderProfiles::get_all_profiles();
 
 		// Get all Provider IDs from profiles.
-		$all_provider_ids = [];
+		$all_provider_ids = array();
 		foreach ( $profiles as $profile ) {
 			$all_provider_ids = array_merge( $all_provider_ids, $profile['provider_ids'] );
 		}
@@ -240,7 +240,7 @@ class CredentialObfuscator {
 			if ( is_array( $value ) && in_array( $key, $all_provider_ids, true ) ) {
 				$new_settings[ $key ] = self::merge_credentials(
 					$value,
-					$existing_settings[ $key ] ?? [],
+					$existing_settings[ $key ] ?? array(),
 					$key
 				);
 			}

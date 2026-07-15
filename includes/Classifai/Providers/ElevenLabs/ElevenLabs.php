@@ -62,7 +62,7 @@ trait ElevenLabs {
 	 * @param array  $options The options for the request.
 	 * @return array|WP_Error
 	 */
-	public function request( string $url, string $api_key = '', string $type = 'post', array $options = [] ) {
+	public function request( string $url, string $api_key = '', string $type = 'post', array $options = array() ) {
 		/**
 		 * Filter the URL for the request.
 		 *
@@ -79,9 +79,9 @@ trait ElevenLabs {
 		// Set our default options.
 		$options = wp_parse_args(
 			$options,
-			[
+			array(
 				'timeout' => 90, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			]
+			)
 		);
 
 		/**
@@ -99,11 +99,11 @@ trait ElevenLabs {
 
 		// Set our default headers.
 		if ( empty( $options['headers'] ) ) {
-			$options['headers'] = [];
+			$options['headers'] = array();
 		}
 
 		if ( ! isset( $options['headers']['xi-api-key'] ) ) {
-			$options['headers']['xi-api-key'] = $this->get_credential( 'api_key', [ static::ID => [ 'api_key' => $api_key ] ] ) ?? '';
+			$options['headers']['xi-api-key'] = $this->get_credential( 'api_key', array( static::ID => array( 'api_key' => $api_key ) ) ) ?? '';
 		}
 
 		if ( ! isset( $options['headers']['Content-Type'] ) ) {
@@ -162,7 +162,7 @@ trait ElevenLabs {
 	 * @param array $settings     Current settings, if any.
 	 * @return array
 	 */
-	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
+	public function sanitize_api_key_settings( array $new_settings = array(), array $settings = array() ): array {
 		$authenticated = $this->authenticate_credentials( $new_settings );
 
 		if ( is_wp_error( $authenticated ) ) {
@@ -184,7 +184,7 @@ trait ElevenLabs {
 
 		if ( is_wp_error( $models ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
-			$new_settings[ static::ID ]['models']        = [];
+			$new_settings[ static::ID ]['models']        = array();
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
 			$new_settings[ static::ID ]['models']        = $models;
@@ -195,7 +195,7 @@ trait ElevenLabs {
 
 				if ( is_wp_error( $voices ) ) {
 					$new_settings[ static::ID ]['authenticated'] = false;
-					$new_settings[ static::ID ]['voices']        = [];
+					$new_settings[ static::ID ]['voices']        = array();
 					add_settings_error(
 						'api_key',
 						'classifai-elevenlabs-voices-error',
@@ -219,11 +219,11 @@ trait ElevenLabs {
 	 * @param array $settings The settings.
 	 * @return bool|WP_Error
 	 */
-	public function authenticate_credentials( array $settings = [] ) {
+	public function authenticate_credentials( array $settings = array() ) {
 		$api_key = $settings[ static::ID ]['api_key'] ?? '';
 
 		// Make request to ensure credentials work.
-		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get', [ 'use_vip' => true ] );
+		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get', array( 'use_vip' => true ) );
 
 		return ! is_wp_error( $response ) ? true : $response;
 	}
@@ -235,7 +235,7 @@ trait ElevenLabs {
 	 * @return array|WP_Error
 	 */
 	protected function get_models( string $api_key = '' ) {
-		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get', [ 'use_vip' => true ] );
+		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get', array( 'use_vip' => true ) );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -253,11 +253,11 @@ trait ElevenLabs {
 
 		// Get the model data we need.
 		$models = array_map(
-			fn( $model ) => [
+			fn( $model ) => array(
 				'id'              => $model['model_id'] ?? '',
 				'display_name'    => $model['name'] ?? '',
 				'max_text_length' => $model['maximum_text_length_per_request'] ?? '',
-			],
+			),
 			$response
 		);
 
@@ -271,7 +271,7 @@ trait ElevenLabs {
 	 * @return array|WP_Error
 	 */
 	protected function get_voices( string $api_key = '' ) {
-		$response = $this->request( $this->get_api_url( 'voices?per_page=100' ), $api_key, 'get', [ 'use_vip' => true ] );
+		$response = $this->request( $this->get_api_url( 'voices?per_page=100' ), $api_key, 'get', array( 'use_vip' => true ) );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -289,12 +289,12 @@ trait ElevenLabs {
 				if ( ! empty( $accent ) ) {
 					$voice_name = sprintf( '%s (%s)', $voice_name, ucfirst( $accent ) );
 				}
-				return [
+				return array(
 					'id'   => $voice['voice_id'] ?? '',
 					'name' => $voice_name,
-				];
+				);
 			},
-			$response['voices'] ?? []
+			$response['voices'] ?? array()
 		);
 
 		return $voices;

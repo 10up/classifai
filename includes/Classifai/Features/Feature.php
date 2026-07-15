@@ -46,7 +46,7 @@ abstract class Feature {
 	 *
 	 * @var array
 	 */
-	public $roles = [];
+	public $roles = array();
 
 	/**
 	 * Array of provider classes.
@@ -55,27 +55,29 @@ abstract class Feature {
 	 *
 	 * @var \Classifai\Providers\Provider[]
 	 */
-	public $provider_instances = [];
+	public $provider_instances = array();
 
 	/**
 	 * Array of providers supported by the feature.
 	 *
-	 * @var \Classifai\Providers\Provider[]
+	 * Maps each supported provider's ID to its display label.
+	 *
+	 * @var array<string, string>
 	 */
-	public $supported_providers = [];
+	public $supported_providers = array();
 
 	/**
 	 * Set up necessary hooks.
 	 */
 	public function setup() {
-		add_action( 'admin_init', [ $this, 'setup_roles' ] );
-		add_action( 'rest_api_init', [ $this, 'setup_roles' ] );
+		add_action( 'admin_init', array( $this, 'setup_roles' ) );
+		add_action( 'rest_api_init', array( $this, 'setup_roles' ) );
 		if ( should_use_legacy_settings_panel() ) {
-			add_action( 'admin_init', [ $this, 'register_setting' ] );
-			add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+			add_action( 'admin_init', array( $this, 'register_setting' ) );
+			add_action( 'admin_init', array( $this, 'setup_fields_sections' ) );
 		}
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'register_plugin_area_script' ] );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_plugin_area_script' ) );
 
 		if ( $this->is_feature_enabled() ) {
 			$this->feature_setup();
@@ -99,8 +101,16 @@ abstract class Feature {
 		}
 
 		$default_settings = $this->get_default_settings();
-		$this->roles      = get_editable_roles() ?? [];
-		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
+		$editable_roles   = get_editable_roles() ?? array();
+		$this->roles      = array();
+
+		foreach ( $editable_roles as $role_key => $role ) {
+			if ( empty( $role['name'] ) ) {
+				continue;
+			}
+
+			$this->roles[ $role_key ] = $role['name'];
+		}
 
 		// Remove subscriber from the list of roles.
 		unset( $this->roles['subscriber'] );
@@ -182,15 +192,15 @@ abstract class Feature {
 		add_settings_field(
 			'status',
 			esc_html__( 'Enable feature', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'status',
 				'input_type'    => 'checkbox',
 				'default_value' => $settings['status'],
 				'description'   => $this->get_enable_description(),
-			]
+			)
 		);
 
 		// Add all the needed provider fields.
@@ -228,12 +238,12 @@ abstract class Feature {
 	 * @return array
 	 */
 	protected function get_default_settings(): array {
-		$shared_defaults   = [
+		$shared_defaults   = array(
 			'status'             => '0',
 			'roles'              => array_combine( array_keys( $this->roles ), array_keys( $this->roles ) ),
-			'users'              => [],
+			'users'              => array(),
 			'user_based_opt_out' => 'no',
-		];
+		);
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = $this->get_feature_default_settings();
 
@@ -351,9 +361,9 @@ abstract class Feature {
 		register_setting(
 			$this->get_option_name(),
 			$this->get_option_name(),
-			[
-				'sanitize_callback' => [ $this, 'sanitize_settings' ],
-			]
+			array(
+				'sanitize_callback' => array( $this, 'sanitize_settings' ),
+			)
 		);
 	}
 
@@ -369,12 +379,12 @@ abstract class Feature {
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
 		$defaults = $this->get_default_settings();
-		$settings = get_option( $this->get_option_name(), [] );
+		$settings = get_option( $this->get_option_name(), array() );
 		$settings = $this->merge_settings( (array) $settings, (array) $defaults );
 
 		// If saved provider is not supported anymore, reset it.
@@ -395,7 +405,7 @@ abstract class Feature {
 	 * @return array
 	 */
 	public function get_provider_default_settings(): array {
-		$provider_settings = [];
+		$provider_settings = array();
 
 		foreach ( array_keys( $this->get_providers() ) as $provider_id ) {
 			$provider = $this->get_feature_provider_instance( $provider_id );
@@ -427,14 +437,14 @@ abstract class Feature {
 		add_settings_field(
 			'provider',
 			esc_html__( 'Select a provider', 'classifai' ),
-			[ $this, 'render_select' ],
+			array( $this, 'render_select' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'provider',
 				'options'       => $this->get_providers(),
 				'default_value' => $settings['provider'],
-			]
+			)
 		);
 
 		foreach ( array_keys( $this->get_providers() ) as $provider_id ) {
@@ -455,7 +465,7 @@ abstract class Feature {
 	 * @param array $defaults  Default feature and providers settings data.
 	 * @return array
 	 */
-	protected function merge_settings( array $settings = [], array $defaults = [] ): array {
+	protected function merge_settings( array $settings = array(), array $defaults = array() ): array {
 		foreach ( $defaults as $key => $value ) {
 			if ( ! array_key_exists( $key, $settings ) ) {
 				$settings[ $key ] = $defaults[ $key ];
@@ -525,45 +535,45 @@ abstract class Feature {
 		add_settings_field(
 			'roles',
 			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
+			array( $this, 'render_checkbox_group' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'      => 'roles',
 				'options'        => $this->roles,
 				'default_values' => $settings['roles'],
 				'description'    => __( 'Choose which roles are allowed to access this feature.', 'classifai' ),
 				'class'          => 'allowed_roles_row',
-			]
+			)
 		);
 
 		add_settings_field(
 			'users',
 			esc_html__( 'Allowed users', 'classifai' ),
-			[ $this, 'render_allowed_users' ],
+			array( $this, 'render_allowed_users' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'users',
 				'default_value' => $settings['users'],
 				'description'   => __( 'Users who have access to this feature.', 'classifai' ),
 				'class'         => 'allowed_users_row',
-			]
+			)
 		);
 
 		add_settings_field(
 			'user_based_opt_out',
 			esc_html__( 'Enable user-based opt-out', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'     => 'user_based_opt_out',
 				'input_type'    => 'checkbox',
 				'default_value' => $settings['user_based_opt_out'],
 				'description'   => __( 'Enables ability for users to opt-out from their user profile page.', 'classifai' ),
 				'class'         => 'classifai-user-based-opt-out',
-			]
+			)
 		);
 	}
 
@@ -593,15 +603,15 @@ abstract class Feature {
 				$attrs = ' value="' . esc_attr( $value ) . '"';
 
 				if ( isset( $args['max'] ) && is_numeric( $args['max'] ) ) {
-					$attrs .= ' max="' . esc_attr( (float) $args['max'] ) . '"';
+					$attrs .= ' max="' . esc_attr( (string) (float) $args['max'] ) . '"';
 				}
 
 				if ( isset( $args['min'] ) && is_numeric( $args['min'] ) ) {
-					$attrs .= ' min="' . esc_attr( (float) $args['min'] ) . '"';
+					$attrs .= ' min="' . esc_attr( (string) (float) $args['min'] ) . '"';
 				}
 
 				if ( isset( $args['step'] ) && is_numeric( $args['step'] ) ) {
-					$attrs .= ' step="' . esc_attr( (float) $args['step'] ) . '"';
+					$attrs .= ' step="' . esc_attr( (string) (float) $args['step'] ) . '"';
 				}
 
 				$class = 'small-text';
@@ -634,6 +644,62 @@ abstract class Feature {
 	}
 
 	/**
+	 * Load a prompt from a file in the Feature's Prompts/ subdirectory.
+	 *
+	 * Prompt files live alongside the Feature class at
+	 * `Features/Prompts/{ShortClassName}/{name}.php` and must `return` a string.
+	 * Any keys in `$data` are extracted into the file's variable scope so prompts
+	 * can interpolate runtime values, e.g. `"Summarize in {$words} words."`.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $name The prompt file name without extension. Default 'default'.
+	 * @param array  $data Optional. Variables exposed to the prompt file.
+	 * @return string The prompt text, or an empty string if the file is missing.
+	 */
+	public function get_prompt( string $name = 'default', array $data = array() ): string {
+		$reflection = new \ReflectionClass( $this );
+		$file_name  = $reflection->getFileName();
+
+		if ( ! $file_name ) {
+			return '';
+		}
+
+		$file_path = trailingslashit( dirname( $file_name ) )
+			. 'Prompts/'
+			. $reflection->getShortName()
+			. '/'
+			. $name
+			. '.php';
+
+		if ( ! file_exists( $file_path ) || ! is_readable( $file_path ) ) {
+			return '';
+		}
+
+		if ( ! empty( $data ) ) {
+			extract( $data, EXTR_SKIP ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+		}
+
+		$content = require $file_path; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable
+		$prompt  = is_string( $content ) ? $content : '';
+
+		/**
+		 * Filter a Feature's default prompt loaded from file.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_feature_prompt
+		 *
+		 * @param string  $prompt  The prompt text.
+		 * @param string  $name    The prompt name (e.g. 'default', 'woocommerce').
+		 * @param array   $data    Data passed to the prompt file.
+		 * @param Feature $feature The feature instance.
+		 *
+		 * @return string The filtered prompt text.
+		 */
+		return apply_filters( 'classifai_feature_prompt', $prompt, $name, $data, $this );
+	}
+
+	/**
 	 * Generic prompt repeater field callback
 	 *
 	 * @since 2.4.0
@@ -643,7 +709,7 @@ abstract class Feature {
 	public function render_prompt_repeater_field( array $args ) {
 		$option_index      = $args['option_index'] ?? false;
 		$setting_index     = $this->get_settings( $option_index );
-		$prompts           = $setting_index[ $args['label_for'] ] ?? [];
+		$prompts           = $setting_index[ $args['label_for'] ] ?? array();
 		$class             = $args['class'] ?? 'large-text';
 		$placeholder       = $args['placeholder'] ?? '';
 		$field_name_prefix = sprintf(
@@ -749,7 +815,7 @@ abstract class Feature {
 
 		// Check for a default value
 		$saved   = ( empty( $saved ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;
-		$options = isset( $args['options'] ) ? $args['options'] : [];
+		$options = isset( $args['options'] ) ? $args['options'] : array();
 		?>
 
 		<select
@@ -889,7 +955,7 @@ abstract class Feature {
 		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
 		$setting_index = $this->get_settings( $option_index );
 		$value         = $setting_index[ $args['label_for'] ] ?? '';
-		$options       = $args['options'] ?? [];
+		$options       = $args['options'] ?? array();
 
 		if ( ! is_array( $options ) ) {
 			return;
@@ -957,10 +1023,10 @@ abstract class Feature {
 		$access        = false;
 		$user_id       = get_current_user_id();
 		$user          = get_user_by( 'id', $user_id );
-		$user_roles    = $user->roles ?? [];
+		$user_roles    = $user->roles ?? array();
 		$settings      = $this->get_settings();
-		$feature_roles = $settings['roles'] ?? [];
-		$feature_users = array_map( 'absint', $settings['users'] ?? [] );
+		$feature_roles = $settings['roles'] ?? array();
+		$feature_users = array_map( 'absint', $settings['users'] ?? array() );
 
 		$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
 
@@ -969,7 +1035,7 @@ abstract class Feature {
 		 */
 		// For super admins that don't have a specific role on a site, treat them as admins.
 		if ( is_multisite() && is_super_admin( $user_id ) && empty( $user_roles ) ) {
-			$user_roles = [ 'administrator' ];
+			$user_roles = array( 'administrator' );
 		}
 
 		$access = ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) );
@@ -1086,7 +1152,7 @@ abstract class Feature {
 	 */
 	public function get_supported_post_types(): array {
 		$settings   = $this->get_settings();
-		$post_types = [];
+		$post_types = array();
 
 		if ( isset( $settings['post_types'] ) && is_array( $settings['post_types'] ) ) {
 			foreach ( $settings['post_types'] as $post_type => $enabled ) {
@@ -1118,7 +1184,7 @@ abstract class Feature {
 	 */
 	public function get_supported_post_statuses(): array {
 		$settings      = $this->get_settings();
-		$post_statuses = [];
+		$post_statuses = array();
 
 		if ( ! empty( $settings ) && isset( $settings['post_statuses'] ) ) {
 			foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
@@ -1149,10 +1215,10 @@ abstract class Feature {
 	 * @param array $post_types Array of post types to filter taxonomies by, leave empty to get all taxonomies.
 	 * @return array
 	 */
-	public function get_taxonomies( array $post_types = [] ): array {
-		$taxonomies = get_taxonomies( [], 'objects' );
+	public function get_taxonomies( array $post_types = array() ): array {
+		$taxonomies = get_taxonomies( array(), 'objects' );
 		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
-		$supported  = [];
+		$supported  = array();
 
 		foreach ( $taxonomies as $taxonomy ) {
 			// Remove this taxonomy if it doesn't support at least one of our post types.
@@ -1192,7 +1258,7 @@ abstract class Feature {
 	 * @return array
 	 */
 	protected function get_provider_instances( array $services ): array {
-		$provider_instances = [];
+		$provider_instances = array();
 
 		foreach ( $services as $provider_class ) {
 			$provider_instances[] = new $provider_class();
@@ -1205,11 +1271,11 @@ abstract class Feature {
 	 * Returns the instance of the provider set for the feature.
 	 *
 	 * @param string $provider_id The ID of the provider.
-	 * @return \Classifai\Providers|null
+	 * @return \Classifai\Providers\Provider|null
 	 */
 	public function get_feature_provider_instance( string $provider_id = '' ) {
 		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );
-		$provider_instance = find_provider_class( $this->provider_instances ?? [], $provider_id );
+		$provider_instance = find_provider_class( $this->provider_instances, $provider_id );
 
 		if ( is_wp_error( $provider_instance ) ) {
 			return null;
@@ -1316,14 +1382,14 @@ abstract class Feature {
 			}
 		);
 
-		$common_debug_info = [
+		$common_debug_info = array(
 			__( 'Authenticated', 'classifai' )      => self::get_debug_value_text( $this->is_configured() ),
 			__( 'Status', 'classifai' )             => self::get_debug_value_text( $feature_settings['status'], 1 ),
-			__( 'Allowed roles', 'classifai' )      => implode( ', ', $roles ?? [] ),
-			__( 'Allowed users', 'classifai' )      => implode( ', ', $feature_settings['users'] ?? [] ),
+			__( 'Allowed roles', 'classifai' )      => implode( ', ', $roles ),
+			__( 'Allowed users', 'classifai' )      => implode( ', ', $feature_settings['users'] ?? array() ),
 			__( 'User based opt-out', 'classifai' ) => self::get_debug_value_text( $feature_settings['user_based_opt_out'], 1 ),
 			__( 'Provider', 'classifai' )           => $feature_settings['provider'],
-		];
+		);
 
 		if ( $provider && method_exists( $provider, 'get_debug_information' ) ) {
 			$all_debug_info = array_merge(
@@ -1359,7 +1425,7 @@ abstract class Feature {
 	 * @return string
 	 */
 	protected function get_data_attribute( array $args ): string {
-		$data_attr     = $args['data_attr'] ?? [];
+		$data_attr     = $args['data_attr'] ?? array();
 		$data_attr_str = '';
 
 		foreach ( $data_attr as $attr_key => $attr_value ) {
@@ -1400,9 +1466,9 @@ abstract class Feature {
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
 
 		/**
-		 * Filter the response before the feature api endpoint is called.
+		 * Filter the response before the Feature API endpoint is called.
 		 *
-		 * @since x.x.x
+		 * @since 3.8.0
 		 *
 		 * @hook classifai_pre_fetch_feature_response
 		 *
@@ -1419,7 +1485,7 @@ abstract class Feature {
 			return $pre_fetch_response;
 		}
 
-		if ( ! is_callable( [ $provider_instance, 'rest_endpoint_callback' ] ) ) {
+		if ( ! is_callable( array( $provider_instance, 'rest_endpoint_callback' ) ) ) {
 			return new WP_Error( 'invalid_route', esc_html__( 'The selected provider does not have a valid callback in place.', 'classifai' ) );
 		}
 

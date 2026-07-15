@@ -36,9 +36,9 @@ class ContentRecommendation extends Service {
 		 */
 		return apply_filters(
 			'classifai_recommendation_service_providers',
-			[
+			array(
 				'Classifai\Providers\OpenAI\Embeddings',
-			]
+			)
 		);
 	}
 }
