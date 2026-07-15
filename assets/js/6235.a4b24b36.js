@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkclassifai_docs=globalThis.webpackChunkclassifai_docs||[]).push([[6235],{56235(s,a,c){c.d(a,{createInfoServices:()=>i.v});var i=c(41009);c(6902)}}]);

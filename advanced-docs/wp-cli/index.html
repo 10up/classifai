@@ -1,29 +1,19 @@
-<!doctype html>
-<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-advanced-docs/wp-cli" data-has-hydrated="false">
-<head>
-<meta charset="UTF-8">
-<meta name="generator" content="Docusaurus v3.9.2">
-<title data-rh="true">WP-CLI commands | ClassifAI Developer Documentation</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://classifaiplugin.com/classifai/advanced-docs/wp-cli"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="WP-CLI commands | ClassifAI Developer Documentation"><meta data-rh="true" name="description" content="The following WP-CLI commands are supported by ClassifAI:"><meta data-rh="true" property="og:description" content="The following WP-CLI commands are supported by ClassifAI:"><link data-rh="true" rel="icon" href="/classifai/img/favicon.png"><link data-rh="true" rel="canonical" href="https://classifaiplugin.com/classifai/advanced-docs/wp-cli"><link data-rh="true" rel="alternate" href="https://classifaiplugin.com/classifai/advanced-docs/wp-cli" hreflang="en"><link data-rh="true" rel="alternate" href="https://classifaiplugin.com/classifai/advanced-docs/wp-cli" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Advanced Documentation","item":"https://classifaiplugin.com/classifai/advanced-docs/"},{"@type":"ListItem","position":2,"name":"WP-CLI commands","item":"https://classifaiplugin.com/classifai/advanced-docs/wp-cli"}]}</script><link rel="stylesheet" href="/classifai/assets/css/styles.2744fbb9.css">
-<script src="/classifai/assets/js/runtime~main.e96c2df7.js" defer="defer"></script>
-<script src="/classifai/assets/js/main.b631836c.js" defer="defer"></script>
-</head>
-<body class="navigation-with-keyboard">
-<svg style="display: none;"><defs>
-<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+<!doctype html><html lang=en dir=ltr class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-advanced-docs/wp-cli" data-has-hydrated=false><head><meta charset=UTF-8><meta name=generator content="Docusaurus v3.10.2"><title data-rh=true>WP-CLI commands | ClassifAI Developer Documentation</title><meta data-rh=true name=viewport content="width=device-width, initial-scale=1.0"/><meta data-rh=true name=twitter:card content=summary_large_image /><meta data-rh=true property=og:url content=https://classifaiplugin.com/classifai/advanced-docs/wp-cli /><meta data-rh=true property=og:locale content=en /><meta data-rh=true name=docusaurus_locale content=en /><meta data-rh=true name=docsearch:language content=en /><meta data-rh=true name=docusaurus_version content=current /><meta data-rh=true name=docusaurus_tag content=docs-default-current /><meta data-rh=true name=docsearch:version content=current /><meta data-rh=true name=docsearch:docusaurus_tag content=docs-default-current /><meta data-rh=true property=og:title content="WP-CLI commands | ClassifAI Developer Documentation"/><meta data-rh=true name=description content="The following WP-CLI commands are supported by ClassifAI:"/><meta data-rh=true property=og:description content="The following WP-CLI commands are supported by ClassifAI:"/><link data-rh=true rel=icon href=/classifai/img/favicon.png /><link data-rh=true rel=canonical href=https://classifaiplugin.com/classifai/advanced-docs/wp-cli /><link data-rh=true rel=alternate href=https://classifaiplugin.com/classifai/advanced-docs/wp-cli hreflang=en /><link data-rh=true rel=alternate href=https://classifaiplugin.com/classifai/advanced-docs/wp-cli hreflang=x-default /><script data-rh=true type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://classifaiplugin.com/classifai/advanced-docs/","name":"Advanced Documentation","position":1},{"@type":"ListItem","item":"https://classifaiplugin.com/classifai/advanced-docs/wp-cli","name":"WP-CLI commands","position":2}]}</script><link rel=stylesheet href=/classifai/assets/css/styles.e4409502.css /><script src=/classifai/assets/js/runtime~main.83f32587.js defer></script><script src=/classifai/assets/js/main.20c16d0a.js defer></script></head><body><svg style="display: none;"><defs>
+<symbol id=theme-svg-external-link viewBox="0 0 24 24"><path fill=currentColor d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
 </defs></svg>
-<script>document.documentElement.setAttribute("data-theme","light"),document.documentElement.setAttribute("data-theme-choice","light"),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/classifai/"><div class="navbar__logo"><img src="/classifai/img/logo.svg" alt="ClassifAI Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/classifai/img/logo.svg" alt="ClassifAI Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Developer Documentation</b></a><a class="navbar__item navbar__link" href="/classifai/get-started/">Get Started</a><a class="navbar__item navbar__link" href="/classifai/hooks">Hooks</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/10up/classifai" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="navbarSearchContainer_Bca1"><div class="navbar__search searchBarContainer_NW3z"><input placeholder="Search" aria-label="Search" class="navbar__search-input" value=""><div class="loadingRing_RJI3 searchBarLoadingRing_YnHq"><div></div><div></div><div></div><div></div></div></div></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/classifai/get-started/"><span title="Get Started" class="categoryLinkLabel_W154">Get Started</span></a><button aria-label="Expand sidebar category &#x27;Get Started&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/classifai/feature-configuration/"><span title="Feature Configuration" class="categoryLinkLabel_W154">Feature Configuration</span></a><button aria-label="Expand sidebar category &#x27;Feature Configuration&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" href="/classifai/advanced-docs/"><span title="Advanced Documentation" class="categoryLinkLabel_W154">Advanced Documentation</span></a><button aria-label="Collapse sidebar category &#x27;Advanced Documentation&#x27;" aria-expanded="true" type="button" class="clean-btn menu__caret"></button></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/classifai/advanced-docs/useful-snippets"><span title="Useful snippets" class="linkLabel_WmDU">Useful snippets</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/classifai/advanced-docs/prompt-examples"><span title="Prompt examples" class="linkLabel_WmDU">Prompt examples</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/classifai/advanced-docs/wp-cli"><span title="WP-CLI commands" class="linkLabel_WmDU">WP-CLI commands</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/classifai/advanced-docs/migration-guide-v2-to-v3"><span title="Migration guide (version 2 to version 3)" class="linkLabel_WmDU">Migration guide (version 2 to version 3)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/classifai/advanced-docs/chrome-built-in-ai"><span title=" Chrome built-in AI" class="linkLabel_WmDU"> Chrome built-in AI</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/classifai/advanced-docs/run-locally-hosted-llms"><span title="Run locally hosted LLMs" class="linkLabel_WmDU">Run locally hosted LLMs</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/classifai/advanced-docs/feature-provider-support"><span title="Providers supported per Feature" class="linkLabel_WmDU">Providers supported per Feature</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/classifai/advanced-docs/data-flow"><span title="Data Flow" class="linkLabel_WmDU">Data Flow</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/classifai/advanced-docs/extending-classifai"><span title="Extending ClassifAI" class="linkLabel_WmDU">Extending ClassifAI</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/classifai/advanced-docs/programmatic-credentials"><span title="Programmatic Credentials" class="linkLabel_WmDU">Programmatic Credentials</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/classifai/data-flow-diagrams/"><span title="Data Flow Diagrams" class="categoryLinkLabel_W154">Data Flow Diagrams</span></a><button aria-label="Expand sidebar category &#x27;Data Flow Diagrams&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/classifai/hooks/"><span title="Hooks" class="categoryLinkLabel_W154">Hooks</span></a><button aria-label="Expand sidebar category &#x27;Hooks&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/classifai/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><a class="breadcrumbs__link" href="/classifai/advanced-docs/"><span>Advanced Documentation</span></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">WP-CLI commands</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>WP-CLI commands</h1></header><p>The following WP-CLI commands are supported by ClassifAI:</p>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="language-processing-commands">Language Processing Commands<a href="#language-processing-commands" class="hash-link" aria-label="Direct link to Language Processing Commands" title="Direct link to Language Processing Commands" translate="no">​</a></h3>
+<script>!function(){var t;document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{for(var[t,e]of new URLSearchParams(window.location.search).entries())if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id=__docusaurus><div role=region aria-label="Skip to main content"><a class=skipToContent_fXgn href=#__docusaurus_skipToContent_fallback>Skip to main content</a></div><nav aria-label=Main class="theme-layout-navbar navbar navbar--fixed-top"><div class=navbar__inner><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded=false class="navbar__toggle clean-btn" type=button><svg width=30 height=30 viewBox="0 0 30 30" aria-hidden=true><path stroke=currentColor stroke-linecap=round stroke-miterlimit=10 stroke-width=2 d="M4 7h22M4 15h22M4 23h22"/></svg></button><a class=navbar__brand href=/classifai/><div class=navbar__logo><img src=/classifai/img/logo.svg alt="ClassifAI Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"/><img src=/classifai/img/logo.svg alt="ClassifAI Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"/></div><b class="navbar__title text--truncate">Developer Documentation</b></a><a class="navbar__item navbar__link" href=/classifai/get-started/>Get Started</a><a class="navbar__item navbar__link" href=/classifai/hooks>Hooks</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href=https://github.com/10up/classifai target=_blank rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPIU><use href=#theme-svg-external-link /></svg></a><div class=navbarSearchContainer_Bca1><div class="navbar__search searchBarContainer_NW3z"><input placeholder=Search aria-label=Search class=navbar__search-input value="" /><div class="loadingRing_RJI3 searchBarLoadingRing_YnHq"><div></div><div></div><div></div><div></div></div></div></div></div></div><div role=presentation class=navbar-sidebar__backdrop></div></nav><div id=__docusaurus_skipToContent_fallback class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class=docsWrapper_hBAB><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type=button></button><div class=docRoot_UBD9><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class=sidebarViewport_aRkj><div class=sidebar_njMd><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/classifai/get-started/><span class=categoryLinkLabel_W154>Get Started</span></a><button aria-label="Expand sidebar category 'Get Started'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/classifai/feature-configuration/><span class=categoryLinkLabel_W154>Feature Configuration</span></a><button aria-label="Expand sidebar category 'Feature Configuration'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" href=/classifai/advanced-docs/><span class=categoryLinkLabel_W154>Advanced Documentation</span></a><button aria-label="Collapse sidebar category 'Advanced Documentation'" aria-expanded=true type=button class="clean-btn menu__caret"></button></div><ul class=menu__list><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/classifai/advanced-docs/useful-snippets><span class=linkLabel_WmDU>Useful snippets</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/classifai/advanced-docs/prompt-examples><span class=linkLabel_WmDU>Prompt examples</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current=page tabindex=0 href=/classifai/advanced-docs/wp-cli><span class=linkLabel_WmDU>WP-CLI commands</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/classifai/advanced-docs/migration-guide-v2-to-v3><span class=linkLabel_WmDU>Migration guide (version 2 to version 3)</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/classifai/advanced-docs/chrome-built-in-ai><span class=linkLabel_WmDU> Chrome built-in AI</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/classifai/advanced-docs/run-locally-hosted-llms><span class=linkLabel_WmDU>Run locally hosted LLMs</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/classifai/advanced-docs/feature-provider-support><span class=linkLabel_WmDU>Providers supported per Feature</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/classifai/advanced-docs/data-flow><span class=linkLabel_WmDU>Data Flow</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/classifai/advanced-docs/extending-classifai><span class=linkLabel_WmDU>Extending ClassifAI</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/classifai/advanced-docs/programmatic-credentials><span class=linkLabel_WmDU>Programmatic Credentials</span></a></ul><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/classifai/data-flow-diagrams/><span class=categoryLinkLabel_W154>Data Flow Diagrams</span></a><button aria-label="Expand sidebar category 'Data Flow Diagrams'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_byQd menu__link menu__link--sublist" href=/classifai/hooks/><span class=categoryLinkLabel_W154>Hooks</span></a><button aria-label="Expand sidebar category 'Hooks'" aria-expanded=false type=button class="clean-btn menu__caret"></button></div></ul></nav></div></div></aside><main class=docMainContainer_TBSr><div class="container padding-top--md padding-bottom--lg"><div class=row><div class="col docItemCol_VOVn"><div class=docItemContainer_Djhp><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label=Breadcrumbs><ul class=breadcrumbs><li class=breadcrumbs__item><a aria-label="Home page" class=breadcrumbs__link href=/classifai/><svg viewBox="0 0 24 24" class=breadcrumbHomeIcon_YNFT><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill=currentColor /></svg></a><li class=breadcrumbs__item><a class=breadcrumbs__link href=/classifai/advanced-docs/><span>Advanced Documentation</span></a><li class="breadcrumbs__item breadcrumbs__item--active"><span class=breadcrumbs__link>WP-CLI commands</span></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type=button class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>WP-CLI commands</h1></header><p>The following WP-CLI commands are supported by ClassifAI:</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id=language-processing-commands>Language Processing Commands<a href=#language-processing-commands class=hash-link aria-label="Direct link to Language Processing Commands" title="Direct link to Language Processing Commands" translate=no>​</a></h3>
 <ul>
 <li class="">
-<p><code>wp classifai post &lt;post_ids&gt; [--post_type=&lt;post_type&gt;] [--limit=&lt;limit&gt;] [--link=&lt;link&gt;]</code></p>
+<p><code>wp classifai post &lt;post_ids> [--post_type=&lt;post_type>] [--limit=&lt;limit>] [--link=&lt;link>]</code></p>
 <p>Batch post classification using IBM Watson NLU API.</p>
 <ul>
 <li class="">
-<p><code>&lt;post_ids&gt;</code>: A comma delimited list of post IDs to classify. Used if post_type is false or absent.</p>
+<p><code>&lt;post_ids></code>: A comma delimited list of post IDs to classify. Used if post_type is false or absent.</p>
 <p>default: <code>true</code></p>
 </li>
 <li class="">
-<p><code>[--post_type=&lt;post_type&gt;]</code>: Batch classify posts belonging to this post type. If false or absent relies on post_ids.</p>
+<p><code>[--post_type=&lt;post_type>]</code>: Batch classify posts belonging to this post type. If false or absent relies on post_ids.</p>
 <p>default: <code>false</code></p>
 <p>options:</p>
 <ul>
@@ -32,7 +22,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--limit=&lt;limit&gt;]</code>: Limit classification to N posts.</p>
+<p><code>[--limit=&lt;limit>]</code>: Limit classification to N posts.</p>
 <p>default: <code>false</code></p>
 <p>options:</p>
 <ul>
@@ -41,36 +31,36 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--link=&lt;link&gt;]</code>: Whether to link classification results to Taxonomy terms.</p>
+<p><code>[--link=&lt;link>]</code>: Whether to link classification results to Taxonomy terms.</p>
 <p>default: <code>true</code></p>
 </li>
 </ul>
 </li>
 <li class="">
-<p><code>wp classifai text &lt;text&gt; [--category=&lt;bool&gt;] [--keyword=&lt;bool&gt;] [--concept=&lt;bool&gt;] [--entity=&lt;bool&gt;] [--input=&lt;input&gt;] [--only-normalize=&lt;bool&gt;]</code></p>
+<p><code>wp classifai text &lt;text> [--category=&lt;bool>] [--keyword=&lt;bool>] [--concept=&lt;bool>] [--entity=&lt;bool>] [--input=&lt;input>] [--only-normalize=&lt;bool>]</code></p>
 <p>Directly classify text using IBM Watson NLU API.</p>
 <ul>
 <li class="">
-<p><code>&lt;text&gt;</code>: A string of text to classify.</p>
+<p><code>&lt;text></code>: A string of text to classify.</p>
 </li>
 <li class="">
-<p><code>[--category=&lt;bool&gt;]</code>: Enables NLU category feature.</p>
+<p><code>[--category=&lt;bool>]</code>: Enables NLU category feature.</p>
 <p>default: <code>true</code></p>
 </li>
 <li class="">
-<p><code>[--keyword=&lt;bool&gt;]</code>: Enables NLU keyword feature.</p>
+<p><code>[--keyword=&lt;bool>]</code>: Enables NLU keyword feature.</p>
 <p>default: <code>true</code></p>
 </li>
 <li class="">
-<p><code>[--concept=&lt;bool&gt;]</code>: Enables NLU concept feature.</p>
+<p><code>[--concept=&lt;bool>]</code>: Enables NLU concept feature.</p>
 <p>default: <code>true</code></p>
 </li>
 <li class="">
-<p><code>[--entity=&lt;bool&gt;]</code>: Enables NLU entity feature.</p>
+<p><code>[--entity=&lt;bool>]</code>: Enables NLU entity feature.</p>
 <p>default: <code>true</code></p>
 </li>
 <li class="">
-<p><code>[--input=&lt;input&gt;]</code>: Path to input file or URL.</p>
+<p><code>[--input=&lt;input>]</code>: Path to input file or URL.</p>
 <p>default: <code>false</code></p>
 <p>options:</p>
 <ul>
@@ -80,21 +70,21 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--only-normalize=&lt;bool&gt;]</code>: Prints the normalized text that will be sent to the NLU API.</p>
+<p><code>[--only-normalize=&lt;bool>]</code>: Prints the normalized text that will be sent to the NLU API.</p>
 <p>default: <code>false</code></p>
 </li>
 </ul>
 </li>
 <li class="">
-<p><code>wp classifai text_to_speech &lt;post_ids&gt; [--post_type=&lt;post_type&gt;] [--post_status=&lt;post_status&gt;] [--per_page=&lt;per_page&gt;] [--dry-run=&lt;bool&gt;]</code></p>
-<p>Batch generation of text-to-speech data using Microsoft Azure&#x27;s Text to Speech API.</p>
+<p><code>wp classifai text_to_speech &lt;post_ids> [--post_type=&lt;post_type>] [--post_status=&lt;post_status>] [--per_page=&lt;per_page>] [--dry-run=&lt;bool>]</code></p>
+<p>Batch generation of text-to-speech data using Microsoft Azure's Text to Speech API.</p>
 <ul>
 <li class="">
-<p><code>&lt;post_ids&gt;</code>: A comma-delimited list of post IDs to generate text-to-speech for. Used if post_type is <code>false</code> or absent.</p>
+<p><code>&lt;post_ids></code>: A comma-delimited list of post IDs to generate text-to-speech for. Used if post_type is <code>false</code> or absent.</p>
 <p>default: <code>null</code></p>
 </li>
 <li class="">
-<p><code>[--post_type=&lt;post_type&gt;]</code>: Batch process items belonging to this post type. If <code>false</code> or absent, will rely on <code>post_ids</code>.</p>
+<p><code>[--post_type=&lt;post_type>]</code>: Batch process items belonging to this post type. If <code>false</code> or absent, will rely on <code>post_ids</code>.</p>
 <p>default: <code>false</code></p>
 <p>options:</p>
 <ul>
@@ -102,7 +92,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--post_status=&lt;post_status&gt;]</code>: Batch process items that have this post status. Defaults to <code>publish</code>.</p>
+<p><code>[--post_status=&lt;post_status>]</code>: Batch process items that have this post status. Defaults to <code>publish</code>.</p>
 <p>default: <code>publish</code></p>
 <p>options:</p>
 <ul>
@@ -110,7 +100,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--per_page=&lt;int&gt;]</code>: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.</p>
+<p><code>[--per_page=&lt;int>]</code>: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.</p>
 <p>default: <code>100</code></p>
 <p>options:</p>
 <ul>
@@ -118,7 +108,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--dry-run=&lt;bool&gt;]</code>: Whether to run as a dry-run. Defaults to <code>true</code>, so will run in dry-run mode unless this is set to <code>false</code>.</p>
+<p><code>[--dry-run=&lt;bool>]</code>: Whether to run as a dry-run. Defaults to <code>true</code>, so will run in dry-run mode unless this is set to <code>false</code>.</p>
 <p>default: <code>true</code></p>
 <p>options:</p>
 <ul>
@@ -129,15 +119,15 @@
 </ul>
 </li>
 <li class="">
-<p><code>wp classifai transcribe_audio &lt;attachment_ids&gt; [--files=&lt;files&gt;] [--per_page=&lt;per_page&gt;] [--force=&lt;bool&gt;] [--dry-run=&lt;bool&gt;]</code></p>
-<p>Batch generation of audio transcriptions using OpenAI&#x27;s Audio Transcription API. Can either process existing attachments or process files from the local filesystem or remote URLs.</p>
+<p><code>wp classifai transcribe_audio &lt;attachment_ids> [--files=&lt;files>] [--per_page=&lt;per_page>] [--force=&lt;bool>] [--dry-run=&lt;bool>]</code></p>
+<p>Batch generation of audio transcriptions using OpenAI's Audio Transcription API. Can either process existing attachments or process files from the local filesystem or remote URLs.</p>
 <ul>
 <li class="">
-<p><code>&lt;attachment_ids&gt;</code>: A comma-delimited list of attachment IDs to generate transcriptions for. If not set, will instead run a query to get all audio attachments to process.</p>
+<p><code>&lt;attachment_ids></code>: A comma-delimited list of attachment IDs to generate transcriptions for. If not set, will instead run a query to get all audio attachments to process.</p>
 <p>default: <code>null</code></p>
 </li>
 <li class="">
-<p><code>[--files=&lt;files&gt;]</code>: A comma-delimited list of file paths to generate transcriptions for. Will take precedence over <code>attachment_ids</code> if set.</p>
+<p><code>[--files=&lt;files>]</code>: A comma-delimited list of file paths to generate transcriptions for. Will take precedence over <code>attachment_ids</code> if set.</p>
 <p>default: <code>null</code></p>
 <p>options:</p>
 <ul>
@@ -146,7 +136,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--per_page=&lt;int&gt;]</code>: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.</p>
+<p><code>[--per_page=&lt;int>]</code>: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.</p>
 <p>default: <code>100</code></p>
 <p>options:</p>
 <ul>
@@ -154,16 +144,16 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--force=&lt;bool&gt;]</code>: Whether to process audio files that already have a transcription set. Defaults to <code>false</code>.</p>
+<p><code>[--force=&lt;bool>]</code>: Whether to process audio files that already have a transcription set. Defaults to <code>false</code>.</p>
 <p>default: <code>false</code></p>
 <p>options:</p>
 <ul>
 <li class=""><code>true</code> to process all items</li>
-<li class=""><code>false</code> to only process items that don&#x27;t have transcriptions set</li>
+<li class=""><code>false</code> to only process items that don't have transcriptions set</li>
 </ul>
 </li>
 <li class="">
-<p><code>[--dry-run=&lt;bool&gt;]</code>: Whether to run as a dry-run. Defaults to <code>true</code>, so will run in dry-run mode unless this is set to <code>false</code>.</p>
+<p><code>[--dry-run=&lt;bool>]</code>: Whether to run as a dry-run. Defaults to <code>true</code>, so will run in dry-run mode unless this is set to <code>false</code>.</p>
 <p>default: <code>true</code></p>
 <p>options:</p>
 <ul>
@@ -174,15 +164,15 @@
 </ul>
 </li>
 <li class="">
-<p><code>wp classifai generate_excerpt &lt;post_ids&gt; [--post_type=&lt;post_type&gt;] [--post_status=&lt;post_status&gt;] [--per_page=&lt;per_page&gt;] [--force=&lt;bool&gt;] [--dry-run=&lt;bool&gt;]</code></p>
-<p>Batch generation of excerpts using OpenAI&#x27;s ChatGPT API.</p>
+<p><code>wp classifai generate_excerpt &lt;post_ids> [--post_type=&lt;post_type>] [--post_status=&lt;post_status>] [--per_page=&lt;per_page>] [--force=&lt;bool>] [--dry-run=&lt;bool>]</code></p>
+<p>Batch generation of excerpts using OpenAI's ChatGPT API.</p>
 <ul>
 <li class="">
-<p><code>&lt;post_ids&gt;</code>: A comma-delimited list of post IDs to generate excerpts for. Used if post_type is <code>false</code> or absent.</p>
+<p><code>&lt;post_ids></code>: A comma-delimited list of post IDs to generate excerpts for. Used if post_type is <code>false</code> or absent.</p>
 <p>default: <code>null</code></p>
 </li>
 <li class="">
-<p><code>[--post_type=&lt;post_type&gt;]</code>: Batch process items belonging to this post type. If <code>false</code> or absent, will rely on <code>post_ids</code>.</p>
+<p><code>[--post_type=&lt;post_type>]</code>: Batch process items belonging to this post type. If <code>false</code> or absent, will rely on <code>post_ids</code>.</p>
 <p>default: <code>false</code></p>
 <p>options:</p>
 <ul>
@@ -190,7 +180,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--post_status=&lt;post_status&gt;]</code>: Batch process items that have this post status. Defaults to <code>publish</code>.</p>
+<p><code>[--post_status=&lt;post_status>]</code>: Batch process items that have this post status. Defaults to <code>publish</code>.</p>
 <p>default: <code>publish</code></p>
 <p>options:</p>
 <ul>
@@ -198,7 +188,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--per_page=&lt;int&gt;]</code>: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.</p>
+<p><code>[--per_page=&lt;int>]</code>: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.</p>
 <p>default: <code>100</code></p>
 <p>options:</p>
 <ul>
@@ -206,16 +196,16 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--force=&lt;bool&gt;]</code>: Whether to process items that already have an excerpt set. Defaults to <code>false</code>.</p>
+<p><code>[--force=&lt;bool>]</code>: Whether to process items that already have an excerpt set. Defaults to <code>false</code>.</p>
 <p>default: <code>false</code></p>
 <p>options:</p>
 <ul>
 <li class=""><code>true</code> to process all items</li>
-<li class=""><code>false</code> to only process items that don&#x27;t have an excerpt set</li>
+<li class=""><code>false</code> to only process items that don't have an excerpt set</li>
 </ul>
 </li>
 <li class="">
-<p><code>[--dry-run=&lt;bool&gt;]</code>: Whether to run as a dry-run. Defaults to <code>true</code>, so will run in dry-run mode unless this is set to <code>false</code>.</p>
+<p><code>[--dry-run=&lt;bool>]</code>: Whether to run as a dry-run. Defaults to <code>true</code>, so will run in dry-run mode unless this is set to <code>false</code>.</p>
 <p>default: <code>true</code></p>
 <p>options:</p>
 <ul>
@@ -226,15 +216,15 @@
 </ul>
 </li>
 <li class="">
-<p><code>wp classifai embeddings &lt;post_ids&gt; [--post_type=&lt;post_type&gt;] [--post_status=&lt;post_status&gt;] [--per_page=&lt;per_page&gt;] [--dry-run=&lt;bool&gt;]</code></p>
+<p><code>wp classifai embeddings &lt;post_ids> [--post_type=&lt;post_type>] [--post_status=&lt;post_status>] [--per_page=&lt;per_page>] [--dry-run=&lt;bool>]</code></p>
 <p>Batch classification of items using the OpenAI Embeddings API.</p>
 <ul>
 <li class="">
-<p><code>&lt;post_ids&gt;</code>: A comma-delimited list of post IDs to classify. Used if <code>post_type</code> is <code>false</code> or absent.</p>
+<p><code>&lt;post_ids></code>: A comma-delimited list of post IDs to classify. Used if <code>post_type</code> is <code>false</code> or absent.</p>
 <p>default: <code>null</code></p>
 </li>
 <li class="">
-<p><code>[--post_type=&lt;post_type&gt;]</code>: Batch process items belonging to this post type. If <code>false</code> or absent, will rely on <code>post_ids</code>.</p>
+<p><code>[--post_type=&lt;post_type>]</code>: Batch process items belonging to this post type. If <code>false</code> or absent, will rely on <code>post_ids</code>.</p>
 <p>default: <code>false</code></p>
 <p>options:</p>
 <ul>
@@ -242,7 +232,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--post_status=&lt;post_status&gt;]</code>: Batch process items that have this post status. Defaults to <code>publish</code>.</p>
+<p><code>[--post_status=&lt;post_status>]</code>: Batch process items that have this post status. Defaults to <code>publish</code>.</p>
 <p>default: <code>publish</code></p>
 <p>options:</p>
 <ul>
@@ -250,7 +240,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--per_page=&lt;int&gt;]</code>: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.</p>
+<p><code>[--per_page=&lt;int>]</code>: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.</p>
 <p>default: <code>100</code></p>
 <p>options:</p>
 <ul>
@@ -258,7 +248,7 @@
 </ul>
 </li>
 <li class="">
-<p><code>[--dry-run=&lt;bool&gt;]</code>: Whether to run as a dry-run. Defaults to <code>true</code>, so will run in dry-run mode unless this is set to <code>false</code>.</p>
+<p><code>[--dry-run=&lt;bool>]</code>: Whether to run as a dry-run. Defaults to <code>true</code>, so will run in dry-run mode unless this is set to <code>false</code>.</p>
 <p>default: <code>true</code></p>
 <p>options:</p>
 <ul>
@@ -269,21 +259,21 @@
 </ul>
 </li>
 </ul>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="image-processing-commands">Image Processing Commands<a href="#image-processing-commands" class="hash-link" aria-label="Direct link to Image Processing Commands" title="Direct link to Image Processing Commands" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id=image-processing-commands>Image Processing Commands<a href=#image-processing-commands class=hash-link aria-label="Direct link to Image Processing Commands" title="Direct link to Image Processing Commands" translate=no>​</a></h3>
 <ul>
 <li class="">
-<p><code>wp classifai image &lt;attachment_ids&gt; [--limit=&lt;int&gt;] [--skip=&lt;skip&gt;] [--force]</code></p>
-<p>Directly add description &quot;alt text&quot; and tags to attachment(s) using Azure AI Vision API.</p>
+<p><code>wp classifai image &lt;attachment_ids> [--limit=&lt;int>] [--skip=&lt;skip>] [--force]</code></p>
+<p>Directly add description "alt text" and tags to attachment(s) using Azure AI Vision API.</p>
 <ul>
 <li class="">
-<p><code>&lt;attachment_ids&gt;</code>: Comma delimited list of Attachment IDs to classify.</p>
+<p><code>&lt;attachment_ids></code>: Comma delimited list of Attachment IDs to classify.</p>
 </li>
 <li class="">
-<p><code>[--limit=&lt;int&gt;]</code>: Limit number of attachments to classify.</p>
+<p><code>[--limit=&lt;int>]</code>: Limit number of attachments to classify.</p>
 <p>default: <code>100</code></p>
 </li>
 <li class="">
-<p><code>[--skip=&lt;skip&gt;]</code>: Skip first N attachments.</p>
+<p><code>[--skip=&lt;skip>]</code>: Skip first N attachments.</p>
 <p>default: <code>false</code></p>
 </li>
 <li class="">
@@ -293,24 +283,24 @@
 </ul>
 </li>
 <li class="">
-<p><code>wp classifai crop &lt;attachment_ids&gt; [--limit=&lt;limit&gt;] [--skip=&lt;skip&gt;]</code></p>
+<p><code>wp classifai crop &lt;attachment_ids> [--limit=&lt;limit>] [--skip=&lt;skip>]</code></p>
 <p>Batch crop image(s) using Azure AI Vision API.</p>
 <ul>
 <li class="">
-<p><code>&lt;attachment_ids&gt;</code>: Comma delimited list of Attachment IDs to crop.</p>
+<p><code>&lt;attachment_ids></code>: Comma delimited list of Attachment IDs to crop.</p>
 </li>
 <li class="">
-<p><code>[--limit=&lt;int&gt;]</code>: Limit number of attachments to crop.</p>
+<p><code>[--limit=&lt;int>]</code>: Limit number of attachments to crop.</p>
 <p>default: <code>100</code></p>
 </li>
 <li class="">
-<p><code>[--skip=&lt;skip&gt;]</code>: Skip first N attachments.</p>
+<p><code>[--skip=&lt;skip>]</code>: Skip first N attachments.</p>
 <p>default: <code>false</code></p>
 </li>
 </ul>
 </li>
 </ul>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="classifai-settings-commands">ClassifAI Settings Commands<a href="#classifai-settings-commands" class="hash-link" aria-label="Direct link to ClassifAI Settings Commands" title="Direct link to ClassifAI Settings Commands" translate="no">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id=classifai-settings-commands>ClassifAI Settings Commands<a href=#classifai-settings-commands class=hash-link aria-label="Direct link to ClassifAI Settings Commands" title="Direct link to ClassifAI Settings Commands" translate=no>​</a></h3>
 <ul>
 <li class="">
 <p><code>wp classifai auth</code></p>
@@ -320,6 +310,4 @@
 <p><code>wp classifai reset</code></p>
 <p>Restores the plugin configuration to factory defaults. Any API credentials will need to be re-entered after this is ran.</p>
 </li>
-</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/classifai/advanced-docs/prompt-examples"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Prompt examples</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/classifai/advanced-docs/migration-guide-v2-to-v3"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Migration guide (version 2 to version 3)</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#language-processing-commands" class="table-of-contents__link toc-highlight">Language Processing Commands</a></li><li><a href="#image-processing-commands" class="table-of-contents__link toc-highlight">Image Processing Commands</a></li><li><a href="#classifai-settings-commands" class="table-of-contents__link toc-highlight">ClassifAI Settings Commands</a></li></ul></div></div></div></div></main></div></div></div><section class="getStartedSection_LwKi greySection_EJkP"><div class="container"><h2 class="sectionTitle_KwN_">Ready to Get Started?</h2><p class="sectionDescription_QuP5">ClassifAI is a Free WordPress plugin that connects to your choice of AI platforms.</p><div class="getStartedActions_llT8"><a href="https://classifaiplugin.com/#cta" target="_blank" rel="noopener noreferrer" class="button button--primary button--lg">Download ClassifAI Plugin</a></div></div></section><footer class="theme-layout-footer mainFooter_nBnY footer"><span aria-hidden="true" class="footerBackground_GyQg"></span><div class="container"><div class="footerContainer_nqCF"><div class="footerCopyright_loPx"><div class="footerCopyrightLinks_YPma"><div class="footer__copyright">Finely crafted by Fueled, ©2026</div><a href="https://github.com/10up/classifai/issues/">Support</a> <span> | </span><a href="https://github.com/10up/classifai/">Contribute</a> <span> | </span><a href="https://classifaiplugin.com/privacy-policy/">Privacy Policy</a></div></div><div class="footerLogo_ZTKe"><img loading="lazy" decoding="async" width="172" height="33" src="https://classifaiplugin.com/wp-content/uploads/sites/3/2025/06/lockup_white.svg" alt="Fueled Logo"><div class="footer10upButton_bKPe"><div class="footer10upButtonInner_jxzc"><a class="wp-block-button__link wp-element-button" href="https://fueled.com/wordpress">Engineered by the<!-- --> <img loading="lazy" decoding="async" width="21" height="24" style="width:21px" src="https://classifaiplugin.com/wp-content/uploads/sites/3/2025/06/svgexport-3-1.svg" alt="10up Logo"> <!-- -->WordPress Practice</a></div></div></div><div class="footerSocial_Zawg"><a href="https://www.facebook.com/10up.agency/?ref=classifai" title="10up on Facebook" aria-hidden="true" target="_blank" rel="noopener nofollow noreferrer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 0c8.837 0 16 7.163 16 16 0 8.159-6.107 14.892-14 15.876V20h5.5l.5-4h-6v-2a2 2 0 0 1 2-2h4V8h-4a6 6 0 0 0-6 6v2h-3v4h3v11.876C6.107 30.892 0 24.159 0 16 0 7.163 7.163 0 16 0z"></path></svg></a><a href="https://x.com/10up" aria-hidden="true" title="10up on X" target="_blank" rel="noopener nofollow noreferrer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.095479,10.316482L22.286354,1h-1.940718l-7.115352,8.087682L7.551414,1H1l8.589488,12.231093L1,23h1.940717  l7.509372-8.542861L16.448587,23H23L14.095479,10.316482z M11.436522,13.338465l-0.871624-1.218704l-6.924311-9.68815h2.981339  l5.58978,7.82155l0.867949,1.218704l7.26506,10.166271h-2.981339L11.436522,13.338465z"></path></svg></a><a href="https://github.com/10up/" aria-hidden="true" title="10up on GitHub" target="_blank" rel="noopener nofollow noreferrer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0zm9.502 25.502a13.4 13.4 0 0 1-5.51 3.334v-2.398c0-1.26-.432-2.188-1.297-2.781.542-.052 1.039-.125 1.492-.219s.932-.229 1.438-.406.958-.388 1.359-.633.786-.563 1.156-.953.68-.833.93-1.328.448-1.089.594-1.781.219-1.456.219-2.289c0-1.615-.526-2.99-1.578-4.125.479-1.25.427-2.609-.156-4.078l-.391-.047c-.271-.031-.758.083-1.461.344s-1.492.688-2.367 1.281a14.367 14.367 0 0 0-3.859-.516c-1.344 0-2.625.172-3.844.516-.552-.375-1.075-.685-1.57-.93s-.891-.411-1.188-.5-.573-.143-.828-.164-.419-.026-.492-.016-.125.021-.156.031c-.583 1.479-.635 2.839-.156 4.078-1.052 1.135-1.578 2.51-1.578 4.125 0 .833.073 1.596.219 2.289s.344 1.286.594 1.781.56.938.93 1.328.755.708 1.156.953.854.456 1.359.633.984.313 1.438.406.95.167 1.492.219c-.854.583-1.281 1.51-1.281 2.781v2.445A13.4 13.4 0 0 1 6.5 25.501a13.4 13.4 0 0 1-3.936-9.502A13.4 13.4 0 0 1 6.5 6.497a13.4 13.4 0 0 1 9.502-3.936 13.4 13.4 0 0 1 9.502 3.936 13.4 13.4 0 0 1 3.936 9.502 13.4 13.4 0 0 1-3.936 9.502z"></path></svg></a></div></div></div></footer></div>
-</body>
-</html>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href=/classifai/advanced-docs/prompt-examples><div class=pagination-nav__sublabel>Previous</div><div class=pagination-nav__label>Prompt examples</div></a><a class="pagination-nav__link pagination-nav__link--next" href=/classifai/advanced-docs/migration-guide-v2-to-v3><div class=pagination-nav__sublabel>Next</div><div class=pagination-nav__label>Migration guide (version 2 to version 3)</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href=#language-processing-commands class="table-of-contents__link toc-highlight">Language Processing Commands</a><li><a href=#image-processing-commands class="table-of-contents__link toc-highlight">Image Processing Commands</a><li><a href=#classifai-settings-commands class="table-of-contents__link toc-highlight">ClassifAI Settings Commands</a></ul></div></div></div></div></main></div></div></div><section class="getStartedSection_LwKi greySection_EJkP"><div class=container><h2 class=sectionTitle_KwN_>Ready to Get Started?</h2><p class=sectionDescription_QuP5>ClassifAI is a Free WordPress plugin that connects to your choice of AI platforms.<div class=getStartedActions_llT8><a href=https://classifaiplugin.com/#cta target=_blank rel="noopener noreferrer" class="button button--primary button--lg">Download ClassifAI Plugin</a></div></div></section><footer class="theme-layout-footer mainFooter_nBnY footer"><span aria-hidden=true class=footerBackground_GyQg></span><div class=container><div class=footerContainer_nqCF><div class=footerCopyright_loPx><div class=footerCopyrightLinks_YPma><div class=footer__copyright>Finely crafted by Fueled, ©2026</div><a href=https://github.com/10up/classifai/issues/>Support</a> <span> | </span><a href=https://github.com/10up/classifai/>Contribute</a> <span> | </span><a href=https://classifaiplugin.com/privacy-policy/>Privacy Policy</a></div></div><div class=footerLogo_ZTKe><img loading=lazy decoding=async width=172 height=33 src=https://classifaiplugin.com/wp-content/uploads/sites/3/2025/06/lockup_white.svg alt="Fueled Logo"/><div class=footer10upButton_bKPe><div class=footer10upButtonInner_jxzc><a class="wp-block-button__link wp-element-button" href=https://fueled.com/wordpress>Engineered by the<!-- --> <img loading=lazy decoding=async width=21 height=24 style=width:21px src=https://classifaiplugin.com/wp-content/uploads/sites/3/2025/06/svgexport-3-1.svg alt="10up Logo"/> <!-- -->WordPress Practice</a></div></div></div><div class=footerSocial_Zawg><a href="https://www.facebook.com/10up.agency/?ref=classifai" title="10up on Facebook" aria-hidden=true target=_blank rel="noopener nofollow noreferrer"><svg xmlns=http://www.w3.org/2000/svg viewBox="0 0 32 32" aria-hidden=true><path d="M16 0c8.837 0 16 7.163 16 16 0 8.159-6.107 14.892-14 15.876V20h5.5l.5-4h-6v-2a2 2 0 0 1 2-2h4V8h-4a6 6 0 0 0-6 6v2h-3v4h3v11.876C6.107 30.892 0 24.159 0 16 0 7.163 7.163 0 16 0z"/></svg></a><a href=https://x.com/10up aria-hidden=true title="10up on X" target=_blank rel="noopener nofollow noreferrer"><svg xmlns=http://www.w3.org/2000/svg viewBox="0 0 24 24" aria-hidden=true><path d="M14.095479,10.316482L22.286354,1h-1.940718l-7.115352,8.087682L7.551414,1H1l8.589488,12.231093L1,23h1.940717  l7.509372-8.542861L16.448587,23H23L14.095479,10.316482z M11.436522,13.338465l-0.871624-1.218704l-6.924311-9.68815h2.981339  l5.58978,7.82155l0.867949,1.218704l7.26506,10.166271h-2.981339L11.436522,13.338465z"/></svg></a><a href=https://github.com/10up/ aria-hidden=true title="10up on GitHub" target=_blank rel="noopener nofollow noreferrer"><svg xmlns=http://www.w3.org/2000/svg viewBox="0 0 32 32" aria-hidden=true><path d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0zm9.502 25.502a13.4 13.4 0 0 1-5.51 3.334v-2.398c0-1.26-.432-2.188-1.297-2.781.542-.052 1.039-.125 1.492-.219s.932-.229 1.438-.406.958-.388 1.359-.633.786-.563 1.156-.953.68-.833.93-1.328.448-1.089.594-1.781.219-1.456.219-2.289c0-1.615-.526-2.99-1.578-4.125.479-1.25.427-2.609-.156-4.078l-.391-.047c-.271-.031-.758.083-1.461.344s-1.492.688-2.367 1.281a14.367 14.367 0 0 0-3.859-.516c-1.344 0-2.625.172-3.844.516-.552-.375-1.075-.685-1.57-.93s-.891-.411-1.188-.5-.573-.143-.828-.164-.419-.026-.492-.016-.125.021-.156.031c-.583 1.479-.635 2.839-.156 4.078-1.052 1.135-1.578 2.51-1.578 4.125 0 .833.073 1.596.219 2.289s.344 1.286.594 1.781.56.938.93 1.328.755.708 1.156.953.854.456 1.359.633.984.313 1.438.406.95.167 1.492.219c-.854.583-1.281 1.51-1.281 2.781v2.445A13.4 13.4 0 0 1 6.5 25.501a13.4 13.4 0 0 1-3.936-9.502A13.4 13.4 0 0 1 6.5 6.497a13.4 13.4 0 0 1 9.502-3.936 13.4 13.4 0 0 1 9.502 3.936 13.4 13.4 0 0 1 3.936 9.502 13.4 13.4 0 0 1-3.936 9.502z"/></svg></a></div></div></div></footer></div></body>

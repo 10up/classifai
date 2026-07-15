@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkclassifai_docs=self.webpackChunkclassifai_docs||[]).push([["1916"],{47671(s,e,a){a.d(e,{createTreemapServices:()=>c.d});var c=a(14687);a(51400)}}]);
