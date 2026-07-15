@@ -24,26 +24,26 @@ class CredentialReuse {
 	 *
 	 * @var array
 	 */
-	private static $provider_groups = [
-		'openai' => [
+	private static $provider_groups = array(
+		'openai' => array(
 			'openai_chatgpt',
 			'openai_embeddings',
 			'openai_moderation',
 			'openai_dalle',
 			'openai_speech_to_text',
 			'openai_text_to_speech',
-		],
-		'azure'  => [
+		),
+		'azure'  => array(
 			'azure_openai',
 			'azure_ai_vision',
 			'azure_speech',
-		],
-		'ollama' => [
+		),
+		'ollama' => array(
 			'ollama',
 			'ollama_embeddings',
 			'ollama_multimodal',
-		],
-	];
+		),
+	);
 
 	/**
 	 * Get all configured providers across all features.
@@ -53,7 +53,7 @@ class CredentialReuse {
 	 * @return array Array of configured providers with their credentials.
 	 */
 	public static function get_configured_providers(): array {
-		$configured_providers = [];
+		$configured_providers = array();
 		$features             = self::get_all_features();
 
 		foreach ( $features as $feature_id => $feature_instance ) {
@@ -64,11 +64,11 @@ class CredentialReuse {
 				continue;
 			}
 
-			$configured_providers[ $provider_id ] = [
+			$configured_providers[ $provider_id ] = array(
 				'feature_id'    => $feature_id,
 				'feature_label' => $feature_instance->get_label(),
 				'credentials'   => $settings[ $provider_id ],
-			];
+			);
 		}
 		return $configured_providers;
 	}
@@ -101,7 +101,7 @@ class CredentialReuse {
 	private static function get_providers_in_same_group( string $provider_id ): array {
 		$group = self::get_provider_group( $provider_id );
 		if ( ! $group ) {
-			return [ $provider_id ];
+			return array( $provider_id );
 		}
 		return self::$provider_groups[ $group ];
 	}
@@ -184,7 +184,7 @@ class CredentialReuse {
 	 */
 	public static function get_reusable_credentials( string $feature_id ): array {
 		$configured_providers = self::get_configured_providers();
-		$reusable             = [];
+		$reusable             = array();
 
 		foreach ( $configured_providers as $provider_id => $provider_data ) {
 			// Skip if this is the same feature.
@@ -203,12 +203,12 @@ class CredentialReuse {
 				$best_match = self::get_best_matching_provider( $provider_id, $feature_id );
 				if ( $best_match ) {
 					// Create a modified provider data entry with the best matching provider ID
-					$reusable[ $best_match ] = [
+					$reusable[ $best_match ] = array(
 						'feature_id'         => $provider_data['feature_id'],
 						'feature_label'      => $provider_data['feature_label'],
 						'credentials'        => $provider_data['credentials'],
 						'source_provider_id' => $provider_id,
-					];
+					);
 				}
 			}
 		}
@@ -299,7 +299,7 @@ class CredentialReuse {
 	 */
 	private static function get_all_features(): array {
 		$services = get_plugin()->services;
-		$features = [];
+		$features = array();
 
 		if ( empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
 			return $features;
@@ -326,7 +326,7 @@ class CredentialReuse {
 	 * @return string The formatted provider name.
 	 */
 	public static function get_provider_display_name( string $provider_id ): string {
-		$provider_names = [
+		$provider_names = array(
 			'openai_chatgpt'        => __( 'OpenAI ChatGPT', 'classifai' ),
 			'openai_dalle'          => __( 'OpenAI Images', 'classifai' ),
 			'openai_embeddings'     => __( 'OpenAI Embeddings', 'classifai' ),
@@ -343,7 +343,7 @@ class CredentialReuse {
 			'ollama_embeddings'     => __( 'Ollama Embeddings', 'classifai' ),
 			'ollama_multimodal'     => __( 'Ollama Multimodal', 'classifai' ),
 			'xai_grok'              => __( 'xAI Grok', 'classifai' ),
-		];
+		);
 
 		return $provider_names[ $provider_id ] ?? ucwords( str_replace( '_', ' ', $provider_id ) );
 	}

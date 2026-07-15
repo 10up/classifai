@@ -34,9 +34,9 @@ class Moderation extends Feature {
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ModerationProvider::ID => __( 'OpenAI Moderation', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -46,7 +46,7 @@ class Moderation extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 	}
 
 	/**
@@ -56,12 +56,12 @@ class Moderation extends Feature {
 	 */
 	public function feature_setup() {
 		if ( in_array( 'comments', $this->get_moderation_content_settings(), true ) ) {
-			add_action( 'wp_insert_comment', [ $this, 'moderate_comment' ] );
-			add_action( 'admin_init', [ $this, 'maybe_moderate_comment' ] );
-			add_action( 'manage_comments_custom_column', [ $this, 'add_comment_list_column_content' ], 10, 2 );
+			add_action( 'wp_insert_comment', array( $this, 'moderate_comment' ) );
+			add_action( 'admin_init', array( $this, 'maybe_moderate_comment' ) );
+			add_action( 'manage_comments_custom_column', array( $this, 'add_comment_list_column_content' ), 10, 2 );
 
-			add_filter( 'comment_row_actions', [ $this, 'comment_row_actions' ], 10, 2 );
-			add_filter( 'manage_edit-comments_columns', [ $this, 'add_comment_list_columns' ] );
+			add_filter( 'comment_row_actions', array( $this, 'comment_row_actions' ), 10, 2 );
+			add_filter( 'manage_edit-comments_columns', array( $this, 'add_comment_list_columns' ) );
 		}
 	}
 
@@ -72,31 +72,31 @@ class Moderation extends Feature {
 		register_rest_route(
 			'classifai/v1',
 			'moderate(?:/(?P<id>\d+))?',
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'rest_endpoint_callback' ],
-					'args'                => [
-						'id'   => [
+					'callback'            => array( $this, 'rest_endpoint_callback' ),
+					'args'                => array(
+						'id'   => array(
 							'required'          => true,
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 							'description'       => esc_html__( 'Item ID to moderate.', 'classifai' ),
-						],
-						'type' => [
+						),
+						'type' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'enum'              => [
+							'enum'              => array(
 								'comment',
 								'post',
-							],
+							),
 							'sanitize_callback' => 'sanitize_text_field',
 							'description'       => esc_html__( 'Item type to moderate.', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'comment_moderation_permissions_check' ],
-				],
-			]
+						),
+					),
+					'permission_callback' => array( $this, 'comment_moderation_permissions_check' ),
+				),
+			)
 		);
 	}
 
@@ -116,7 +116,7 @@ class Moderation extends Feature {
 		$cap       = 'post' === $item_type ? 'edit_post' : 'edit_comment';
 
 		// Ensure we have a logged in user that can edit the item.
-		if ( empty( $item_id ) || ! current_user_can( $cap, $item_id ) ) {
+		if ( empty( $item_id ) || ! current_user_can( $cap, $item_id ) ) { // phpcs:ignore WordPress.WP.Capabilities.Undetermined, - $cap is either edit_post or edit_comment
 			return false;
 		}
 
@@ -199,10 +199,10 @@ class Moderation extends Feature {
 			);
 
 			wp_update_comment(
-				[
+				array(
 					'comment_ID'       => $comment_id,
 					'comment_approved' => '0',
-				]
+				)
 			);
 			update_comment_meta( $comment_id, 'classifai_moderation_flagged', '1' );
 			update_comment_meta( $comment_id, 'classifai_moderation_flags', $moderation_flags );
@@ -238,7 +238,7 @@ class Moderation extends Feature {
 			$comment_id &&
 			wp_verify_nonce( $nonce, 'moderate_comment' )
 		) {
-			$this->moderate_comment( $comment_id );
+			$this->moderate_comment( (int) $comment_id );
 			wp_safe_redirect( '/wp-admin/edit-comments.php' );
 			exit;
 		}
@@ -257,11 +257,11 @@ class Moderation extends Feature {
 		$actions['moderate'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
 			add_query_arg(
-				[
+				array(
 					'a'     => 'moderate',
 					'c'     => $comment->comment_ID,
 					'nonce' => $nonce,
-				],
+				),
 				admin_url( 'edit-comments.php' ),
 			),
 			esc_attr__( 'Moderate this comment', 'classifai' ),
@@ -305,7 +305,7 @@ class Moderation extends Feature {
 
 		if ( 'moderation_flags' === $column_name ) {
 			$flags = get_comment_meta( $comment_id, 'classifai_moderation_flags', true );
-			$flags = $flags ? $flags : [];
+			$flags = $flags ? $flags : array();
 
 			echo '<div>' . esc_html( implode( ', ', $flags ) ) . '</div>';
 		}
@@ -325,22 +325,22 @@ class Moderation extends Feature {
 	 */
 	public function add_custom_settings_fields() {
 		$settings      = $this->get_settings();
-		$content_types = [
+		$content_types = array(
 			'comments' => esc_html__( 'Comments', 'classifai' ),
-		];
+		);
 
 		add_settings_field(
 			'content_types',
 			esc_html__( 'Content to moderate', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
+			array( $this, 'render_checkbox_group' ),
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
-			[
+			array(
 				'label_for'      => 'content_types',
 				'options'        => $content_types,
 				'default_values' => $settings['content_types'],
 				'description'    => __( 'Choose what type of content to moderate.', 'classifai' ),
-			]
+			)
 		);
 	}
 
@@ -350,12 +350,12 @@ class Moderation extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
-			'content_types' => [
+		return array(
+			'content_types' => array(
 				'comments' => 'comments',
-			],
+			),
 			'provider'      => ModerationProvider::ID,
-		];
+		);
 	}
 
 	/**
@@ -366,9 +366,9 @@ class Moderation extends Feature {
 	 */
 	public function sanitize_default_feature_settings( array $new_settings ): array {
 		$settings      = $this->get_settings();
-		$content_types = [
+		$content_types = array(
 			'comments',
-		];
+		);
 
 		foreach ( $content_types as $type ) {
 			if ( ! isset( $new_settings['content_types'][ $type ] ) ) {

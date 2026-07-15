@@ -1,11 +1,11 @@
 === Action Scheduler ===
 Contributors: Automattic, wpmuguru, claudiosanches, peterfabian1000, vedjain, jamosova, obliviousharmony, konamiman, sadowski, royho, barryhughes-1
 Tags: scheduler, cron
-Stable tag: 3.8.1
+Stable tag: 3.9.3
 License: GPLv3
-Requires at least: 6.3
-Tested up to: 6.5
-Requires PHP: 7.0
+Requires at least: 6.5
+Tested up to: 6.8
+Requires PHP: 7.2
 
 Action Scheduler - Job Queue for WordPress
 
@@ -29,7 +29,7 @@ If your plugin needs background processing, especially of large sets of tasks, A
 
 ## Learn More
 
-To learn more about how to Action Scheduler works, and how to use it in your plugin, check out the docs on [ActionScheduler.org](https://actionscheduler.org).
+To learn more about how Action Scheduler works, and how to use it in your plugin, check out the docs on [ActionScheduler.org](https://actionscheduler.org).
 
 There you will find:
 
@@ -46,6 +46,43 @@ Action Scheduler is developed and maintained by [Automattic](http://automattic.c
 Collaboration is cool. We'd love to work with you to improve Action Scheduler. [Pull Requests](https://github.com/woocommerce/action-scheduler/pulls) welcome.
 
 == Changelog ==
+
+= 3.9.3 - 2025-07-15 =
+* Add hook 'action_scheduler_ensure_recurring_actions' specifically for scheduling recurring actions.
+* Assume an action is valid until proven otherwise.
+* Implement SKIP LOCKED during action claiming.
+* Import `get_flag_value()` from `WP_CLI\Utils` before using.
+* Make `$unique` available to all pre-creation/short-circuit hooks.
+* Make version/source information available via new class.
+* Only release claims on pending actions.
+* Tweak - WP 6.8 compatibility.
+* Update minimum supported php and phpunit versions.
+* Update readme.txt.
+* WP CLI get action command: correct parentheses/nesting of conditional checks.
+
+= 3.9.2 - 2025-02-03 =
+* Fixed fatal errors by moving version info methods to a new class and deprecating conflicting ones in ActionScheduler_Versions
+
+= 3.9.1 - 2025-01-21 =
+* A number of new WP CLI commands have been added, making it easier to manage actions in the terminal and from scripts.
+* New wp action-scheduler source command to help determine how Action Scheduler is being loaded.
+* Additional information about the active instance of Action Scheduler is now available in the Help pull-down drawer.
+* Make some other nullable parameters explicitly nullable.
+* Set option value to `no` rather than deleting.
+
+= 3.9.0 - 2024-11-14 =  
+* Minimum required version of PHP is now 7.1.  
+* Performance improvements for the `as_pending_actions_due()` function.  
+* Existing filter hook `action_scheduler_claim_actions_order_by` enhanced to provide callbacks with additional information.  
+* Improved compatibility with PHP 8.4, specifically by making implicitly nullable parameters explicitly nullable.  
+* A large number of coding standards-enhancements, to help reduce friction when submitting plugins to marketplaces and plugin directories. Special props @crstauf for this effort.  
+* Minor documentation tweaks and improvements.
+
+= 3.8.2 - 2024-09-12 =
+* Add missing parameter to the `pre_as_enqueue_async_action` hook.
+* Bump minimum PHP version to 7.0.
+* Bump minimum WordPress version to 6.4.
+* Make the batch size adjustable during processing.
 
 = 3.8.1 - 2024-06-20 =
 * Fix typos.

@@ -54,9 +54,9 @@ class Read {
 	/**
 	 * Constructor
 	 *
-	 * @param array             $settings Computer Vision settings.
-	 * @param int               $attachment_id Attachment ID to process.
-	 * @param PDFTextExtraction $feature Feature instance.
+	 * @param array                                 $settings Computer Vision settings.
+	 * @param int                                   $attachment_id Attachment ID to process.
+	 * @param \Classifai\Features\PDFTextExtraction $feature Feature instance.
 	 */
 	public function __construct( array $settings, int $attachment_id, $feature ) {
 		$this->settings      = $settings;
@@ -84,7 +84,7 @@ class Read {
 		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 		$process            = false;
 
-		$approved_media_types = [ 'pdf' ];
+		$approved_media_types = array( 'pdf' );
 
 		foreach ( $matched_extensions as $ext ) {
 			if ( in_array( $ext, $approved_media_types, true ) ) {
@@ -151,7 +151,7 @@ class Read {
 		 *
 		 * @return array Filtered request arguments.
 		 */
-		$request_args = apply_filters( 'classifai_azure_read_request_args', [], $this->attachment_id );
+		$request_args = apply_filters( 'classifai_azure_read_request_args', array(), $this->attachment_id );
 
 		$url = add_query_arg(
 			$request_args,
@@ -166,17 +166,17 @@ class Read {
 
 		$response = safe_wp_remote_post(
 			$url,
-			[
+			array(
 				'body'    => wp_json_encode(
-					[
+					array(
 						'url' => $document_url,
-					]
+					)
 				),
-				'headers' => [
+				'headers' => array(
 					'Content-Type'              => 'application/json',
 					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'] ?? '',
-				],
-			]
+				),
+			)
 		);
 
 		/**
@@ -224,11 +224,11 @@ class Read {
 	public function check_read_result( string $operation_url ) {
 		$response = safe_wp_remote_get(
 			$operation_url,
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'] ?? '',
-				],
-			]
+				),
+			)
 		);
 
 		set_transient( 'classifai_azure_computer_vision_pdf_text_extraction_check_result_latest_response', $response, DAY_IN_SECONDS * 30 );
@@ -259,7 +259,7 @@ class Read {
 					 * @return int Filtered interval.
 					 */
 					$retry_interval = apply_filters( 'classifai_azure_read_retry_interval', MINUTE_IN_SECONDS );
-					wp_schedule_single_event( time() + $retry_interval, 'classifai_retry_get_read_result', [ $operation_url, $this->attachment_id ] );
+					wp_schedule_single_event( time() + $retry_interval, 'classifai_retry_get_read_result', array( $operation_url, $this->attachment_id ) );
 					break;
 				case 'failed':
 					return $this->log_error( new WP_Error( 'failed_read_request', esc_html__( 'The Read operation has failed.', 'classifai' ) ) );
@@ -269,6 +269,8 @@ class Read {
 					return $this->log_error( new WP_Error( 'invalid_read_result_status', esc_html__( 'Invalid Read result status.', 'classifai' ) ) );
 			}
 		}
+
+		return null;
 	}
 
 	/**
@@ -294,7 +296,7 @@ class Read {
 		 */
 		$max_page = min( apply_filters( 'classifai_azure_read_result_max_page', 2 ), count( $data['analyzeResult']['readResults'] ) );
 
-		$lines_of_text = [];
+		$lines_of_text = array();
 
 		for ( $page = 0; $page < $max_page; $page++ ) {
 			foreach ( $data['analyzeResult']['readResults'][ $page ]['lines'] as $line ) {
@@ -323,6 +325,8 @@ class Read {
 		}
 
 		$this->update_status( $data );
+
+		return null;
 	}
 
 	/**

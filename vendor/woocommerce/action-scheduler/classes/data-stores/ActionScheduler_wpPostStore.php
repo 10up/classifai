@@ -30,12 +30,12 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * Save action.
 	 *
 	 * @param ActionScheduler_Action $action Scheduled Action.
-	 * @param DateTime               $scheduled_date Scheduled Date.
+	 * @param DateTime|null          $scheduled_date Scheduled Date.
 	 *
 	 * @throws RuntimeException Throws an exception if the action could not be saved.
 	 * @return int
 	 */
-	public function save_action( ActionScheduler_Action $action, DateTime $scheduled_date = null ) {
+	public function save_action( ActionScheduler_Action $action, ?DateTime $scheduled_date = null ) {
 		try {
 			$this->validate_action( $action );
 			$post_array = $this->create_post_array( $action, $scheduled_date );
@@ -54,11 +54,11 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * Create post array.
 	 *
 	 * @param ActionScheduler_Action $action Scheduled Action.
-	 * @param DateTime               $scheduled_date Scheduled Date.
+	 * @param DateTime|null          $scheduled_date Scheduled Date.
 	 *
 	 * @return array Returns an array of post data.
 	 */
-	protected function create_post_array( ActionScheduler_Action $action, DateTime $scheduled_date = null ) {
+	protected function create_post_array( ActionScheduler_Action $action, ?DateTime $scheduled_date = null ) {
 		$post = array(
 			'post_type'     => self::POST_TYPE,
 			'post_title'    => $action->get_hook(),
@@ -573,16 +573,16 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	/**
 	 * Stake claim.
 	 *
-	 * @param int      $max_actions Maximum number of actions.
-	 * @param DateTime $before_date Jobs must be schedule before this date. Defaults to now.
-	 * @param array    $hooks       Claim only actions with a hook or hooks.
-	 * @param string   $group       Claim only actions in the given group.
+	 * @param int           $max_actions Maximum number of actions.
+	 * @param DateTime|null $before_date Jobs must be schedule before this date. Defaults to now.
+	 * @param array         $hooks       Claim only actions with a hook or hooks.
+	 * @param string        $group       Claim only actions in the given group.
 	 *
 	 * @return ActionScheduler_ActionClaim
 	 * @throws RuntimeException When there is an error staking a claim.
 	 * @throws InvalidArgumentException When the given group is not valid.
 	 */
-	public function stake_claim( $max_actions = 10, DateTime $before_date = null, $hooks = array(), $group = '' ) {
+	public function stake_claim( $max_actions = 10, ?DateTime $before_date = null, $hooks = array(), $group = '' ) {
 		$this->claim_before_date = $before_date;
 		$claim_id                = $this->generate_claim_id();
 		$this->claim_actions( $claim_id, $max_actions, $before_date, $hooks, $group );
@@ -622,16 +622,16 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	/**
 	 * Claim actions.
 	 *
-	 * @param string   $claim_id    Claim ID.
-	 * @param int      $limit       Limit.
-	 * @param DateTime $before_date Should use UTC timezone.
-	 * @param array    $hooks       Claim only actions with a hook or hooks.
-	 * @param string   $group       Claim only actions in the given group.
+	 * @param string        $claim_id    Claim ID.
+	 * @param int           $limit       Limit.
+	 * @param DateTime|null $before_date Should use UTC timezone.
+	 * @param array         $hooks       Claim only actions with a hook or hooks.
+	 * @param string        $group       Claim only actions in the given group.
 	 *
 	 * @return int The number of actions that were claimed.
 	 * @throws RuntimeException  When there is a database error.
 	 */
-	protected function claim_actions( $claim_id, $limit, DateTime $before_date = null, $hooks = array(), $group = '' ) {
+	protected function claim_actions( $claim_id, $limit, ?DateTime $before_date = null, $hooks = array(), $group = '' ) {
 		// Set up initial variables.
 		$date      = null === $before_date ? as_get_datetime_object() : clone $before_date;
 		$limit_ids = ! empty( $group );
@@ -791,24 +791,41 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	}
 
 	/**
-	 * Release claim.
+	 * Release pending actions from a claim.
 	 *
 	 * @param ActionScheduler_ActionClaim $claim Claim object to release.
 	 * @return void
 	 * @throws RuntimeException When the claim is not unlocked.
 	 */
 	public function release_claim( ActionScheduler_ActionClaim $claim ) {
-		$action_ids = $this->find_actions_by_claim_id( $claim->get_id() );
-		if ( empty( $action_ids ) ) {
-			return; // nothing to do.
-		}
-		$action_id_string = implode( ',', array_map( 'intval', $action_ids ) );
 		/**
 		 * Global wpdb object.
 		 *
 		 * @var wpdb $wpdb
 		 */
 		global $wpdb;
+
+		$claim_id = $claim->get_id();
+		if ( trim( $claim_id ) === '' ) {
+			// Verify that the claim_id is valid before attempting to release it.
+			return;
+		}
+
+		// Only attempt to release pending actions to be claimed again. Running and complete actions are no longer relevant outside of admin/analytics.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$action_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID, post_date_gmt FROM {$wpdb->posts} WHERE post_type = %s AND post_password = %s AND post_status = %s",
+				self::POST_TYPE,
+				$claim_id,
+				self::STATUS_PENDING
+			)
+		);
+
+		if ( empty( $action_ids ) ) {
+			return; // nothing to do.
+		}
+		$action_id_string = implode( ',', array_map( 'intval', $action_ids ) );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$result = $wpdb->query(

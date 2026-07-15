@@ -38,8 +38,8 @@ class Linker {
 	 * @param bool  $link_terms Whether to link the terms to the post or return the term ids.
 	 * @return array The terms that were linked.
 	 */
-	public function link( int $post_id, array $output, array $options = [], bool $link_terms = true ): array {
-		$all_terms = [];
+	public function link( int $post_id, array $output, array $options = array(), bool $link_terms = true ): array {
+		$all_terms = array();
 
 		if ( ! empty( $output['categories'] ) ) {
 			$terms     = $this->link_categories( $post_id, $output['categories'], false );
@@ -93,7 +93,7 @@ class Linker {
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_categories( int $post_id, array $categories, bool $link_categories = true ) {
-		$terms_to_link           = [];
+		$terms_to_link           = array();
 		$taxonomy                = get_classification_feature_taxonomy( 'category' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
@@ -114,7 +114,7 @@ class Linker {
 						}
 
 						if ( false === $term ) {
-							$term = wp_insert_term( $part, $taxonomy, [ 'parent' => $parent ] );
+							$term = wp_insert_term( $part, $taxonomy, array( 'parent' => $parent ) );
 
 							if ( ! is_wp_error( $term ) ) {
 								$parent                 = (int) $term['term_id'];
@@ -131,7 +131,7 @@ class Linker {
 
 		// Exit if there are not any term to link.
 		if ( empty( $terms_to_link ) ) {
-			return [];
+			return array();
 		}
 
 		if ( $link_categories ) {
@@ -142,7 +142,7 @@ class Linker {
 			}
 		}
 
-		return [ $taxonomy => $terms_to_link ];
+		return array( $taxonomy => $terms_to_link );
 	}
 
 	/**
@@ -161,7 +161,7 @@ class Linker {
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_keywords( int $post_id, array $keywords, bool $link_keywords = true ) {
-		$terms_to_link           = [];
+		$terms_to_link           = array();
 		$taxonomy                = get_classification_feature_taxonomy( 'keyword' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
@@ -177,7 +177,7 @@ class Linker {
 				}
 
 				if ( false === $term ) {
-					$term = wp_insert_term( $name, $taxonomy, [] );
+					$term = wp_insert_term( $name, $taxonomy, array() );
 
 					if ( ! is_wp_error( $term ) ) {
 						$terms_to_link[ $name ] = (int) $term['term_id'];
@@ -190,7 +190,7 @@ class Linker {
 
 		// Exit if there are not any term to link.
 		if ( empty( $terms_to_link ) ) {
-			return [];
+			return array();
 		}
 
 		if ( $link_keywords ) {
@@ -201,7 +201,7 @@ class Linker {
 			}
 		}
 
-		return [ $taxonomy => $terms_to_link ];
+		return array( $taxonomy => $terms_to_link );
 	}
 
 	/**
@@ -220,7 +220,7 @@ class Linker {
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_concepts( int $post_id, array $concepts, bool $link_concepts = true ) {
-		$terms_to_link           = [];
+		$terms_to_link           = array();
 		$taxonomy                = get_classification_feature_taxonomy( 'concept' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
@@ -235,7 +235,7 @@ class Linker {
 				}
 
 				if ( false === $term ) {
-					$term = wp_insert_term( $name, $taxonomy, [] );
+					$term = wp_insert_term( $name, $taxonomy, array() );
 
 					if ( ! is_wp_error( $term ) ) {
 						$terms_to_link[ $name ] = (int) $term['term_id'];
@@ -256,7 +256,7 @@ class Linker {
 
 		// Exit if there are not any term to link.
 		if ( empty( $terms_to_link ) ) {
-			return [];
+			return array();
 		}
 
 		if ( $link_concepts ) {
@@ -267,7 +267,7 @@ class Linker {
 			}
 		}
 
-		return [ $taxonomy => $terms_to_link ];
+		return array( $taxonomy => $terms_to_link );
 	}
 
 	/**
@@ -286,7 +286,7 @@ class Linker {
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_entities( int $post_id, array $entities, bool $link_entities = true ) {
-		$terms_to_link           = [];
+		$terms_to_link           = array();
 		$taxonomy                = get_classification_feature_taxonomy( 'entity' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
@@ -306,7 +306,7 @@ class Linker {
 				}
 
 				if ( false === $term ) {
-					$term = wp_insert_term( $name, $taxonomy, [] );
+					$term = wp_insert_term( $name, $taxonomy, array() );
 
 					if ( ! is_wp_error( $term ) ) {
 						$terms_to_link[ $name ] = (int) $term['term_id'];
@@ -333,7 +333,7 @@ class Linker {
 
 		// Exit if there are not any term to link.
 		if ( empty( $terms_to_link ) ) {
-			return [];
+			return array();
 		}
 
 		if ( $link_entities ) {
@@ -344,7 +344,7 @@ class Linker {
 			}
 		}
 
-		return [ $taxonomy => $terms_to_link ];
+		return array( $taxonomy => $terms_to_link );
 	}
 
 	/**
