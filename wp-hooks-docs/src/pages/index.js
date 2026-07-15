@@ -126,7 +126,7 @@ export default function Home() {
 			tagline: 'Say More, Say Less',
 			description:
 				'Expand, condense or fix grammar in your written content to create the ideal version that is precise and effective, with length indicators.',
-			configureLink: '/feature-configuration/content-resizing',
+			configureLink: '/feature-configuration/writing-tools',
 		},
 		{
 			title: 'Key Takeaways',

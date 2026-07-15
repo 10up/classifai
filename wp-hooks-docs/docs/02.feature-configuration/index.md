@@ -14,7 +14,7 @@ Welcome to the ClassifAI Feature Configuration guide. This section provides deta
 - [Title Generation](./02.title-generation.md) - Set up automated title generation for your content
 - [Excerpt Generation](./03.excerpt-generation.md) - Configure automatic excerpt generation
 - [Content Generation](./04.content-generation.md) - Set up AI-powered content generation
-- [Writing Tools](./05.content-resizing.md) - Configure content length adjustment features and fix grammar
+- [Writing Tools](./05.writing-tools.md) - Configure content length adjustment features and fix grammar
 - [Key Takeaways](./06.key-takeaways.md) - Set up automatic key points extraction
 - [Text to Speech](./07.text-to-speech.md) - Configure text-to-speech conversion
 - [Audio Transcripts Generation](./08.audio-transcripts-generation.md) - Set up audio transcription

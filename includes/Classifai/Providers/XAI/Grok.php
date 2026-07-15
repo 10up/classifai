@@ -5,7 +5,7 @@
 
 namespace Classifai\Providers\XAI;
 
-use Classifai\Features\ContentResizing;
+use Classifai\Features\WritingTools;
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
@@ -139,7 +139,7 @@ class Grok extends Provider {
 		 * Default values for feature specific settings.
 		 */
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				$common_settings['number_of_suggestions'] = 1;
 				break;
@@ -181,7 +181,7 @@ class Grok extends Provider {
 		$new_settings[ static::ID ]['models']        = $api_key_settings[ static::ID ]['models'];
 
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				$new_settings[ static::ID ]['number_of_suggestions'] = sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings[ static::ID ], $settings[ static::ID ] );
 				break;
@@ -221,7 +221,7 @@ class Grok extends Provider {
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
 			switch ( $this->feature_instance::ID ) {
-				case ContentResizing::ID:
+				case WritingTools::ID:
 				case TitleGeneration::ID:
 				case ExcerptGeneration::ID:
 					$text_models      = array_filter( $models, fn( $model ) => in_array( 'text', $model['input_modalities'], true ) );
@@ -672,7 +672,7 @@ class Grok extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
 		}
 
-		$feature  = new ContentResizing();
+		$feature  = new WritingTools();
 		$settings = $feature->get_settings();
 
 		$args = wp_parse_args(
@@ -746,7 +746,7 @@ class Grok extends Provider {
 			]
 		);
 
-		set_transient( 'classifai_xai_grok_content_resizing_latest_response', $response, DAY_IN_SECONDS * 30 );
+		set_transient( 'classifai_xai_grok_writing_tools_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -850,12 +850,12 @@ class Grok extends Provider {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
 			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? [] );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_xai_grok_excerpt_generation_latest_response' ) );
-		} elseif ( $this->feature_instance instanceof ContentResizing ) {
+		} elseif ( $this->feature_instance instanceof WritingTools ) {
 			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]       = $provider_settings['number_of_suggestions'] ?? 1;
 			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]       = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
 			$debug_info[ __( 'Condense text prompt', 'classifai' ) ]     = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
 			$debug_info[ __( 'Fix grammar and spelling', 'classifai' ) ] = wp_json_encode( $settings['fix_grammar_text_prompt'] ?? [] );
-			$debug_info[ __( 'Latest response', 'classifai' ) ]          = $this->get_formatted_latest_response( get_transient( 'classifai_xai_grok_content_resizing_latest_response' ) );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]          = $this->get_formatted_latest_response( get_transient( 'classifai_xai_grok_writing_tools_latest_response' ) );
 		}
 
 		return apply_filters(

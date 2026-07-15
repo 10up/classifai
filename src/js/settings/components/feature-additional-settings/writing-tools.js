@@ -16,9 +16,9 @@ import { PromptRepeater } from './prompt-repeater';
  *
  * This component is used within the FeatureSettings component to allow users to configure the Writing Tools feature.
  *
- * @return {React.ReactElement} ContentResizingSettings component.
+ * @return {React.ReactElement} WritingToolsSettings component.
  */
-export const ContentResizingSettings = () => {
+export const WritingToolsSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);

@@ -118,7 +118,7 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 
 register( resizeContentStore );
 
-const ContentResizingPlugin = () => {
+const WritingToolsPlugin = () => {
 	// Holds the original text of the block being processed.
 	const [ blockContentAsPlainText, setBlockContentAsPlainText ] =
 		useState( '' );
@@ -483,8 +483,8 @@ function toPlainText( html ) {
 	return plainText.replace( /\n\n+/g, '\n\n' );
 }
 
-registerPlugin( 'classifai-plugin-content-resizing', {
-	render: ContentResizingPlugin,
+registerPlugin( 'classifai-plugin-writing-tools', {
+	render: WritingToolsPlugin,
 } );
 
 const colorsArray = [ '#8c2525', '#ca4444', '#303030' ];

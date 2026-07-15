@@ -389,7 +389,7 @@ Disallow: /
 		if ( ! empty( $chatgpt_settings ) ) {
 			$features[] = \Classifai\Features\TitleGeneration::class;
 			$features[] = \Classifai\Features\ExcerptGeneration::class;
-			$features[] = \Classifai\Features\ContentResizing::class;
+			$features[] = \Classifai\Features\WritingTools::class;
 		}
 
 		if ( ! empty( $tts_settings ) ) {

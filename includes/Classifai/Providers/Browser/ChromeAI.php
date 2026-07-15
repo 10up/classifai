@@ -5,7 +5,7 @@
 
 namespace Classifai\Providers\Browser;
 
-use Classifai\Features\ContentResizing;
+use Classifai\Features\WritingTools;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
@@ -283,7 +283,7 @@ class ChromeAI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
 		}
 
-		$feature  = new ContentResizing();
+		$feature  = new WritingTools();
 		$settings = $feature->get_settings();
 
 		if ( 'shrink' === $args['resize_type'] ) {

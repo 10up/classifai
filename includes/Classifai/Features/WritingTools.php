@@ -21,9 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class ContentResizing
+ * Class WritingTools
  */
-class ContentResizing extends Feature {
+class WritingTools extends Feature {
 	/**
 	 * ID of the current feature.
 	 *
@@ -184,18 +184,18 @@ class ContentResizing extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-plugin-content-resizing-js',
-			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-resizing.js',
-			array_merge( get_asset_info( 'classifai-plugin-content-resizing', 'dependencies' ), [ 'lodash' ] ),
-			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
+			'classifai-plugin-writing-tools-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-writing-tools.js',
+			array_merge( get_asset_info( 'classifai-plugin-writing-tools', 'dependencies' ), [ 'lodash' ] ),
+			get_asset_info( 'classifai-plugin-writing-tools', 'version' ),
 			true
 		);
 
 		wp_enqueue_style(
-			'classifai-plugin-content-resizing-css',
-			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-resizing.css',
+			'classifai-plugin-writing-tools-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-writing-tools.css',
 			[],
-			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
+			get_asset_info( 'classifai-plugin-writing-tools', 'version' ),
 			'all'
 		);
 	}
