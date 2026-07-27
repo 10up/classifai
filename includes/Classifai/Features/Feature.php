@@ -1250,6 +1250,19 @@ abstract class Feature {
 	}
 
 	/**
+	 * Get all taxonomies enabled for this feature.
+	 *
+	 * Features that work with taxonomies (e.g. Classification, TermCleanup)
+	 * override this to return their enabled taxonomies. The default is an
+	 * empty array, indicating the feature doesn't classify into taxonomies.
+	 *
+	 * @return array
+	 */
+	public function get_all_feature_taxonomies(): array {
+		return array();
+	}
+
+	/**
 	 * Returns array of instances of provider classes registered for the service.
 	 *
 	 * @internal

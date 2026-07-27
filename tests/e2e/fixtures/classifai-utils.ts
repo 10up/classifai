@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { execFileSync } from 'child_process';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -390,6 +391,48 @@ export class ClassifAIUtils {
 		}
 	}
 
+	async showClassicEditorExcerptMetabox(): Promise< void > {
+		const excerptMetabox = this.page.locator( '#postexcerpt' );
+		if ( await excerptMetabox.isVisible() ) {
+			return;
+		}
+
+		const screenOptions = this.page.locator( '#show-settings-link' );
+		if (
+			( await screenOptions.count() ) &&
+			( await screenOptions.getAttribute( 'aria-expanded' ) ) !== 'true'
+		) {
+			await screenOptions.click( { force: true } );
+		}
+
+		const excerptToggle = this.page.locator( '#postexcerpt-hide' );
+		if (
+			( await excerptToggle.count() ) &&
+			! ( await excerptToggle.isChecked() )
+		) {
+			await excerptToggle.click( { force: true } );
+		}
+
+		try {
+			await expect( excerptMetabox ).toBeVisible( { timeout: 1000 } );
+		} catch ( _ ) {
+			await this.page.evaluate( () => {
+				const postboxes = ( window as any ).postboxes;
+				if ( postboxes && typeof postboxes.pbshow === 'function' ) {
+					postboxes.pbshow( 'postexcerpt' );
+				}
+
+				const excerptToggle = document.querySelector< HTMLInputElement >(
+					'#postexcerpt-hide'
+				);
+				if ( excerptToggle ) {
+					excerptToggle.checked = true;
+				}
+			} );
+			await expect( excerptMetabox ).toBeVisible();
+		}
+	}
+
 	async enableElasticPress(): Promise< void > {
 		try {
 			await this.requestUtils.activatePlugin( 'elasticpress' );
@@ -697,15 +740,32 @@ export class ClassifAIUtils {
 	}
 
 	async verifyTextToSpeechEnabled( enabled = true ): Promise< void > {
-		await this.page.goto( '/wp-admin/edit.php' );
-		await this.page
-			.locator( '#the-list tr:nth-child(1) td.title a.row-title' )
-			.first()
-			.click();
-		await this.closeWelcomeGuide();
+		await this.createPost( {
+			title: 'Verify text to speech controls',
+			content: 'Does this post expose the text to speech controls?',
+		} );
 		await this.openClassifAIPostPanel();
 		const btn = this.page.locator( '#classifai-audio-controls__preview-btn' );
 		if ( enabled ) {
+			await expect( this.page.locator( '.classifai-panel' ) ).toContainText(
+				'Audio generation is in progress…'
+			);
+			execFileSync(
+				'npx',
+				[
+					'wp-env',
+					'run',
+					'tests-cli',
+					'wp',
+					'action-scheduler',
+					'run',
+					'--hooks=classifai_schedule_text_to_speech_job',
+					'--force',
+				],
+				{ timeout: 20000, stdio: 'inherit' }
+			);
+			await this.page.reload();
+			await this.openClassifAIPostPanel();
 			await expect( btn ).toBeVisible();
 		} else {
 			await expect( btn ).toHaveCount( 0 );

@@ -304,6 +304,37 @@ class HelpersTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * The Recommended Content cache key is versioned and stable within a version.
+	 */
+	public function test_recommended_content_cache_key_is_versioned() {
+		wp_cache_delete( 'classifai_recommended_content_version' );
+
+		$key = recommended_content_cache_key( 42 );
+
+		$this->assertStringContainsString( '42', $key );
+		$this->assertStringContainsString( '_v', $key );
+		// Stable while the version is unchanged.
+		$this->assertSame( $key, recommended_content_cache_key( 42 ) );
+	}
+
+	/**
+	 * Bumping the version changes the key so previously cached results are orphaned.
+	 */
+	public function test_bumping_version_changes_cache_key_and_orphans_old_entries() {
+		wp_cache_delete( 'classifai_recommended_content_version' );
+
+		$old_key = recommended_content_cache_key( 42 );
+		wp_cache_set( $old_key, [ 'stale' ], '', HOUR_IN_SECONDS );
+
+		bump_recommended_content_cache_version();
+
+		$new_key = recommended_content_cache_key( 42 );
+		$this->assertNotSame( $old_key, $new_key );
+		// Readers now look at the new key, which is empty -> miss -> recompute.
+		$this->assertFalse( wp_cache_get( $new_key ) );
+	}
+
+	/**
 	 * @covers \Classifai\sanitize_prompts
 	 */
 	public function test_sanitize_prompts_strips_tags_and_enforces_one_default() {

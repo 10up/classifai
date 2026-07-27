@@ -5,19 +5,15 @@
 
 namespace Classifai\Providers\OpenAI;
 
-use Classifai\Admin\Notifications;
+use Classifai\Embeddings\HandlesEmbeddingsLifecycle;
+use Classifai\Embeddings\HasEmbeddingsStorage;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
-use Classifai\Providers\OpenAI\EmbeddingCalculations;
-use Classifai\Normalizer;
 use Classifai\Features\Classification;
 use Classifai\Features\RecommendedContent;
 use Classifai\Features\Feature;
 use Classifai\EmbeddingsScheduler;
 use WP_Error;
-use WP_Query;
-
-use function Classifai\should_use_legacy_settings_panel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -26,6 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Embeddings extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
+	use HasEmbeddingsStorage;
+	use HandlesEmbeddingsLifecycle;
 
 	const ID = 'openai_embeddings';
 
@@ -84,6 +82,42 @@ class Embeddings extends Provider {
 	 * @var EmbeddingsScheduler|null
 	 */
 	private static $scheduler_instance = null;
+
+	/**
+	 * Legacy meta key still used by older installs / for backfill fallback.
+	 *
+	 * @return string
+	 */
+	protected function legacy_embedding_meta_key(): string {
+		return 'classifai_openai_embeddings';
+	}
+
+	/**
+	 * Filter prefix used to build per-provider hook/filter names.
+	 *
+	 * @return string
+	 */
+	protected function embeddings_filter_prefix(): string {
+		return 'classifai_openai_embeddings';
+	}
+
+	/**
+	 * Action Scheduler action that processes term-embedding batches.
+	 *
+	 * @return string
+	 */
+	protected function embeddings_term_job_action(): string {
+		return 'classifai_generate_term_embedding_job';
+	}
+
+	/**
+	 * Action Scheduler action that processes post-embedding batches.
+	 *
+	 * @return string
+	 */
+	protected function embeddings_post_job_action(): string {
+		return 'classifai_generate_post_embedding_job';
+	}
 
 	/**
 	 * OpenAI Embeddings constructor.
@@ -168,7 +202,7 @@ class Embeddings extends Provider {
 		 * @since 3.1.0
 		 * @hook classifai_openai_embeddings_dimensions
 		 *
-		 * @param int $this->dimensions The default dimensions.
+		 * @param int $dimensions The default dimensions.
 		 *
 		 * @return int  The dimensions.
 		 */
@@ -191,7 +225,7 @@ class Embeddings extends Provider {
 		 * @since 3.1.0
 		 * @hook classifai_openai_embeddings_max_tokens
 		 *
-		 * @param int $this->max_tokens The default maximum tokens.
+		 * @param int $max_tokens The default maximum tokens.
 		 *
 		 * @return int  The maximum tokens.
 		 */
@@ -214,7 +248,7 @@ class Embeddings extends Provider {
 		 * @since 3.1.0
 		 * @hook classifai_openai_embeddings_max_terms
 		 *
-		 * @param int $this->max_terms The default maximum terms.
+		 * @param int $max_terms The default maximum terms.
 		 *
 		 * @return int  The maximum terms.
 		 */
@@ -237,7 +271,7 @@ class Embeddings extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_embeddings_max_posts
 		 *
-		 * @param int $this->max_posts The default maximum posts.
+		 * @param int $max_posts The default maximum posts.
 		 *
 		 * @return int The maximum posts.
 		 */
@@ -333,7 +367,7 @@ class Embeddings extends Provider {
 
 			// Register hooks.
 			add_action( 'created_term', array( $this, 'generate_embeddings_for_term' ) ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-			add_action( 'edited_terms', array( $this, 'generate_embeddings_for_term' ) ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+			add_action( 'edited_term', array( $this, 'update_embeddings_for_term' ) );
 			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 			add_action( 'admin_post_classifai_regen_embeddings', array( $this, 'classifai_regen_embeddings' ) );
 			add_filter( 'classifai_feature_classification_get_default_settings', array( $this, 'modify_default_classification_feature_settings' ), 10, 2 );
@@ -430,127 +464,6 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Get the threshold for the similarity calculation.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param string $taxonomy Taxonomy slug.
-	 * @return float
-	 */
-	public function get_threshold( string $taxonomy = '' ): float {
-		$settings  = ( new Classification() )->get_settings();
-		$threshold = 1;
-
-		if ( ! empty( $taxonomy ) ) {
-			$threshold = isset( $settings[ $taxonomy . '_threshold' ] ) ? $settings[ $taxonomy . '_threshold' ] : 75;
-		}
-
-		// Convert $threshold (%) to decimal.
-		$threshold = 1 - ( (float) $threshold / 100 );
-
-		/**
-		 * Filter the threshold for the similarity calculation.
-		 *
-		 * @since 2.5.0
-		 * @hook classifai_threshold
-		 *
-		 * @param float  $threshold The threshold to use.
-		 * @param string $taxonomy  The taxonomy to get the threshold for.
-		 *
-		 * @return float The threshold to use.
-		 */
-		return apply_filters( 'classifai_threshold', $threshold, $taxonomy );
-	}
-
-	/**
-	 * Regenerate embeddings.
-	 *
-	 * This will regenerate embeddings for all terms
-	 * and delete existing post embeddings. Useful to run
-	 * anytime the model or dimensions are changed.
-	 */
-	public function regenerate_embeddings() {
-		$feature  = new Classification();
-		$settings = $feature->get_settings();
-
-		if (
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
-		) {
-			return;
-		}
-
-		// Regenerate embeddings for all terms.
-		foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
-			if ( isset( $settings[ $feature_name ] ) && 1 === (int) $settings[ $feature_name ] ) {
-				$this->trigger_taxonomy_update( $feature_name, true );
-			}
-		}
-
-		// Delete all post embeddings.
-		$embedding_posts = get_posts(
-			array(
-				'post_type'      => 'any',
-				'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page
-				'fields'         => 'ids',
-				'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare'   => 'EXISTS',
-			)
-		);
-
-		foreach ( $embedding_posts as $post_id ) {
-			delete_post_meta( $post_id, 'classifai_openai_embeddings' );
-		}
-
-		// Hide the admin notice.
-		update_option( 'classifai_hide_embeddings_notice', true, false );
-
-		// Set a notice to let the user know the embeddings have been regenerated.
-		$notifications = new Notifications();
-		$notifications->set_notice(
-			esc_html__( 'Embeddings have been regenerated.', 'classifai' ),
-			'success',
-		);
-
-		// Redirect to the same page but remove the nonce so we don't run this again.
-		$redirect_url = admin_url( 'tools.php?page=classifai#/language_processing/feature_classification' );
-		if ( should_use_legacy_settings_panel() ) {
-			$redirect_url = admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification' );
-		}
-		wp_safe_redirect( $redirect_url );
-		exit;
-	}
-
-	/**
-	 * Get the data to preview terms.
-	 *
-	 * @since 2.5.0
-	 */
-	public function get_post_classifier_embeddings_preview_data() {
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
-
-		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
-			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
-		}
-
-		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
-
-		$embeddings       = $this->generate_embeddings_for_post( (int) $post_id, true );
-		$embeddings_terms = array();
-
-		// Add terms to this item based on embedding data.
-		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
-			$embeddings_terms = $this->get_terms( $embeddings );
-
-			if ( is_wp_error( $embeddings_terms ) ) {
-				wp_send_json_error( $embeddings_terms->get_error_message() );
-			}
-		}
-
-		wp_send_json_success( $embeddings_terms );
-	}
-
-	/**
 	 * Regenerate embeddings.
 	 */
 	public function classifai_regen_embeddings() {
@@ -562,890 +475,6 @@ class Embeddings extends Provider {
 		}
 
 		$this->regenerate_embeddings();
-	}
-
-	/**
-	 * Maybe generated embeddings for a post.
-	 *
-	 * @param int $post_id ID of the post.
-	 */
-	public function maybe_generated_embeddings_for_post( $post_id ) {
-		// Don't run on autosaves.
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-
-		// Only run on posts for now. // TODO: Add support for other post types.
-		$post_type = get_post_type( $post_id );
-		if ( 'post' !== $post_type ) {
-			return;
-		}
-
-		// Only run when publishing.
-		$post_status = get_post_status( $post_id );
-		if ( 'publish' !== $post_status ) {
-			return;
-		}
-
-		$this->generate_embeddings_for_post( $post_id, true, new RecommendedContent() );
-	}
-
-	/**
-	 * Trigger embedding generation for a post.
-	 *
-	 * @param int          $post_id ID of post.
-	 * @param bool         $force Whether to force generation of embeddings even if they already exist. Default false.
-	 * @param Feature|null $feature The feature instance.
-	 * @return array[]|WP_Error Array of embedding vectors on success, WP_Error on failure.
-	 */
-	public function generate_embeddings_for_post( int $post_id, bool $force = false, $feature = null ) {
-		// Don't run on autosaves.
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return new WP_Error( 'invalid', esc_html__( 'Embedding generation will not work during an autosave.', 'classifai' ) );
-		}
-
-		// Ensure the user has permissions to edit.
-		if ( ! current_user_can( 'edit_post', $post_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'User does not have permission to generate embeddings.', 'classifai' ) );
-		}
-
-		/**
-		 * Filter whether ClassifAI should classify an item.
-		 *
-		 * Default is true, return false to skip classifying.
-		 *
-		 * @since 2.2.0
-		 * @hook classifai_openai_embeddings_should_classify
-		 *
-		 * @param bool   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
-		 * @param int    $id              The ID of the item to be considered for classification.
-		 * @param string $type            The type of item to be considered for classification.
-		 *
-		 * @return bool Whether the item should be classified.
-		 */
-		if ( ! apply_filters( 'classifai_openai_embeddings_should_classify', true, $post_id, 'post' ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'Embedding generation is disabled for this item.', 'classifai' ) );
-		}
-
-		// Try to use the stored embeddings first.
-		if ( ! $force ) {
-			$embeddings = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
-
-			if ( ! empty( $embeddings ) ) {
-				return $embeddings;
-			}
-		}
-
-		// Chunk the post content down.
-		$embeddings     = array();
-		$content        = $this->get_normalized_content( $post_id, 'post' );
-		$content_chunks = $this->chunk_content( $content );
-
-		// Get the embeddings for each chunk.
-		if ( ! empty( $content_chunks ) ) {
-			$tokenizer    = new Tokenizer( $this->get_max_tokens() );
-			$total_tokens = $tokenizer->tokens_in_content( $content );
-
-			// If we have a lot of tokens, we need to get embeddings for each chunk individually.
-			if ( $this->max_tokens < $total_tokens ) {
-				foreach ( $content_chunks as $chunk ) {
-					$embedding = $this->generate_embedding( $chunk, $feature );
-
-					if ( $embedding && ! is_wp_error( $embedding ) ) {
-						$embeddings[] = array_map( 'floatval', $embedding );
-					} elseif ( is_wp_error( $embedding ) ) {
-						return $embedding;
-					}
-				}
-			} else {
-				// Otherwise let's get all embeddings in a single request.
-				$all_embeddings = $this->generate_embeddings( $content_chunks, $feature );
-
-				if ( $all_embeddings && ! is_wp_error( $all_embeddings ) ) {
-					$embeddings = array_map(
-						function ( $embedding ) {
-							return array_map( 'floatval', $embedding );
-						},
-						$all_embeddings
-					);
-				} elseif ( is_wp_error( $all_embeddings ) ) {
-					return $all_embeddings;
-				}
-			}
-		}
-
-		// Store the embeddings for future use.
-		if ( ! empty( $embeddings ) ) {
-			update_post_meta( $post_id, 'classifai_openai_embeddings', $embeddings );
-		}
-
-		return $embeddings;
-	}
-
-	/**
-	 * Add terms to a post based on embeddings.
-	 *
-	 * @param int   $post_id ID of post to set terms on.
-	 * @param array $embeddings Embeddings data.
-	 * @param bool  $link Whether to link the terms or not.
-	 * @return array|WP_Error
-	 */
-	public function set_terms( int $post_id = 0, array $embeddings = array(), bool $link = true ) {
-		if ( ! $post_id || ! get_post( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
-		}
-
-		if ( empty( $embeddings ) ) {
-			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to set terms.', 'classifai' ) );
-		}
-
-		$embeddings_similarity = array();
-
-		// Iterate through all of our embedding chunks and run our similarity calculations.
-		foreach ( $embeddings as $embedding ) {
-			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_term_embeddings_similarity( $embedding ) );
-		}
-
-		// Ensure we have some results.
-		if ( empty( $embeddings_similarity ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
-		}
-
-		/**
-		 * Fires after the embeddings similarity has been run but before results are sorted.
-		 *
-		 * @since 3.3.1
-		 * @hook classifai_openai_embeddings_pre_sort_embeddings_similarity
-		 *
-		 * @param array $embeddings_similarity The embeddings similarity results.
-		 * @param int   $post_id               ID of post to set terms on.
-		 * @param array $embeddings            Embeddings data.
-		 * @param bool  $link                  Whether to link the terms or not.
-		 */
-		do_action( 'classifai_openai_embeddings_pre_sort_embeddings_similarity', $embeddings_similarity, $post_id, $embeddings, $link );
-
-		// Sort the results by similarity.
-		usort(
-			$embeddings_similarity,
-			function ( $a, $b ) {
-				return $a['similarity'] <=> $b['similarity'];
-			}
-		);
-
-		// Remove duplicates based on the term_id field.
-		$uniques               = array_unique( array_column( $embeddings_similarity, 'term_id' ) );
-		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
-
-		$sorted_results = array();
-
-		// Sort the results into taxonomy buckets.
-		foreach ( $embeddings_similarity as $item ) {
-			$sorted_results[ $item['taxonomy'] ][] = $item;
-		}
-
-		/**
-		 * Fires after the embeddings similarity has been run and sorted.
-		 *
-		 * @since 3.3.1
-		 * @hook classifai_openai_embeddings_post_sort_embeddings_similarity
-		 *
-		 * @param array $sorted_results The sorted embeddings similarity results.
-		 * @param array $embeddings_similarity The embeddings similarity results.
-		 * @param intpost_id ID of post to set terms on.
-		 * @param array $embeddings Embeddings data.
-		 * @param bool $link Whether to link the terms or not.
-		 */
-		do_action( 'classifai_openai_embeddings_post_sort_embeddings_similarity', $sorted_results, $embeddings_similarity, $post_id, $embeddings, $link );
-
-		$return = array();
-
-		/**
-		 * If $link is true, immediately link all the terms
-		 * to the item.
-		 *
-		 * If it is false, build an array of term data that
-		 * can be used to display the terms in the UI.
-		 */
-		foreach ( $sorted_results as $tax => $terms ) {
-			if ( $link ) {
-				wp_set_object_terms( $post_id, array_map( 'absint', array_column( $terms, 'term_id' ) ), $tax, false );
-			} else {
-				$terms_to_link = array();
-
-				foreach ( $terms as $term ) {
-					$found_term = get_term( $term['term_id'] );
-
-					if ( $found_term && ! is_wp_error( $found_term ) ) {
-						$terms_to_link[ $found_term->name ] = $term['term_id'];
-					}
-				}
-
-				$return[ $tax ] = $terms_to_link;
-			}
-		}
-
-		return empty( $return ) ? $embeddings_similarity : $return;
-	}
-
-	/**
-	 * Determine which terms best match a post based on embeddings.
-	 *
-	 * @param array $embeddings An array of embeddings data.
-	 * @return array|WP_Error
-	 */
-	public function get_terms( array $embeddings = array() ) {
-		if ( empty( $embeddings ) ) {
-			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
-		}
-
-		$embeddings_similarity = array();
-
-		// Iterate through all of our embedding chunks and run our similarity calculations.
-		foreach ( $embeddings as $embedding ) {
-			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_term_embeddings_similarity( $embedding, false ) );
-		}
-
-		// Ensure we have some results.
-		if ( empty( $embeddings_similarity ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
-		}
-
-		// Sort the results by similarity.
-		usort(
-			$embeddings_similarity,
-			function ( $a, $b ) {
-				return $a['similarity'] <=> $b['similarity'];
-			}
-		);
-
-		// Remove duplicates based on the term_id field.
-		$uniques               = array_unique( array_column( $embeddings_similarity, 'term_id' ) );
-		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
-
-		$sorted_results = array();
-
-		// Sort the results into taxonomy buckets.
-		foreach ( $embeddings_similarity as $item ) {
-			$sorted_results[ $item['taxonomy'] ][] = $item;
-		}
-
-		// Prepare the results.
-		$results = array();
-
-		foreach ( $sorted_results as $tax => $terms ) {
-			// Get the taxonomy name.
-			$taxonomy = get_taxonomy( $tax );
-			$tax_name = $taxonomy->labels->singular_name;
-
-			// Initialize the taxonomy bucket in results.
-			$results[ $tax ] = array(
-				'label' => $tax_name,
-				'data'  => array(),
-			);
-
-			foreach ( $terms as $term ) {
-				// Convert $similarity to percentage.
-				$similarity = round( ( 1 - $term['similarity'] ), 10 );
-
-				// Store the results.
-				$results[ $tax ]['data'][] = array(
-					'label' => get_term( $term['term_id'] )->name,
-					'score' => $similarity,
-				);
-			}
-		}
-
-		return $results;
-	}
-
-	/**
-	 * Get the similarity between an embedding and all terms.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param array $embedding Embedding data.
-	 * @param bool  $consider_threshold Whether to consider the threshold setting.
-	 * @return array
-	 */
-	private function get_term_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
-		$feature              = new Classification();
-		$embedding_similarity = array();
-		$taxonomies           = $feature->get_all_feature_taxonomies();
-		$calculations         = new EmbeddingCalculations();
-
-		foreach ( $taxonomies as $tax ) {
-			$exclude = array();
-
-			if ( is_numeric( $tax ) ) {
-				continue;
-			}
-
-			if ( 'tags' === $tax ) {
-				$tax = 'post_tag';
-			}
-
-			if ( 'categories' === $tax ) {
-				$tax = 'category';
-
-				// Exclude the uncategorized term.
-				$uncat_term = get_term_by( 'name', 'Uncategorized', 'category' );
-				if ( $uncat_term ) {
-					$exclude = array( $uncat_term->term_id );
-				}
-			}
-
-			$terms = get_terms(
-				array(
-					'taxonomy'   => $tax,
-					'orderby'    => 'count',
-					'order'      => 'DESC',
-					'hide_empty' => false,
-					'fields'     => 'ids',
-					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					'number'     => $this->get_max_terms(),
-					'exclude'    => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-				)
-			);
-
-			if ( is_wp_error( $terms ) || empty( $terms ) ) {
-				continue;
-			}
-
-			// Get threshold setting for this taxonomy.
-			$threshold = $this->get_threshold( $tax );
-
-			// Get embedding similarity for each term.
-			foreach ( $terms as $term_id ) {
-				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
-					continue;
-				}
-
-				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
-
-				if ( ! empty( $term_embedding ) ) {
-					// Loop through the chunks and run a similarity calculation on each.
-					foreach ( $term_embedding as $chunk ) {
-						$similarity = $calculations->cosine_similarity( $embedding, $chunk );
-
-						/**
-						 * Fires after the embeddings similarity has been run for a single chunk.
-						 *
-						 * @since 3.3.1
-						 * @hook classifai_openai_embeddings_single_embedding_similarity
-						 *
-						 * @param bool|float $similarity         The embeddings similarity result.
-						 * @param array      $embedding          Post embedding data.
-						 * @param array      $chunk              Term chunk embedding data.
-						 * @param int        $term_id            ID of term we're comparing.
-						 * @param string     $tax                Taxonomy of term.
-						 * @param bool       $consider_threshold Whether to consider the threshold or not.
-						 */
-						do_action( 'classifai_openai_embeddings_single_embedding_similarity', $similarity, $embedding, $chunk, $term_id, $tax, $consider_threshold );
-
-						if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
-							$embedding_similarity[] = array(
-								'taxonomy'   => $tax,
-								'term_id'    => $term_id,
-								'similarity' => $similarity,
-							);
-						}
-					}
-				}
-			}
-		}
-
-		return $embedding_similarity;
-	}
-
-	/**
-	 * Determine which posts best match another post based on embeddings.
-	 *
-	 * @param array $embeddings An array of embeddings data.
-	 * @param int   $post_id ID of the post to compare against.
-	 * @return array|WP_Error
-	 */
-	public function get_posts( array $embeddings = array(), int $post_id = 0 ) {
-		// Use cached results if they exist.
-		$cache_key = 'classifai_recommended_content_' . $post_id;
-		$results   = wp_cache_get( $cache_key );
-
-		if ( is_array( $results ) ) {
-			return $results;
-		}
-
-		if ( empty( $embeddings ) ) {
-			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required.', 'classifai' ) );
-		}
-
-		$embeddings_similarity = array();
-
-		// Iterate through all of our embedding chunks and run our similarity calculations.
-		foreach ( $embeddings as $embedding ) {
-			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_post_embeddings_similarity( $embedding ) );
-		}
-
-		// Ensure we have some results.
-		if ( empty( $embeddings_similarity ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'No matching items found.', 'classifai' ) );
-		}
-
-		// Sort the results by similarity.
-		usort(
-			$embeddings_similarity,
-			function ( $a, $b ) {
-				return $a['similarity'] <=> $b['similarity'];
-			}
-		);
-
-		// Remove duplicates based on the post_id field.
-		$uniques               = array_unique( array_column( $embeddings_similarity, 'post_id' ) );
-		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
-
-		// Prepare the results.
-		$results = array();
-
-		foreach ( $embeddings_similarity as $result ) {
-			// Convert $similarity to percentage.
-			$similarity = round( ( 1 - $result['similarity'] ), 10 );
-
-			// Store the results.
-			$results[] = array(
-				'post_id' => $result['post_id'],
-				'score'   => $similarity,
-			);
-		}
-
-		// Cache the results.
-		wp_cache_set( $cache_key, $results, '', 60 * MINUTE_IN_SECONDS );
-
-		return $results;
-	}
-
-	/**
-	 * Get the similarity between an embedding and a group of posts.
-	 *
-	 * @param array  $embedding Embedding data.
-	 * @param string $post_type Post type.
-	 * @param bool   $consider_threshold Whether to consider the threshold setting.
-	 * @return array
-	 */
-	private function get_post_embeddings_similarity( array $embedding, string $post_type = 'post', bool $consider_threshold = true ): array {
-		$embedding_similarity = array();
-		$calculations         = new EmbeddingCalculations();
-
-		static $posts     = null;
-		static $threshold = null;
-
-		if ( null === $posts ) {
-			$posts = new WP_Query(
-				array(
-					'post_type'      => $post_type,
-					'post_status'    => 'publish',
-					'posts_per_page' => $this->get_max_posts(),
-					'fields'         => 'ids',
-					'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					'meta_compare'   => 'EXISTS',
-				)
-			);
-			$posts = $posts->get_posts();
-		}
-
-		if ( empty( $posts ) ) {
-			return array();
-		}
-
-		if ( null === $threshold ) {
-			$settings  = $this->feature_instance->get_settings();
-			$threshold = $settings[ static::ID ]['embedding_threshold'] ?? 75;
-
-			// Convert $threshold (%) to decimal.
-			$threshold = 1 - ( (float) $threshold / 100 );
-		}
-
-		// Get embedding similarity for each post.
-		foreach ( $posts as $post_id ) {
-			$post_embedding = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
-
-			if ( empty( $post_embedding ) ) {
-				continue;
-			}
-
-			// Loop through the chunks and run a similarity calculation on each.
-			foreach ( $post_embedding as $chunk ) {
-				$similarity = $calculations->cosine_similarity( $embedding, $chunk );
-
-				/**
-				 * Fires after the embeddings similarity has been run for a single chunk.
-				 *
-				 * @since 3.4.0
-				 * @hook classifai_openai_embeddings_single_post_embedding_similarity
-				 *
-				 * @param bool|float $similarity         The embeddings similarity result.
-				 * @param array      $embedding          Post embedding data.
-				 * @param array      $chunk              Post chunk embedding data.
-				 * @param int        $post_id            ID of post we're comparing.
-				 * @param bool       $consider_threshold Whether to consider the threshold or not.
-				 */
-				do_action( 'classifai_openai_embeddings_single_post_embedding_similarity', $similarity, $embedding, $chunk, $post_id, $consider_threshold );
-
-				if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
-					$embedding_similarity[] = array(
-						'post_id'    => $post_id,
-						'similarity' => $similarity,
-					);
-				}
-			}
-		}
-
-		return $embedding_similarity;
-	}
-
-	/**
-	 * Schedules the job to generate embedding data for all posts.
-	 *
-	 * @param string $post_type Post type.
-	 * @param bool   $all       Whether to generate embeddings for all posts or just those without embeddings.
-	 * @param array  $args      Overridable query args for WP_Query()
-	 * @param int    $user_id   The user ID to run this as.
-	 */
-	public function trigger_post_update( string $post_type = 'post', bool $all = false, array $args = array(), int $user_id = 0 ) {
-		$feature = new RecommendedContent();
-
-		if (
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
-		) {
-			return;
-		}
-
-		/**
-		 * Filter the number of post items to process in a batch.
-		 *
-		 * @since 3.4.0
-		 * @hook classifai_openai_embeddings_items_per_job
-		 *
-		 * @param int $number Number of post items to process per job.
-		 *
-		 * @return int  Filtered number of post items to process per job.
-		 */
-		$number = apply_filters( 'classifai_openai_embeddings_items_per_job', 100 );
-
-		$default_args = array(
-			'post_type'      => $post_type,
-			'post_status'    => 'publish',
-			'posts_per_page' => $number,
-			'fields'         => 'ids',
-			'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare'   => 'NOT EXISTS',
-			'offset'         => 0,
-			'post__not_in'   => array(), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
-		);
-
-		$default_args = array_merge( $default_args, $args );
-
-		// If we want all items, remove our meta query.
-		if ( $all ) {
-			if ( 'classifai_openai_embeddings' === $default_args['meta_key'] ) {
-				unset( $default_args['meta_key'] );
-			}
-
-			if ( 'NOT EXISTS' === $default_args['meta_compare'] ) {
-				unset( $default_args['meta_compare'] );
-			}
-		} else {
-			unset( $default_args['offset'] );
-		}
-
-		if ( 0 === $user_id ) {
-			$user_id = get_current_user_id();
-		}
-
-		$job_args = array(
-			'post_type' => $post_type,
-			'all'       => $all,
-			'args'      => $default_args,
-			'user_id'   => $user_id,
-		);
-
-		// We return early and don't schedule the job if there are no posts.
-		$posts = new WP_Query( $default_args );
-		$posts = $posts->get_posts();
-
-		if ( empty( $posts ) ) {
-			return;
-		}
-
-		if ( function_exists( 'as_enqueue_async_action' ) ) {
-			\as_enqueue_async_action( 'classifai_generate_post_embedding_job', $job_args );
-		}
-	}
-
-	/**
-	 * Job to generate embedding data for all posts.
-	 *
-	 * @param string $post_type Post type.
-	 * @param bool   $all       Whether to generate embeddings for all posts or just those without embeddings.
-	 * @param array  $args      Overridable query args for WP_Query().
-	 * @param int    $user_id   The user ID to run this as.
-	 */
-	public function generate_post_embedding_job( string $post_type = '', bool $all = false, array $args = array(), int $user_id = 0 ) {
-		if ( $user_id > 0 ) {
-			// We set this as current_user_can() fails when this function runs
-			// under the context of Action Scheduler.
-			wp_set_current_user( $user_id );
-		}
-
-		$posts = new WP_Query( $args );
-		$posts = $posts->get_posts();
-
-		if ( empty( $posts ) ) {
-			return;
-		}
-
-		$exclude = array();
-
-		// Generate embedding data for each post.
-		foreach ( $posts as $post_id ) {
-			/** @var int $post_id */
-			$has_generated = $this->generate_embeddings_for_post( $post_id, $all, new RecommendedContent() );
-
-			if ( is_wp_error( $has_generated ) ) {
-				$exclude[] = $post_id;
-			}
-		}
-
-		if ( $all && isset( $args['offset'], $args['posts_per_page'] ) ) {
-			$args['offset'] = $args['offset'] + $args['posts_per_page'];
-		}
-
-		if ( ! empty( $exclude ) ) {
-			$args['post__not_in'] = array_merge( $args['post__not_in'], $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in
-		}
-
-		$this->trigger_post_update( $post_type, $all, $args, $user_id );
-	}
-
-	/**
-	 * Schedules the job to generate embedding data for all terms within a taxonomy.
-	 *
-	 * @param string $taxonomy Taxonomy slug.
-	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
-	 * @param array  $args     Overridable query args for get_terms()
-	 * @param int    $user_id  The user ID to run this as.
-	 */
-	public function trigger_taxonomy_update( string $taxonomy = '', bool $all = false, array $args = array(), int $user_id = 0 ) {
-		$feature = new Classification();
-
-		if (
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
-		) {
-			return;
-		}
-
-		$exclude = array();
-
-		// Exclude the uncategorized term.
-		if ( 'category' === $taxonomy ) {
-			$uncat_term = get_term_by( 'name', 'Uncategorized', 'category' );
-			if ( $uncat_term ) {
-				$exclude = array( $uncat_term->term_id );
-			}
-		}
-
-		/**
-		 * Filter the number of terms to process in a batch.
-		 *
-		 * @since 3.1.0
-		 * @hook classifai_openai_embeddings_terms_per_job
-		 *
-		 * @param int $number Number of terms to process per job.
-		 *
-		 * @return int  Filtered number of terms to process per job.
-		 */
-		$number = apply_filters( 'classifai_openai_embeddings_terms_per_job', 100 );
-
-		$default_args = array(
-			'taxonomy'     => $taxonomy,
-			'orderby'      => 'count',
-			'order'        => 'DESC',
-			'hide_empty'   => false,
-			'fields'       => 'ids',
-			'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare' => 'NOT EXISTS',
-			'number'       => $number,
-			'offset'       => 0,
-			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-		);
-
-		$default_args = array_merge( $default_args, $args );
-
-		// If we want all terms, remove our meta query.
-		if ( $all ) {
-			unset( $default_args['meta_key'], $default_args['meta_compare'] );
-		} else {
-			unset( $default_args['offset'] );
-		}
-
-		if ( 0 === $user_id ) {
-			$user_id = get_current_user_id();
-		}
-
-		$job_args = array(
-			'taxonomy' => $taxonomy,
-			'all'      => $all,
-			'args'     => $default_args,
-			'user_id'  => $user_id,
-		);
-
-		// We return early and don't schedule the job if there are no terms.
-		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( 'classifai_generate_term_embedding_job', $job_args ) ) {
-			$terms = get_terms( $default_args );
-
-			if ( is_wp_error( $terms ) || empty( $terms ) ) {
-				return;
-			}
-		}
-
-		if ( function_exists( 'as_enqueue_async_action' ) ) {
-			\as_enqueue_async_action( 'classifai_generate_term_embedding_job', $job_args );
-		}
-	}
-
-	/**
-	 * Job to generate embedding data for all terms within a taxonomy.
-	 *
-	 * @param string $taxonomy Taxonomy slug.
-	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
-	 * @param array  $args     Overridable query args for get_terms()
-	 * @param int    $user_id  The user ID to run this as.
-	 */
-	public function generate_term_embedding_job( string $taxonomy = '', bool $all = false, array $args = array(), int $user_id = 0 ) {
-
-		if ( $user_id > 0 ) {
-			// We set this as current_user_can() fails when this function runs
-			// under the context of Action Scheduler.
-			wp_set_current_user( $user_id );
-		}
-
-		$terms = get_terms( $args );
-
-		if ( is_wp_error( $terms ) || empty( $terms ) ) {
-			return;
-		}
-
-		// Re-orders the keys.
-		$terms   = array_values( $terms );
-		$exclude = array();
-
-		// Generate embedding data for each term.
-		foreach ( $terms as $term_id ) {
-			/** @var int $term_id */
-			$has_generated = $this->generate_embeddings_for_term( $term_id, $all );
-
-			if ( is_wp_error( $has_generated ) ) {
-				$exclude[] = $term_id;
-			}
-		}
-
-		if ( $all && isset( $args['offset'] ) && isset( $args['number'] ) ) {
-			$args['offset'] = $args['offset'] + $args['number'];
-		}
-
-		if ( ! empty( $exclude ) ) {
-			$args['exclude'] = array_merge( $args['exclude'], $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-		}
-
-		$this->trigger_taxonomy_update( $taxonomy, $all, $args, $user_id );
-	}
-
-	/**
-	 * Trigger embedding generation for term being saved.
-	 *
-	 * @param int                                                                     $term_id ID of term being saved.
-	 * @param bool                                                                    $force Whether to force generation of embeddings even if they already exist. Default false.
-	 * @param \Classifai\Features\Classification|\Classifai\Features\TermCleanup|null $feature The feature instance.
-	 * @return array|WP_Error
-	 */
-	public function generate_embeddings_for_term( int $term_id, bool $force = false, ?Feature $feature = null ) {
-		// Ensure the user has permissions to edit.
-		if ( ! current_user_can( 'edit_term', $term_id ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'User does not have valid permissions to edit this term.', 'classifai' ) );
-		}
-
-		$term = get_term( $term_id );
-
-		if ( ! is_a( $term, '\WP_Term' ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'This is not a valid term.', 'classifai' ) );
-		}
-
-		if ( ! $feature ) {
-			$feature = new Classification();
-		}
-		$taxonomies = $feature->get_all_feature_taxonomies();
-
-		if ( in_array( 'tags', $taxonomies, true ) ) {
-			$taxonomies[] = 'post_tag';
-		}
-
-		if ( in_array( 'categories', $taxonomies, true ) ) {
-			$taxonomies[] = 'category';
-		}
-
-		// Ensure this term is part of a taxonomy we support.
-		if ( ! in_array( $term->taxonomy, $taxonomies, true ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'This taxonomy is not supported.', 'classifai' ) );
-		}
-
-		/**
-		 * Filter whether ClassifAI should classify an item.
-		 *
-		 * Default is true, return false to skip classifying.
-		 *
-		 * @since 2.2.0
-		 * @hook classifai_openai_embeddings_should_classify
-		 *
-		 * @param bool   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
-		 * @param int    $id              The ID of the item to be considered for classification.
-		 * @param string $type            The type of item to be considered for classification.
-		 *
-		 * @return bool Whether the item should be classified.
-		 */
-		if ( ! apply_filters( 'classifai_openai_embeddings_should_classify', true, $term_id, 'term' ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
-		}
-
-		// Try to use the stored embeddings first.
-		$embeddings = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
-
-		if ( ! empty( $embeddings ) && ! $force ) {
-			return $embeddings;
-		}
-
-		// Chunk the term content down.
-		$embeddings     = array();
-		$content        = $this->get_normalized_content( $term_id, 'term' );
-		$content_chunks = $this->chunk_content( $content );
-
-		// Get the embeddings for each chunk.
-		if ( ! empty( $content_chunks ) ) {
-			foreach ( $content_chunks as $chunk ) {
-				$embedding = $this->generate_embedding( $chunk, $feature );
-
-				if ( $embedding && ! is_wp_error( $embedding ) ) {
-					$embeddings[] = array_map( 'floatval', $embedding );
-				} elseif ( is_wp_error( $embedding ) ) {
-					return $embedding;
-				}
-			}
-		}
-
-		// Store the embeddings for future use.
-		if ( ! empty( $embeddings ) ) {
-			update_term_meta( $term_id, 'classifai_openai_embeddings', $embeddings );
-		}
-
-		return $embeddings;
 	}
 
 	/**
@@ -1601,111 +630,6 @@ class Embeddings extends Provider {
 			}
 
 			$return[] = $data['embedding'];
-		}
-
-		return $return;
-	}
-
-	/**
-	 * Chunk content into smaller pieces with an overlap.
-	 *
-	 * @param string $content Content to chunk.
-	 * @param int    $chunk_size Size of each chunk, in words.
-	 * @param int    $overlap_size Overlap size for each chunk, in words.
-	 * @return array
-	 */
-	public function chunk_content( string $content = '', int $chunk_size = 150, $overlap_size = 25 ): array {
-		// Remove multiple whitespaces.
-		$content = preg_replace( '/\s+/', ' ', $content );
-
-		// Split text by single whitespace.
-		$words = explode( ' ', $content );
-
-		$chunks     = array();
-		$text_count = count( $words );
-
-		// Iterate through and chunk data with an overlap.
-		for ( $i = 0; $i < $text_count; $i += $chunk_size ) {
-			// Join a set of words into a string.
-			$chunk = implode(
-				' ',
-				array_slice(
-					$words,
-					max( $i - $overlap_size, 0 ),
-					$chunk_size + $overlap_size
-				)
-			);
-
-			array_push( $chunks, $chunk );
-		}
-
-		return $chunks;
-	}
-
-	/**
-	 * Get our content, ensuring it is normalized.
-	 *
-	 * @param int    $id ID of item to get content from.
-	 * @param string $type Type of content. Default 'post'.
-	 * @return string
-	 */
-	public function get_normalized_content( int $id = 0, string $type = 'post' ): string {
-		$normalizer = new Normalizer();
-		$content    = '';
-
-		// Get the content depending on the type.
-		switch ( $type ) {
-			case 'post':
-				// This will include the post_title and post_content.
-				$content = $normalizer->normalize( $id );
-				break;
-			case 'term':
-				$content = '';
-				$term    = get_term( $id );
-
-				if ( is_a( $term, '\WP_Term' ) ) {
-					$content = $term->name . ' ' . $term->slug . ' ' . $term->description;
-				}
-
-				break;
-		}
-
-		/**
-		 * Filter content that will get sent to OpenAI.
-		 *
-		 * @since 2.2.0
-		 * @hook classifai_openai_embeddings_content
-		 *
-		 * @param string $content Content that will be sent to OpenAI.
-		 * @param int    $post_id ID of post we are submitting.
-		 * @param string $type    Type of content.
-		 *
-		 * @return string Content.
-		 */
-		return apply_filters( 'classifai_openai_embeddings_content', $content, $id, $type );
-	}
-
-	/**
-	 * Common entry point for all REST endpoints for this provider.
-	 *
-	 * @param int    $post_id The Post Id we're processing.
-	 * @param string $route_to_call The route we are processing.
-	 * @param array  $args Optional arguments to pass to the route.
-	 * @return array|string|WP_Error
-	 */
-	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = array() ) {
-		if ( ! $post_id || ! get_post( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to run classification.', 'classifai' ) );
-		}
-
-		$route_to_call = strtolower( $route_to_call );
-		$return        = '';
-
-		// Handle all of our routes.
-		switch ( $route_to_call ) {
-			case 'classify':
-				$return = $this->generate_embeddings_for_post( $post_id, true );
-				break;
 		}
 
 		return $return;

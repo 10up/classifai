@@ -350,8 +350,11 @@ jobs:
       matrix:
         core:
           - { name: 'WP latest', version: 'latest' }
-          - { name: 'WP minimum', version: 'https://wordpress.org/wordpress-6.9.zip' }
-          - { name: 'WP trunk', version: 'WordPress/WordPress#master' }
+          - { name: 'WP minimum', version: '6.9' }
+          - { name: 'WP trunk', version: 'trunk' }
+    env:
+      WP_ENV_PHP_VERSION: 8.3
+      WP_ENV_CORE: ${{ matrix.core.version == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.core.version ) }}
 
     steps:
       - name: Checkout repository
@@ -389,8 +392,10 @@ jobs:
           command: |
             npm run env:start
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+      - name: Log versions
+        run: |
+          npm run env -- run cli php -- -v
+          npm run env -- run cli wp core version
 
       - name: Run E2E tests
         run: npm run test:e2e

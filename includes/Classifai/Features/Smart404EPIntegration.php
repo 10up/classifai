@@ -176,7 +176,9 @@ class Smart404EPIntegration {
 		}
 
 		// Try to use the stored embeddings first if content hasn't changed.
-		$embeddings   = get_post_meta( $post_id, $this->embeddings_meta_key, true );
+		$embeddings   = method_exists( $this->embeddings_handler, 'read_object_embedding' )
+			? $this->embeddings_handler->read_object_embedding( 'post', $post_id )
+			: array();
 		$content_hash = get_post_meta( $post_id, $this->content_hash_meta_key, true );
 
 		// This will include the post title and post content combined.
@@ -243,7 +245,9 @@ class Smart404EPIntegration {
 
 			// Store the embeddings for future use.
 			if ( ! empty( $embeddings ) ) {
-				update_post_meta( $post_id, $this->embeddings_meta_key, $embeddings );
+				if ( method_exists( $this->embeddings_handler, 'write_object_embedding' ) ) {
+					$this->embeddings_handler->write_object_embedding( 'post', $post_id, $embeddings, md5( $content ) );
+				}
 				update_post_meta( $post_id, $this->content_hash_meta_key, md5( $content ) );
 			}
 		}

@@ -37,15 +37,61 @@ class Plugin {
 	 * Setup WP hooks
 	 */
 	public function enable() {
+		add_action( 'init', array( \Classifai\Embeddings\Schema::class, 'maybe_install' ), 1 );
+		add_filter( 'wpmu_drop_tables', array( \Classifai\Embeddings\Schema::class, 'add_to_drop_tables' ), 10, 2 );
+		add_action( 'before_delete_post', array( $this, 'delete_post_embeddings' ) );
+		add_action( 'delete_term', array( $this, 'delete_term_embeddings' ) );
 		add_action( 'init', array( $this, 'init' ), 20 );
 		add_action( 'init', array( $this, 'i18n' ) );
 		add_action( 'admin_init', array( $this, 'init_admin_helpers' ) );
 		add_action( 'admin_init', array( $this, 'add_privacy_policy_content' ) );
 		add_action( 'admin_init', array( $this, 'maybe_migrate_to_v3' ) );
+		add_action( 'admin_init', array( $this, 'maybe_schedule_embeddings_migration' ) );
+		add_action( 'after_classifai_init', array( $this, 'register_embeddings_migration_hooks' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
 		add_filter( 'robots_txt', array( $this, 'maybe_block_ai_crawlers' ) ); // phpcs:ignore WordPressVIPMinimum.Hooks.RestrictedHooks.robots_txt
 		add_action( 'after_classifai_init', array( $this, 'load_action_scheduler' ) );
+	}
+
+	/**
+	 * Purge a post's embeddings from the custom table when it is permanently deleted.
+	 *
+	 * @param int $post_id ID of the post being deleted.
+	 */
+	public function delete_post_embeddings( $post_id ) {
+		( new \Classifai\Embeddings\Repository() )->delete_all_for_object( 'post', (int) $post_id );
+	}
+
+	/**
+	 * Purge a term's embeddings from the custom table when it is deleted.
+	 *
+	 * @param int $term_id ID of the term being deleted.
+	 */
+	public function delete_term_embeddings( $term_id ) {
+		( new \Classifai\Embeddings\Repository() )->delete_all_for_object( 'term', (int) $term_id );
+	}
+
+	/**
+	 * Wire Action Scheduler callbacks for the embeddings backfill.
+	 *
+	 * Runs on after_classifai_init so Action Scheduler is loaded.
+	 */
+	public function register_embeddings_migration_hooks() {
+		( new \Classifai\Embeddings\MigrationRunner() )->register_hooks();
+	}
+
+	/**
+	 * Schedule the embeddings backfill on plugin upgrade.
+	 *
+	 * Idempotent — returns immediately if already completed or already queued.
+	 */
+	public function maybe_schedule_embeddings_migration() {
+		$runner = new \Classifai\Embeddings\MigrationRunner();
+		if ( \Classifai\Embeddings\MigrationRunner::STATUS_COMPLETED === $runner->status() ) {
+			return;
+		}
+		$runner->schedule();
 	}
 
 	/**

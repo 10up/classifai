@@ -988,3 +988,44 @@ function get_temperature( float $temperature, int $results = 1 ): float {
 
 	return (float) min( 2.0, $temperature + ( $results / 10 ) );
 }
+
+/**
+ * Current version salt for the Recommended Content results cache.
+ *
+ * The cache is keyed only by the source post, so a deleted post can linger
+ * inside other posts' cached recommendation lists. Bumping this version
+ * invalidates every entry at once without scanning per-post keys. Defaults to 1.
+ *
+ * @return int
+ */
+function recommended_content_cache_version(): int {
+	$version = wp_cache_get( 'classifai_recommended_content_version' );
+
+	if ( false === $version ) {
+		$version = 1;
+		wp_cache_set( 'classifai_recommended_content_version', $version );
+	}
+
+	return (int) $version;
+}
+
+/**
+ * Cache key for a source post's Recommended Content results, salted with the
+ * current cache version so the whole cache can be invalidated in one bump.
+ *
+ * @param int $post_id Source post the recommendations are computed for.
+ * @return string
+ */
+function recommended_content_cache_key( int $post_id ): string {
+	return 'classifai_recommended_content_' . $post_id . '_v' . recommended_content_cache_version();
+}
+
+/**
+ * Invalidate every cached Recommended Content result by bumping the version salt.
+ *
+ * Called when a post is deleted so it stops appearing in other posts'
+ * recommendations before the per-entry TTL expires.
+ */
+function bump_recommended_content_cache_version() {
+	wp_cache_set( 'classifai_recommended_content_version', recommended_content_cache_version() + 1 );
+}

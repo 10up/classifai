@@ -50,7 +50,40 @@ class RecommendedContent extends Feature {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
 			add_filter( 'pre_render_block', array( $this, 'pre_render_block' ), 10, 2 );
 			add_filter( 'rest_post_query', array( $this, 'modify_block_query_vars_rest' ), 10, 2 );
+
+			// Keep the recommendation cache from serving posts that should no longer appear.
+			add_action( 'transition_post_status', array( $this, 'invalidate_cache_on_unpublish' ), 10, 2 );
+			add_action( 'before_delete_post', array( $this, 'invalidate_cache_on_delete' ) );
 		}
+	}
+
+	/**
+	 * Invalidate the recommendation cache when a post leaves published status.
+	 *
+	 * Recommendations are computed only from published posts, so trashing,
+	 * unpublishing, or otherwise moving a post out of `publish` must remove it from
+	 * other posts' cached recommendations. Skips publish -> publish edits so routine
+	 * saves don't flush the cache.
+	 *
+	 * @param string $new_status The post's new status.
+	 * @param string $old_status The post's previous status.
+	 */
+	public function invalidate_cache_on_unpublish( $new_status, $old_status ) {
+		if ( 'publish' === $old_status && 'publish' !== $new_status ) {
+			\Classifai\bump_recommended_content_cache_version();
+		}
+	}
+
+	/**
+	 * Invalidate the recommendation cache when a post is permanently deleted.
+	 *
+	 * Safety net for the cases that skip the trash status transition: force-deleting
+	 * a still-published post (wp_delete_post( $id, true )) or any site with the trash
+	 * disabled. The cache is keyed only by the source post, so bumping the version
+	 * salt drops every cached list referencing the deleted post at once.
+	 */
+	public function invalidate_cache_on_delete() {
+		\Classifai\bump_recommended_content_cache_version();
 	}
 
 	/**
