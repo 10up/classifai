@@ -940,20 +940,6 @@ class TextToSpeech extends Feature {
 				'description'    => __( 'Choose which post types support this feature.', 'classifai' ),
 			)
 		);
-
-		add_settings_field(
-			'post_statuses',
-			esc_html__( 'Allowed post statuses', 'classifai' ),
-			array( $this, 'render_checkbox_group' ),
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			array(
-				'label_for'      => 'post_statuses',
-				'options'        => \Classifai\get_post_statuses_for_language_settings(),
-				'default_values' => $settings['post_statuses'],
-				'description'    => __( 'Choose which post statuses are allowed to generate audio, e.g. disable this for Draft to avoid generating audio for content that is still being edited.', 'classifai' ),
-			)
-		);
 	}
 
 	/**
