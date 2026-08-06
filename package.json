@@ -48,11 +48,11 @@
     "wp-hooks-documentor": "github:10up/wp-hooks-documentor#build"
   },
   "dependencies": {
-    "@wordpress/icons": "^15.0.0",
+    "@wordpress/icons": "^15.3.0",
     "choices.js": "^11.2.3",
     "clsx": "^2.1.1",
-    "motion": "^12.42.2",
-    "react-router-dom": "^7.18.1",
+    "motion": "^12.43.0",
+    "react-router-dom": "^7.18.2",
     "tippy.js": "^6.3.7"
   }
 }
