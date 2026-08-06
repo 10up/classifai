@@ -25,7 +25,7 @@
     ]
   },
   "require-dev": {
-    "automattic/vipwpcs": "^3.0",
+    "automattic/vipwpcs": "^3.1",
     "dealerdirect/phpcodesniffer-composer-installer": "^1.2.1",
     "johnbillion/wp-compat": "^1.4.0",
     "php-stubs/wp-cli-stubs": "^2.12",
