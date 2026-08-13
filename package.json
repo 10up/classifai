@@ -37,13 +37,13 @@
     "role": "developer"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.0",
+    "@playwright/test": "^1.62.1",
     "@types/wordpress__blocks": "^15.17.0",
     "@wordpress/e2e-test-utils-playwright": "^1.52.0",
     "@wordpress/env": "^11.12.0",
     "@wordpress/scripts": "^32.6.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.2.0",
+    "lint-staged": "^17.3.0",
     "node-wp-i18n": "^1.2.8",
     "wp-hooks-documentor": "github:10up/wp-hooks-documentor#build"
   },
