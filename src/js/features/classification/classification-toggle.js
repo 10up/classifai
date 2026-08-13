@@ -1,8 +1,9 @@
 /**
- * Internal dependencies.
+ * WordPress dependencies
  */
 import { ToggleControl } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -13,13 +14,13 @@ import { __ } from '@wordpress/i18n';
 export const ClassificationToggle = () => {
 	// Use the datastore to retrieve all the meta for this post.
 	const processContent = useSelect( ( select ) =>
-		select( 'core/editor' ).getEditedPostAttribute(
+		select( editorStore ).getEditedPostAttribute(
 			'classifai_process_content'
 		)
 	);
 
 	// Use the datastore to tell the post to update the meta.
-	const { editPost } = useDispatch( 'core/editor' );
+	const { editPost } = useDispatch( editorStore );
 	const enabled = 'yes' === processContent ? 'yes' : 'no';
 
 	return (

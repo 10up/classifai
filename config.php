@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$plugin_version = '3.8.0';
+$plugin_version = '3.9.0';
 
 // Useful global constants
 classifai_define( 'CLASSIFAI_PLUGIN', __DIR__ . '/classifai.php' );

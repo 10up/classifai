@@ -1,24 +1,57 @@
 parameters:
-	level: 1
-	scanFiles:
-		- %rootDir%/../../php-stubs/wp-cli-stubs/wp-cli-stubs.php
-		- %rootDir%/../../php-stubs/wp-cli-stubs/wp-cli-commands-stubs.php
-		- %rootDir%/../../php-stubs/wp-cli-stubs/wp-cli-i18n-stubs.php
-		- %rootDir%/../../php-stubs/wp-cli-stubs/wp-cli-tools-stubs.php
+	# Rules
+	treatPhpDocTypesAsCertain: false
+	inferPrivatePropertyTypeFromConstructor: true
+	checkExplicitMixedMissingReturn: true
+	checkFunctionNameCase: true
+	checkInternalClassCaseSensitivity: true
+	checkTooWideReturnTypesInProtectedAndPublicMethods: true
+	polluteScopeWithAlwaysIterableForeach: false
+	polluteScopeWithLoopInitialAssignments: false
+	reportAlwaysTrueInLastCondition: true
+	reportStaticMethodSignatures: true
+	reportWrongPhpDocTypeInVarTag: true
+
+	# Configuration
+	level: 5
+	phpVersion:
+		min: 70400
+		max: 80400
+	bootstrapFiles:
+		- classifai.php
 	paths:
-		- includes/
 		- classifai.php
 		- config.php
+		- includes/
+	scanFiles:
+		- vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+		- vendor/php-stubs/wp-cli-stubs/wp-cli-commands-stubs.php
+		- vendor/php-stubs/wp-cli-stubs/wp-cli-i18n-stubs.php
+		- vendor/php-stubs/wp-cli-stubs/wp-cli-tools-stubs.php
+		# These are needed due config.platform.php being 7.4 in composer.json and wordpress-stubs not including polyfills.
+		# See <https://github.com/php-stubs/wordpress-stubs/issues/100>.
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
+	scanDirectories:
+		# These libraries are loaded lazily at runtime (not via Composer autoload),
+		# so PHPStan needs them scanned explicitly to discover their symbols.
+		- vendor/woocommerce/action-scheduler/classes
+		- vendor/yahnis-elsts/plugin-update-checker/Puc
 	ignoreErrors:
 		# The JSDoc standard we use on hooks is not compatible with PHPStan.
+		# These hook docblocks use tokens such as `$this`, `$this->prop` and `{array}`
+		# that PHPStan's PHPDoc parser cannot tokenize.
 		- '#One or more @param tags has an invalid name or invalid syntax#'
-		# - '#PHPDoc tag @(.+) has invalid value \({(.+)}(.*)\): Unexpected token "{"#'
-		# Could look to fix this in the future.
 		- '#@param tag must not be named \$this. Choose a descriptive alias, for example \$instance#'
+		- '#PHPDoc tag @(param|return|var) has invalid value (.*): Unexpected token#s'
 		# Ignore ElasticPress for now, as we'll need to stub this.
 		- '#ElasticPress#'
-		# These constants are defined but we'd need to stub them for PHPStan to know.
-		- '#Constant CLASSIFAI_.+ not found#'
-		- '#Constant WATSON_.+ not found#'
+	excludePaths:
+		analyse:
+			- tests/
+			- vendor/
+			- vendor-prefixed/
+		analyseAndScan:
+			- node_modules (?)
 	WPCompat:
-		requiresAtLeast: '6.8'
+		requiresAtLeast: '6.9'

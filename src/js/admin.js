@@ -1,6 +1,17 @@
 /* global ClassifAI */
+/**
+ * WordPress dependencies
+ */
 import { __, sprintf } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import '../scss/admin.scss';
+
+/**
+ * External dependencies
+ */
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';

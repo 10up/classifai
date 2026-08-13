@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { SelectControl, RadioControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -39,6 +38,7 @@ export const ImageTagGeneratorSettings = () => {
 		<>
 			<SettingsRow label={ __( 'Tag taxonomy', 'classifai' ) }>
 				<SelectControl
+					// eslint-disable-next-line no-restricted-syntax
 					id="feature_image_tags_generator_tag_taxonomy"
 					onChange={ ( value ) => {
 						setFeatureSettings( {
@@ -56,7 +56,7 @@ export const ImageTagGeneratorSettings = () => {
 			<SettingsRow
 				label={ __( 'Processing mode', 'classifai' ) }
 				description={ __(
-					'Choose how you want images to be processed. These can be processed automatically when each image is uploaded or can instead be triggered manually on each desired image. Note if set to automatic, you can still trigger the processing manually on individual images.',
+					'Choose how you want images to be processed. Images can be processed automatically when uploaded — either during the upload request, or in the background so uploads are not blocked — or triggered manually on each desired image. With either automatic mode you can still trigger processing manually on individual images.',
 					'classifai'
 				) }
 			>
@@ -71,6 +71,13 @@ export const ImageTagGeneratorSettings = () => {
 						{
 							label: __( 'Automatically on upload', 'classifai' ),
 							value: 'automatic',
+						},
+						{
+							label: __(
+								'Automatically on upload (background)',
+								'classifai'
+							),
+							value: 'automatic_async',
 						},
 						{
 							label: __( 'Manually trigger', 'classifai' ),

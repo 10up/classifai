@@ -1,4 +1,12 @@
-import React, { CSSProperties } from 'react';
+/**
+ * External dependencies
+ */
+import type { CSSProperties } from 'react';
+import React from 'react';
+
+/**
+ * WordPress dependencies
+ */
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**

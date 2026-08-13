@@ -30,59 +30,6 @@ class ContentGeneration extends Feature {
 	const ID = 'feature_content_generation';
 
 	/**
-	 * Prompt for creating content.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'Act as an experienced SEO copywriter tasked with writing an article based off of a given summary and an optionally provided title. Your goal is to craft a compelling, informative piece that adheres to SEO best practices, is well-researched, engaging to the target audience, and structured in a way that enhances readability. Incorporate relevant keywords naturally throughout the text, without compromising the flow or quality of the content. Ensure that the article provides value to the reader. Only return the contents of the article, not the title or other commentary.';
-
-	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed, PluginCheck.CodeAnalysis.Heredoc.NotAllowed
-	/**
-	 * The format of how we'd like content to be returned.
-	 *
-	 * @var string
-	 */
-	public $return_format = <<<'INSTRUCTION'
-The content returned should be valid WordPress block markup as described below, using elements like paragraphs and headings where appropriate. Be selective on the elements you use, defaulting to paragraphs. Please check the content before returning to ensure each element has proper opening and closing block markup and HTML tags and any required block attributes. Ensure elements don't nest inside each other, i.e. don't put a paragraph inside another paragraph or a list within a paragraph. Don't start the content with a heading, start with a paragraph.
-
-Markup available to use; don't use any other blocks, even if requested:
-<!-- wp:paragraph -->
-<p>CONTENT</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading -->
-<h2 class="wp-block-heading">CONTENT</h2>
-<!-- /wp:heading -->
-
-<!-- wp:table -->
-<figure class="wp-block-table"><table class="has-fixed-layout"><tbody><tr><td>CONTENT</td></tr><tr><td>CONTENT</td></tr></tbody></table></figure>
-<!-- /wp:table -->
-
-<!-- wp:quote -->
-<blockquote class="wp-block-quote">
-<p>CONTENT</p>
-</blockquote>
-<!-- /wp:quote -->
-
-<!-- wp:pullquote -->
-<figure class="wp-block-pullquote"><blockquote><p>QUOTE</p><cite>AUTHOR</cite></blockquote></figure>
-<!-- /wp:pullquote -->
-
-<!-- wp:list -->
-<ul class="wp-block-list">
-<li>CONTENT</li>
-</ul>
-<!-- /wp:list -->
-
-<!-- wp:list {"ordered":true} -->
-<ol class="wp-block-list">
-<li>CONTENT</li>
-</ol>
-<!-- /wp:list -->
-INSTRUCTION;
-	// phpcs:enable
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -92,11 +39,11 @@ INSTRUCTION;
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			ChatGPT::ID => __( 'OpenAI ChatGPT', 'classifai' ),
 			OpenAI::ID  => __( 'Azure OpenAI', 'classifai' ),
 			Ollama::ID  => __( 'Ollama', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -106,14 +53,14 @@ INSTRUCTION;
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 	}
 
 	/**
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_assets' ) );
 
 		$quick_draft = new QuickDraftIntegration();
 		$quick_draft->init();
@@ -126,50 +73,50 @@ INSTRUCTION;
 		register_rest_route(
 			'classifai/v1',
 			'create-content',
-			[
+			array(
 				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
-				'permission_callback' => [ $this, 'create_content_permissions_check' ],
-				'args'                => [
-					'id'           => [
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
+				'permission_callback' => array( $this, 'create_content_permissions_check' ),
+				'args'                => array(
+					'id'           => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID where content should be stored.', 'classifai' ),
-					],
-					'summary'      => [
+					),
+					'summary'      => array(
 						'required'          => true,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The summary that will be used to generate the full article.', 'classifai' ),
-					],
-					'title'        => [
+					),
+					'title'        => array(
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The title of the article.', 'classifai' ),
-					],
-					'conversation' => [
+					),
+					'conversation' => array(
 						'type'        => 'object',
-						'properties'  => [
-							'prompt'   => [
+						'properties'  => array(
+							'prompt'   => array(
 								'type'              => 'string',
 								'sanitize_callback' => 'wp_kses_post',
 								'validate_callback' => 'rest_validate_request_arg',
 								'description'       => esc_html__( 'The prompt a user sent.', 'classifai' ),
-							],
-							'response' => [
+							),
+							'response' => array(
 								'type'              => 'string',
 								'sanitize_callback' => 'wp_kses_post',
 								'validate_callback' => 'rest_validate_request_arg',
 								'description'       => esc_html__( 'The response from the assistant to the prompt.', 'classifai' ),
-							],
-						],
+							),
+						),
 						'description' => esc_html__( 'Any previous conversation between a user and assistant.', 'classifai' ),
-					],
-				],
-			]
+					),
+				),
+			)
 		);
 	}
 
@@ -217,11 +164,11 @@ INSTRUCTION;
 				$this->run(
 					$request->get_param( 'id' ),
 					'create_content',
-					[
+					array(
 						'title'        => $request->get_param( 'title' ),
 						'summary'      => $request->get_param( 'summary' ),
 						'conversation' => $request->get_param( 'conversation' ),
-					]
+					)
 				)
 			);
 		}
@@ -263,26 +210,26 @@ INSTRUCTION;
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
-			'prompt'             => [
-				[
+		return array(
+			'prompt'             => array(
+				array(
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->prompt,
+					'prompt'   => $this->get_prompt( 'default' ),
 					'original' => 1,
-				],
-			],
-			'post_types'         => [
+				),
+			),
+			'post_types'         => array(
 				'post' => 'post',
-			],
+			),
 			'provider'           => ChatGPT::ID,
 			'enable_quick_draft' => false,
-		];
+		);
 	}
 
 	/**
 	 * Returns the settings for the feature.
 	 *
-	 * @param string $index The index of the setting to return.
+	 * @param string|false $index The index of the setting to return.
 	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -292,7 +239,7 @@ INSTRUCTION;
 		if ( $settings && ! empty( $settings['prompt'] ) ) {
 			foreach ( $settings['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
-					$settings['prompt'][ $key ]['prompt'] = $this->prompt;
+					$settings['prompt'][ $key ]['prompt'] = $this->get_prompt( 'default' );
 					break;
 				}
 			}

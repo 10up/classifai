@@ -1,5 +1,17 @@
-import React, { CSSProperties } from 'react';
+/**
+ * External dependencies
+ */
+import type { CSSProperties } from 'react';
+import React from 'react';
+
+/**
+ * WordPress dependencies
+ */
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { LoadingDots } from './loading-dots';
 
 // Define style objects outside of JSX

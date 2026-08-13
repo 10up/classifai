@@ -58,7 +58,7 @@ class APIRequest {
 	 * @param Provider|null $provider Provider instance.
 	 * @param array         $settings Feature settings. Optional, useful when settings aren't saved yet.
 	 */
-	public function __construct( string $api_key = '', string $feature = '', ?Provider $provider = null, array $settings = [] ) {
+	public function __construct( string $api_key = '', string $feature = '', ?Provider $provider = null, array $settings = array() ) {
 		$this->api_key  = $api_key;
 		$this->feature  = $feature;
 		$this->provider = $provider;
@@ -72,7 +72,7 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|WP_Error
 	 */
-	public function get( string $url, array $options = [] ) {
+	public function get( string $url, array $options = array() ) {
 		/**
 		 * Filter the URL for the get request.
 		 *
@@ -132,12 +132,12 @@ class APIRequest {
 	 * @param array  $options Additional query params.
 	 * @return array|WP_Error
 	 */
-	public function post( string $url = '', array $options = [] ) {
+	public function post( string $url = '', array $options = array() ) {
 		$options = wp_parse_args(
 			$options,
-			[
+			array(
 				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			]
+			)
 		);
 
 		/**
@@ -227,9 +227,9 @@ class APIRequest {
 	 *
 	 * @param array $options The header options, passed by reference.
 	 */
-	public function add_headers( array &$options = [] ) {
+	public function add_headers( array &$options = array() ) {
 		if ( empty( $options['headers'] ) ) {
-			$options['headers'] = [];
+			$options['headers'] = array();
 		}
 
 		if ( ! isset( $options['headers']['Authorization'] ) ) {
@@ -260,6 +260,6 @@ class APIRequest {
 			return $this->provider->get_credential( 'api_key', $this->settings ) ?? '';
 		}
 
-		return $this->api_key ?? '';
+		return $this->api_key;
 	}
 }

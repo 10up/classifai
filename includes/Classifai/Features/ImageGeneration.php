@@ -39,12 +39,12 @@ class ImageGeneration extends Feature {
 		$this->provider_instances = $this->get_provider_instances( ImageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
-		$this->supported_providers = [
+		$this->supported_providers = array(
 			OpenAIImages::ID             => __( 'OpenAI Images', 'classifai' ),
 			GoogleAIImagen::ID           => __( 'Google AI Imagen', 'classifai' ),
 			TogetherAIImages::ID         => __( 'Together AI', 'classifai' ),
 			LocalhostStableDiffusion::ID => __( 'Stable Diffusion (local)', 'classifai' ),
-		];
+		);
 	}
 
 	/**
@@ -54,16 +54,16 @@ class ImageGeneration extends Feature {
 	 */
 	public function setup() {
 		parent::setup();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'rest_api_init', array( $this, 'register_endpoints' ) );
 	}
 
 	/**
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
-		add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
+		add_action( 'admin_menu', array( $this, 'register_generate_media_page' ), 0 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
+		add_action( 'print_media_templates', array( $this, 'print_media_templates' ) );
 	}
 
 	/**
@@ -88,20 +88,20 @@ class ImageGeneration extends Feature {
 		 */
 		$args = apply_filters(
 			'classifai_' . static::ID . '_rest_route_' . $route . '_args',
-			[
+			array(
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'rest_endpoint_callback' ],
-				'args'                => [
-					'prompt' => [
+				'callback'            => array( $this, 'rest_endpoint_callback' ),
+				'args'                => array(
+					'prompt' => array(
 						'required'          => true,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
-			]
+					),
+				),
+				'permission_callback' => array( $this, 'generate_image_permissions_check' ),
+			)
 		);
 
 		register_rest_route(
@@ -198,7 +198,7 @@ class ImageGeneration extends Feature {
 		wp_enqueue_style(
 			'classifai-plugin-image-generation-media-modal-css',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-image-generation-media-modal.css',
-			[],
+			array(),
 			get_asset_info( 'classifai-plugin-image-generation-media-modal', 'version' ),
 			'all'
 		);
@@ -241,13 +241,13 @@ class ImageGeneration extends Feature {
 		wp_localize_script(
 			'classifai-plugin-image-generation-media-modal-js',
 			'classifaiDalleData',
-			[
+			array(
 				'endpoint'   => 'classifai/v1/generate-image',
 				'tabText'    => $number_of_images > 1 ? esc_html__( 'Generate images', 'classifai' ) : esc_html__( 'Generate image', 'classifai' ),
 				'errorText'  => esc_html__( 'Something went wrong. No results found', 'classifai' ),
 				'buttonText' => esc_html__( 'Select image', 'classifai' ),
 				'caption'    => $caption,
-			]
+			)
 		);
 
 		if ( 'upload.php' === $hook_suffix ) {
@@ -265,9 +265,9 @@ class ImageGeneration extends Feature {
 				wp_localize_script(
 					'classifai-plugin-image-generation-generate-image-media-upload-js',
 					'classifaiGenerateImages',
-					[
+					array(
 						'upload_url' => esc_url( admin_url( 'upload.php' ) ),
-					]
+					)
 				);
 			}
 		}
@@ -320,7 +320,7 @@ class ImageGeneration extends Feature {
 
 				<div class="additional-image-generation-settings hidden">
 					<?php
-					$quality_options = method_exists( $provider_instance, 'get_image_quality_options' ) ? $provider_instance->get_image_quality_options() : [];
+					$quality_options = method_exists( $provider_instance, 'get_image_quality_options' ) ? $provider_instance->get_image_quality_options() : array();
 					if ( ! empty( $quality_options ) ) :
 						?>
 						<label>
@@ -337,7 +337,7 @@ class ImageGeneration extends Feature {
 					<?php endif; ?>
 
 					<?php
-					$size_options = method_exists( $provider_instance, 'get_image_size_options' ) ? $provider_instance->get_image_size_options() : [];
+					$size_options = method_exists( $provider_instance, 'get_image_size_options' ) ? $provider_instance->get_image_size_options() : array();
 					if ( ! empty( $size_options ) ) :
 						?>
 						<label>
@@ -354,7 +354,7 @@ class ImageGeneration extends Feature {
 					<?php endif; ?>
 
 					<?php
-					$aspect_ratio_options = method_exists( $provider_instance, 'get_image_aspect_ratio_options' ) ? $provider_instance->get_image_aspect_ratio_options() : [];
+					$aspect_ratio_options = method_exists( $provider_instance, 'get_image_aspect_ratio_options' ) ? $provider_instance->get_image_aspect_ratio_options() : array();
 					if ( ! empty( $aspect_ratio_options ) ) :
 						?>
 						<label>
@@ -371,7 +371,7 @@ class ImageGeneration extends Feature {
 					<?php endif; ?>
 
 					<?php
-					$style_options = method_exists( $provider_instance, 'get_image_style_options' ) ? $provider_instance->get_image_style_options() : [];
+					$style_options = method_exists( $provider_instance, 'get_image_style_options' ) ? $provider_instance->get_image_style_options() : array();
 					if ( ! empty( $style_options ) ) :
 						?>
 						<label>
@@ -441,14 +441,16 @@ class ImageGeneration extends Feature {
 		$default_settings = $this->get_default_settings();
 
 		// Get all roles that have the upload_files cap.
-		$roles = get_editable_roles() ?? [];
-		$roles = array_filter(
-			$roles,
-			function ( $role ) {
-				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
+		$editable_roles = get_editable_roles() ?? array();
+		$roles          = array();
+
+		foreach ( $editable_roles as $role_key => $role ) {
+			if ( empty( $role['name'] ) || empty( $role['capabilities']['upload_files'] ) ) {
+				continue;
 			}
-		);
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+			$roles[ $role_key ] = $role['name'];
+		}
 
 		/**
 		 * Filter the allowed WordPress roles for image generation.
@@ -492,9 +494,9 @@ class ImageGeneration extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return [
+		return array(
 			'provider' => OpenAIImages::ID,
-		];
+		);
 	}
 
 	/**

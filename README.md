@@ -60,7 +60,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 ## Requirements
 
 * PHP 7.4+
-* [WordPress](http://wordpress.org) 6.8+
+* [WordPress](http://wordpress.org) 6.9+
 * Each individual Feature may have its own requirements, please refer to the [ClassifAI documentation site](https://10up.github.io/classifai/get-started/#requirements) for detailed requirements.
 
 ## Pricing

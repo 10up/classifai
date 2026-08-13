@@ -1,12 +1,12 @@
 /**
- * External Dependencies.
+ * WordPress dependencies
  */
 import { registerBlockVariation } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
 
 /**
- * Internal Dependencies.
+ * Internal dependencies
  */
 import { ReactComponent as icon } from '../../../../assets/img/block-icon.svg';
 

@@ -84,6 +84,7 @@ export const TermCleanupSettings = () => {
 				className="settings-term-cleanup-use-ep"
 			>
 				<CheckboxControl
+					// eslint-disable-next-line no-restricted-syntax
 					id="use_ep"
 					key="use_ep"
 					checked={ featureSettings?.use_ep === '1' }

@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { getInitialFeature, getInitialService } from '../utils/utils';
 
 const { classifAISettings } = window;

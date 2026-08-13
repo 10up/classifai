@@ -109,10 +109,10 @@ class TextToSpeech extends Provider {
 		add_settings_field(
 			static::ID . '_api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
@@ -124,31 +124,31 @@ class TextToSpeech extends Provider {
 						wp_kses(
 							/* translators: %1$s is replaced with the OpenAI sign up URL */
 							__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							]
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							)
 						),
 						esc_url( 'https://platform.openai.com/signup' )
 					),
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_tts_model',
 			esc_html__( 'TTS model', 'classifai' ),
-			[ $this->feature_instance, 'render_select' ],
+			array( $this->feature_instance, 'render_select' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'tts_model',
-				'options'       => [
+				'options'       => array(
 					'tts-1'    => __( 'Text-to-speech 1 (Optimized for speed)', 'classifai' ),
 					'tts-1-hd' => __( 'Text-to-speech 1 HD (Optimized for quality)', 'classifai' ),
-				],
+				),
 				'default_value' => $settings['tts_model'],
 				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
 					'' :
@@ -156,36 +156,36 @@ class TextToSpeech extends Provider {
 						wp_kses(
 							/* translators: %s is replaced with the OpenAI Text to Speech models URL */
 							__( 'Select a <a href="%s" title="OpenAI Text to Speech models" target="_blank">model</a> depending on your requirement.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							],
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							),
 						),
 						esc_url( 'https://platform.openai.com/docs/models/tts' )
 					),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_voice',
 			esc_html__( 'Voice', 'classifai' ),
-			[ $this->feature_instance, 'render_select' ],
+			array( $this->feature_instance, 'render_select' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'voice',
-				'options'       => [
+				'options'       => array(
 					'alloy'   => __( 'Alloy (male)', 'classifai' ),
 					'echo'    => __( 'Echo (male)', 'classifai' ),
 					'fable'   => __( 'Fable (male)', 'classifai' ),
 					'onyx'    => __( 'Onyx (male)', 'classifai' ),
 					'nova'    => __( 'Nova (female)', 'classifai' ),
 					'shimmer' => __( 'Shimmer (female)', 'classifai' ),
-				],
+				),
 				'default_value' => $settings['voice'],
 				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
 					'' :
@@ -193,45 +193,45 @@ class TextToSpeech extends Provider {
 						wp_kses(
 							/* translators: %s is replaced with the OpenAI Text to Speech voice options URL */
 							__( 'Select the speech <a href="%s" title="OpenAI Text to Speech voice options" target="_blank">voice</a>.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							],
+							array(
+								'a' => array(
+									'href'  => array(),
+									'title' => array(),
+								),
+							),
 						),
 						esc_url( 'https://platform.openai.com/docs/guides/text-to-speech/voice-options' )
 					),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_format',
 			esc_html__( 'Audio format', 'classifai' ),
-			[ $this->feature_instance, 'render_select' ],
+			array( $this->feature_instance, 'render_select' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'format',
-				'options'       => [
+				'options'       => array(
 					'mp3' => __( '.mp3', 'classifai' ),
 					'wav' => __( '.wav', 'classifai' ),
-				],
+				),
 				'default_value' => $settings['format'],
 				'description'   => __( 'Select the desired audio format.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
+			)
 		);
 
 		add_settings_field(
 			static::ID . '_speed',
 			esc_html__( 'Audio speed', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
+			array( $this->feature_instance, 'render_input' ),
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
-			[
+			array(
 				'option_index'  => static::ID,
 				'label_for'     => 'speed',
 				'input_type'    => 'number',
@@ -241,7 +241,7 @@ class TextToSpeech extends Provider {
 				'default_value' => $settings['speed'],
 				'description'   => __( 'Select the desired speed of the generated audio.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
+			)
 		);
 	}
 
@@ -251,22 +251,22 @@ class TextToSpeech extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		$common_settings = array(
 			'api_key'       => '',
 			'authenticated' => false,
-		];
+		);
 
 		switch ( $this->feature_instance::ID ) {
 			case FeatureTextToSpeech::ID:
 				return array_merge(
 					$common_settings,
-					[
+					array(
 						'tts_model'    => 'gpt-4o-mini-tts',
 						'voice'        => 'alloy',
 						'format'       => 'mp3',
 						'speed'        => 1,
 						'instructions' => '',
-					]
+					)
 				);
 		}
 
@@ -286,15 +286,15 @@ class TextToSpeech extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		if ( $this->feature_instance instanceof FeatureTextToSpeech ) {
-			if ( in_array( $new_settings[ static::ID ]['tts_model'], [ 'gpt-4o-mini-tts', 'tts-1', 'tts-1-hd' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['tts_model'], array( 'gpt-4o-mini-tts', 'tts-1', 'tts-1-hd' ), true ) ) {
 				$new_settings[ static::ID ]['tts_model'] = sanitize_text_field( $new_settings[ static::ID ]['tts_model'] );
 			}
 
-			if ( in_array( $new_settings[ static::ID ]['voice'], [ 'alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'onyx', 'nova', 'sage', 'shimmer' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['voice'], array( 'alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'onyx', 'nova', 'sage', 'shimmer' ), true ) ) {
 				$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] );
 			}
 
-			if ( in_array( $new_settings[ static::ID ]['format'], [ 'mp3', 'wav' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['format'], array( 'mp3', 'wav' ), true ) ) {
 				$new_settings[ static::ID ]['format'] = sanitize_text_field( $new_settings[ static::ID ]['format'] );
 			}
 
@@ -319,7 +319,7 @@ class TextToSpeech extends Provider {
 	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = array() ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
@@ -341,7 +341,7 @@ class TextToSpeech extends Provider {
 	 * Synthesizes speech from a post item.
 	 *
 	 * @param int $post_id Post ID.
-	 * @return string|WP_Error
+	 * @return int|string|WP_Error
 	 */
 	public function synthesize_speech( int $post_id ) {
 		if ( empty( $post_id ) ) {
@@ -420,9 +420,9 @@ class TextToSpeech extends Provider {
 
 		$response = $request->post(
 			$this->get_api_url(),
-			[
+			array(
 				'body' => wp_json_encode( $request_body ),
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -447,7 +447,7 @@ class TextToSpeech extends Provider {
 	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$debug_info        = array();
 
 		if ( $this->feature_instance instanceof FeatureTextToSpeech ) {
 			$debug_info[ __( 'Model', 'classifai' ) ]        = $provider_settings['tts_model'] ?? '';

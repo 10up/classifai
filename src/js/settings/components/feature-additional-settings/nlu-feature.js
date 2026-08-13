@@ -106,7 +106,7 @@ export const NLUFeatureSettings = () => {
 					<SettingsRow
 						key={ feature }
 						label={ label }
-						className={ 'nlu-features' }
+						className="nlu-features"
 						helperText={ helperText }
 					>
 						<CheckboxControl

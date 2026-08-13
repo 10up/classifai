@@ -1,8 +1,13 @@
 /**
- * External Dependencies.
+ * WordPress dependencies
  */
 import { dispatch, select } from '@wordpress/data';
-import { PluginPostStatusInfo, PostTypeSupportCheck } from '@wordpress/editor';
+import {
+	PluginPostStatusInfo,
+	PostTypeSupportCheck,
+	store as editorStore,
+} from '@wordpress/editor';
+import { store as coreStore } from '@wordpress/core-data';
 import {
 	Button,
 	Modal,
@@ -17,7 +22,7 @@ import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
- * Internal Dependencies.
+ * Internal dependencies
  */
 import { DisableFeatureButton } from '../../components';
 import { browserAITextGeneration } from '../../helpers';
@@ -50,8 +55,8 @@ const TitleGenerationPlugin = () => {
 		return null;
 	}
 
-	const postId = select( 'core/editor' ).getCurrentPostId();
-	const postType = select( 'core/editor' ).getCurrentPostType();
+	const postId = select( editorStore ).getCurrentPostId();
+	const postType = select( editorStore ).getCurrentPostType();
 
 	const openModal = () => setOpen( true );
 	const closeModal = () =>
@@ -59,7 +64,7 @@ const TitleGenerationPlugin = () => {
 
 	const buttonClick = async ( path ) => {
 		const postContent =
-			select( 'core/editor' ).getEditedPostAttribute( 'content' );
+			select( editorStore ).getEditedPostAttribute( 'content' );
 
 		setIsLoading( true );
 		openModal();
@@ -97,13 +102,13 @@ const TitleGenerationPlugin = () => {
 		}
 
 		return (
-			<Flex gap="5" wrap>
+			<Flex gap="5" wrap align="flex-start">
 				{ dataToRender.map( ( item, i ) => {
 					return (
 						<FlexItem
 							className="classifai-title"
 							key={ i }
-							style={ { flexGrow: 1 } }
+							style={ { flexBasis: 'calc(50% - 10px)' } }
 						>
 							<TextareaControl
 								rows="5"
@@ -117,18 +122,19 @@ const TitleGenerationPlugin = () => {
 							/>
 							<Button
 								variant="secondary"
+								style={ { marginTop: '8px' } }
 								onClick={ async () => {
 									const isDirty =
 										select(
-											'core/editor'
+											editorStore
 										).isEditedPostDirty();
-									dispatch( 'core/editor' ).editPost( {
+									dispatch( editorStore ).editPost( {
 										title: data[ i ],
 									} );
 									closeModal();
 									if ( ! isDirty ) {
 										await dispatch(
-											'core'
+											coreStore
 										).saveEditedEntityRecord(
 											'postType',
 											postType,
@@ -174,6 +180,7 @@ const TitleGenerationPlugin = () => {
 						<Button
 							className={ feature?.feature }
 							variant="secondary"
+							disabled={ isOpen }
 							onClick={ () => buttonClick( path ) }
 						>
 							{ feature?.buttonText }

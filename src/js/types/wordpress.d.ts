@@ -55,7 +55,6 @@ declare module '@wordpress/components' {
 	// Add other commonly used components as needed
 	export const __experimentalHStack: React.ComponentType< any >;
 	export const __experimentalVStack: React.ComponentType< any >;
-	[ key: string ]: any; // Allow any other exports
 }
 
 declare module '@wordpress/compose' {
@@ -66,7 +65,6 @@ declare module '@wordpress/compose' {
 	export const useDebounce: any;
 	export const usePrevious: any;
 	export const useViewportMatch: any;
-	[ key: string ]: any;
 }
 
 declare module '@wordpress/core-data' {
@@ -120,7 +118,11 @@ declare module '@wordpress/html-entities' {
 
 declare module '@wordpress/i18n' {
 	export const __: ( text: string, domain?: string ) => string;
-	export const _x: ( text: string, context: string, domain?: string ) => string;
+	export const _x: (
+		text: string,
+		context: string,
+		domain?: string
+	) => string;
 	export const _n: (
 		single: string,
 		plural: string,
@@ -144,7 +146,6 @@ declare module '@wordpress/icons' {
 	export const close: any;
 	export const plus: any;
 	export const trash: any;
-	[ key: string ]: any; // Allow any other icon exports
 }
 
 declare module '@wordpress/media-utils' {
@@ -163,7 +164,10 @@ declare module '@wordpress/plugins' {
 }
 
 declare module '@wordpress/url' {
-	export const addQueryArgs: ( url: string, args: Record< string, any > ) => string;
+	export const addQueryArgs: (
+		url: string,
+		args: Record< string, any >
+	) => string;
 	export const getQueryArgs: ( url: string ) => Record< string, any >;
 	export const hasQueryArg: ( url: string, arg: string ) => boolean;
 	export const removeQueryArgs: ( url: string, ...args: string[] ) => string;

@@ -86,7 +86,9 @@ export const PromptRepeater = ( props ) => {
 										'classifai'
 									) }
 								</strong>{ ' ' }
-								{ prompt.prompt }
+								<span style={ { whiteSpace: 'pre-line' } }>
+									{ prompt.prompt }
+								</span>
 							</p>
 						</>
 					) }
@@ -129,7 +131,7 @@ export const PromptRepeater = ( props ) => {
 					<div className="actions-rows">
 						<Button
 							className="action__set_default"
-							variant={ 'link' }
+							variant="link"
 							disabled={ !! prompt.default ? true : false }
 							onClick={ () => {
 								onChange( index, {
@@ -143,10 +145,10 @@ export const PromptRepeater = ( props ) => {
 						</Button>
 						{ ! prompt.original && (
 							<>
-								<span className="separator">{ '|' }</span>
+								<span className="separator">|</span>
 								<Button
 									className="action__remove_prompt"
-									variant={ 'link' }
+									variant="link"
 									onClick={ () => {
 										setActiveIndex( index );
 										setShowConfirmDialog( true );
@@ -163,7 +165,7 @@ export const PromptRepeater = ( props ) => {
 				isOpen={ showConfirmDialog }
 				onConfirm={ handleConfirm }
 				onCancel={ () => setShowConfirmDialog( false ) }
-				confirmButtonText={ __( 'Remove' ) }
+				confirmButtonText={ __( 'Remove', 'classifai' ) }
 				size="medium"
 			>
 				{ __(
@@ -174,7 +176,7 @@ export const PromptRepeater = ( props ) => {
 			<Button
 				className="action__add_prompt"
 				onClick={ addPrompt }
-				variant={ 'secondary' }
+				variant="secondary"
 			>
 				{ __( 'Add new prompt', 'classifai' ) }
 			</Button>
