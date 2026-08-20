@@ -381,6 +381,9 @@ jobs:
       - name: Build assets
         run: npm run build
 
+      - name: Set the core version
+        run: ./tests/bin/set-core-version.js ${{ matrix.core.version }}
+
       - name: Start the Docker testing environment
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
@@ -391,6 +394,11 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+
+      - name: Log versions
+        run: |
+          npm run env -- run cli php -- -v
+          npm run env -- run cli wp core version
 
       - name: Run E2E tests
         run: npm run test:e2e
