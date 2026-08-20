@@ -547,30 +547,24 @@ export class ClassifAIUtils {
 	// ---------- Feature verification ----------
 
 	/**
-	 * Open the post sidebar's ClassifAI section. Handles both the legacy
-	 * `.classifai-panel` collapsible panel and the WP 6.6+ heading-button
-	 * variant exposed as `<h2><button>ClassifAI</button></h2>`.
+	 * Open the post sidebar's ClassifAI section, rendered as a collapsed
+	 * `.classifai-panel` whose `<h2><button>ClassifAI</button></h2>` toggle
+	 * expands it.
 	 */
 	async openClassifAIPostPanel(): Promise< void > {
 		await this.activatePostTab();
-		const legacy = this.page.locator( '.classifai-panel' );
-		if ( await legacy.count() ) {
-			const cls = ( await legacy.first().getAttribute( 'class' ) ) || '';
-			if ( ! cls.includes( 'is-opened' ) ) {
-				await legacy.first().click();
-			}
+
+		const toggle = this.page
+			.locator( '.classifai-panel .components-panel__body-toggle' )
+			.first();
+		try {
+			await toggle.waitFor( { timeout: 5000 } );
+		} catch {
 			return;
 		}
 
-		// New panel: heading-button labelled "ClassifAI" in the post sidebar.
-		const headingBtn = this.page
-			.getByRole( 'button', { name: 'ClassifAI', exact: true } )
-			.first();
-		if ( await headingBtn.count() ) {
-			const aria = await headingBtn.getAttribute( 'aria-expanded' );
-			if ( aria !== 'true' ) {
-				await headingBtn.click();
-			}
+		if ( ( await toggle.getAttribute( 'aria-expanded' ) ) !== 'true' ) {
+			await toggle.click();
 		}
 	}
 
@@ -623,13 +617,17 @@ export class ClassifAIUtils {
 		await this.closeWelcomeGuide();
 	}
 
-	async verifyExcerptGenerationEnabled( enabled = true ): Promise< void > {
+	/**
+	 * Open the first post listed on /wp-admin/edit.php in the block editor.
+	 */
+	async openFirstPostInList(): Promise< void > {
 		await this.page.goto( '/wp-admin/edit.php' );
-		await this.page
-			.locator( '#the-list tr:nth-child(1) td.title a.row-title' )
-			.first()
-			.click();
+		await this.page.locator( '#the-list .row-title' ).first().click();
 		await this.closeWelcomeGuide();
+	}
+
+	async verifyExcerptGenerationEnabled( enabled = true ): Promise< void > {
+		await this.openFirstPostInList();
 
 		// Ensure document settings sidebar is open so the Excerpt panel is in the DOM.
 		await this.editor.openDocumentSettingsSidebar();
@@ -697,12 +695,7 @@ export class ClassifAIUtils {
 	}
 
 	async verifyTextToSpeechEnabled( enabled = true ): Promise< void > {
-		await this.page.goto( '/wp-admin/edit.php' );
-		await this.page
-			.locator( '#the-list tr:nth-child(1) td.title a.row-title' )
-			.first()
-			.click();
-		await this.closeWelcomeGuide();
+		await this.openFirstPostInList();
 		await this.openClassifAIPostPanel();
 		const btn = this.page.locator( '#classifai-audio-controls__preview-btn' );
 		if ( enabled ) {
@@ -713,12 +706,7 @@ export class ClassifAIUtils {
 	}
 
 	async verifyTitleGenerationEnabled( enabled = true ): Promise< void > {
-		await this.page.goto( '/wp-admin/edit.php' );
-		await this.page
-			.locator( '#the-list tr:nth-child(1) td.title a.row-title' )
-			.first()
-			.click();
-		await this.closeWelcomeGuide();
+		await this.openFirstPostInList();
 		await this.openLegacyPostStatusPanelIfPresent();
 		const btn = this.page.locator( '.classifai-post-status button.title' );
 		if ( enabled ) {
@@ -773,12 +761,7 @@ export class ClassifAIUtils {
 	}
 
 	async verifyContentGenerationEnabled( enabled = true ): Promise< void > {
-		await this.page.goto( '/wp-admin/edit.php' );
-		await this.page
-			.locator( '#the-list tr:nth-child(1) td.title a.row-title' )
-			.first()
-			.click();
-		await this.closeWelcomeGuide();
+		await this.openFirstPostInList();
 
 		const chatBtn = this.page.locator( '.classifai-chat-button' ).first();
 		if ( enabled ) {
@@ -808,12 +791,7 @@ export class ClassifAIUtils {
 			await expect( generateMenu ).not.toContainText( 'Generate Images' );
 		}
 
-		await this.page.goto( '/wp-admin/edit.php' );
-		await this.page
-			.locator( '#the-list tr:nth-child(1) td.title a.row-title' )
-			.first()
-			.click();
-		await this.closeWelcomeGuide();
+		await this.openFirstPostInList();
 
 		await this.openFeaturedImageModal();
 

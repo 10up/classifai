@@ -72,7 +72,7 @@ async function globalSetup( config: FullConfig ) {
 
 	// Reset the test environment before running the tests.
 	await Promise.all( [
-		requestUtils.activateTheme( 'twentytwentyone' ),
+		requestUtils.activateTheme( 'twentytwentyfive' ),
 		requestUtils.activatePlugin( 'classifai-e2e-test-request-mock-plugin' ),
 		requestUtils.deleteAllPosts(),
 		requestUtils.deleteAllBlocks(),
