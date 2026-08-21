@@ -1,0 +1,22 @@
+{
+  "name": "10up/classifai",
+  "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://classifaiplugin.com/",
+  "authors": [
+    {
+      "name": "10up",
+      "email": "info@10up.com",
+      "homepage": "https://10up.com"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/10up/classifai/issues",
+    "source": "https://github.com/10up/classifai"
+  },
+  "require": {
+    "php": ">=7.4",
+    "composer/installers": "^1.0 || ^2.0"
+  }
+}

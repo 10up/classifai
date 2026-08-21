@@ -40,6 +40,17 @@ jobs:
       run: |
         npm run archive
 
+    - name: Add release composer.json
+      run: |
+        DEV_PHP=$(jq -r '.require.php' composer.json)
+        REL_PHP=$(jq -r '.require.php' bin/composer-release.json)
+        if [ "$DEV_PHP" != "$REL_PHP" ]; then
+          echo "::error::PHP constraint drift: composer.json requires '$DEV_PHP' but bin/composer-release.json requires '$REL_PHP'"
+          exit 1
+        fi
+        cp bin/composer-release.json release/composer.json
+        composer validate --no-check-lock release/composer.json
+
     - name: Release to Stable
       uses: s0/git-publish-subdir-action@ac113f6bfe8896e85a373534242c949a7ea74c98 # develop
       env:
