@@ -30,35 +30,43 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Extract PR metadata from artifact name
+      - name: Resolve trusted PR metadata
         id: pr-metadata
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+            // The build runs untrusted PR code; the run's head SHA is the
+            // only trusted value.
+            const trustedSha = context.payload.workflow_run.head_sha;
+
+            // Resolve the PR from the trusted head SHA, not the PR number in
+            // the artifact name.
+            const pulls = await github.paginate(github.rest.pulls.list, {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              run_id: ${{ github.event.workflow_run.id }},
+              state: 'open',
+              per_page: 100,
             });
+            const pr = pulls.find(p => p.head.sha === trustedSha);
+            if (!pr) {
+              throw new Error(`Could not resolve an open pull request for head SHA ${trustedSha}`);
+            }
 
-            const artifact = artifacts.data.artifacts.find(a =>
-              a.name.startsWith("classifai-zip-pr")
-            );
-
+            // Match the artifact by the name the trusted build derives, not by
+            // prefix.
+            const expectedName = `classifai-zip-pr${pr.number}-${trustedSha}`;
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+            });
+            const artifact = artifacts.find(a => a.name === expectedName);
             if (!artifact) {
-              throw new Error('Could not find plugin artifact');
+              throw new Error(`Could not find plugin artifact named ${expectedName}`);
             }
 
-            // Parse: classifai-zip-pr123-abc123def...
-            const match = artifact.name.match(/^classifai-zip-pr(\d+)-(.+)$/);
-            if (!match) {
-              throw new Error(`Could not parse artifact name: ${artifact.name}`);
-            }
-
-            const [, prNumber, commitSha] = match;
-
-            core.setOutput('pr-number', prNumber);
-            core.setOutput('commit-sha', commitSha);
+            core.setOutput('pr-number', String(pr.number));
+            core.setOutput('commit-sha', trustedSha);
             core.setOutput('artifact-name', artifact.name);
 
       - name: Expose built artifact
