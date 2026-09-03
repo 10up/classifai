@@ -30,23 +30,7 @@ if ( empty( $takeaways ) ) {
 
 	<div class="wp-block-classifai-key-takeaways__content">
 	<?php
-	if ( 'list' === $layout ) {
-		echo '<ul>';
-		foreach ( (array) $takeaways as $takeaway ) {
-			printf(
-				'<li>%s</li>',
-				esc_html( $takeaway )
-			);
-		}
-		echo '</ul>';
-	} else {
-		foreach ( (array) $takeaways as $takeaway ) {
-			printf(
-				'<p>%s</p>',
-				esc_html( $takeaway )
-			);
-		}
-	}
+	echo wp_kses_post( ( new \Classifai\Features\KeyTakeaways() )->render_takeaways_html( (array) $takeaways, $layout ) );
 	?>
 	</div>
 </div>
