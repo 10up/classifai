@@ -223,7 +223,7 @@ class ContentResizing extends Feature {
 			$this->get_option_name() . '_section',
 			array(
 				'label_for'     => 'condense_text_prompt',
-				'placeholder'   => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
+				'placeholder'   => $this->get_prompt( 'condense' ),
 				'default_value' => $settings['condense_text_prompt'],
 				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
 			)
@@ -237,7 +237,7 @@ class ContentResizing extends Feature {
 			$this->get_option_name() . '_section',
 			array(
 				'label_for'     => 'expand_text_prompt',
-				'placeholder'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
+				'placeholder'   => $this->get_prompt( 'expand' ),
 				'default_value' => $settings['expand_text_prompt'],
 				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
 			)
