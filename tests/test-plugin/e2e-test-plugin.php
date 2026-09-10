@@ -161,6 +161,10 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		$response = file_get_contents( __DIR__ . '/stable-diffusion-models.json' );
 	} elseif ( strpos( $url, 'http://127.0.0.1:7860/sdapi/v1/txt2img' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/stable-diffusion.json' );
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/organization/admin_api_keys' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/mock-data/openai-admin-api-keys.json' );
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/organization/costs' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/mock-data/openai-costs.json' );
 	}
 
 	if ( ! empty( $response ) ) {
@@ -237,3 +241,147 @@ function classifai_mock_aws_polly_connect_to_service() {
 function classifai_mock_aws_polly_pre_synthesize_speech() {
 	return file_get_contents( __DIR__ . '/text-to-speech.txt' );
 }
+
+// Register E2E test helper REST routes for Usage Tracking tests.
+add_action(
+	'rest_api_init',
+	function () {
+		// Run usage refresh synchronously and return the updated data.
+		register_rest_route(
+			'classifai/v1',
+			'run-usage-refresh',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function () {
+					if ( ! class_exists( 'Classifai\Features\APIUsageTracking' ) ) {
+						return new WP_Error( 'class_not_found', 'APIUsageTracking class not found.' );
+					}
+					$feature = new \Classifai\Features\APIUsageTracking();
+					$feature->run_usage_refresh( true );
+					return rest_ensure_response(
+						array(
+							'success' => true,
+							'data'    => $feature->get_usage_data(),
+						)
+					);
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// Set the usage data option directly.
+		register_rest_route(
+			'classifai/v1',
+			'set-usage-data',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					$data = $request->get_json_params();
+					update_option( \Classifai\Features\APIUsageTracking::USAGE_DATA_KEY, $data );
+					return rest_ensure_response( array( 'success' => true ) );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// Set or clear the hard limit reached option.
+		register_rest_route(
+			'classifai/v1',
+			'set-hard-limit',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					$reached = (bool) $request->get_param( 'reached' );
+					if ( $reached ) {
+						update_option( \Classifai\Features\APIUsageTracking::HARD_LIMIT_REACHED_KEY, true );
+					} else {
+						delete_option( \Classifai\Features\APIUsageTracking::HARD_LIMIT_REACHED_KEY );
+					}
+					return rest_ensure_response( array( 'success' => true ) );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// Merge settings into a specific provider within a feature option.
+		register_rest_route(
+			'classifai/v1',
+			'set-provider-settings',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					$body           = $request->get_json_params();
+					$feature_option = sanitize_key( $body['feature_option'] ?? '' );
+					$provider       = sanitize_key( $body['provider'] ?? '' );
+					$settings       = $body['settings'] ?? array();
+
+					if ( empty( $feature_option ) || empty( $provider ) ) {
+						return new WP_Error( 'invalid_params', 'Missing required parameters: feature_option, provider.' );
+					}
+
+					$existing              = get_option( $feature_option, array() );
+					$existing[ $provider ] = array_merge( $existing[ $provider ] ?? array(), $settings );
+					update_option( $feature_option, $existing );
+
+					return rest_ensure_response( array( 'success' => true ) );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		// Run the TTS feature's run() method, temporarily using the OpenAI provider,
+		// to verify the hard limit filter blocks the request.
+		register_rest_route(
+			'classifai/v1',
+			'test-tts',
+			array(
+				'methods'             => 'GET',
+				'callback'            => function () {
+					if ( ! class_exists( 'Classifai\Features\TextToSpeech' ) ) {
+						return new WP_Error( 'class_not_found', 'TextToSpeech class not found.' );
+					}
+
+					// Temporarily override TTS settings to use the OpenAI provider so that the
+					// classifai_pre_fetch_feature_response filter (hard limit check) applies.
+					$feature_option = 'classifai_feature_text_to_speech_generation';
+					$saved_settings = get_option( $feature_option, array() );
+					$provider_key   = 'openai_text_to_speech';
+					$temp_settings  = array_merge(
+						$saved_settings,
+						array(
+							'provider'     => $provider_key,
+							$provider_key  => array_merge(
+								$saved_settings[ $provider_key ] ?? array(),
+								array(
+									'authenticated' => true,
+									'api_key'       => 'test-key',
+								)
+							),
+						)
+					);
+					update_option( $feature_option, $temp_settings );
+
+					$feature = new \Classifai\Features\TextToSpeech();
+					// Post ID does not matter here; the hard limit filter fires before any post processing.
+					$result = $feature->run( 1, 'synthesize' );
+
+					// Restore the original settings.
+					update_option( $feature_option, $saved_settings );
+
+					if ( is_wp_error( $result ) ) {
+						return rest_ensure_response(
+							array(
+								'success' => false,
+								'code'    => $result->get_error_code(),
+								'message' => $result->get_error_message(),
+							)
+						);
+					}
+
+					return rest_ensure_response( array( 'success' => true ) );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);

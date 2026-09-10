@@ -1,0 +1,40 @@
+{
+  "object": "list",
+  "data": [
+      {
+          "object": "organization.admin_api_key",
+          "id": "key_iMsVywuMiZ8QHsBb",
+          "name": "ClassifAI Test Admin API Key",
+          "redacted_value": "sk-proj-********************************************************************************************************************************************************ilkA",
+          "created_at": 1738616855,
+          "last_used_at": 1773926235,
+          "owner": {
+              "type": "user",
+              "object": "organization.user",
+              "id": "user-y8Dd7nRo6DLw97YibFGmgifw",
+              "name": "ClassifAI",
+              "created_at": 1738614303,
+              "role": "reader"
+          }
+      },
+      {
+          "object": "organization.admin_api_key",
+          "id": "key_vL7kHhxaNHqZLCE4",
+          "name": null,
+          "redacted_value": "sk-proj-********************************************************************************************************************************************************vaIA",
+          "created_at": 1743612682,
+          "last_used_at": 1770150101,
+          "owner": {
+              "type": "user",
+              "object": "organization.user",
+              "id": "user-mnH7BTMVDTAzXcR8xroiENJT",
+              "name": "ClassifAI User 1",
+              "created_at": 1643126205,
+              "role": "owner"
+          }
+      }
+  ],
+  "first_id": "key_iMsVywuMiZ8QHsBb",
+  "last_id": "key_vL7kHhxaNHqZLCE4",
+  "has_more": false
+}
