@@ -5,7 +5,7 @@
 
 namespace Classifai\Providers\GoogleAI;
 
-use Classifai\Features\ContentResizing;
+use Classifai\Features\WritingTools;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
@@ -439,7 +439,7 @@ class GeminiAPI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
 		}
 
-		$feature  = new ContentResizing();
+		$feature  = new WritingTools();
 		$settings = $feature->get_settings();
 
 		$args = wp_parse_args(
@@ -453,6 +453,8 @@ class GeminiAPI extends Provider {
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->get_prompt( 'condense' ) );
+		} elseif ( 'fix_grammar' === $args['resize_type'] ) {
+			$prompt = esc_textarea( get_default_prompt( $settings['fix_grammar_text_prompt'] ) ?? $feature->get_prompt( 'fix_grammar' ) );
 		} else {
 			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->get_prompt( 'expand' ) );
 		}
@@ -510,7 +512,7 @@ class GeminiAPI extends Provider {
 			)
 		);
 
-		set_transient( 'classifai_googleai_gemini_api_content_resizing_latest_response', $response, DAY_IN_SECONDS * 30 );
+		set_transient( 'classifai_googleai_gemini_api_writing_tools_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -595,11 +597,12 @@ class GeminiAPI extends Provider {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
 			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_excerpt_generation_latest_response' ) );
-		} elseif ( $this->feature_instance instanceof ContentResizing ) {
-			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = 1;
-			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? array() );
-			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? array() );
-			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_content_resizing_latest_response' ) );
+		} elseif ( $this->feature_instance instanceof WritingTools ) {
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]       = 1;
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]       = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ]     = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Fix grammar and spelling', 'classifai' ) ] = wp_json_encode( $settings['fix_grammar_text_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]          = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_writing_tools_latest_response' ) );
 		}
 
 		return apply_filters(
