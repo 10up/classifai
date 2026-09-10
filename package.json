@@ -52,7 +52,7 @@
     "choices.js": "^11.2.4",
     "clsx": "^2.1.1",
     "motion": "^12.43.0",
-    "react-router-dom": "^7.18.2",
+    "react-router-dom": "^7.18.3",
     "tippy.js": "^6.3.7"
   }
 }
