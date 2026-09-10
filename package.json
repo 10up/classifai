@@ -51,7 +51,7 @@
     "@wordpress/icons": "^15.5.0",
     "choices.js": "^11.2.4",
     "clsx": "^2.1.1",
-    "motion": "^12.43.0",
+    "motion": "^13.1.0",
     "react-router-dom": "^7.18.2",
     "tippy.js": "^6.3.7"
   }
