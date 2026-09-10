@@ -976,7 +976,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [1.3.0] - 2019-06-06
 ### Added
 - Support for automatic image alt text with Microsoft Azure's Computer Vision API (props [@ryanwelcher](https://github.com/ryanwelcher), [@helen](https://github.com/helen) via [#46](https://github.com/10up/classifai/pull/46))
-- Azure seutp and configuration details to docs (props [@jeffpaul](https://github.com/jeffpaul) via [#71](https://github.com/10up/classifai/pull/71))
+- Azure setup and configuration details to docs (props [@jeffpaul](https://github.com/jeffpaul) via [#71](https://github.com/10up/classifai/pull/71))
 - Composer `type` and `license` attributes (props [@christianc1](https://github.com/christianc1), [@helen](https://github.com/helen) via [#57](https://github.com/10up/classifai/pull/57))
 - WordPress version support badge (props [@adamsilverstein](https://github.com/adamsilverstein), [@jeffpaul](https://github.com/jeffpaul) via [#67](https://github.com/10up/classifai/pull/67))
 
