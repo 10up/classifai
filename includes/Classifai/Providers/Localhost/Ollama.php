@@ -7,7 +7,7 @@ namespace Classifai\Providers\Localhost;
 
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
-use Classifai\Features\ContentResizing;
+use Classifai\Features\WritingTools;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Features\ContentGeneration;
@@ -54,7 +54,7 @@ class Ollama extends Provider {
 		 * Default values for feature specific settings.
 		 */
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				$common_settings['number_of_suggestions'] = 1;
 				break;
@@ -114,7 +114,7 @@ class Ollama extends Provider {
 		$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] ?? $settings[ static::ID ]['model'] );
 
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				$new_settings[ static::ID ]['number_of_suggestions'] = sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings[ static::ID ], $settings[ static::ID ] );
 				break;
@@ -422,7 +422,7 @@ class Ollama extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
 		}
 
-		$feature  = new ContentResizing();
+		$feature  = new WritingTools();
 		$settings = $feature->get_settings();
 
 		$args = wp_parse_args(
@@ -435,6 +435,8 @@ class Ollama extends Provider {
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->get_prompt( 'condense' ) );
+		} elseif ( 'fix_grammar' === $args['resize_type'] ) {
+			$prompt = esc_textarea( get_default_prompt( $settings['fix_grammar_text_prompt'] ) ?? $feature->get_prompt( 'fix_grammar' ) );
 		} else {
 			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->get_prompt( 'expand' ) );
 		}
