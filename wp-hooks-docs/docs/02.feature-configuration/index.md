@@ -22,6 +22,7 @@ Welcome to the ClassifAI Feature Configuration guide. This section provides deta
 - [Smart 404](./10.smart-404.md) - Set up intelligent 404 handling
 - [Term Cleanup](./11.term-cleanup.md) - Configure taxonomy term management
 - [Recommended Content](./18.recommended-content.md) - Set up content recommendation features
+- [AI Usage Tracking](./19.usage-tracking.md) - Monitor AI API costs and configure spending alerts
 
 ## Image Processing Features
 
