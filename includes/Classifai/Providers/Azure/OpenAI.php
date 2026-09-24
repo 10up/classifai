@@ -5,7 +5,7 @@
 
 namespace Classifai\Providers\Azure;
 
-use Classifai\Features\ContentResizing;
+use Classifai\Features\WritingTools;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Features\ContentGeneration;
@@ -142,7 +142,7 @@ class OpenAI extends Provider {
 		);
 
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				add_settings_field(
 					static::ID . '_number_of_suggestions',
@@ -184,7 +184,7 @@ class OpenAI extends Provider {
 		 * Default values for feature specific settings.
 		 */
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				$common_settings['number_of_suggestions'] = 1;
 				break;
@@ -221,7 +221,7 @@ class OpenAI extends Provider {
 		$new_settings[ static::ID ]['deployment']   = sanitize_text_field( $new_settings[ static::ID ]['deployment'] ?? $settings[ static::ID ]['deployment'] );
 
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				$new_settings[ static::ID ]['number_of_suggestions'] = sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings[ static::ID ], $settings[ static::ID ] );
 				break;
@@ -246,7 +246,7 @@ class OpenAI extends Provider {
 		}
 
 		if (
-			( $feature instanceof ContentResizing ||
+			( $feature instanceof WritingTools ||
 			$feature instanceof ExcerptGeneration ||
 			$feature instanceof TitleGeneration ||
 			$feature instanceof KeyTakeaways ||
@@ -584,7 +584,7 @@ class OpenAI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
 		}
 
-		$feature  = new ContentResizing();
+		$feature  = new WritingTools();
 		$settings = $feature->get_settings();
 
 		$args = wp_parse_args(
@@ -596,6 +596,8 @@ class OpenAI extends Provider {
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->get_prompt( 'condense' ) );
+		} elseif ( 'fix_grammar' === $args['resize_type'] ) {
+			$prompt = esc_textarea( get_default_prompt( $settings['fix_grammar_text_prompt'] ) ?? $feature->get_prompt( 'fix_grammar' ) );
 		} else {
 			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->get_prompt( 'expand' ) );
 		}
@@ -657,7 +659,7 @@ class OpenAI extends Provider {
 		);
 		$response = $this->get_result( $response );
 
-		set_transient( 'classifai_azure_openai_content_resizing_latest_response', $response, DAY_IN_SECONDS * 30 );
+		set_transient( 'classifai_azure_openai_writing_tools_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -1080,11 +1082,12 @@ class OpenAI extends Provider {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
 			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_excerpt_generation_latest_response' ) );
-		} elseif ( $this->feature_instance instanceof ContentResizing ) {
-			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'] ?? 1;
-			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? array() );
-			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? array() );
-			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_content_resizing_latest_response' ) );
+		} elseif ( $this->feature_instance instanceof WritingTools ) {
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]       = $provider_settings['number_of_suggestions'] ?? 1;
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]       = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ]     = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Fix grammar and spelling', 'classifai' ) ] = wp_json_encode( $settings['fix_grammar_text_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]          = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_writing_tools_latest_response' ) );
 		}
 
 		return apply_filters(
