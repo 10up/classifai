@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2369047d47844f7b4c90f9844597e7af",
+    "content-hash": "dca84f66903abf9ecd72d007b9dd1428",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -2186,16 +2186,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.4.37",
+            "version": "0.4.40",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "4e42269ff2304769ba6f6c43e08894146adc0827"
+                "reference": "59100d74e3e55a74cc410670e4137146ac53cbdc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/4e42269ff2304769ba6f6c43e08894146adc0827",
-                "reference": "4e42269ff2304769ba6f6c43e08894146adc0827",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/59100d74e3e55a74cc410670e4137146ac53cbdc",
+                "reference": "59100d74e3e55a74cc410670e4137146ac53cbdc",
                 "shasum": ""
             },
             "type": "library",
@@ -2212,9 +2212,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.37"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.40"
             },
-            "time": "2026-09-10T08:23:17+00:00"
+            "time": "2026-09-16T00:33:13+00:00"
         },
         {
             "name": "phpstan/phpstan",
@@ -3819,16 +3819,16 @@
         },
         {
             "name": "sirbrillig/phpcs-changed",
-            "version": "v3.0.1",
+            "version": "v3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sirbrillig/phpcs-changed.git",
-                "reference": "5a7c2a58458b84a93444c724d232be8bb9e196ae"
+                "reference": "03ac4c7153b67d5e925829488f399d52ab848fd4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sirbrillig/phpcs-changed/zipball/5a7c2a58458b84a93444c724d232be8bb9e196ae",
-                "reference": "5a7c2a58458b84a93444c724d232be8bb9e196ae",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-changed/zipball/03ac4c7153b67d5e925829488f399d52ab848fd4",
+                "reference": "03ac4c7153b67d5e925829488f399d52ab848fd4",
                 "shasum": ""
             },
             "require": {
@@ -3867,9 +3867,9 @@
             "description": "Run phpcs on files, but only report warnings/errors from lines which were changed.",
             "support": {
                 "issues": "https://github.com/sirbrillig/phpcs-changed/issues",
-                "source": "https://github.com/sirbrillig/phpcs-changed/tree/v3.0.1"
+                "source": "https://github.com/sirbrillig/phpcs-changed/tree/v3.0.2"
             },
-            "time": "2026-08-24T20:27:15+00:00"
+            "time": "2026-09-12T14:53:46+00:00"
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
@@ -4271,7 +4271,7 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "7.1.0",
+            "version": "7.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
