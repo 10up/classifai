@@ -27,7 +27,7 @@
   "require-dev": {
     "automattic/vipwpcs": "^3.1",
     "dealerdirect/phpcodesniffer-composer-installer": "^1.2.1",
-    "johnbillion/wp-compat": "^1.4.0",
+    "johnbillion/wp-compat": "^2.0.0",
     "php-stubs/wp-cli-stubs": "^2.12",
     "phpcompatibility/phpcompatibility-wp": "^3.0@dev",
     "phpstan/extension-installer": "^1.3",
