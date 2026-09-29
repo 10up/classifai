@@ -12,13 +12,13 @@ import { STORE_NAME } from '../../data/store';
 import { PromptRepeater } from './prompt-repeater';
 
 /**
- * Component for the Content Resizing feature settings.
+ * Component for the Writing Tools feature settings.
  *
- * This component is used within the FeatureSettings component to allow users to configure the Content Resizing feature.
+ * This component is used within the FeatureSettings component to allow users to configure the Writing Tools feature.
  *
- * @return {React.ReactElement} ContentResizingSettings component.
+ * @return {React.ReactElement} WritingToolsSettings component.
  */
-export const ContentResizingSettings = () => {
+export const WritingToolsSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
@@ -50,6 +50,20 @@ export const ContentResizingSettings = () => {
 					setPrompts={ ( prompts ) => {
 						setFeatureSettings( {
 							expand_text_prompt: prompts,
+						} );
+					} }
+				/>
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Fix grammar and spelling', 'classifai' ) }
+				description={ __( 'Enter your custom prompt.', 'classifai' ) }
+				className="settings-fix-grammar-text-prompt"
+			>
+				<PromptRepeater
+					prompts={ featureSettings.fix_grammar_text_prompt }
+					setPrompts={ ( prompts ) => {
+						setFeatureSettings( {
+							fix_grammar_text_prompt: prompts,
 						} );
 					} }
 				/>
