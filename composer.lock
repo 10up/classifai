@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ed0f9fa51f9073b03d35425883c54b28",
+    "content-hash": "1922d37b8def3046f719c0cf4c499198",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1319,16 +1319,16 @@
         },
         {
             "name": "johnbillion/wp-compat",
-            "version": "2.0.0",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/johnbillion/wp-compat.git",
-                "reference": "687656425d016891babe4092dffcbc488470034a"
+                "reference": "b2e32bd91716a98bc6fc527c525b979652a4a567"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/johnbillion/wp-compat/zipball/687656425d016891babe4092dffcbc488470034a",
-                "reference": "687656425d016891babe4092dffcbc488470034a",
+                "url": "https://api.github.com/repos/johnbillion/wp-compat/zipball/b2e32bd91716a98bc6fc527c525b979652a4a567",
+                "reference": "b2e32bd91716a98bc6fc527c525b979652a4a567",
                 "shasum": ""
             },
             "require": {
@@ -1343,7 +1343,7 @@
                 "phpstan/phpstan-phpunit": "^1.0 || ^2.0",
                 "phpstan/phpstan-strict-rules": "^1.0 || ^2.0",
                 "phpunit/phpunit": "^8.5 || ^9.0",
-                "roots/wordpress": "^7.1",
+                "roots/wordpress": "*",
                 "wp-coding-standards/wpcs": "3.4.1"
             },
             "suggest": {
@@ -1390,7 +1390,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-24T01:19:53+00:00"
+            "time": "2026-08-29T17:12:02+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -2183,16 +2183,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.4.40",
+            "version": "0.4.42",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "59100d74e3e55a74cc410670e4137146ac53cbdc"
+                "reference": "27ceb3c2390505938b3ce9cc101e76a8df332c9a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/59100d74e3e55a74cc410670e4137146ac53cbdc",
-                "reference": "59100d74e3e55a74cc410670e4137146ac53cbdc",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/27ceb3c2390505938b3ce9cc101e76a8df332c9a",
+                "reference": "27ceb3c2390505938b3ce9cc101e76a8df332c9a",
                 "shasum": ""
             },
             "type": "library",
@@ -2209,17 +2209,17 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.40"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.42"
             },
-            "time": "2026-09-16T00:33:13+00:00"
+            "time": "2026-09-23T00:31:57+00:00"
         },
         {
             "name": "phpstan/phpstan",
             "version": "2.3.x-dev",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/b0b0f75110d4e0fcd44df72a81ececfba082d8cb",
-                "reference": "b0b0f75110d4e0fcd44df72a81ececfba082d8cb",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/cef1263bd17e9a4a24aa66698c620f5f92de6664",
+                "reference": "cef1263bd17e9a4a24aa66698c620f5f92de6664",
                 "shasum": ""
             },
             "require": {
@@ -2276,7 +2276,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-24T08:58:25+00:00"
+            "time": "2026-10-01T07:19:31+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -3816,16 +3816,16 @@
         },
         {
             "name": "sirbrillig/phpcs-changed",
-            "version": "v3.0.2",
+            "version": "v3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sirbrillig/phpcs-changed.git",
-                "reference": "03ac4c7153b67d5e925829488f399d52ab848fd4"
+                "reference": "92e6615c7d2fb85c3e7e5aa6807006f256ec2e2f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sirbrillig/phpcs-changed/zipball/03ac4c7153b67d5e925829488f399d52ab848fd4",
-                "reference": "03ac4c7153b67d5e925829488f399d52ab848fd4",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-changed/zipball/92e6615c7d2fb85c3e7e5aa6807006f256ec2e2f",
+                "reference": "92e6615c7d2fb85c3e7e5aa6807006f256ec2e2f",
                 "shasum": ""
             },
             "require": {
@@ -3864,9 +3864,9 @@
             "description": "Run phpcs on files, but only report warnings/errors from lines which were changed.",
             "support": {
                 "issues": "https://github.com/sirbrillig/phpcs-changed/issues",
-                "source": "https://github.com/sirbrillig/phpcs-changed/tree/v3.0.2"
+                "source": "https://github.com/sirbrillig/phpcs-changed/tree/v3.1.0"
             },
-            "time": "2026-09-12T14:53:46+00:00"
+            "time": "2026-09-22T17:59:38+00:00"
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
