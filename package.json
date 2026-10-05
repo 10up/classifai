@@ -40,7 +40,7 @@
     "@playwright/test": "^1.63.0",
     "@types/wordpress__blocks": "^15.17.0",
     "@wordpress/e2e-test-utils-playwright": "^1.54.0",
-    "@wordpress/env": "^11.15.0",
+    "@wordpress/env": "^11.16.0",
     "@wordpress/scripts": "^32.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.5.1",
@@ -51,7 +51,7 @@
     "@wordpress/icons": "^15.5.0",
     "choices.js": "^11.2.4",
     "clsx": "^2.1.1",
-    "motion": "^13.4.0",
+    "motion": "^13.4.2",
     "react-router-dom": "^7.18.4",
     "tippy.js": "^6.3.7"
   }
