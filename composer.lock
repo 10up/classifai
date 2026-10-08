@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1922d37b8def3046f719c0cf4c499198",
+    "content-hash": "1f25b9c9697735816dadb23a0baddff7",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -2183,16 +2183,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.4.42",
+            "version": "0.4.43",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "27ceb3c2390505938b3ce9cc101e76a8df332c9a"
+                "reference": "47d572570d71b2de6d882974c3a2e530cffce481"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/27ceb3c2390505938b3ce9cc101e76a8df332c9a",
-                "reference": "27ceb3c2390505938b3ce9cc101e76a8df332c9a",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/47d572570d71b2de6d882974c3a2e530cffce481",
+                "reference": "47d572570d71b2de6d882974c3a2e530cffce481",
                 "shasum": ""
             },
             "type": "library",
@@ -2209,9 +2209,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.42"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.43"
             },
-            "time": "2026-09-23T00:31:57+00:00"
+            "time": "2026-09-25T00:34:48+00:00"
         },
         {
             "name": "phpstan/phpstan",
