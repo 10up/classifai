@@ -8,7 +8,7 @@
 import wordpress from '@wordpress/eslint-plugin';
 
 export default [
-	// Global ignores — these directories and config files are skipped entirely.
+	// Global ignores — must be a standalone object with only `ignores` to apply globally.
 	{
 		ignores: [
 			'**/dist/**',
@@ -20,6 +20,8 @@ export default [
 			'eslint.config.mjs',
 			'webpack.config.js',
 		],
+	},
+	{
 		languageOptions: {
 			globals: {
 				wp: "readonly",
