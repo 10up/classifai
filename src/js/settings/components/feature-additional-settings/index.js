@@ -16,7 +16,7 @@ import { ImageToTextGeneratorSettings } from './image-to-text-generator';
 import { PDFToTextGenerationSettings } from './pdf-to-text-generation';
 import { TextToSpeechSettings } from './text-to-speech';
 import { TitleGenerationSettings } from './title-generation';
-import { ContentResizingSettings } from './content-resizing';
+import { WritingToolsSettings } from './writing-tools';
 import { ContentGenerationSettings } from './content-generation';
 import { ExcerptGenerationSettings } from './excerpt-generation';
 import { KeyTakeawaysSettings } from './key-takeaways';
@@ -51,7 +51,7 @@ const AdditionalSettingsFields = () => {
 			return <ContentGenerationSettings />;
 
 		case 'feature_content_resizing':
-			return <ContentResizingSettings />;
+			return <WritingToolsSettings />;
 
 		case 'feature_key_takeaways':
 			return <KeyTakeawaysSettings />;
