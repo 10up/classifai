@@ -651,7 +651,7 @@ abstract class Feature {
 	 * Any keys in `$data` are extracted into the file's variable scope so prompts
 	 * can interpolate runtime values, e.g. `"Summarize in {$words} words."`.
 	 *
-	 * @since x.x.x
+	 * @since 3.9.0
 	 *
 	 * @param string $name The prompt file name without extension. Default 'default'.
 	 * @param array  $data Optional. Variables exposed to the prompt file.
@@ -686,7 +686,7 @@ abstract class Feature {
 		/**
 		 * Filter a Feature's default prompt loaded from file.
 		 *
-		 * @since x.x.x
+		 * @since 3.9.0
 		 * @hook classifai_feature_prompt
 		 *
 		 * @param string  $prompt  The prompt text.

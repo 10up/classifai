@@ -1280,7 +1280,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'post_type'      => ! empty( $opts['post_type'] ) ? $opts['post_type'] : 'any',
 			'post_status'    => 'publish',
 			'fields'         => 'ids',
-			'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page
+			'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page, WordPressVIPMinimum.Performance.NoPaging.posts_per_page_posts_per_page
 		);
 
 		\WP_CLI::log( 'Fetching posts to classify ...' );
