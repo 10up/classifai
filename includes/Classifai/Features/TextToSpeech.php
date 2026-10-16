@@ -255,7 +255,10 @@ class TextToSpeech extends Feature {
 	public function rest_handle_audio( \WP_Post $post, WP_REST_Request $request ) {
 		$post_id = (int) $request->get_param( 'id' );
 
-		if ( ! $this->is_feature_enabled() ) {
+		if (
+			! in_array( $post->post_status, $this->get_supported_post_statuses(), true ) ||
+			! $this->is_feature_enabled()
+		) {
 			return;
 		}
 
@@ -614,6 +617,7 @@ class TextToSpeech extends Feature {
 	public function save_post_metadata( int $post_id ) {
 		if (
 			! in_array( get_post_type( $post_id ), $this->get_supported_post_types(), true ) ||
+			! in_array( get_post_status( $post_id ), $this->get_supported_post_statuses(), true ) ||
 			! $this->is_feature_enabled()
 		) {
 			return;
@@ -961,10 +965,13 @@ class TextToSpeech extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return array(
-			'post_types' => array(
+			'post_types'    => array(
 				'post' => 'post',
 			),
-			'provider'   => Speech::ID,
+			'post_statuses' => array(
+				'publish' => 'publish',
+			),
+			'provider'      => Speech::ID,
 		);
 	}
 
@@ -982,6 +989,16 @@ class TextToSpeech extends Feature {
 				$new_settings['post_types'][ $post_type->name ] = '';
 			} else {
 				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
+			}
+		}
+
+		$post_statuses = \Classifai\get_post_statuses_for_language_settings();
+
+		foreach ( array_keys( $post_statuses ) as $post_status ) {
+			if ( ! isset( $new_settings['post_statuses'][ $post_status ] ) ) {
+				$new_settings['post_statuses'][ $post_status ] = '';
+			} else {
+				$new_settings['post_statuses'][ $post_status ] = sanitize_text_field( $new_settings['post_statuses'][ $post_status ] );
 			}
 		}
 
