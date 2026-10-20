@@ -103,6 +103,27 @@ class ProviderProfilesTest extends TestCase {
 	}
 
 	/**
+	 * The usage tracking Project ID setting must survive credential resolution,
+	 * otherwise it never reaches the costs request.
+	 *
+	 * @covers ::get_credential_fields
+	 * @covers \Classifai\Providers\CredentialResolver::resolve
+	 */
+	public function test_resolve_keeps_usage_tracking_project_id() {
+		$resolved = CredentialResolver::resolve(
+			'openai_usage_tracking',
+			[
+				'api_key'       => 'sk-admin-key',
+				'project_id'    => 'proj_12345',
+				'authenticated' => true,
+			]
+		);
+
+		$this->assertArrayHasKey( 'project_id', $resolved );
+		$this->assertSame( 'proj_12345', $resolved['project_id'] );
+	}
+
+	/**
 	 * @covers \Classifai\Providers\CredentialResolver::resolve
 	 */
 	public function test_resolve_unknown_provider_passes_settings_through() {
