@@ -63,9 +63,10 @@ class UsageTrackingProviderTest extends TestCase {
 	/**
 	 * Enable the API usage tracking feature with an authenticated provider.
 	 *
-	 * @param string $api_key API key to store.
+	 * @param string $api_key    API key to store.
+	 * @param string $project_id Project ID to store.
 	 */
-	private function enable_feature( string $api_key = 'sk-usage' ) {
+	private function enable_feature( string $api_key = 'sk-usage', string $project_id = '' ) {
 		update_option(
 			'classifai_api_usage_tracking',
 			[
@@ -74,6 +75,7 @@ class UsageTrackingProviderTest extends TestCase {
 				'openai_usage_tracking' => [
 					'api_key'       => $api_key,
 					'authenticated' => true,
+					'project_id'    => $project_id,
 				],
 			]
 		);
@@ -160,5 +162,61 @@ class UsageTrackingProviderTest extends TestCase {
 		$this->assertSame( 4.0, $result['amount'], 'Page totals are summed.' );
 		$this->assertSame( 'USD', $result['currency'] );
 		$this->assertSame( 2, $http_calls, 'Both pages were requested.' );
+	}
+
+	/**
+	 * The saved Project ID is passed to the costs API as the project_ids arg.
+	 *
+	 * @covers ::fetch_period
+	 */
+	public function test_fetch_period_sends_project_id() {
+		$this->enable_feature( 'sk-admin-usage', 'proj_test_123' );
+
+		$requested_urls = [];
+		$mock           = function ( $preempt, $args, $url ) use ( &$requested_urls ) {
+			$requested_urls[] = $url;
+			return [
+				'response' => [ 'code' => 200 ],
+				'headers'  => [ 'content-type' => 'application/json' ],
+				'body'     => wp_json_encode( [ 'data' => [] ] ),
+			];
+		};
+		add_filter( 'pre_http_request', $mock, 10, 3 );
+
+		$provider = new FakeUsageTrackingProvider( new APIUsageTracking() );
+		$provider->fetch_period( 1000, 2000 );
+
+		remove_filter( 'pre_http_request', $mock, 10 );
+
+		$this->assertNotEmpty( $requested_urls );
+		$this->assertStringContainsString( 'project_ids=proj_test_123', $requested_urls[0] );
+	}
+
+	/**
+	 * No project_ids arg is added when no Project ID is configured.
+	 *
+	 * @covers ::fetch_period
+	 */
+	public function test_fetch_period_omits_project_id_when_empty() {
+		$this->enable_feature();
+
+		$requested_urls = [];
+		$mock           = function ( $preempt, $args, $url ) use ( &$requested_urls ) {
+			$requested_urls[] = $url;
+			return [
+				'response' => [ 'code' => 200 ],
+				'headers'  => [ 'content-type' => 'application/json' ],
+				'body'     => wp_json_encode( [ 'data' => [] ] ),
+			];
+		};
+		add_filter( 'pre_http_request', $mock, 10, 3 );
+
+		$provider = new FakeUsageTrackingProvider( new APIUsageTracking() );
+		$provider->fetch_period( 1000, 2000 );
+
+		remove_filter( 'pre_http_request', $mock, 10 );
+
+		$this->assertNotEmpty( $requested_urls );
+		$this->assertStringNotContainsString( 'project_ids', $requested_urls[0] );
 	}
 }
