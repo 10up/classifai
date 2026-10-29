@@ -5,6 +5,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
 use Classifai\Providers\Localhost\OllamaEmbeddings;
@@ -148,6 +149,9 @@ class TermCleanupEPIntegration {
 			) {
 				$embeddings = $provider->generate_embeddings_for_term( $term_id, false, $this->term_cleanup );
 			}
+		} elseif ( is_array( $embeddings ) && ! is_array( reset( $embeddings ) ) ) {
+			$embeddings = ( new EmbeddingCalculations() )->normalize_embeddings( $embeddings );
+			update_term_meta( $term_id, $meta_key, $embeddings );
 		}
 
 		// If we still don't have embeddings, return early.

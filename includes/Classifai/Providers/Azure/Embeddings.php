@@ -408,11 +408,18 @@ class Embeddings extends OpenAI {
 			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
 		}
 
+		$calculations = new EmbeddingCalculations();
+
 		// Try to use the stored embeddings first.
 		if ( ! $force ) {
 			$embeddings = get_post_meta( $post_id, 'classifai_azure_openai_embeddings', true );
 
-			if ( ! empty( $embeddings ) ) {
+			if ( ! empty( $embeddings ) && is_array( $embeddings ) ) {
+				if ( ! is_array( reset( $embeddings ) ) ) {
+					$embeddings = $calculations->normalize_embeddings( $embeddings );
+					update_post_meta( $post_id, 'classifai_azure_openai_embeddings', $embeddings );
+				}
+
 				return $embeddings;
 			}
 		}
@@ -457,6 +464,7 @@ class Embeddings extends OpenAI {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
+			$embeddings = $calculations->normalize_embeddings( $embeddings );
 			update_post_meta( $post_id, 'classifai_azure_openai_embeddings', $embeddings );
 		}
 
@@ -701,7 +709,12 @@ class Embeddings extends OpenAI {
 
 				$term_embedding = get_term_meta( $term_id, 'classifai_azure_openai_embeddings', true );
 
-				if ( ! empty( $term_embedding ) ) {
+				if ( ! empty( $term_embedding ) && is_array( $term_embedding ) ) {
+					if ( ! is_array( reset( $term_embedding ) ) ) {
+						$term_embedding = $calculations->normalize_embeddings( $term_embedding );
+						update_term_meta( $term_id, 'classifai_azure_openai_embeddings', $term_embedding );
+					}
+
 					// Loop through the chunks and run a similarity calculation on each.
 					foreach ( $term_embedding as $chunk ) {
 						$similarity = $calculations->cosine_similarity( $embedding, $chunk );
@@ -926,10 +939,17 @@ class Embeddings extends OpenAI {
 			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
 		}
 
+		$calculations = new EmbeddingCalculations();
+
 		// Try to use the stored embeddings first.
 		$embeddings = get_term_meta( $term_id, 'classifai_azure_openai_embeddings', true );
 
-		if ( ! empty( $embeddings ) && ! $force ) {
+		if ( ! empty( $embeddings ) && is_array( $embeddings ) && ! $force ) {
+			if ( ! is_array( reset( $embeddings ) ) ) {
+				$embeddings = $calculations->normalize_embeddings( $embeddings );
+				update_term_meta( $term_id, 'classifai_azure_openai_embeddings', $embeddings );
+			}
+
 			return $embeddings;
 		}
 
@@ -953,6 +973,7 @@ class Embeddings extends OpenAI {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
+			$embeddings = $calculations->normalize_embeddings( $embeddings );
 			update_term_meta( $term_id, 'classifai_azure_openai_embeddings', $embeddings );
 		}
 
