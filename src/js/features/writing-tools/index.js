@@ -120,7 +120,7 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 
 register( resizeContentStore );
 
-const ContentResizingPlugin = () => {
+const WritingToolsPlugin = () => {
 	// Holds the original text of the block being processed.
 	const [ blockContentAsPlainText, setBlockContentAsPlainText ] =
 		useState( '' );
@@ -164,7 +164,17 @@ const ContentResizingPlugin = () => {
 					'Expanded text suggestion',
 					'Expanded text suggestions',
 					textArray.length,
-					'Modal title after expand content resizing.',
+					'Modal title after expand writing tools.',
+					'classifai'
+				)
+			);
+		} else if ( 'fix_grammar' === resizingType ) {
+			setModalTitle(
+				_nx(
+					'Grammar and spelling correction suggestion',
+					'Grammar and spelling correction suggestions',
+					textArray.length,
+					'Modal title after fix grammar writing tools.',
 					'classifai'
 				)
 			);
@@ -174,7 +184,7 @@ const ContentResizingPlugin = () => {
 					'Condensed text suggestion',
 					'Condensed text suggestions',
 					textArray.length,
-					'Modal title after condense content resizing.',
+					'Modal title after condense writing tools.',
 					'classifai'
 				)
 			);
@@ -204,7 +214,7 @@ const ContentResizingPlugin = () => {
 	/**
 	 * Refreshes results.
 	 *
-	 * @param {string} resizingType  Type of resizing. grow|shrink|null
+	 * @param {string} resizingType  Type of resizing. grow|shrink|fix_grammar|null
 	 * @param {Block}  selectedBlock The selected block.
 	 */
 	async function refreshResults( resizingType, selectedBlock ) {
@@ -218,7 +228,7 @@ const ContentResizingPlugin = () => {
 	}
 
 	/**
-	 * Triggered when either `Grow content` or `Shrink content` is clicked from
+	 * Triggered when `Expand this text`, `Condense this text`, or `Fix grammar and spelling` is clicked from
 	 * the Block's "more options" menu.
 	 *
 	 * @return {void}
@@ -319,7 +329,7 @@ const ContentResizingPlugin = () => {
 		}
 	}
 
-	// We don't want to use the reszing feature when multiple blocks are selected.
+	// We don't want to use the resizing feature when multiple blocks are selected.
 	// Nor do we want to use it when a block's content resizing is under process.
 	if ( isMultiBlocksSelected || isResizing ) {
 		return null;
@@ -475,8 +485,8 @@ function toPlainText( html ) {
 	return plainText.replace( /\n\n+/g, '\n\n' );
 }
 
-registerPlugin( 'classifai-plugin-content-resizing', {
-	render: ContentResizingPlugin,
+registerPlugin( 'classifai-plugin-writing-tools', {
+	render: WritingToolsPlugin,
 } );
 
 const colorsArray = [ '#8c2525', '#ca4444', '#303030' ];
@@ -635,6 +645,17 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 										dispatch(
 											resizeContentStore
 										).setResizingType( 'shrink' );
+									},
+								},
+								{
+									title: __(
+										'Fix grammar and spelling',
+										'classifai'
+									),
+									onClick: () => {
+										dispatch(
+											resizeContentStore
+										).setResizingType( 'fix_grammar' );
 									},
 								},
 							] }
