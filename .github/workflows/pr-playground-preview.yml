@@ -71,7 +71,7 @@ jobs:
 
       - name: Expose built artifact
         id: expose
-        uses: WordPress/action-wp-playground-pr-preview/.github/actions/expose-artifact-on-public-url@07d56d39d84ecfcdae2e7ddf9dd83e5e6dde769a # v4.0.0
+        uses: WordPress/action-wp-playground-pr-preview/.github/actions/expose-artifact-on-public-url@6c9250e3acf3cdd454aa9d18f9a3c925a0dad82a # v4.0.0
         with:
           artifact-name: ${{ steps.pr-metadata.outputs.artifact-name }}
           artifact-filename: classifai.zip
@@ -110,7 +110,7 @@ jobs:
           ARTIFACT_URL: ${{ steps.expose.outputs.artifact-url }}
 
       - name: Post Playground preview button
-        uses: WordPress/action-wp-playground-pr-preview@07d56d39d84ecfcdae2e7ddf9dd83e5e6dde769a # v4.0.0
+        uses: WordPress/action-wp-playground-pr-preview@6c9250e3acf3cdd454aa9d18f9a3c925a0dad82a # v4.0.0
         with:
           mode: append-to-description
           blueprint: ${{ steps.blueprint.outputs.blueprint }}
