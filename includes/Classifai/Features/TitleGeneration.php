@@ -193,6 +193,64 @@ class TitleGeneration extends Feature {
 	}
 
 	/**
+	 * Register the title generation ability.
+	 */
+	public function register_abilities() {
+		wp_register_ability(
+			'classifai/generate-titles',
+			array(
+				'label'               => __( 'Generate titles', 'classifai' ),
+				'description'         => __( 'Generates title suggestions for a post.', 'classifai' ),
+				'category'            => 'classifai',
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'post_id' => array(
+							'type'        => 'integer',
+							'minimum'     => 1,
+							'description' => __( 'Post ID to generate titles for.', 'classifai' ),
+						),
+						'num'     => array(
+							'type'        => 'integer',
+							'minimum'     => 1,
+							'maximum'     => 10,
+							'description' => __( 'Number of titles to generate.', 'classifai' ),
+						),
+						'content' => array(
+							'type'        => 'string',
+							'description' => __( 'Content to generate titles for. Defaults to the post content.', 'classifai' ),
+						),
+					),
+					'required'             => array( 'post_id' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array(
+					'type'  => 'array',
+					'items' => array( 'type' => 'string' ),
+				),
+				'execute_callback'    => function ( array $input ) {
+					return $this->run(
+						$input['post_id'],
+						'title',
+						array(
+							'num'     => $input['num'] ?? null,
+							'content' => sanitize_text_field( $input['content'] ?? '' ),
+						)
+					);
+				},
+				'permission_callback' => array( $this, 'ability_permissions_check' ),
+				'meta'                => array(
+					'annotations'  => array(
+						'readonly'   => true,
+						'idempotent' => false,
+					),
+					'show_in_rest' => true,
+				),
+			)
+		);
+	}
+
+	/**
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {

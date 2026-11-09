@@ -5,6 +5,7 @@ namespace Classifai\Features;
 use WP_REST_Request;
 use WP_Error;
 use Classifai\Providers\CredentialObfuscator;
+use Classifai\Providers\Browser\ChromeAI;
 
 use function Classifai\find_provider_class;
 use function Classifai\should_use_legacy_settings_panel;
@@ -78,6 +79,11 @@ abstract class Feature {
 		}
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_plugin_area_script' ) );
+
+		// Chrome AI runs in the browser, so it can't power a server-side ability.
+		if ( $this->is_enabled() && ChromeAI::ID !== $this->get_settings( 'provider' ) ) {
+			add_action( 'wp_abilities_api_init', array( $this, 'register_abilities' ) );
+		}
 
 		if ( $this->is_feature_enabled() ) {
 			$this->feature_setup();
@@ -1443,6 +1449,40 @@ abstract class Feature {
 	 * Register any needed endpoints.
 	 */
 	public function register_endpoints() {}
+
+	/**
+	 * Register any needed abilities with the Abilities API.
+	 *
+	 * Only fires if the feature is turned on and configured.
+	 */
+	public function register_abilities() {}
+
+	/**
+	 * Check if the current user can run a post-based ability of this feature.
+	 *
+	 * Mirrors the permission checks of the feature's REST endpoints.
+	 *
+	 * @param array $input Ability input.
+	 * @return bool
+	 */
+	public function ability_permissions_check( $input = array() ): bool {
+		$post_id = absint( $input['post_id'] ?? 0 );
+
+		// Ensure we have a logged in user that can edit the item.
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$post_type_obj = get_post_type_object( (string) get_post_type( $post_id ) );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure the feature is enabled. Also runs a user check.
+		return $this->is_feature_enabled();
+	}
 
 	/**
 	 * Generic callback that can be used for all custom endpoints.
