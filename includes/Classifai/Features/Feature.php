@@ -1451,37 +1451,18 @@ abstract class Feature {
 	public function register_endpoints() {}
 
 	/**
-	 * Register any needed abilities with the Abilities API.
-	 *
-	 * Only fires if the feature is turned on and configured.
+	 * Register any needed abilities.
 	 */
 	public function register_abilities() {}
 
 	/**
-	 * Check if the current user can run a post-based ability of this feature.
-	 *
-	 * Mirrors the permission checks of the feature's REST endpoints.
+	 * Check if the current user can run an ability for the given post.
 	 *
 	 * @param array $input Ability input.
 	 * @return bool
 	 */
-	public function ability_permissions_check( $input = array() ): bool {
-		$post_id = absint( $input['post_id'] ?? 0 );
-
-		// Ensure we have a logged in user that can edit the item.
-		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
-			return false;
-		}
-
-		$post_type_obj = get_post_type_object( (string) get_post_type( $post_id ) );
-
-		// Ensure the post type is allowed in REST endpoints.
-		if ( empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
-			return false;
-		}
-
-		// Ensure the feature is enabled. Also runs a user check.
-		return $this->is_feature_enabled();
+	public function ability_permissions_check( array $input ): bool {
+		return current_user_can( 'edit_post', $input['post_id'] ) && $this->is_feature_enabled();
 	}
 
 	/**

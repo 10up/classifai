@@ -182,6 +182,29 @@ class ExcerptGeneration extends Feature {
 		if ( strpos( $route, '/classifai/v1/generate-excerpt' ) === 0 ) {
 			$post_id = $request->get_param( 'id' );
 
+			// Get the author name - prefer from request payload, fallback to database.
+			$author_name = $request->get_param( 'author' );
+
+			if ( empty( $author_name ) && $post_id ) {
+				$post = get_post( $post_id );
+				if ( $post ) {
+					$author_name = get_the_author_meta( 'display_name', (int) $post->post_author );
+				}
+			}
+
+			/**
+			 * Filter the author name used in excerpt generation.
+			 *
+			 * @since 3.x.x
+			 * @hook classifai_excerpt_generation_author_name
+			 *
+			 * @param string $author_name The author's display name.
+			 * @param int    $post_id     The post ID.
+			 *
+			 * @return string The author name to use in the prompt.
+			 */
+			$author_name = apply_filters( 'classifai_excerpt_generation_author_name', $author_name, $post_id );
+
 			return rest_ensure_response(
 				$this->run(
 					$post_id,
@@ -189,43 +212,13 @@ class ExcerptGeneration extends Feature {
 					array(
 						'content' => $request->get_param( 'content' ),
 						'title'   => $request->get_param( 'title' ),
-						'author'  => $this->get_author_name( $post_id, (string) $request->get_param( 'author' ) ),
+						'author'  => $author_name,
 					)
 				)
 			);
 		}
 
 		return parent::rest_endpoint_callback( $request );
-	}
-
-	/**
-	 * Get the author name used in excerpt generation.
-	 *
-	 * @param int    $post_id     The post ID.
-	 * @param string $author_name Author name to prefer over the post author.
-	 * @return string
-	 */
-	protected function get_author_name( $post_id, string $author_name = '' ) {
-		// Prefer the passed author name, fallback to database.
-		if ( empty( $author_name ) && $post_id ) {
-			$post = get_post( $post_id );
-			if ( $post ) {
-				$author_name = get_the_author_meta( 'display_name', (int) $post->post_author );
-			}
-		}
-
-		/**
-		 * Filter the author name used in excerpt generation.
-		 *
-		 * @since 3.x.x
-		 * @hook classifai_excerpt_generation_author_name
-		 *
-		 * @param string $author_name The author's display name.
-		 * @param int    $post_id     The post ID.
-		 *
-		 * @return string The author name to use in the prompt.
-		 */
-		return apply_filters( 'classifai_excerpt_generation_author_name', $author_name, $post_id );
 	}
 
 	/**
@@ -242,13 +235,8 @@ class ExcerptGeneration extends Feature {
 					'type'                 => 'object',
 					'properties'           => array(
 						'post_id' => array(
-							'type'        => 'integer',
-							'minimum'     => 1,
-							'description' => __( 'Post ID to generate an excerpt for.', 'classifai' ),
-						),
-						'content' => array(
-							'type'        => 'string',
-							'description' => __( 'Content to summarize into an excerpt. Defaults to the post content.', 'classifai' ),
+							'type'    => 'integer',
+							'minimum' => 1,
 						),
 					),
 					'required'             => array( 'post_id' ),
@@ -256,23 +244,16 @@ class ExcerptGeneration extends Feature {
 				),
 				'output_schema'       => array( 'type' => 'string' ),
 				'execute_callback'    => function ( array $input ) {
-					return $this->run(
-						$input['post_id'],
-						'excerpt',
-						array(
-							'content' => sanitize_text_field( $input['content'] ?? '' ),
-							'author'  => $this->get_author_name( $input['post_id'] ),
-						)
-					);
+					$post_id = $input['post_id'];
+					$author  = get_the_author_meta( 'display_name', (int) get_post_field( 'post_author', $post_id ) );
+
+					/** This filter is documented in includes/Classifai/Features/ExcerptGeneration.php */
+					$author = apply_filters( 'classifai_excerpt_generation_author_name', $author, $post_id );
+
+					return $this->run( $post_id, 'excerpt', array( 'author' => $author ) );
 				},
 				'permission_callback' => array( $this, 'ability_permissions_check' ),
-				'meta'                => array(
-					'annotations'  => array(
-						'readonly'   => true,
-						'idempotent' => false,
-					),
-					'show_in_rest' => true,
-				),
+				'meta'                => array( 'show_in_rest' => true ),
 			)
 		);
 	}

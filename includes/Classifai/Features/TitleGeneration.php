@@ -206,19 +206,13 @@ class TitleGeneration extends Feature {
 					'type'                 => 'object',
 					'properties'           => array(
 						'post_id' => array(
-							'type'        => 'integer',
-							'minimum'     => 1,
-							'description' => __( 'Post ID to generate titles for.', 'classifai' ),
+							'type'    => 'integer',
+							'minimum' => 1,
 						),
 						'num'     => array(
-							'type'        => 'integer',
-							'minimum'     => 1,
-							'maximum'     => 10,
-							'description' => __( 'Number of titles to generate.', 'classifai' ),
-						),
-						'content' => array(
-							'type'        => 'string',
-							'description' => __( 'Content to generate titles for. Defaults to the post content.', 'classifai' ),
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 10,
 						),
 					),
 					'required'             => array( 'post_id' ),
@@ -229,23 +223,10 @@ class TitleGeneration extends Feature {
 					'items' => array( 'type' => 'string' ),
 				),
 				'execute_callback'    => function ( array $input ) {
-					return $this->run(
-						$input['post_id'],
-						'title',
-						array(
-							'num'     => $input['num'] ?? null,
-							'content' => sanitize_text_field( $input['content'] ?? '' ),
-						)
-					);
+					return $this->run( $input['post_id'], 'title', array( 'num' => $input['num'] ?? null ) );
 				},
 				'permission_callback' => array( $this, 'ability_permissions_check' ),
-				'meta'                => array(
-					'annotations'  => array(
-						'readonly'   => true,
-						'idempotent' => false,
-					),
-					'show_in_rest' => true,
-				),
+				'meta'                => array( 'show_in_rest' => true ),
 			)
 		);
 	}

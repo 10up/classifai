@@ -50,19 +50,6 @@ class Plugin {
 	}
 
 	/**
-	 * Register the ability category used by all ClassifAI abilities.
-	 */
-	public function register_ability_category() {
-		wp_register_ability_category(
-			'classifai',
-			array(
-				'label'       => __( 'ClassifAI', 'classifai' ),
-				'description' => __( 'AI-powered abilities provided by ClassifAI.', 'classifai' ),
-			)
-		);
-	}
-
-	/**
 	 * Initializes the ClassifAI plugin modules and support objects.
 	 */
 	public function init() {
@@ -378,6 +365,19 @@ Disallow: /
 
 			require_once CLASSIFAI_PLUGIN_DIR . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
 		}
+	}
+
+	/**
+	 * Register the ClassifAI ability category.
+	 */
+	public function register_ability_category() {
+		wp_register_ability_category(
+			'classifai',
+			array(
+				'label'       => __( 'ClassifAI', 'classifai' ),
+				'description' => __( 'AI-powered abilities provided by ClassifAI.', 'classifai' ),
+			)
+		);
 	}
 
 	/**
