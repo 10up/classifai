@@ -80,10 +80,15 @@ abstract class Feature {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_plugin_area_script' ) );
 
-		// Chrome AI runs in the browser, so it can't power a server-side ability.
-		if ( $this->is_enabled() && ChromeAI::ID !== $this->get_settings( 'provider' ) ) {
-			add_action( 'wp_abilities_api_init', array( $this, 'register_abilities' ) );
-		}
+		add_action(
+			'wp_abilities_api_init',
+			function () {
+				// Chrome AI runs in the browser, so it can't power a server-side ability.
+				if ( $this->is_enabled() && ChromeAI::ID !== $this->get_settings( 'provider' ) ) {
+					$this->register_abilities();
+				}
+			}
+		);
 
 		if ( $this->is_feature_enabled() ) {
 			$this->feature_setup();
