@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be1f3b1361f5794648c44683bb1325f7",
+    "content-hash": "506dea561666fee3c65bb9720d846c22",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1319,16 +1319,16 @@
         },
         {
             "name": "johnbillion/wp-compat",
-            "version": "2.0.1",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/johnbillion/wp-compat.git",
-                "reference": "b2e32bd91716a98bc6fc527c525b979652a4a567"
+                "reference": "3936fc9b292f501c6b014d33b904a3ed869ffafb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/johnbillion/wp-compat/zipball/b2e32bd91716a98bc6fc527c525b979652a4a567",
-                "reference": "b2e32bd91716a98bc6fc527c525b979652a4a567",
+                "url": "https://api.github.com/repos/johnbillion/wp-compat/zipball/3936fc9b292f501c6b014d33b904a3ed869ffafb",
+                "reference": "3936fc9b292f501c6b014d33b904a3ed869ffafb",
                 "shasum": ""
             },
             "require": {
@@ -1390,7 +1390,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-29T17:12:02+00:00"
+            "time": "2026-10-09T11:29:14+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -2218,8 +2218,8 @@
             "version": "2.3.x-dev",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/579a7f1469c6b3d8f096ab81e260e6435fb9a624",
-                "reference": "579a7f1469c6b3d8f096ab81e260e6435fb9a624",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d84b7abbf09752214a565e6caf9917e231e513fe",
+                "reference": "d84b7abbf09752214a565e6caf9917e231e513fe",
                 "shasum": ""
             },
             "require": {
@@ -2276,7 +2276,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-14T12:42:33+00:00"
+            "time": "2026-11-12T07:25:50+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
