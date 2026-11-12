@@ -37,8 +37,8 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 				: __( 'Generate short description', 'classifai' );
 		} else {
 			buttonText = excerptContainer.value
-				? classifaiExcerptData?.regenerateText ?? ''
-				: classifaiExcerptData?.buttonText ?? '';
+				? ( classifaiExcerptData?.regenerateText ?? '' )
+				: ( classifaiExcerptData?.buttonText ?? '' );
 		}
 
 		const buttonWidth = isProduct ? 'fit-content' : '100%';
@@ -145,7 +145,7 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 					generateTextEl.text(
 						isProduct
 							? __( 'Re-generate short description', 'classifai' )
-							: classifaiExcerptData?.regenerateText ?? ''
+							: ( classifaiExcerptData?.regenerateText ?? '' )
 					);
 				} )
 				.catch( ( error ) => {

@@ -261,7 +261,7 @@ const TextToSpeechPlugin = () => {
 									: __(
 											'Preview the generated audio.',
 											'classifai'
-									  )
+										)
 							}
 							__nextHasNoMarginBottom
 						>

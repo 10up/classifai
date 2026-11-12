@@ -144,7 +144,7 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 									'classifai'
 								),
 								responseData[ taxSlug ].label
-						  ) }
+							) }
 				</CardBody>
 			</Card>
 		);

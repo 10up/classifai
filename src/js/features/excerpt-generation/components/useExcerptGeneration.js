@@ -149,8 +149,8 @@ export function useExcerptGeneration() {
 			const message =
 				typeof error === 'string'
 					? error
-					: error?.message ??
-					  __( 'Failed to generate excerpt.', 'classifai' );
+					: ( error?.message ??
+						__( 'Failed to generate excerpt.', 'classifai' ) );
 			dispatch( noticesStore ).createErrorNotice( message, {
 				id: NOTICE_ID,
 				isDismissible: true,
