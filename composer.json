@@ -10,7 +10,7 @@
   "type": "wordpress-plugin",
   "license": "GPLv2",
   "require": {
-    "aws/aws-sdk-php": "3.337.3",
+    "aws/aws-sdk-php": "3.402.6",
     "php": ">=7.4",
     "woocommerce/action-scheduler": "3.9.3",
     "yahnis-elsts/plugin-update-checker": "5.7"
