@@ -441,7 +441,7 @@ function PostSelector( { placeholder = '', showLabel = true } ) {
 						highlight={ searchText }
 					/>
 				</div>
-		  ) )
+			) )
 		: [];
 
 	return (

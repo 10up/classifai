@@ -164,7 +164,7 @@ export function IBMWatsonNLUResults( { postId } ) {
 									'classifai'
 								),
 								taxSlug
-						  ) }
+							) }
 				</CardBody>
 			</Card>
 		);

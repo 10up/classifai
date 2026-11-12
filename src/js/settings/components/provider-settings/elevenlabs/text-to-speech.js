@@ -36,7 +36,7 @@ export const ElevenLabsTextToSpeechSettings = ( { isConfigured = false } ) => {
 					name: __( '-- Choose Voice --', 'classifai' ),
 					id: '',
 				},
-		  ];
+			];
 
 	return (
 		<>
