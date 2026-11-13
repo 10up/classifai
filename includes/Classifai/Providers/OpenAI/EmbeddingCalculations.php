@@ -67,4 +67,39 @@ class EmbeddingCalculations {
 		// Ensure we are within the range of 0 to 1.0.
 		return max( 0, min( abs( (float) $distance ), 1.0 ) );
 	}
+
+	/**
+	 * Normalize embeddings into an array of float vector arrays.
+	 *
+	 * Ensures that both single-vector (1D) embeddings and multi-chunk (2D)
+	 * embeddings are consistently structured as `array<int, array<int, float>>`
+	 * prior to saving or comparing.
+	 *
+	 * @param mixed $embeddings Embedding data to normalize.
+	 * @return array[] Normalized array of float embedding vectors.
+	 */
+	public function normalize_embeddings( $embeddings ): array {
+		if ( ! is_array( $embeddings ) || empty( $embeddings ) ) {
+			return array();
+		}
+
+		$first_element = reset( $embeddings );
+
+		// Wrap a single 1D embedding vector into a 2D array of chunks.
+		if ( ! is_array( $first_element ) ) {
+			$embeddings = array( array_values( $embeddings ) );
+		}
+
+		$normalized = array();
+
+		foreach ( $embeddings as $chunk ) {
+			if ( ! is_array( $chunk ) || empty( $chunk ) ) {
+				continue;
+			}
+
+			$normalized[] = array_map( 'floatval', array_values( $chunk ) );
+		}
+
+		return $normalized;
+	}
 }
