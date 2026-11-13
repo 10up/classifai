@@ -222,6 +222,43 @@ class ExcerptGeneration extends Feature {
 	}
 
 	/**
+	 * Register the excerpt generation ability.
+	 */
+	public function register_abilities() {
+		wp_register_ability(
+			'classifai/generate-excerpt',
+			array(
+				'label'               => __( 'Generate excerpt', 'classifai' ),
+				'description'         => __( 'Generates an excerpt for a post.', 'classifai' ),
+				'category'            => 'classifai',
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'post_id' => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+					),
+					'required'             => array( 'post_id' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array( 'type' => 'string' ),
+				'execute_callback'    => function ( array $input ) {
+					$post_id = $input['post_id'];
+					$author  = get_the_author_meta( 'display_name', (int) get_post_field( 'post_author', $post_id ) );
+
+					/** This filter is documented in includes/Classifai/Features/ExcerptGeneration.php */
+					$author = apply_filters( 'classifai_excerpt_generation_author_name', $author, $post_id );
+
+					return $this->run( $post_id, 'excerpt', array( 'author' => $author ) );
+				},
+				'permission_callback' => array( $this, 'ability_permissions_check' ),
+				'meta'                => array( 'show_in_rest' => true ),
+			)
+		);
+	}
+
+	/**
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
