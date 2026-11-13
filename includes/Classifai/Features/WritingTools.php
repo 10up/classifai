@@ -21,9 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class ContentResizing
+ * Class WritingTools
  */
-class ContentResizing extends Feature {
+class WritingTools extends Feature {
 	/**
 	 * ID of the current feature.
 	 *
@@ -35,7 +35,7 @@ class ContentResizing extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->label = __( 'Content Resizing', 'classifai' );
+		$this->label = __( 'Writing Tools', 'classifai' );
 
 		// Contains all providers that are registered to the service.
 		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
@@ -111,7 +111,7 @@ class ContentResizing extends Feature {
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'The type of resize operation. "expand" or "condense".', 'classifai' ),
+						'description'       => esc_html__( 'The type of resize operation. "expand", "condense", or "fix_grammar".', 'classifai' ),
 					),
 				),
 			)
@@ -142,7 +142,7 @@ class ContentResizing extends Feature {
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $this->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing is not currently enabled.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Writing tools are not currently enabled.', 'classifai' ) );
 		}
 
 		return true;
@@ -184,18 +184,18 @@ class ContentResizing extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-plugin-content-resizing-js',
-			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-resizing.js',
-			array_merge( get_asset_info( 'classifai-plugin-content-resizing', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
+			'classifai-plugin-writing-tools-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-writing-tools.js',
+			array_merge( get_asset_info( 'classifai-plugin-writing-tools', 'dependencies' ), [ 'lodash' ] ),
+			get_asset_info( 'classifai-plugin-writing-tools', 'version' ),
 			true
 		);
 
 		wp_enqueue_style(
-			'classifai-plugin-content-resizing-css',
-			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-resizing.css',
-			array(),
-			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
+			'classifai-plugin-writing-tools-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-writing-tools.css',
+			[],
+			get_asset_info( 'classifai-plugin-writing-tools', 'version' ),
 			'all'
 		);
 	}
@@ -206,7 +206,7 @@ class ContentResizing extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( '"Condense this text" and "Expand this text" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' );
+		return esc_html__( '"Condense this text", "Expand this text", and "Fix grammar and spelling" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' );
 	}
 
 	/**
@@ -242,6 +242,20 @@ class ContentResizing extends Feature {
 				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
 			)
 		);
+
+		add_settings_field(
+			'fix_grammar_text_prompt',
+			esc_html__( 'Fix grammar and spelling', 'classifai' ),
+			[ $this, 'render_prompt_repeater_field' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'fix_grammar_text_prompt',
+				'placeholder'   => esc_html__( 'Please correct any spelling errors and grammatical mistakes in the following text', 'classifai' ),
+				'default_value' => $settings['fix_grammar_text_prompt'],
+				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -250,23 +264,30 @@ class ContentResizing extends Feature {
 	 * @return array
 	 */
 	public function get_feature_default_settings(): array {
-		return array(
-			'condense_text_prompt' => array(
-				array(
+		return [
+			'condense_text_prompt'    => [
+				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->get_prompt( 'condense' ),
 					'original' => 1,
-				),
-			),
-			'expand_text_prompt'   => array(
-				array(
+				],
+			],
+			'expand_text_prompt'      => [
+				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->get_prompt( 'expand' ),
 					'original' => 1,
-				),
-			),
-			'provider'             => ChatGPT::ID,
-		);
+				],
+			],
+			'fix_grammar_text_prompt' => [
+				[
+					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+					'prompt'   => $this->get_prompt( 'fix_grammar' ),
+					'original' => 1,
+				],
+			],
+			'provider'                => ChatGPT::ID,
+		];
 	}
 
 	/**
@@ -297,6 +318,15 @@ class ContentResizing extends Feature {
 			}
 		}
 
+		if ( $settings && ! empty( $settings['fix_grammar_text_prompt'] ) ) {
+			foreach ( $settings['fix_grammar_text_prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings['fix_grammar_text_prompt'][ $key ]['prompt'] = $this->get_prompt( 'fix_grammar' );
+					break;
+				}
+			}
+		}
+
 		return $settings;
 	}
 
@@ -309,8 +339,9 @@ class ContentResizing extends Feature {
 	public function sanitize_default_feature_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
-		$new_settings['condense_text_prompt'] = sanitize_prompts( 'condense_text_prompt', $new_settings );
-		$new_settings['expand_text_prompt']   = sanitize_prompts( 'expand_text_prompt', $new_settings );
+		$new_settings['condense_text_prompt']    = sanitize_prompts( 'condense_text_prompt', $new_settings );
+		$new_settings['expand_text_prompt']      = sanitize_prompts( 'expand_text_prompt', $new_settings );
+		$new_settings['fix_grammar_text_prompt'] = sanitize_prompts( 'fix_grammar_text_prompt', $new_settings );
 
 		return $new_settings;
 	}

@@ -83,7 +83,7 @@ class ServicesManager {
 			'\Classifai\Features\TitleGeneration',
 			'\Classifai\Features\ExcerptGeneration',
 			'\Classifai\Features\ContentGeneration',
-			'\Classifai\Features\ContentResizing',
+			'\Classifai\Features\WritingTools',
 			'\Classifai\Features\KeyTakeaways',
 			'\Classifai\Features\TextToSpeech',
 			'\Classifai\Features\AudioTranscriptsGeneration',
