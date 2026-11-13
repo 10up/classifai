@@ -978,7 +978,7 @@ class Classification extends Feature {
 			'default_value' => $labels['threshold_default'],
 			'min'           => 0,
 			'max'           => 100,
-			'step'          => 0.01,
+			'step'          => 1,
 		);
 		?>
 
