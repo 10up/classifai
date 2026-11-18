@@ -24,9 +24,7 @@ import { ChatUI } from './components/chat-ui';
  */
 export const RenderChatUI = () => {
 	useEffect( () => {
-		const editorIframe = document.querySelector(
-			'.editor-visual-editor.is-iframed'
-		);
+		const editorIframe = document.querySelector( '.editor-visual-editor' );
 
 		if ( ! editorIframe || ! editorIframe.parentNode ) {
 			return;

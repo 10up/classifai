@@ -21,7 +21,7 @@
 /composer.lock export-ignore
 /CONTRIBUTING.md export-ignore
 /CREDITS.md export-ignore
-/eslint.config.js export-ignore
+/eslint.config.mjs export-ignore
 /LICENSE.md export-ignore
 /package-lock.json export-ignore
 /package.json export-ignore
