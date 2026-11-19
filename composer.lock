@@ -1819,16 +1819,16 @@
         },
         {
             "name": "phpcompatibility/phpcompatibility-paragonie",
-            "version": "2.0.0-alpha2",
+            "version": "2.0.0-alpha3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibilityParagonie.git",
-                "reference": "7a979711c87d8202b52f56c56bd719d09d8ed7f5"
+                "reference": "aa2baa7027d2491732420d0cffc12a749e89e97c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityParagonie/zipball/7a979711c87d8202b52f56c56bd719d09d8ed7f5",
-                "reference": "7a979711c87d8202b52f56c56bd719d09d8ed7f5",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityParagonie/zipball/aa2baa7027d2491732420d0cffc12a749e89e97c",
+                "reference": "aa2baa7027d2491732420d0cffc12a749e89e97c",
                 "shasum": ""
             },
             "require": {
@@ -1886,20 +1886,20 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-11-29T13:09:49+00:00"
+            "time": "2026-11-17T20:00:34+00:00"
         },
         {
             "name": "phpcompatibility/phpcompatibility-wp",
-            "version": "3.0.0-alpha2",
+            "version": "3.0.0-alpha3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibilityWP.git",
-                "reference": "bd53f24e7528422ac51d64dc8d53e8d4c4a877b3"
+                "reference": "b475f1d61eb600b72e93f640d1265639c8fc3610"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityWP/zipball/bd53f24e7528422ac51d64dc8d53e8d4c4a877b3",
-                "reference": "bd53f24e7528422ac51d64dc8d53e8d4c4a877b3",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityWP/zipball/b475f1d61eb600b72e93f640d1265639c8fc3610",
+                "reference": "b475f1d61eb600b72e93f640d1265639c8fc3610",
                 "shasum": ""
             },
             "require": {
@@ -1953,7 +1953,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-12-16T13:35:20+00:00"
+            "time": "2026-11-17T21:25:26+00:00"
         },
         {
             "name": "phpcsstandards/phpcsextra",
@@ -2044,18 +2044,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHPCSUtils.git",
-                "reference": "170d55931d3190a1feb35b7985a4b725094908c7"
+                "reference": "b008482a2fae22ced43cac745a185580c1e7c44d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/170d55931d3190a1feb35b7985a4b725094908c7",
-                "reference": "170d55931d3190a1feb35b7985a4b725094908c7",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/b008482a2fae22ced43cac745a185580c1e7c44d",
+                "reference": "b008482a2fae22ced43cac745a185580c1e7c44d",
                 "shasum": ""
             },
             "require": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.4.1 || ^0.5 || ^0.6.2 || ^0.7 || ^1.0",
                 "php": ">=5.4",
-                "squizlabs/php_codesniffer": "^3.13.5 || ^4.0.1"
+                "squizlabs/php_codesniffer": "^3.13.6 || ^4.0.2"
             },
             "require-dev": {
                 "ext-filter": "*",
@@ -2130,7 +2130,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2026-07-27T15:58:30+00:00"
+            "time": "2026-11-05T22:54:26+00:00"
         },
         {
             "name": "phpstan/extension-installer",
@@ -3930,12 +3930,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "3d9e4c698ffb5204a0cc017bb81656fb67488ad5"
+                "reference": "f3af34c2035b2a7058d9f00fa244d854066b5411"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/3d9e4c698ffb5204a0cc017bb81656fb67488ad5",
-                "reference": "3d9e4c698ffb5204a0cc017bb81656fb67488ad5",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/f3af34c2035b2a7058d9f00fa244d854066b5411",
+                "reference": "f3af34c2035b2a7058d9f00fa244d854066b5411",
                 "shasum": ""
             },
             "require": {
@@ -4001,7 +4001,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2026-08-06T02:44:48+00:00"
+            "time": "2026-11-19T03:21:47+00:00"
         },
         {
             "name": "szepeviktor/phpstan-wordpress",
@@ -4380,9 +4380,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "phpcompatibility/phpcompatibility-wp": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
