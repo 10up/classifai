@@ -193,6 +193,45 @@ class TitleGeneration extends Feature {
 	}
 
 	/**
+	 * Register the title generation ability.
+	 */
+	public function register_abilities() {
+		wp_register_ability(
+			'classifai/generate-titles',
+			array(
+				'label'               => __( 'Generate titles', 'classifai' ),
+				'description'         => __( 'Generates title suggestions for a post.', 'classifai' ),
+				'category'            => 'classifai',
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'post_id' => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+						'num'     => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 10,
+						),
+					),
+					'required'             => array( 'post_id' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array(
+					'type'  => 'array',
+					'items' => array( 'type' => 'string' ),
+				),
+				'execute_callback'    => function ( array $input ) {
+					return $this->run( $input['post_id'], 'title', array( 'num' => $input['num'] ?? null ) );
+				},
+				'permission_callback' => array( $this, 'ability_permissions_check' ),
+				'meta'                => array( 'show_in_rest' => true ),
+			)
+		);
+	}
+
+	/**
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {

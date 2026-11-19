@@ -46,6 +46,7 @@ class Plugin {
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
 		add_filter( 'robots_txt', array( $this, 'maybe_block_ai_crawlers' ) ); // phpcs:ignore WordPressVIPMinimum.Hooks.RestrictedHooks.robots_txt
 		add_action( 'after_classifai_init', array( $this, 'load_action_scheduler' ) );
+		add_action( 'wp_abilities_api_categories_init', array( $this, 'register_ability_category' ) );
 	}
 
 	/**
@@ -364,6 +365,19 @@ Disallow: /
 
 			require_once CLASSIFAI_PLUGIN_DIR . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
 		}
+	}
+
+	/**
+	 * Register the ClassifAI ability category.
+	 */
+	public function register_ability_category() {
+		wp_register_ability_category(
+			'classifai',
+			array(
+				'label'       => __( 'ClassifAI', 'classifai' ),
+				'description' => __( 'AI-powered abilities provided by ClassifAI.', 'classifai' ),
+			)
+		);
 	}
 
 	/**
