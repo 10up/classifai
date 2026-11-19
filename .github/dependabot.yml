@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
-      interval: weekly
+      interval: monthly
     open-pull-requests-limit: 10
     commit-message:
       prefix: 'chore(ci)'
@@ -18,7 +18,7 @@ updates:
   - package-ecosystem: composer
     directory: '/'
     schedule:
-      interval: weekly
+      interval: monthly
     open-pull-requests-limit: 10
     cooldown:
       semver-major-days: 30
@@ -42,7 +42,7 @@ updates:
   - package-ecosystem: npm
     directory: '/'
     schedule:
-      interval: weekly
+      interval: monthly
     open-pull-requests-limit: 10
     cooldown:
       semver-major-days: 30
