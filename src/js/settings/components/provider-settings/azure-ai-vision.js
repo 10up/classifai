@@ -89,7 +89,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 						type="number"
 						min={ 0 }
 						max={ 100 }
-						step={ 0.01 }
+						step={ 1 }
 						value={
 							providerSettings.descriptive_confidence_threshold ||
 							70
@@ -116,7 +116,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 						type="number"
 						min={ 0 }
 						max={ 100 }
-						step={ 0.01 }
+						step={ 1 }
 						value={
 							providerSettings.tag_confidence_threshold || 70
 						}

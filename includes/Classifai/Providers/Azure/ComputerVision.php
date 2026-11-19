@@ -135,7 +135,7 @@ class ComputerVision extends Provider {
 				'input_type'    => 'number',
 				'min'           => 0,
 				'max'           => 100,
-				'step'          => 0.01,
+				'step'          => 1,
 				'default_value' => $settings['descriptive_confidence_threshold'],
 				'description'   => esc_html__( 'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
@@ -161,7 +161,7 @@ class ComputerVision extends Provider {
 				'input_type'    => 'number',
 				'min'           => 0,
 				'max'           => 100,
-				'step'          => 0.01,
+				'step'          => 1,
 				'default_value' => $settings['tag_confidence_threshold'],
 				'description'   => esc_html__( 'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.

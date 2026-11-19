@@ -147,7 +147,7 @@ export const NLUFeatureSettings = () => {
 							}
 							min="0"
 							max="100"
-							step="0.01"
+							step="1"
 							__next40pxDefaultSize
 						/>
 
