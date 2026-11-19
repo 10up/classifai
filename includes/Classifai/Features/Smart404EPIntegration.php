@@ -6,6 +6,7 @@
 namespace Classifai\Features;
 
 use Classifai\Features\Smart404;
+use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Providers\OpenAI\Tokenizer;
 use ElasticPress\Indexables;
 use ElasticPress\Indexable;
@@ -185,6 +186,8 @@ class Smart404EPIntegration {
 		// Add the post slug to our content as well.
 		$content = $post->post_name . ".\n\n" . $content;
 
+		$calculations = new EmbeddingCalculations();
+
 		// If they don't exist or content has changed, make API requests to generate them.
 		if ( ! $embeddings || md5( $content ) !== $content_hash ) {
 			$embeddings = array();
@@ -243,9 +246,13 @@ class Smart404EPIntegration {
 
 			// Store the embeddings for future use.
 			if ( ! empty( $embeddings ) ) {
+				$embeddings = $calculations->normalize_embeddings( $embeddings );
 				update_post_meta( $post_id, $this->embeddings_meta_key, $embeddings );
 				update_post_meta( $post_id, $this->content_hash_meta_key, md5( $content ) );
 			}
+		} elseif ( is_array( $embeddings ) && ! is_array( reset( $embeddings ) ) ) {
+			$embeddings = $calculations->normalize_embeddings( $embeddings );
+			update_post_meta( $post_id, $this->embeddings_meta_key, $embeddings );
 		}
 
 		// If we still don't have embeddings, return early.

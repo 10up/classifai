@@ -95,4 +95,57 @@ class EmbeddingCalculationsTest extends TestCase {
 		$this->assertFalse( $calc->cosine_similarity( [ 0, 0, 0 ], [ 1, 2, 3 ] ) );
 		$this->assertFalse( $calc->cosine_similarity( [ 1, 2, 3 ], [ 0, 0, 0 ] ) );
 	}
+
+	/**
+	 * A single 1D embedding vector is wrapped into a 2D array of float vectors.
+	 *
+	 * @covers ::normalize_embeddings
+	 */
+	public function test_normalize_embeddings_wraps_single_vector_and_casts_to_float() {
+		$calc = new EmbeddingCalculations();
+
+		$this->assertSame(
+			[ [ 0.0023, -0.0093, 1.0 ] ],
+			$calc->normalize_embeddings( [ '0.0023', -0.0093, 1 ] )
+		);
+	}
+
+	/**
+	 * Multiple chunk vectors in a 2D array preserve their structure and are cast to floats.
+	 *
+	 * @covers ::normalize_embeddings
+	 */
+	public function test_normalize_embeddings_preserves_multiple_chunks_and_casts_to_float() {
+		$calc = new EmbeddingCalculations();
+
+		$this->assertSame(
+			[
+				[ 0.1, 0.2, 0.3 ],
+				[ -0.4, 0.5, 0.6 ],
+			],
+			$calc->normalize_embeddings(
+				[
+					[ '0.1', 0.2, '0.3' ],
+					[ -0.4, '0.5', 0.6 ],
+				]
+			)
+		);
+	}
+
+	/**
+	 * Empty or invalid inputs return an empty array and malformed chunks are skipped.
+	 *
+	 * @covers ::normalize_embeddings
+	 */
+	public function test_normalize_embeddings_handles_empty_or_invalid_inputs() {
+		$calc = new EmbeddingCalculations();
+
+		$this->assertSame( [], $calc->normalize_embeddings( [] ) );
+		$this->assertSame( [], $calc->normalize_embeddings( null ) );
+		$this->assertSame( [], $calc->normalize_embeddings( 'invalid' ) );
+		$this->assertSame(
+			[ [ 0.5, 0.25 ] ],
+			$calc->normalize_embeddings( [ [ 0.5, 0.25 ], [] ] )
+		);
+	}
 }
