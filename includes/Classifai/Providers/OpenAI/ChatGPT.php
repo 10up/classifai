@@ -5,7 +5,7 @@
 
 namespace Classifai\Providers\OpenAI;
 
-use Classifai\Features\ContentResizing;
+use Classifai\Features\WritingTools;
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\ImageTextExtraction;
 use Classifai\Features\ImageTagsGenerator;
@@ -115,7 +115,7 @@ class ChatGPT extends Provider {
 		);
 
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				add_settings_field(
 					static::ID . '_number_of_suggestions',
@@ -155,7 +155,7 @@ class ChatGPT extends Provider {
 		 * Default values for feature specific settings.
 		 */
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				$common_settings['number_of_suggestions'] = 1;
 				break;
@@ -191,7 +191,7 @@ class ChatGPT extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
+			case WritingTools::ID:
 			case TitleGeneration::ID:
 				$new_settings[ static::ID ]['number_of_suggestions'] = sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings[ static::ID ], $settings[ static::ID ] );
 				break;
@@ -847,7 +847,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
 		}
 
-		$feature  = new ContentResizing();
+		$feature  = new WritingTools();
 		$settings = $feature->get_settings();
 
 		$args = wp_parse_args(
@@ -861,6 +861,8 @@ class ChatGPT extends Provider {
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->get_prompt( 'condense' ) );
+		} elseif ( 'fix_grammar' === $args['resize_type'] ) {
+			$prompt = esc_textarea( get_default_prompt( $settings['fix_grammar_text_prompt'] ) ?? $feature->get_prompt( 'fix_grammar' ) );
 		} else {
 			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->get_prompt( 'expand' ) );
 		}
@@ -918,7 +920,7 @@ class ChatGPT extends Provider {
 			)
 		);
 
-		set_transient( 'classifai_openai_chatgpt_content_resizing_latest_response', $response, DAY_IN_SECONDS * 30 );
+		set_transient( 'classifai_openai_chatgpt_writing_tools_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -1403,11 +1405,12 @@ class ChatGPT extends Provider {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
 			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? array() );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_excerpt_generation_latest_response' ) );
-		} elseif ( $this->feature_instance instanceof ContentResizing ) {
-			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'] ?? 1;
-			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? array() );
-			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? array() );
-			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_content_resizing_latest_response' ) );
+		} elseif ( $this->feature_instance instanceof WritingTools ) {
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]       = $provider_settings['number_of_suggestions'] ?? 1;
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]       = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ]     = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Fix grammar and spelling', 'classifai' ) ] = wp_json_encode( $settings['fix_grammar_text_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]          = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_writing_tools_latest_response' ) );
 		}
 
 		return apply_filters(
