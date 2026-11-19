@@ -122,7 +122,7 @@ class ProviderProfiles {
 		),
 		'api_usage_tracking'      => array(
 			'provider_ids'      => array( 'openai_usage_tracking' ),
-			'credential_fields' => array( 'api_key', 'authenticated' ),
+			'credential_fields' => array( 'api_key', 'project_id', 'authenticated' ),
 			'sensitive_fields'  => array( 'api_key' ),
 			'label'             => 'OpenAI Usage Tracking',
 		),
