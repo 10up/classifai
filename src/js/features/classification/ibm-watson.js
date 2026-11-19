@@ -9,16 +9,21 @@ let saveHappened = false;
 let showingNotice = false;
 
 subscribe( () => {
-	if ( saveHappened === false ) {
-		saveHappened = wp.data.select( editorStore ).isSavingPost() === true;
+	const editor = select( editorStore );
+
+	// Stop if the editor store is missing, for example outside the post editor.
+	if ( typeof editor?.isSavingPost !== 'function' ) {
+		return;
 	}
 
-	if (
-		saveHappened &&
-		wp.data.select( editorStore ).isSavingPost() === false &&
-		showingNotice === false
-	) {
-		const meta = select( editorStore ).getCurrentPostAttribute( 'meta' );
+	const isSavingPost = editor.isSavingPost();
+
+	if ( saveHappened === false ) {
+		saveHappened = isSavingPost === true;
+	}
+
+	if ( saveHappened && isSavingPost === false && showingNotice === false ) {
+		const meta = editor.getCurrentPostAttribute( 'meta' );
 		if ( meta && meta._classifai_error ) {
 			showingNotice = true;
 			const error = JSON.parse( meta._classifai_error );

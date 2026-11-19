@@ -333,6 +333,12 @@ class Classification extends Feature {
 	public function enqueue_editor_assets() {
 		global $post;
 
+		// Only load on post editing screens. Other block editors, such as
+		// the widgets screen and the site editor, have no post to classify.
+		if ( empty( $post ) ) {
+			return;
+		}
+
 		wp_enqueue_script(
 			'classifai-plugin-classification-ibm-watson-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-ibm-watson.js',
@@ -340,10 +346,6 @@ class Classification extends Feature {
 			get_asset_info( 'classifai-plugin-classification-ibm-watson', 'version' ),
 			true
 		);
-
-		if ( empty( $post ) ) {
-			return;
-		}
 
 		wp_enqueue_script(
 			'classifai-plugin-classification-js',
